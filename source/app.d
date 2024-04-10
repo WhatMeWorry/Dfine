@@ -21,7 +21,7 @@ bool loadSimpleDirectMediaLibary()
     if(ret == sdlSupport)
     {
         SDL_version ver;
-		SDL_GetVersion(&ver);
+        SDL_GetVersion(&ver);
 		
         writeln("version = ", ver);	  // displays: version = SDL_version(2, 30, 2)
         return true;
