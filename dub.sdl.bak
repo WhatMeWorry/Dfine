@@ -1,0 +1,5 @@
+name "dfine"
+description "A minimal D application."
+authors "kheas"
+copyright "Copyright © 2024, kheas"
+license "Zlib"
