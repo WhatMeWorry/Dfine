@@ -1,8 +1,35 @@
 
 
-/// Simple example of a GLFW application that creates a black window and reads some input and output
-///
-/// Does not load OpenGL / Vulkan.
+/// Simple example of a SDL/GLFW application that creates multiple windows
+
+/+
+https://wiki.libsdl.org/SDL2/MigrationGuide#Overview_of_new_features
+
+Support for OpenGL 3.0+ in various profiles (core, compatibility, debug, robust, etc)
+Support for multiple windows and multiple displays
+Simple 2D rendering API that can use Direct3D, OpenGL, OpenGL ES, or software rendering behind the scenes
+Shaped windows
+32-bit audio (int and float)
+Simplified Game Controller API (the Joystick API is still here, too!)
+Touch support (multitouch, gestures, etc)
+Better keyboard support (scancodes vs keycodes, etc).
+Message boxes
+Clipboard support
+APIs for building robust GUI toolkits on top of SDL
+Basic Drag'n'Drop support
+A really powerful assert macro
+zlib license instead of LGPL.
+
+For 2D graphics, SDL 1.2 offered a concept called "surfaces," which were memory buffers of pixels.
+In SDL 2.0, Surfaces are always in system RAM now, and are always operated on by the CPU, so we want to get away from there.
+What you want, if possible, is the new SDL_Texture.
+
+There are very few reasons for using SDL_Surfaces for rendering these days, except if you 100% know 
+what you are doing (and are perhaps writing a low resolution raytracer that runs on the CPU?). 
+SDL_Renderer and its SDL_Texture is a much better performing choice if you don't need CPU side 
+access to individual pixels.
+
++/
 
 module app;
 
@@ -32,10 +59,7 @@ bool loadSimpleDirectMediaLibary()
 }
 
 
-Globals g;
 
-/// Global variables
-/// Idea taken from Mike Shah
 
 struct GLFW_STRUCT
 {	
@@ -49,7 +73,8 @@ struct SDL_STRUCT
     const int SCREEN_WIDTH = 640;
     const int SCREEN_HEIGHT = 480;		
     SDL_Window* window = null;            // The window we'll be rendering to
-    SDL_Surface* screenSurface = null;    //The surface contained by the window
+	SDL_Renderer* renderer = null;
+    //SDL_Surface* screenSurface = null;
 }	
 
 struct Globals
@@ -59,7 +84,10 @@ struct Globals
     SDL_STRUCT sdl;
 }	
  
+Globals g;
 
+/// Global variables
+/// Idea taken from Mike Shah
 
 
 
@@ -75,7 +103,7 @@ int main()
     // Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
     {
-        writeln( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
+        writeln( "SDL could not initialize. SDL_Error: %s\n", SDL_GetError() );
     }	
     else
     {
@@ -86,20 +114,43 @@ int main()
                                          SDL_WINDOW_SHOWN );
         if( g.sdl.window == null )
         {
-            printf( "sdl Window could not be created! SDL_Error: %s\n", SDL_GetError() );
+            printf( "sdl Window could not be created. SDL_Error: %s\n", SDL_GetError() );
         }	
         else
         {
             //Get window surface
-            g.sdl.screenSurface = SDL_GetWindowSurface( g.sdl.window );
+            //g.sdl.screenSurface = SDL_GetWindowSurface( g.sdl.window );
 
             //Fill the surface white
-            SDL_FillRect( g.sdl.screenSurface, null, SDL_MapRGB( g.sdl.screenSurface.format, 0xFF, 0xFF, 0xFF ) );
+            //SDL_FillRect( g.sdl.screenSurface, null, SDL_MapRGB( g.sdl.screenSurface.format, 0xFF, 0xFF, 0xFF ) );
             
             //Update the surface
-            SDL_UpdateWindowSurface( g.sdl.window );
+            //SDL_UpdateWindowSurface( g.sdl.window );
+			
+            //Create renderer for window
+            g.sdl.renderer = SDL_CreateRenderer( g.sdl.window, -1, SDL_RENDERER_ACCELERATED );
+            if( g.sdl.renderer == null )
+            {
+                printf( "Renderer could not be created. SDL Error: %s\n", SDL_GetError() );
+                //success = false;
+            }
+			
+            //Clear screen
+            SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
+            SDL_RenderClear( g.sdl.renderer );		
+			
+            //Render red filled quad
+            SDL_Rect fillRect = { g.sdl.SCREEN_WIDTH / 4, g.sdl.SCREEN_HEIGHT / 4, g.sdl.SCREEN_WIDTH / 2, g.sdl.SCREEN_HEIGHT / 2 };
+            SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
+            SDL_RenderFillRect( g.sdl.renderer, &fillRect );			
+			
+			
+            //Update screen
+            SDL_RenderPresent( g.sdl.renderer );			
+			
 
             //Hack to get window to stay up
+            
             SDL_Event e; bool quit = false; 
             while( quit == false )
             { 
@@ -108,6 +159,7 @@ int main()
                     if( e.type == SDL_QUIT ) quit = true; 
                 } 
             }
+            
         }
     }  
 	
