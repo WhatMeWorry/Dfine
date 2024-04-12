@@ -29,9 +29,17 @@ what you are doing (and are perhaps writing a low resolution raytracer that runs
 SDL_Renderer and its SDL_Texture is a much better performing choice if you don't need CPU side 
 access to individual pixels.
 
+
+SDL coordinates are like most graphic engine coordinates, they start at the top left corner of your screen/window. 
+The more you go down the screen the Y increases and as you go across to the right the X increases.
+
+If you want an image in the top left corner set its X to 0 and it's Y to 0
+
 +/
 
 module app;
+
+import honeycomb : HexBoard;
 
 import glfw3.api;
 import core.stdc.stdio;
@@ -93,6 +101,9 @@ Globals g;
 
 int main() 
 {
+
+    HexBoard hexB = HexBoard(.43, 3, 5);
+
     glfwSetErrorCallback(&errorCallback);
 
     if (!glfwInit()) { return -1; }
