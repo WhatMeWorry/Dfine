@@ -236,9 +236,7 @@ int main()
 
     WindowData data;
 	
-    g.glfw.window = glfwCreateWindow(g.glfw.SCREEN_WIDTH, g.glfw.SCREEN_HEIGHT, 
-	                                 "Black window - press F11 to toggle fullscreen, press ESC to exit", 
-                                     null, null);
+    g.glfw.window = glfwCreateWindow(g.glfw.SCREEN_WIDTH, 600, "Black window - press F11 to toggle fullscreen, press ESC to exit", null, null);
     scope(exit) glfwDestroyWindow(g.glfw.window);
     if (!g.glfw.window) 
     { 

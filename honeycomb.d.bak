@@ -145,7 +145,7 @@ D3_point[6] defineHexVertices(float x, float y, float perpendicular, float diame
 	points[5].y = y + apothem;
 	points[5].z = 0.0;	
 	
-    // writeln("points = ", points);
+    writeln("points = ", points);
 	
     return points;
 } 
