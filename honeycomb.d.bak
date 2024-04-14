@@ -121,31 +121,31 @@ D3_point[6] defineHexVertices(float x, float y, float perpendicular, float diame
 {
     D3_point[6] points;
 	
-	points[0].x = x + halfRadius;
-	points[0].y = y;	
-	points[0].z = 0.0;	
+    points[0].x = x + halfRadius;
+    points[0].y = y;	
+    points[0].z = 0.0;	
 
-	points[1].x = x + halfRadius + radius;
-	points[1].y = y;
-	points[1].z = 0.0;		
+    points[1].x = x + halfRadius + radius;
+    points[1].y = y;
+    points[1].z = 0.0;		
 		
-	points[2].x = x + diameter;
-	points[2].y = y + apothem;
-	points[2].z = 0.0;		
+    points[2].x = x + diameter;
+    points[2].y = y + apothem;
+    points[2].z = 0.0;		
 	
-	points[3].x = x + halfRadius + radius;
-	points[3].y = y + perpendicular;
-	points[3].z = 0.0;		
+    points[3].x = x + halfRadius + radius;
+    points[3].y = y + perpendicular;
+    points[3].z = 0.0;		
 	
-	points[4].x = x + halfRadius;
-	points[4].y = y + perpendicular;
-	points[4].z = 0.0;	
+    points[4].x = x + halfRadius;
+    points[4].y = y + perpendicular;
+    points[4].z = 0.0;	
 	
-	points[5].x = x;
-	points[5].y = y + apothem;
-	points[5].z = 0.0;	
+    points[5].x = x;
+    points[5].y = y + apothem;
+    points[5].z = 0.0;	
 	
-    writeln("points = ", points);
+    // writeln("points = ", points);
 	
     return points;
 } 
@@ -154,8 +154,8 @@ D3_point defineHexCenter(float x, float y, float apothem, float radius)
 {
     D3_point center;
 	
-	center.x = x + radius;
-	center.y = y + apothem;
+    center.x = x + radius;
+    center.y = y + apothem;
     center.z = 0.0;
 	
     return center;
@@ -185,7 +185,7 @@ struct D3_point
 struct Hex
 {
     D3_point[6] points;  // each hex is made up of 6 vertices
-	D2_point[6] sc;      // screen coordinates
+    D2_point[6] sc;      // screen coordinates
     D3_point center;     // each hex has a center
 }
 
@@ -202,7 +202,7 @@ struct HexBoard
     @disable this();   // disables default constructor HexBoard h;
 	
     this(float d, uint r, uint c) 
-	{
+    {
         // These three parametes suffice to define the hexboard as well as each individual hex
 	    diameter = d;
         rows = r;
@@ -216,16 +216,16 @@ struct HexBoard
         rows = r;
         cols = c;
 		
-	    edge.bottom = -1.0;
+        edge.bottom = -1.0;
         edge.top    = edge.bottom + (rows * perpendicular); 
-	    edge.left   = -1.0;
+        edge.left   = -1.0;
         edge.right  = edge.left + (cols * (radius + halfRadius)); 			
 		
         hexes = new Hex[][](rows, cols);
 		
-	    initializeHexBoard();
+        initializeHexBoard();
 		
-		// can't call from here because we need the apps windows screen size which is 
+        // can't call from here because we need the apps windows screen size which is 
         // unknown to the hex board. 
         //convertNDCoordsScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates
 		
@@ -251,7 +251,7 @@ struct HexBoard
     Hex[][] hexes;  //  = new int[][](5, 2);	
 	
     //SelectedPair selected;	
-	//D3_point[4] squarePts;
+    //D3_point[4] squarePts;
 
     uint numberOfRows(){ return rows; }
 
@@ -285,7 +285,7 @@ struct HexBoard
  
         foreach(row; 0..rows)
         {
-		    // writeln("inside foreach row, row = ", row);		
+            // writeln("inside foreach row, row = ", row);		
             foreach(col; 0..cols)
             {	
                 hexes[row][col].points = defineHexVertices(x, y, perpendicular, diameter, 
@@ -321,7 +321,7 @@ struct HexBoard
     void convertNDCoordsScreenCoords(int screenWidth, int screenHeight)
     {
         //D3_point center;
-		//center.x = width / 2;
+        //center.x = width / 2;
         //center.y = height / 2;
 	
         foreach(r; 0..rows)

@@ -108,7 +108,7 @@ int main()
 	
     h.convertNDCoordsScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
 
-	//h.displayHexBoard();
+    //h.displayHexBoard();
 	
     //return 0;
 
@@ -163,7 +163,7 @@ int main()
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
             //SDL_RenderFillRect( g.sdl.renderer, &fillRect );
 
-			SDL_RenderDrawLine( g.sdl.renderer, roundTo!int(50.3), roundTo!int(50.7), 233, 233);
+            SDL_RenderDrawLine( g.sdl.renderer, roundTo!int(50.3), roundTo!int(50.7), 233, 233);
 
             D2_point[6] s;
             uint maxRows = h.numberOfRows();
@@ -236,8 +236,11 @@ int main()
 
     WindowData data;
 	
-    g.glfw.window = glfwCreateWindow(g.glfw.SCREEN_WIDTH, 600, "Black window - press F11 to toggle fullscreen, press ESC to exit", null, null);
+    g.glfw.window = glfwCreateWindow(g.glfw.SCREEN_WIDTH, g.glfw.SCREEN_HEIGHT, 
+	                                 "Black window - press F11 to toggle fullscreen, press ESC to exit", 
+                                     null, null);
     scope(exit) glfwDestroyWindow(g.glfw.window);
+	
     if (!g.glfw.window) 
     { 
         glfwTerminate();

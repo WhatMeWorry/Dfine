@@ -108,7 +108,7 @@ int main()
 	
     h.convertNDCoordsScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
 
-	//h.displayHexBoard();
+    //h.displayHexBoard();
 	
     //return 0;
 
@@ -163,7 +163,7 @@ int main()
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
             //SDL_RenderFillRect( g.sdl.renderer, &fillRect );
 
-			SDL_RenderDrawLine( g.sdl.renderer, roundTo!int(50.3), roundTo!int(50.7), 233, 233);
+            SDL_RenderDrawLine( g.sdl.renderer, roundTo!int(50.3), roundTo!int(50.7), 233, 233);
 
             D2_point[6] s;
             uint maxRows = h.numberOfRows();
@@ -177,17 +177,17 @@ int main()
                     foreach(p; 0..6)
                     {
                         s[0].x = h.hexes[r][c].sc[0].x;
-						s[0].y = h.hexes[r][c].sc[0].y;
+                        s[0].y = h.hexes[r][c].sc[0].y;
                         s[1].x = h.hexes[r][c].sc[1].x;
-						s[1].y = h.hexes[r][c].sc[1].y;
+                        s[1].y = h.hexes[r][c].sc[1].y;
                         s[2].x = h.hexes[r][c].sc[2].x;
-						s[2].y = h.hexes[r][c].sc[2].y;
+                        s[2].y = h.hexes[r][c].sc[2].y;
                         s[3].x = h.hexes[r][c].sc[3].x;
-						s[3].y = h.hexes[r][c].sc[3].y;						
+                        s[3].y = h.hexes[r][c].sc[3].y;						
                         s[4].x = h.hexes[r][c].sc[4].x;
-						s[4].y = h.hexes[r][c].sc[4].y;	
+                        s[4].y = h.hexes[r][c].sc[4].y;	
                         s[5].x = h.hexes[r][c].sc[5].x;
-						s[5].y = h.hexes[r][c].sc[5].y;	
+                        s[5].y = h.hexes[r][c].sc[5].y;	
 						
                         SDL_RenderDrawLine( g.sdl.renderer, s[0].x, s[0].y, s[1].x, s[1].y);
                         SDL_RenderDrawLine( g.sdl.renderer, s[1].x, s[1].y, s[2].x, s[2].y);						
@@ -240,6 +240,7 @@ int main()
 	                                 "Black window - press F11 to toggle fullscreen, press ESC to exit", 
                                      null, null);
     scope(exit) glfwDestroyWindow(g.glfw.window);
+	
     if (!g.glfw.window) 
     { 
         glfwTerminate();
