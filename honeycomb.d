@@ -204,7 +204,7 @@ struct HexBoard
     this(float d, uint r, uint c) 
     {
         // These three parametes suffice to define the hexboard as well as each individual hex
-	    diameter = d;
+        diameter = d;
         rows = r;
         cols = c;		
 		

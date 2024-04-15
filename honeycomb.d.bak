@@ -320,10 +320,6 @@ struct HexBoard
 	
     void convertNDCoordsScreenCoords(int screenWidth, int screenHeight)
     {
-        //D3_point center;
-        //center.x = width / 2;
-        //center.y = height / 2;
-	
         foreach(r; 0..rows)
         {
             foreach(c; 0..cols)
@@ -335,8 +331,6 @@ struct HexBoard
 					
                     hexes[r][c].sc[v].x = roundTo!int((NDCx + 1.0) * 0.5 * screenWidth); 
                     hexes[r][c].sc[v].y = roundTo!int((1.0 - NDCy) * 0.5 * screenHeight); 					
-					// writeln(hexes[r][c].sc[v].x, ", ", hexes[r][c].sc[v].y);
-                    
                 }
             }				
         }  
