@@ -5,6 +5,7 @@ module honeycomb;
 import std.conv: roundTo;
 import std.stdio: writeln, readf;
 import core.stdc.stdlib: exit;
+import std.range;
 
 import std.math.rounding: floor;
 import std.math.algebraic: abs;
@@ -12,6 +13,7 @@ import std.math.algebraic: abs;
 
 /+
 From:  https://wiki.dlang.org/Dense_multidimensional_arrays
+
 
 Jagged arrays
 The simplest way is to use an array of arrays:
@@ -163,16 +165,11 @@ D3_point defineHexCenter(float x, float y, float apothem, float radius)
 
 
 
-
-
-
-
 struct D2_point
 {
     int x;
     int y; 
 }
-
 
 
 struct D3_point
@@ -197,6 +194,11 @@ struct Edges
     float right;	
 }
 
+
+
+
+
+
 struct HexBoard
 {
     @disable this();   // disables default constructor HexBoard h;
@@ -212,9 +214,6 @@ struct HexBoard
         halfRadius    = radius   * 0.5;						
         perpendicular = diameter * 0.866;	
         apothem       = perpendicular * 0.5; 
-
-        rows = r;
-        cols = c;
 		
         edge.bottom = -1.0;
         edge.top    = edge.bottom + (rows * perpendicular); 
@@ -222,13 +221,12 @@ struct HexBoard
         edge.right  = edge.left + (cols * (radius + halfRadius)); 			
 		
         hexes = new Hex[][](rows, cols);
-		
+
         initializeHexBoard();
 		
         // can't call from here because we need the apps windows screen size which is 
         // unknown to the hex board. 
-        //convertNDCoordsScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates
-		
+        //convertNDCoordsToScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates		
     }
 	
     uint rows;  // number of rows on the board [0..rows-1]
@@ -248,7 +246,7 @@ struct HexBoard
     float apothem;
 
 	
-    Hex[][] hexes;  //  = new int[][](5, 2);	
+    Hex[][] hexes;  // = new int[][](5, 2);	
 	
     //SelectedPair selected;	
     //D3_point[4] squarePts;
@@ -263,10 +261,10 @@ struct HexBoard
         {
             foreach(c; 0..cols)
             {
-                writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );    	
+                //writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );    	
                 foreach(p; 0..6)
                 {
-                    writeln("hexes(r,c) ) ", hexes[r][c].points[p] );                   
+                    //writeln("hexes(r,c) ) ", hexes[r][c].points[p] );                   
                 }				 	
             }
         }			

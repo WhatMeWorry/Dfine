@@ -80,8 +80,8 @@ struct GLFW_STRUCT
 
 struct SDL_STRUCT
 {
-    const int SCREEN_WIDTH = 1600;
-    const int SCREEN_HEIGHT = 1600;		
+    const int SCREEN_WIDTH = 800;
+    const int SCREEN_HEIGHT = 800;		
     SDL_Window* window = null;            // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
@@ -96,21 +96,17 @@ struct Globals
  
 Globals g;
 
-/// Global variables
-/// Idea taken from Mike Shah
+/// Global variables idea taken from Mike Shah
 
 
 
 int main() 
 {
-
-    HexBoard h = HexBoard(.15, 140, 160);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(.3, 7, 9);  // hex board is created with NDC coordinates
 	
     h.convertNDCoordsScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
 
-    //h.displayHexBoard();
-	
-    //return 0;
+    h.displayHexBoard();
 
     glfwSetErrorCallback(&errorCallback);
 
@@ -163,14 +159,12 @@ int main()
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
             //SDL_RenderFillRect( g.sdl.renderer, &fillRect );
 
-            SDL_RenderDrawLine( g.sdl.renderer, roundTo!int(50.3), roundTo!int(50.7), 233, 233);
-
             D2_point[6] s;
             uint maxRows = h.numberOfRows();
             uint maxCols = h.numberOfColumns();			
             foreach(r; 0..maxRows)
             {
-                foreach(c; 0..maxRows)
+                foreach(c; 0..maxCols)
                 {  
                     // writeln("r = ", r, " c = ", c);
 					
@@ -200,33 +194,51 @@ int main()
                 }
             }				
 			
-            //int v1x =
-            //int v1y = 			
-            //SDL_RenderDrawLine( g.sdl.renderer, roundTo!int(50.3), roundTo!int(50.7), 233, 233);
-
-		
-			
-            //Update screen
+            // Update screen
             SDL_RenderPresent( g.sdl.renderer );			
-			
 
-            //Hack to get window to stay up
-            
-            SDL_Event e; bool quit = false; 
-            while( quit == false )
-            { 
-                while( SDL_PollEvent(&e) )
-                { 
-                    if( e.type == SDL_QUIT ) quit = true; 
-                } 
+            // https://thenumb.at/cpp-course/sdl2/03/03.html
+			
+            SDL_Event event;
+            bool running = true;
+
+            while(running) 
+            {
+                while(SDL_PollEvent(&event) != 0)
+                {
+                    switch(event.type) 
+                    {
+			            case SDL_QUIT:
+						
+                            writeln("user clicked on close button of windows");
+				            running = false;
+				            break;
+							
+						case SDL_KEYDOWN:
+						
+                            if( event.key.keysym.sym == SDLK_ESCAPE )
+                            {
+                                writeln("user pressed the Escape Key");			
+                                running = false;
+                            }
+                            break;
+							
+						case SDL_MOUSEBUTTONDOWN:
+                           if( event.button.button == SDL_BUTTON_LEFT )
+                            {
+                                writeln("user pressed the Left Mouse Button");			
+                            }
+                            break;			
+
+                        default: break;											
+                    }
+                }
             }
-            
+            return 0;           
         }
     }  
 	
 	
-	
-
     //printClipboardState();
     //printJoystickState();
     //printMonitorState();
