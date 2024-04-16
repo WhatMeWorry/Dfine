@@ -40,6 +40,7 @@ If you want an image in the top left corner set its X to 0 and it's Y to 0
 module app;
 
 import honeycomb;
+import select_hex;
 
 import glfw3.api;
 import core.stdc.stdio;
@@ -80,8 +81,8 @@ struct GLFW_STRUCT
 
 struct SDL_STRUCT
 {
-    const int SCREEN_WIDTH = 1600;
-    const int SCREEN_HEIGHT = 1600;		
+    const int SCREEN_WIDTH = 800;
+    const int SCREEN_HEIGHT = 800;		
     SDL_Window* window = null;            // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
@@ -96,21 +97,17 @@ struct Globals
  
 Globals g;
 
-/// Global variables
-/// Idea taken from Mike Shah
+/// Global variables idea taken from Mike Shah
 
 
 
 int main() 
 {
-
-    HexBoard h = HexBoard(.15, 140, 160);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(.3, 7, 9);  // hex board is created with NDC coordinates
 	
-    h.convertNDCoordsScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
+    h.convertNDCoordsToScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
 
-    //h.displayHexBoard();
-	
-    //return 0;
+    h.displayHexBoard();
 
     glfwSetErrorCallback(&errorCallback);
 
@@ -163,31 +160,29 @@ int main()
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
             //SDL_RenderFillRect( g.sdl.renderer, &fillRect );
 
-            SDL_RenderDrawLine( g.sdl.renderer, roundTo!int(50.3), roundTo!int(50.7), 233, 233);
-
             D2_point[6] s;
             uint maxRows = h.numberOfRows();
             uint maxCols = h.numberOfColumns();			
             foreach(r; 0..maxRows)
             {
-                foreach(c; 0..maxRows)
+                foreach(c; 0..maxCols)
                 {  
                     // writeln("r = ", r, " c = ", c);
 					
                     foreach(p; 0..6)
                     {
                         s[0].x = h.hexes[r][c].sc[0].x;
-						s[0].y = h.hexes[r][c].sc[0].y;
+                        s[0].y = h.hexes[r][c].sc[0].y;
                         s[1].x = h.hexes[r][c].sc[1].x;
-						s[1].y = h.hexes[r][c].sc[1].y;
+                        s[1].y = h.hexes[r][c].sc[1].y;
                         s[2].x = h.hexes[r][c].sc[2].x;
-						s[2].y = h.hexes[r][c].sc[2].y;
+                        s[2].y = h.hexes[r][c].sc[2].y;
                         s[3].x = h.hexes[r][c].sc[3].x;
-						s[3].y = h.hexes[r][c].sc[3].y;						
+                        s[3].y = h.hexes[r][c].sc[3].y;						
                         s[4].x = h.hexes[r][c].sc[4].x;
-						s[4].y = h.hexes[r][c].sc[4].y;	
+                        s[4].y = h.hexes[r][c].sc[4].y;	
                         s[5].x = h.hexes[r][c].sc[5].x;
-						s[5].y = h.hexes[r][c].sc[5].y;	
+                        s[5].y = h.hexes[r][c].sc[5].y;	
 						
                         SDL_RenderDrawLine( g.sdl.renderer, s[0].x, s[0].y, s[1].x, s[1].y);
                         SDL_RenderDrawLine( g.sdl.renderer, s[1].x, s[1].y, s[2].x, s[2].y);						
@@ -200,33 +195,64 @@ int main()
                 }
             }				
 			
-            //int v1x =
-            //int v1y = 			
-            //SDL_RenderDrawLine( g.sdl.renderer, roundTo!int(50.3), roundTo!int(50.7), 233, 233);
-
-		
-			
-            //Update screen
+            // Update screen
             SDL_RenderPresent( g.sdl.renderer );			
-			
 
-            //Hack to get window to stay up
-            
-            SDL_Event e; bool quit = false; 
-            while( quit == false )
-            { 
-                while( SDL_PollEvent(&e) )
-                { 
-                    if( e.type == SDL_QUIT ) quit = true; 
-                } 
+            // https://thenumb.at/cpp-course/sdl2/03/03.html
+			
+            SDL_Event event;
+            bool running = true;
+
+            while(running) 
+            {
+                while(SDL_PollEvent(&event) != 0)
+                {
+                    switch(event.type) 
+                    {
+			            case SDL_QUIT:
+						
+                            writeln("user clicked on close button of windows");
+				            running = false;
+				            break;
+							
+						case SDL_KEYDOWN:
+						
+                            if( event.key.keysym.sym == SDLK_ESCAPE )
+                            {
+                                writeln("user pressed the Escape Key");			
+                                running = false;
+                            }
+                            break;
+							
+						case SDL_MOUSEBUTTONDOWN:
+                           if( event.button.button == SDL_BUTTON_LEFT )
+                            {
+                                writeln("user pressed the Left Mouse Button");	
+                                //SDL_GetMouseState(&x, &y);	
+                                //writeln("(x, y) = (", x, ", ", y,  ")");
+
+                                SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
+
+                                writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
+                                //h.mouseClick.sc.x = x;
+								//h.mouseClick.sc.y = y;
+								
+                                h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);
+
+                                writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
+                                //getHexThatWasClickedWithMouse( h, h.mouseClick.sc.x, h.mouseClick.sc.y);							
+                            }
+                            break;			
+
+                        default: break;											
+                    }
+                }
             }
-            
+            return 0;           
         }
     }  
 	
 	
-	
-
     //printClipboardState();
     //printJoystickState();
     //printMonitorState();

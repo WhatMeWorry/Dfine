@@ -172,6 +172,20 @@ struct D2_point
 }
 
 
+struct D2_NDC
+{
+    float x;
+    float y; 
+}
+
+
+struct D2_SC
+{
+    int x;
+    int y; 
+}
+
+
 struct D3_point
 {
     float x;
@@ -194,7 +208,17 @@ struct Edges
     float right;	
 }
 
+struct MouseClick
+{   	
+    D2_NDC ndc;  // normalized device coordinates 
+    D2_SC  sc;   // screen coordinates
+}		
 
+struct SelectedHex
+{
+    int row;
+    int col;
+}
 
 
 
@@ -224,6 +248,9 @@ struct HexBoard
 
         initializeHexBoard();
 		
+		mouseClick.ndc.x = 0.0;
+		mouseClick.ndc.y = 0.0;		
+		
         // can't call from here because we need the apps windows screen size which is 
         // unknown to the hex board. 
         //convertNDCoordsToScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates		
@@ -245,11 +272,14 @@ struct HexBoard
     float perpendicular;	
     float apothem;
 
-	
     Hex[][] hexes;  // = new int[][](5, 2);	
 	
-    //SelectedPair selected;	
-    //D3_point[4] squarePts;
+    SelectedHex selectedHex; 
+
+    MouseClick mouseClick;
+	
+    //D3_point hexCenter;  // will just use the x,y coordinates (not z)
+	
 
     uint numberOfRows(){ return rows; }
 
@@ -316,7 +346,7 @@ struct HexBoard
     }	
 	
 	
-    void convertNDCoordsScreenCoords(int screenWidth, int screenHeight)
+    void convertNDCoordsToScreenCoords(int screenWidth, int screenHeight)
     {
         foreach(r; 0..rows)
         {
@@ -333,6 +363,22 @@ struct HexBoard
             }				
         }  
     }		
+
+
+    void convertScreenCoordinatesToNormalizedDeviceCoordinates(int screenWidth, int screenHeight)
+    {
 	
+        mouseClick.ndc.x =   (mouseClick.sc.x / (screenWidth / 2.0)) - 1.0;   // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
+                                                                              // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0 	
+																	
+        mouseClick.ndc.y = -((mouseClick.sc.y / (screenHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
+                                                                              // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0
+																			  
+        // The minus sign at front of expression is needed because screen coordinates are flipped horizontally from NDC coordinates																	
+ 							
+        // Take the bottom of the edge of the screen (ie -1.0)  Any screen click on the screen is going to be Bigger in value.
+	    // So that the mouse click and subtract the edge.  	
+		
+    }			
 	
 }

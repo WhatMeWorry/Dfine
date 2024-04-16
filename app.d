@@ -37,9 +37,16 @@ If you want an image in the top left corner set its X to 0 and it's Y to 0
 
 +/
 
+
+/+
+Should each hex board have an associated windows/screen???  It would simply parameter passing.
+Or will this cause problems further down the road?
++/
+
 module app;
 
 import honeycomb;
+import select_hex;
 
 import glfw3.api;
 import core.stdc.stdio;
@@ -104,7 +111,7 @@ int main()
 {
     HexBoard h = HexBoard(.3, 7, 9);  // hex board is created with NDC coordinates
 	
-    h.convertNDCoordsScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
+    h.convertNDCoordsToScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
 
     h.displayHexBoard();
 
@@ -226,7 +233,20 @@ int main()
 						case SDL_MOUSEBUTTONDOWN:
                            if( event.button.button == SDL_BUTTON_LEFT )
                             {
-                                writeln("user pressed the Left Mouse Button");			
+                                writeln("user pressed the Left Mouse Button");	
+                                //SDL_GetMouseState(&x, &y);	
+                                //writeln("(x, y) = (", x, ", ", y,  ")");
+
+                                SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
+
+                                writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
+                                //h.mouseClick.sc.x = x;
+								//h.mouseClick.sc.y = y;
+								
+                                h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);
+
+                                writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
+                                //getHexThatWasClickedWithMouse( h, h.mouseClick.sc.x, h.mouseClick.sc.y);							
                             }
                             break;			
 
