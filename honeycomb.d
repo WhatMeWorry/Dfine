@@ -210,7 +210,7 @@ struct Edges
 
 struct MouseClick
 {   	
-    D2_NDC ndc;  // normalized device coordinates 
+    D3_point ndc;  // normalized device coordinates 
     D2_SC  sc;   // screen coordinates
 }		
 
@@ -231,8 +231,8 @@ struct HexBoard
     {
         // These three parametes suffice to define the hexboard as well as each individual hex
         diameter = d;
-        rows = r;
-        cols = c;		
+        maxRows = r;
+        maxCols = c;		
 		
         radius        = diameter * 0.5;	
         halfRadius    = radius   * 0.5;						
@@ -240,11 +240,11 @@ struct HexBoard
         apothem       = perpendicular * 0.5; 
 		
         edge.bottom = -1.0;
-        edge.top    = edge.bottom + (rows * perpendicular); 
+        edge.top    = edge.bottom + (maxRows * perpendicular); 
         edge.left   = -1.0;
-        edge.right  = edge.left + (cols * (radius + halfRadius)); 			
+        edge.right  = edge.left + (maxCols * (radius + halfRadius)); 			
 		
-        hexes = new Hex[][](rows, cols);
+        hexes = new Hex[][](maxRows, maxCols);
 
         initializeHexBoard();
 		
@@ -258,8 +258,8 @@ struct HexBoard
 	
 	enum invalid = -1;  // -1 means a row or column is invalid
 	
-    uint rows;  // number of rows on the board [0..rows-1]
-    uint cols;  // number of columns on the bord [0..cols-1]
+    uint maxRows;  // number of rows on the board [0..rows-1]
+    uint maxCols;  // number of columns on the bord [0..cols-1]
 	
     Edges edge;
 
@@ -276,8 +276,6 @@ struct HexBoard
 
     Hex[][] hexes;  // = new int[][](5, 2);	
 
-    D2_NDC hexCenter;
-
     SelectedHex selectedHex; 
 
     MouseClick mouseClick;
@@ -285,15 +283,15 @@ struct HexBoard
     //D3_point hexCenter;  // will just use the x,y coordinates (not z)
 	
 
-    uint numberOfRows(){ return rows; }
+    uint numberOfRows(){ return maxRows; }
 
-    uint numberOfColumns(){ return cols; }
+    uint numberOfColumns(){ return maxCols; }
 	
     void displayHexBoard()
     {
-        foreach(r; 0..rows)
+        foreach(r; 0..maxRows)
         {
-            foreach(c; 0..cols)
+            foreach(c; 0..maxCols)
             {
                 //writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );    	
                 foreach(p; 0..6)
@@ -315,10 +313,10 @@ struct HexBoard
 
         writeln("inside initializeHexBoard");		
  
-        foreach(row; 0..rows)
+        foreach(row; 0..maxRows)
         {
             // writeln("inside foreach row, row = ", row);		
-            foreach(col; 0..cols)
+            foreach(col; 0..maxCols)
             {	
                 hexes[row][col].points = defineHexVertices(x, y, perpendicular, diameter, 
 														   apothem, halfRadius, radius);
@@ -340,7 +338,7 @@ struct HexBoard
 		
             x = edge.left;  // start a new row and column on the left
 		
-            if (cols.isOdd)
+            if (maxCols.isOdd)
             {
                 y -= apothem;
             }
@@ -352,9 +350,9 @@ struct HexBoard
 	
     void convertNDCoordsToScreenCoords(int screenWidth, int screenHeight)
     {
-        foreach(r; 0..rows)
+        foreach(r; 0..maxRows)
         {
-            foreach(c; 0..cols)
+            foreach(c; 0..maxCols)
             {	
                 foreach(v; 0..6)
                 {
