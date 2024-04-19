@@ -256,6 +256,8 @@ struct HexBoard
         //convertNDCoordsToScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates		
     }
 	
+	enum invalid = -1;  // -1 means a row or column is invalid
+	
     uint rows;  // number of rows on the board [0..rows-1]
     uint cols;  // number of columns on the bord [0..cols-1]
 	
@@ -365,34 +367,21 @@ struct HexBoard
     }		
 
 
-    void convertScreenCoordsToNDCoords(int screenWidth, int screenHeight)
+    // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+	
+    void convertScreenCoordinatesToNormalizedDeviceCoordinates(int screenWidth, int screenHeight)
     {
 	
-   //NDC.x =   (xPos /  (winWidth / 2.0)) - 1.0;  // xPos/(winWidth/2.0) gives values from 0.0 to 2.0
-                                                                    // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0 	
-    //NDC.y = -((yPos / (winHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
-                                                                    // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0 	
-    // The minus sign is needed because screen coordinates are flipped horizontally from NDC coordinates	
-	
-	
-	
-	
-	    /+
-        foreach(r; 0..rows)
-        {
-            foreach(c; 0..cols)
-            {	
-                foreach(v; 0..6)
-                {
-                    float NDCx = hexes[r][c].points[v].x;
-                    float NDCy = hexes[r][c].points[v].y;
-					
-                    hexes[r][c].sc[v].x = roundTo!int((NDCx + 1.0) * 0.5 * screenWidth); 
-                    hexes[r][c].sc[v].y = roundTo!int((1.0 - NDCy) * 0.5 * screenHeight); 					
-                }
-            }				
-        } 
-        +/
+        mouseClick.ndc.x =   (mouseClick.sc.x / (screenWidth / 2.0)) - 1.0;   // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
+                                                                              // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0 	
+																	
+        mouseClick.ndc.y = -((mouseClick.sc.y / (screenHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
+                                                                              // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0
+																			  
+        // The minus sign at front of expression is needed because screen coordinates are flipped horizontally from NDC coordinates																	
+ 							
+        // Take the bottom of the edge of the screen (ie -1.0)  Any screen click on the screen is going to be Bigger in value.
+	    // So that the mouse click and subtract the edge.  	
 		
     }			
 	

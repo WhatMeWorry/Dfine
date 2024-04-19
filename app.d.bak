@@ -37,6 +37,12 @@ If you want an image in the top left corner set its X to 0 and it's Y to 0
 
 +/
 
+
+/+
+Should each hex board have an associated windows/screen???  It would simply parameter passing.
+Or will this cause problems further down the road?
++/
+
 module app;
 
 import honeycomb;
@@ -237,10 +243,13 @@ int main()
                                 //h.mouseClick.sc.x = x;
 								//h.mouseClick.sc.y = y;
 								
+								// Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+								
                                 h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);
 
-                                writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
-                                //getHexThatWasClickedWithMouse( h, h.mouseClick.sc.x, h.mouseClick.sc.y);							
+                                //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
+								
+                                getHexThatWasClickedWithMouse(h);							
                             }
                             break;			
 

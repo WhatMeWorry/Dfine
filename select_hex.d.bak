@@ -3,6 +3,110 @@ module select_hex;
 
 import honeycomb;
 import std.stdio;
+import std.conv: roundTo;
+import std.math.rounding: floor;
+
+
+
+
+//   |  \________|/          |  \________|/          |  \________|/
+//   |XX/        |\          |XX/        |\          |XX/        |\ 
+//   |X/         | \         |X/         | \         |X/         | \ 
+//   |/          |  \________|/          |  \________|/          |  \    
+//   |\          |XX/        |\          |XX/        |\          |XX/
+//   | \         |X/         | \         |X/         | \         |X/
+//   |  \________|/          |  \________|/          |  \________|/
+//   |XX/        |\          |XX/        |\          |XX/        |\ 
+//   |X/         | \         |X/         | \         |X/         | \ 
+//   |/          |  \________|/          |  \________|/          |  \    
+//   |\          |XX/        |\          |XX/        |\          |XX/
+//   | \         |X/         | \         |X/         | \         |X/
+//   |  \________|/__________|__\________|/__________|__\________|/__
+// 
+//            opposite 
+//           __________
+//           |......../         
+//           |......./        
+//           |....../  if angle > tan(60) then mouse clicked         
+//           |...../   inside the triangle         
+//  adjacent |..../            
+//           |.../             
+//           |../ 60 degrees   
+//           |./  
+//           |/
+//           +         
+//           leftPoint
+
+
+
+//   |  /        |\          |  /        |\          |  /        |\ 
+//   | /         |X\         | /         |X\         | /         |X\ 
+//   |/          |XX\________|/          |XX\________|/          |XX\
+//   |\          |  /        |\          |  /        |\          |  /
+//   |X\         | /         |X\         | /         |X\         | /
+//   |XX\________|/          |XX\________|/          |XX\________|/__
+//   |  /        |\          |  /        |\          |  /        |\ 
+//   | /         |X\         | /         |X\         | /         |X\ 
+//   |/          |XX\________|/          |XX\________|/          |XX\    
+//   |\          |  /        |\          |  /        |\          |  /
+//   |X\         | /         |X\         | /         |X\         | /
+//   |XX\________|/__________|XX\________|/__________|XX\________|/__
+//
+//           + leftPoint
+//           |\      
+//           |.\
+//           |..\ 300 degrees
+//           |...\
+//           |....\     if angle < tan(300) then mouse clicked
+//  adjacent |.....\    inside the triangle
+//           |......\ 
+//           |.......\     
+//           |________\
+// 
+//            opposite         
+
+
+bool clickedInSmallTriangle(D3_point mouseClick, D3_point hexCenter)
+{
+    immutable float tanOf60  =  1.7320508;
+    immutable float tanOf300 = -1.7320508;
+
+    float leftPointX = hexCenter.x - hexBoard.hex.radius;
+    float leftPointY = hexCenter.y;    
+
+    float adjacent = mouseClick.x - leftPointX;
+    float opposite = mouseClick.y - leftPointY;
+	
+    // tan(theta) = opposite / adjacent     
+	
+    float angle = opposite / adjacent;  // opposite is positive for hex sides /  (leaning Southwest to Northeast)
+	                                     // opposite is negative for hex sides \  (leaning Northwest to Southeast)
+    if (angle >= 0.0)            
+        return (angle > tanOf60);    // angle is positive
+    else                           
+        return (angle < tanOf300);	 // angle is negative
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /+
 A hexboard will be passed in my reference (for speed sake) consisting of NDC coordinates and a screen
@@ -11,12 +115,127 @@ coordinate pair consisting of an x and y value of where the mouse was clicked
 +/
 
 
-bool getHexThatWasClickedWithMouse( ref HexBoard h, int x, int y)
+                                                    // mouse click
+bool getHexThatWasClickedWithMouse( ref HexBoard h)
 {
     writeln("inside getHexThatWasClickedWithMouse");
 
-    writeln("h.rows = ", h.rows);
+    writeln("h.rows = ", h.rows, "   h.cols = ", h.cols);
+    writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
+    writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
+
+    // Take the bottom of the edge of the screen (ie -1.0)  Any screen click on the screen is going to be Bigger in value.
+    // So that the mouse click and subtract the edge.  
+
+    // This block of code handles the (rare?) cases where the window is bigger than
+    // than the hex board.  
+										
+    float offsetFromBottom = h.mouseClick.ndc.y - (-1.0);
 	
+    uint gridRow = roundTo!uint(floor(offsetFromBottom / h.apothem));
+
+    float offsetFromLeft = h.mouseClick.ndc.x - (-1.0);						
+                     
+    uint gridCol = roundTo!uint(floor(offsetFromLeft / (h.radius + h.halfRadius)));
+
+
+    if (h.mouseClick.ndc.x > h.edge.right)  // clicked to the right of the hex board's right edge
+    {
+        writeln("Clicked outside of the hex board's right edge");
+        return false;						
+    }
+    if (h.mouseClick.ndc.y > h.edge.top)    // clicked above the hex board's top edge
+    {
+        writeln("Clicked above the hex board's top edge");
+        return false;						
+    }
+
+    writeln("gridRow = ", gridRow);
+    writeln("gridCol = ", gridCol);	
+
+
+    //   |__\________|/__________|__\________|/__________|__\________|/__
+    //   |  /        |\          |  /        |\          |  /        |\ 
+    //   | Upper Left|Upper Right| Upper Left|Upper Right| Upper Left| Upper Right
+    //   |/__________|__\________|/__________|__\________|/__________|__\
+    //   |\          |  /        |\          |  /        |\          |  /
+    //   | Lower Left|Lower Right|Lower Left |Lower Right| Lower Left| Lower Right
+    //   |__\________|/__________|__\________|/__________|__\________|/__
+    //   |  /        |\          |  /        |\          |  /        |\ 
+    //   |Upper Left |Upper Right| Upper Left|Upper Right| Upper Left| Upper Right
+    //   |/__________|__\________|/__________|__\________|/__________|  \    
+    //   |\          |  /        |\          |  /        |\          |  /
+    //   |Lower Left |Lower Right| Lower Left|Lower Right| Lower Left| Lower Right
+    //   |__\________|/__________|__\________|/__________|__\________|/__
+
+    // We can exclude 3/4 of the hexBoard just by finding the quadrant that was mouse clicked on
+
+    enum Quads { UL, UR, LL, LR }
+    Quads quadrant;
+
+    if (gridRow.isEven)
+    {
+        if (gridCol.isEven)
+            quadrant = Quads.LL; // (e,e)
+        else
+            quadrant = Quads.LR; // (e,o)					
+    }
+    else // gridRow isOdd
+    {
+        if (gridCol.isEven)
+            quadrant = Quads.UL; // (o,e)
+        else
+            quadrant = Quads.UR; // (o,o)					
+    }
+
+    int hexRow = h.invalid;
+    int hexCol = h.invalid;					
+
+    //D3_point NDC;        // will just use the x,y coordinates (not z)
+	
+    //D2_point hexCenter;  // will just use the x,y coordinates (not z
+
+struct D2_NDC
+{
+    float x;
+    float y; 
+}
+D2_point hexCenter;
+    //================================= UL ========================================= 
+  
+    if (quadrant == Quads.UL)   // Upper Left Quadrant
+    { 					
+        hexRow = (gridRow-1) / 2;  // UL gridRows = {1, 3, 5, 7,...} mapped to row = {0, 1, 2, 3,...}
+        hexCol = gridCol;
+
+        //hexCenter = hexBoard.hexes[row][col].center;		
+		
+        //hexCenter.x = h.hexes[hexRow][hexCol].points[0].x; // + (h.radius/2.0);  // move the bottom vertex to right a bit
+		h.hexes[hexRow][hexCol].points[0].x = 2;
+        hexCenter.y = h.hexes[hexRow][hexCol].points[0].y; // + (h.apothem);   // move 
+		
+        if (clickedInSmallTriangle(NDC, hexCenter))	 					
+        {
+            if(col == 0)  // corner case if select small triangle on far left of board  
+            {  
+                //row = invalid; 
+                //col = invalid;
+                return false;
+            }
+            else
+            {
+                col -= 1;							   
+            }
+        }							
+    }	
+
+
+
+
+
+
+
+
 
 
     return true;
@@ -36,107 +255,11 @@ extern(C) void mouseButtonCallback(GLFWwindow* winMain, int button, int action, 
                 if (action == GLFW_PRESS)
                 {
                     double xPos, yPos;
-                    glfwGetCursorPos(winMain, &xPos, &yPos);  // glfwGetCursorPos returns double mouse position
-					
-                    //writeln("x and y cursor position = ", xPos, " ", yPos);
+ 
 
-                    NDC.x =   (xPos /  (winWidth / 2.0)) - 1.0;  // xPos/(winWidth/2.0) gives values from 0.0 to 2.0
-                                                                    // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0 	
-                    NDC.y = -((yPos / (winHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
-                                                                    // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0 	
-                    // The minus sign is needed because screen coordinates are flipped horizontally from NDC coordinates																	
- 							
-                    // Take the bottom of the edge of the screen (ie -1.0)  Any screen click on the screen is going to be Bigger in value.
-					// So that the mouse click and subtract the edge.  
-										
-                    float offsetFromBottom = NDC.y - (-1.0);
-	
-					uint gridRow = roundTo!uint(floor(offsetFromBottom / hexBoard.apothem));
-
-                    float offsetFromLeft = NDC.x - (-1.0);						
-                     
-					uint gridCol = roundTo!uint(floor(offsetFromLeft / (hexBoard.radius + hexBoard.halfRadius)));
+ 
 
 
-                    if (NDC.x > hexBoard.edge.right)  // clicked to the right of the hex board's right edge
-                    {
-                        writeln("Clicked outside of the hex board's right edge");
-                        return;						
-                    }
-                    if (NDC.y > hexBoard.edge.top)    // clicked above the hex board's top edge
-                    {
-                        writeln("Clicked above the hex board's top edge");
-                        return;						
-                    }
-
-                    //   Grid Quandrants
-                    // Quadrant is defined by (gridRow, gridCol) pair.
-                    // Quad UL = (odd, even) 
-                    //      LL = (even, even)
-                    //      UR = (odd, odd)
-                    //      LR = (even, odd)      
-                    //
-                    //   |__\________|/__________|__\________|/__________|__\________|/__
-                    //   |  /        |\          |  /        |\          |  /        |\ 
-                    //   | Upper Left|Upper Right| Upper Left|Upper Right| Upper Left| Upper Right
-                    //   |/__________|__\________|/__________|__\________|/__________|__\
-                    //   |\          |  /        |\          |  /        |\          |  /
-                    //   | Lower Left|Lower Right|Lower Left |Lower Right| Lower Left| Lower Right
-                    //   |__\________|/__________|__\________|/__________|__\________|/__
-                    //   |  /        |\          |  /        |\          |  /        |\ 
-                    //   |Upper Left |Upper Right| Upper Left|Upper Right| Upper Left| Upper Right
-                    //   |/__________|__\________|/__________|__\________|/__________|  \    
-                    //   |\          |  /        |\          |  /        |\          |  /
-                    //   |Lower Left |Lower Right| Lower Left|Lower Right| Lower Left| Lower Right
-                    //   |__\________|/__________|__\________|/__________|__\________|/__
-
-                    // We can exclude 3/4 of the hexBoard just by finding the quadrant that was mouse clicked on
-
-                    enum Quads { UL, UR, LL, LR }
-                    Quads quadrant;
-
-                    if (gridRow.isEven)
-					{
-					    if (gridCol.isEven)
-                            quadrant = Quads.LL; // (e,e)
-                        else
-                            quadrant = Quads.LR; // (e,o)					
-					}
-                    else // gridRow isOdd
-					{
-					    if (gridCol.isEven)
-                            quadrant = Quads.UL; // (o,e)
-                        else
-                            quadrant = Quads.UR; // (o,o)					
-					}
-
-
-
-                    int row = invalid;
-                    int col = invalid;					
-
-                    //================================= UL ========================================= 
-  
-                    if (quadrant == Quads.UL)   // Upper Left Quadrant
-                    { 					
-                        row = (gridRow-1) / 2;  // UL gridRows = {1, 3, 5, 7,...} mapped to row = {0, 1, 2, 3,...}
-                        col = gridCol;
-
-                        hexCenter = hexBoard.hexes[row][col].center;					
-
-                        if (clickedInSmallTriangle(NDC, hexCenter))	 					
-                        {
-                            if(col == 0)
-							{
-                                row = invalid; 
-                                col = invalid;
-                            }
-                            else
-                            {
-                                col -= 1;							   
-                            }
-                        }							
-					}	
 
                     //================================= LR ========================================= 
 						

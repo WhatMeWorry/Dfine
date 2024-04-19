@@ -109,7 +109,7 @@ Globals g;
 
 int main() 
 {
-    HexBoard h = HexBoard(.3, 7, 9);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(.3, 5, 5);  // hex board is created with NDC coordinates
 	
     h.convertNDCoordsToScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
 
@@ -243,10 +243,13 @@ int main()
                                 //h.mouseClick.sc.x = x;
 								//h.mouseClick.sc.y = y;
 								
+								// Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+								
                                 h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);
 
-                                writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
-                                //getHexThatWasClickedWithMouse( h, h.mouseClick.sc.x, h.mouseClick.sc.y);							
+                                //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
+								
+                                getHexThatWasClickedWithMouse(h);							
                             }
                             break;			
 

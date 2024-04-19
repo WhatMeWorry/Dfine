@@ -256,6 +256,8 @@ struct HexBoard
         //convertNDCoordsToScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates		
     }
 	
+	enum invalid = -1;  // -1 means a row or column is invalid
+	
     uint rows;  // number of rows on the board [0..rows-1]
     uint cols;  // number of columns on the bord [0..cols-1]
 	
@@ -273,7 +275,9 @@ struct HexBoard
     float apothem;
 
     Hex[][] hexes;  // = new int[][](5, 2);	
-	
+
+    D2_NDC hexCenter;
+
     SelectedHex selectedHex; 
 
     MouseClick mouseClick;
@@ -365,6 +369,8 @@ struct HexBoard
     }		
 
 
+    // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+	
     void convertScreenCoordinatesToNormalizedDeviceCoordinates(int screenWidth, int screenHeight)
     {
 	
