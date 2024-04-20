@@ -338,7 +338,7 @@ struct HexBoard
 		
             x = edge.left;  // start a new row and column on the left
 		
-            if (col.isOdd)
+            if (maxCols.isOdd)
             {
                 y -= apothem;
             }

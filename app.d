@@ -233,15 +233,11 @@ int main()
 						case SDL_MOUSEBUTTONDOWN:
                            if( event.button.button == SDL_BUTTON_LEFT )
                             {
-                                writeln("user pressed the Left Mouse Button");	
-                                //SDL_GetMouseState(&x, &y);	
-                                //writeln("(x, y) = (", x, ", ", y,  ")");
+                                //writeln("user pressed the Left Mouse Button");	
 
                                 SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
 
-                                writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
-                                //h.mouseClick.sc.x = x;
-								//h.mouseClick.sc.y = y;
+                                //writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
 								
 								// Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
 								
@@ -251,9 +247,31 @@ int main()
 								
                                 if (getHexThatWasClickedWithMouse(h))
                                 {
-                                    writeln("Success!****************************************************");
-                           			writeln("Hex selected was (", h.selectedHex.row, ", ", h.selectedHex.col, ")");						
+                                    //writeln("Success!****************************************************");
+                           			writeln("Hex selected was (", h.selectedHex.row, ", ", h.selectedHex.col, ")");	
+									
+									int x = h.selectedHex.row;   int y = h.selectedHex.col;
+                                    
+									D2_point[4] t;
+                   								
+									t[0].x = h.hexes[x][y].sc[0].x;
+									t[0].y = h.hexes[x][y].sc[0].y;	
+									t[1].x = h.hexes[x][y].sc[1].x;
+									t[1].y = h.hexes[x][y].sc[1].y;
+									t[2].x = h.hexes[x][y].sc[3].x;
+									t[2].y = h.hexes[x][y].sc[3].y;	
+									t[3].x = h.hexes[x][y].sc[4].x;
+									t[3].y = h.hexes[x][y].sc[4].y;
+
+                                    //writeln(t);
+									
+									SDL_RenderDrawLine( g.sdl.renderer, t[0].x, t[0].y, t[1].x, t[1].y);
+									SDL_RenderDrawLine( g.sdl.renderer, t[1].x, t[1].y, t[2].x, t[2].y);
+									SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
+									SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);									
                                 }
+								
+								SDL_RenderPresent( g.sdl.renderer );
 
 
 								

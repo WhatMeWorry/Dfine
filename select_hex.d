@@ -170,7 +170,7 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
         return false;						
     }
 
-    writeln("(gridRow,gridCol) = (", gridRow, ",", gridCol, ")");
+    //writeln("[gridRow,gridCol] = [", gridRow, ",", gridCol, "]");
 
     //   |___________|___________|___________|___________|___________|___
     //   |           |           |           |           |           |  
@@ -239,21 +239,19 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
         {
             if(hexCol == 0)  // corner case if select small triangle on far left of board  
             {  
-                //row = invalid; 
-                //col = invalid;
 				writeln("Select small triangle on far left of board");
                 return false;
             }
             else
             {
-                //hexCol -= 1;	
-                //writeln("(hexRow, hexCol) = (", hexRow, ", ", hexCol, ")");
-
-                h.selectedHex.row = hexRow;
-                h.selectedHex.col = hexCol -= 1;				
-                return true;				
-            }
-        }							
+                hexCol -= 1;		
+            }            
+        }
+		
+        h.selectedHex.row = hexRow;
+        h.selectedHex.col = hexCol;		
+ 
+        return true;		
     }	
 
     //================================= LR ========================================= 
@@ -269,12 +267,9 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
 
             if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
             {
-                //hexRow += 1;
-                //hexCol -= 1;
-                h.selectedHex.row = hexRow + 1;				
-                h.selectedHex.col = hexCol - 1;				
-                return true;
-            }						    
+                hexRow += 1;
+                hexCol -= 1;
+            }
         }
         else   // degenerate case, only for very bottom row on hexboard
         {							
@@ -287,18 +282,19 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
 						
             if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
             {
-                //hexCol -= 1;
-                h.selectedHex.row = hexRow;				
-                h.selectedHex.col = hexCol - 1;
-                return true;				
+                hexCol -= 1;	
             }
             else
             {
-                hexRow = h.invalid; 
-                hexCol = h.invalid;	
+                h.selectedHex.row = h.invalid; 
+                h.selectedHex.col = h.invalid;	
                 return false;				
             }
         }
+		
+        h.selectedHex.row = hexRow;				
+        h.selectedHex.col = hexCol;				
+        return true;		
     }
 
     //================================= UR =========================================						
@@ -312,11 +308,13 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
 
         if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
         {
-            //hexCol -= 1;
-            h.selectedHex.row = hexRow;				
-            h.selectedHex.col = hexCol - 1;					   
+            hexCol -= 1;								   
         }
-        return true;   // no degenerate case 		
+		
+        h.selectedHex.row = hexRow;
+        h.selectedHex.col = hexCol;	
+		
+        return true;   // always returns success because no degenerate case 		
     }													
 	
     //================================= LL =========================================						
@@ -334,27 +332,22 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
             {                                  // bottom of hexboard outside of any hex
                 hexRow = h.invalid, 
                 hexCol = h.invalid;
+                return false;
             }
             else
             {
                 hexRow -= 1;
-                hexCol -= 1;								
+                hexCol -= 1;
             }
         }
+        h.selectedHex.row = hexRow;
+        h.selectedHex.col = hexCol;		
+ 
+        return true;				
     }	
 
-    if ((hexRow != h.invalid) && (hexCol != h.invalid))
-    {
-        writeln("hex(hexRow,hexCol) = ", hexRow, " ", hexCol, " has been selected");	
-        h.selectedHex.row = hexRow;
-        h.selectedHex.col = hexCol;						
-        //hexBoard.hexes[row][col].selected = true;
-    }						
-
-
-
-
-    return true;
+ 
+    return false;  // should never get here but if so just assume failure
 }
 
 
