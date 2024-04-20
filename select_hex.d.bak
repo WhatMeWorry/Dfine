@@ -170,7 +170,7 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
         return false;						
     }
 
-    writeln("[gridRow,gridCol] = [", gridRow, ",", gridCol, "]");
+    //writeln("[gridRow,gridCol] = [", gridRow, ",", gridCol, "]");
 
     //   |___________|___________|___________|___________|___________|___
     //   |           |           |           |           |           |  

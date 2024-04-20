@@ -193,12 +193,6 @@ struct D3_point
     float z;
 }
 
-struct Hex
-{
-    D3_point[6] points;  // each hex is made up of 6 vertices
-    D2_point[6] sc;      // screen coordinates
-    D3_point center;     // each hex has a center
-}
 
 struct Edges
 {                // This is the hex board edges, not the window's and is in NDC units
@@ -221,6 +215,12 @@ struct SelectedHex
 }
 
 
+struct Hex
+{
+    D3_point[6] points;  // each hex is made up of 6 vertices
+    D2_point[6] sc;      // screen coordinates
+    D3_point center;     // each hex has a center
+}
 
 
 struct HexBoard

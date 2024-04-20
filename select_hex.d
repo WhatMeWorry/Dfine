@@ -232,7 +232,7 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
         hexCenter = h.hexes[hexRow][hexCol].center;	
 		
         //hexCenter.x = h.hexes[hexRow][hexCol].points[0].x; // + (h.radius/2.0);  // move the bottom vertex to right a bit
-		//h.hexes[hexRow][hexCol].points[0].x = 2;
+        //h.hexes[hexRow][hexCol].points[0].x = 2;
         //hexCenter.y = h.hexes[hexRow][hexCol].points[0].y; // + (h.apothem);   // move 
 		
         if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))	 					

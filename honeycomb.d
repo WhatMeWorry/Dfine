@@ -248,15 +248,15 @@ struct HexBoard
 
         initializeHexBoard();
 		
-		mouseClick.ndc.x = 0.0;
-		mouseClick.ndc.y = 0.0;		
+        mouseClick.ndc.x = 0.0;
+        mouseClick.ndc.y = 0.0;		
 		
         // can't call from here because we need the apps windows screen size which is 
         // unknown to the hex board. 
         //convertNDCoordsToScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates		
     }
 	
-	enum invalid = -1;  // -1 means a row or column is invalid
+    enum invalid = -1;  // -1 means a row or column is invalid
 	
     uint maxRows;  // number of rows on the board [0..rows-1]
     uint maxCols;  // number of columns on the bord [0..cols-1]
