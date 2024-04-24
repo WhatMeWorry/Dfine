@@ -37,6 +37,17 @@ If you want an image in the top left corner set its X to 0 and it's Y to 0
 
 +/
 
+/+
+What’s the difference between Texture and Surface?
+
+Surface is stored in RAM and drawing is performed on the CPU. Texture is stored in Video RAM (GPU RAM) and drawing is 
+performed by the GPU. If you need best performance, use textures only, because GPU can render things million times 
+faster than the CPU.
+
+you don’t need to use surfaces at all. You can create texture using the SDL_CreateTexture 17 function and render anything 
+on it. If you need to load image e.g. from file and store it in the form of texture, you can do it via IMG_LoadTexture. 
+SDL will do everything for you internally.
++/
 
 /+
 Should each hex board have an associated windows/screen???  It would simply parameter passing.
