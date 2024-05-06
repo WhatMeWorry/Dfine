@@ -117,7 +117,6 @@ bool isEven(uint value)
     return((value % 2) == 0);   
 }
 
-
                              // x, y is the lower left corner of the rectangle touching all vertices
 D3_point[6] defineHexVertices(float x, float y, float perpendicular, float diameter, float apothem, float halfRadius, float radius)
 {

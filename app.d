@@ -98,8 +98,8 @@ struct GLFW_STRUCT
 
 struct SDL_STRUCT
 {
-    const int  SCREEN_WIDTH = 1000;
-    const int SCREEN_HEIGHT = 1000;		
+    const int  SCREEN_WIDTH = 2000;
+    const int SCREEN_HEIGHT = 2000;		
     SDL_Window* window = null;            // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
@@ -120,7 +120,7 @@ Globals g;
 
 int main() 
 {
-    HexBoard h = HexBoard(.75, 4, 4);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(.33, 8, 9);  // hex board is created with NDC coordinates
 	
     h.convertNDCoordsToScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
 

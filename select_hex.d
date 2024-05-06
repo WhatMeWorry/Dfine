@@ -84,7 +84,7 @@ bool clickedInSmallTriangle(D3_point mouseClick, D3_point hexCenter, float radiu
     // tan(theta) = opposite / adjacent     
 	
     float angle = opposite / adjacent;  // opposite is positive for hex sides /  (leaning Southwest to Northeast)
-	                                     // opposite is negative for hex sides \  (leaning Northwest to Southeast)
+                                        // opposite is negative for hex sides \  (leaning Northwest to Southeast)
     if (angle >= 0.0)            
         return (angle > tanOf60);    // angle is positive
     else                           
@@ -115,11 +115,9 @@ bool clickedInSmallTriangle(D3_point mouseClick, D3_point hexCenter, float radiu
 /+
 A hexboard will be passed in my reference (for speed sake) consisting of NDC coordinates and a screen
 coordinate pair consisting of an x and y value of where the mouse was clicked  
-
 +/
 
 
-                                                    // mouse click
 bool getHexThatWasClickedWithMouse( ref HexBoard h)
 {
     //writeln("inside getHexThatWasClickedWithMouse");
@@ -134,8 +132,6 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
     // This block of code handles the (rare?) cases where the window is bigger than
     // than the hex board. 
 
-
-
     //   |__\________|/__________|__\________|/__________|__\________|/__
     //   |  /        |\          |  /        |\          |  /        |\ 
     //   | Upper Left|Upper Right| Upper Left|Upper Right| Upper Left| Upper Right
@@ -149,13 +145,13 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
     //   |\          |  /        |\          |  /        |\          |  /
     //   |Lower Left |Lower Right| Lower Left|Lower Right| Lower Left| Lower Right
     //   |__\________|/__________|__\________|/__________|__\________|/__	
-										
+	
     float offsetFromBottom = h.mouseClick.ndc.y - (-1.0);
 	
     uint gridRow = roundTo!uint(floor(offsetFromBottom / h.apothem));
 
     float offsetFromLeft = h.mouseClick.ndc.x - (-1.0);						
-                     
+
     uint gridCol = roundTo!uint(floor(offsetFromLeft / (h.radius + h.halfRadius)));
 
 
@@ -255,7 +251,7 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
     }	
 
     //================================= LR ========================================= 
-						
+
     if (quadrant == Quads.LR)    // Lower Right Quadrant
     {
         if (gridRow >= 1)  
@@ -298,7 +294,7 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
     }
 
     //================================= UR =========================================						
-						
+	
     if (quadrant == Quads.UR)    // Upper Right Quadrant
     { 
         hexRow = (gridRow-1) / 2;    // UR gridRows = {1, 3, 5, 7,...} mapped to row = {0, 1, 2, 3,...}
@@ -318,7 +314,7 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
     }													
 	
     //================================= LL =========================================						
-						
+	
     if (quadrant == Quads.LL)    // Lower Left Quadrant
     { 
         hexRow = gridRow / 2;    // gridRows = {0, 2, 4, 6,...} mapped to row = {0, 1, 2, 3,...}
@@ -346,7 +342,6 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
         return true;				
     }	
 
- 
     return false;  // should never get here but if so just assume failure
 }
 
