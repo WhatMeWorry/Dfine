@@ -65,6 +65,7 @@ import core.stdc.stdio;
 import std.conv : roundTo;
 
 import std.stdio : writeln;
+
 import bindbc.sdl;
 import bindbc.loader;
 
@@ -132,6 +133,23 @@ int main()
     scope(exit) glfwTerminate();
 	
     loadSimpleDirectMediaLibary();
+	
+    // https://github.com/BindBC/bindbc-sdl/issues/53	
+	
+	
+
+    /+
+    // load dynamic libraries that SDL_image needs, and prepares them for use. This must be the 
+	// first function you call in SDL_image, and if it fails you should not continue with the library.
+    // Give SDL_image a chance to load libpng and libjpeg
+    auto flags = IMG_INIT_PNG | IMG_INIT_JPEG;
+    if(IMG_Init(flags) != flags) { /* handle error */ }
+    +/
+		
+    SDLImageSupport ret;
+    ret = loadSDLImage();
+
+    writeln("ret = ", ret);	
 
     // Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -264,7 +282,7 @@ int main()
 									int x = h.selectedHex.row;   int y = h.selectedHex.col;
                                     
 									D2_point[4] t;
-                   								
+                   					
 									t[0].x = h.hexes[x][y].sc[0].x;
 									t[0].y = h.hexes[x][y].sc[0].y;	
 									t[1].x = h.hexes[x][y].sc[1].x;
@@ -340,6 +358,7 @@ int main()
 /// Data stored in the window's user pointer
 ///
 /// Note: assuming you only have one window, you could make these global variables.
+
 
 struct WindowData 
 {
