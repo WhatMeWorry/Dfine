@@ -1,24 +1,11 @@
 name "dfine"
-description "opens a GLFW window with opengl and sdl available"
-authors "kheas"
-copyright "Copyright © 2024, kheas"
+description "A minimal D application."
+authors "Kyle Heaser"
+copyright "Copyright © 2024, Kyle Heaser"
 license "Zlib"
-
-targetType "executable"
-targetName "dfine"
-
-targetPath "."
-//dependency "glfw-d" path="../../"
 dependency "glfw-d" version="~>1.1.1"
-
-dependency "bindbc-opengl" version="~>1.1.0"
-
-dependency "bindbc-sdl" version="~>1.4.7"
-versions   "SDL_Image_2_8"
-
 dependency "bindbc-loader" version="~>1.1.5"
-
-//sourceFiles "source/app.d"
-sourceFiles "app.d"
-sourceFiles "honeycomb.d"
-sourceFiles "select_hex.d"
+dependency "bindbc-sdl" version="~>1.4.7"
+targetType "executable"
+sourceFiles "app.d" "honeycomb.d" "select_hex.d"
+versions "SDL_2_8" "SDL_Image_2_6" "SDL_TTF_2_20"
