@@ -70,26 +70,6 @@ import bindbc.sdl;
 import bindbc.loader;
 
 
-bool loadSimpleDirectMediaLibary()
-{
-    SDLSupport ret = loadSDL();	
-	
-    if(ret == sdlSupport)
-    {
-        SDL_version ver;
-        SDL_GetVersion(&ver);
-		
-        writeln("version = ", ver);	  // displays: version = SDL_version(2, 30, 2)
-        return true;
-    }
-
-    writeln("SDL library was not found or bad version");
-    return false;
-}
-
-
-
-
 struct GLFW_STRUCT
 {	
     const int SCREEN_WIDTH = 640;
@@ -99,8 +79,8 @@ struct GLFW_STRUCT
 
 struct SDL_STRUCT
 {
-    const int  SCREEN_WIDTH = 2000;
-    const int SCREEN_HEIGHT = 2000;		
+    const int  SCREEN_WIDTH = 800;
+    const int SCREEN_HEIGHT = 800;		
     SDL_Window* window = null;            // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
@@ -121,8 +101,8 @@ Globals g;
 
 int main() 
 {
-    HexBoard h = HexBoard(.33, 8, 9);  // hex board is created with NDC coordinates
-	
+    HexBoard h = HexBoard(.33, 7, 7);  // hex board is created with NDC coordinates
+
     h.convertNDCoordsToScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
 
     h.displayHexBoard();
@@ -132,22 +112,46 @@ int main()
     if (!glfwInit()) { return -1; }
     scope(exit) glfwTerminate();
 	
-    loadSimpleDirectMediaLibary();
-	
     // https://github.com/BindBC/bindbc-sdl/issues/53	
 	
-	
+    // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
-    /+
-    // load dynamic libraries that SDL_image needs, and prepares them for use. This must be the 
-	// first function you call in SDL_image, and if it fails you should not continue with the library.
-    // Give SDL_image a chance to load libpng and libjpeg
-    auto flags = IMG_INIT_PNG | IMG_INIT_JPEG;
-    if(IMG_Init(flags) != flags) { /* handle error */ }
-    +/
-		
-    SDLImageSupportas ret;
-    ret = loadSDLImage();	
+    SDL_version v;
+  
+    auto sdl = loadSDL();
+    writeln("loadSDL returned: ", sdl);
+    SDL_GetVersion(&v);
+    writeln("SDL version loaded is: ", v.major, ".", v.minor, ".", v.patch);
+  
+    auto sdlInit = SDL_Init(SDL_INIT_EVERYTHING);
+    writeln("SDL_Init returned (0 is success): ", sdlInit);
+
+    auto image = loadSDLImage();
+    writeln("loadSDLImage returned: ", image); 
+    SDL_IMAGE_VERSION(&v);
+    writeln("Image version loaded is: ", v.major, ".", v.minor, ".", v.patch);
+    auto imageInit = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+    writeln("IMG_init returned: ", imageInit);
+
+    auto ttf = loadSDLTTF();
+    writeln("loadSDLTTF returned: ", ttf);
+    SDL_TTF_VERSION(&v);
+    writeln("TTF version loaded is: ", v.major, ".", v.minor, ".", v.patch);
+    auto ttfInit = TTF_Init();
+    writeln("TTF_Init returned: (0 is success): ", ttfInit);
+
+    auto mixer = loadSDLMixer();
+    writeln("loadSDLMixer returned: ", mixer); 
+    SDL_MIXER_VERSION(&v);
+    writeln("MIXER version loaded is: ", v.major, "x", v.minor, ".", v.patch);
+  
+    auto mixerInit = Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);							
+    writeln("Mix_Init returned: ", mixerInit);
+  
+    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 1024 ) < 0 )
+    {
+        writeln("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
+    }
 
     // Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
