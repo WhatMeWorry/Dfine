@@ -133,14 +133,14 @@ int main()
     auto imageInit = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
     writeln("IMG_init returned: ", imageInit);
 
-/+
+
     auto ttf = loadSDLTTF();
     writeln("loadSDLTTF returned: ", ttf);
     SDL_TTF_VERSION(&v);
     writeln("TTF version loaded is: ", v.major, ".", v.minor, ".", v.patch);
     auto ttfInit = TTF_Init();
     writeln("TTF_Init returned: (0 is success): ", ttfInit);
-+/
+
     auto mixer = loadSDLMixer();
     writeln("loadSDLMixer returned: ", mixer); 
     SDL_MIXER_VERSION(&v);
