@@ -153,6 +153,10 @@ int main()
     {
         writeln("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
     }
+	
+    auto net = loadSDLNet();
+    writeln("loadSDLNet returned: ", net);	
+	
 
     // Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
