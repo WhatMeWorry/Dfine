@@ -65,6 +65,7 @@ import core.stdc.stdio;
 import std.conv : roundTo;
 
 import std.stdio : writeln;
+import std.string;
 
 import bindbc.sdl;
 import bindbc.sdl : IMG_SavePNG;
@@ -81,8 +82,8 @@ struct GLFW_STRUCT
 
 struct SDL_STRUCT
 {
-    const int  screenWidth = 800;
-    const int screenHeight = 800;		
+    const int  screenWidth = 1024;
+    const int screenHeight = 1024;  // .866 * 1024		
     SDL_Window* window = null;            // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
@@ -103,7 +104,7 @@ Globals g;
 
 int main() 
 {
-    HexBoard h = HexBoard(.33, 7, 7);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(.3, 7, 7);  // hex board is created with NDC coordinates
 
     h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);	
 
@@ -238,7 +239,9 @@ int main()
                     }				 						
                 }
             }				
-			
+							//Apply the PNG image
+				//SDL_BlitSurface( gPNGSurface, NULL, gScreenSurface, NULL );
+	
             // Update screen
             SDL_RenderPresent( g.sdl.renderer );			
 
@@ -291,7 +294,39 @@ int main()
 								IMG_SavePNG(screenshot, "screenshot.png"); 
                                 SDL_FreeSurface(screenshot); 
                             }							
-                            break;
+							
+                            if( event.key.keysym.sym == SDLK_F2 )
+                            {
+							    writeln("user pressed the Function Key F2");
+								SDL_Surface *loadedSurface = IMG_Load(toStringz("hex.png"));
+								
+                                /+ loadedSurface = SDL_CreateRGBSurface(SDL_SWSURFACE,
+                                                               g.sdl.screenWidth, 
+                                                               g.sdl.screenHeight, 
+                                                               32, 
+															   0x00FF0000, 
+									                           0X0000FF00, 
+										                       0X000000FF, 
+										                       0XFF000000); +/
+                                if( loadedSurface == null )
+	                            {
+		                            writeln( "Unable to load image");
+	                            }								
+
+                                SDL_Surface *screenSurface = SDL_GetWindowSurface( g.sdl.window ); 								
+                               
+  		                        SDL_Surface *optimizedSurface = SDL_ConvertSurface( loadedSurface, screenSurface.format, 0 );
+		                        if( optimizedSurface == null )
+		                        {
+			                        writeln( "Unable to optimize image" );
+		                        } 
+
+							//Apply the PNG image
+				                SDL_BlitSurface( optimizedSurface, null, screenSurface, null );								
+                                 SDL_UpdateWindowSurface( g.sdl.window );                               
+                            }							
+                            break;							
+							
 													
 						case SDL_MOUSEBUTTONDOWN:
                            if( event.button.button == SDL_BUTTON_LEFT )
