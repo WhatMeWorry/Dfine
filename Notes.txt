@@ -1,0 +1,41 @@
+
+
+SDL_Texture* rock_tex;
+SDL_Texture* paper_tex;
+SDL_Texture* scissors_tex;
+
+
+
+
+
+https://github.com/SpaghettiBorgar/rps-battle-sim/blob/master/source/app.d
+
+
+auto window = SDL_CreateWindow("SDL Application", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		                       windowW, windowH, SDL_WINDOW_SHOWN);
+							   
+							   
+							   
+							   
+							   
+SDL_Renderer* sdlr = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+
+SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+
+// SDL_SetHint(SDL_HINT_RENDER_LINE_METHOD, "2");
+	
+SDL_SetRenderDrawBlendMode(sdlr, SDL_BLENDMODE_BLEND);
+
+rock_tex = SDL_CreateTextureFromSurface(sdlr, IMG_Load("./rock.png"));
+
+
+SDL_Texture*     rock_tex = SDL_CreateTextureFromSurface(sdlr, IMG_Load("./rock.png"));
+SDL_Texture*    paper_tex = SDL_CreateTextureFromSurface(sdlr, IMG_Load("./paper.png"));
+SDL_Texture* scissors_tex = SDL_CreateTextureFromSurface(sdlr, IMG_Load("./scissors.png"));
+
+if(rock_tex is null || paper_tex is null || scissors_tex is null) 
+{
+    throw new SDLException();
+}
+
+
