@@ -65,8 +65,11 @@ import core.stdc.stdio;
 import std.conv : roundTo;
 
 import std.stdio : writeln;
+import std.string;
 
 import bindbc.sdl;
+import bindbc.sdl : IMG_SavePNG;
+
 import bindbc.loader;
 
 
@@ -79,8 +82,8 @@ struct GLFW_STRUCT
 
 struct SDL_STRUCT
 {
-    const int  SCREEN_WIDTH = 800;
-    const int SCREEN_HEIGHT = 800;		
+    const int  screenWidth = 1024;
+    const int screenHeight = 1024;  // .866 * 1024		
     SDL_Window* window = null;            // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
@@ -101,9 +104,9 @@ Globals g;
 
 int main() 
 {
-    HexBoard h = HexBoard(.33, 7, 7);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(.3, 7, 7);  // hex board is created with NDC coordinates
 
-    h.convertNDCoordsToScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
+    h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);	
 
     h.displayHexBoard();
 
@@ -131,7 +134,7 @@ int main()
     SDL_IMAGE_VERSION(&v);
     writeln("Image version loaded is: ", v.major, ".", v.minor, ".", v.patch);
     auto imageInit = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
-    writeln("IMG_init returned: ", imageInit);
+    writeln("IMG_init returned (0 is failure): ", imageInit);
 
 
     auto ttf = loadSDLTTF();
@@ -168,7 +171,7 @@ int main()
         //Create window
         g.sdl.window = SDL_CreateWindow( "SDL Tutorial", 
                                          SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                                         g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT, 
+                                         g.sdl.screenWidth, g.sdl.screenHeight, 
                                          SDL_WINDOW_SHOWN );
         if( g.sdl.window == null )
         {
@@ -236,7 +239,9 @@ int main()
                     }				 						
                 }
             }				
-			
+							//Apply the PNG image
+				//SDL_BlitSurface( gPNGSurface, NULL, gScreenSurface, NULL );
+	
             // Update screen
             SDL_RenderPresent( g.sdl.renderer );			
 
@@ -264,8 +269,65 @@ int main()
                                 writeln("user pressed the Escape Key");			
                                 running = false;
                             }
-                            break;
 							
+                            if( event.key.keysym.sym == SDLK_F1 )
+                            {
+                                writeln("user pressed the Function Key F1");
+
+                                SDL_Surface *screenshot; 
+	
+                                screenshot = SDL_CreateRGBSurface(SDL_SWSURFACE,
+                                                                  g.sdl.screenWidth, 
+                                                                  g.sdl.screenHeight, 
+                                                                  32, 
+																  0x00FF0000, 
+									                              0X0000FF00, 
+										                          0X000000FF, 
+										                          0XFF000000); 
+										  
+                                SDL_RenderReadPixels(g.sdl.renderer, 
+								                     null, 
+													 SDL_PIXELFORMAT_ARGB8888, 
+                                                     screenshot.pixels, 
+													 screenshot.pitch);
+                                //SDL_SavePNG(screenshot, "screenshot.png"); 
+								IMG_SavePNG(screenshot, "screenshot.png"); 
+                                SDL_FreeSurface(screenshot); 
+                            }							
+							
+                            if( event.key.keysym.sym == SDLK_F2 )
+                            {
+							    writeln("user pressed the Function Key F2");
+								SDL_Surface *loadedSurface = IMG_Load(toStringz("hex.png"));
+								
+                                /+ loadedSurface = SDL_CreateRGBSurface(SDL_SWSURFACE,
+                                                               g.sdl.screenWidth, 
+                                                               g.sdl.screenHeight, 
+                                                               32, 
+															   0x00FF0000, 
+									                           0X0000FF00, 
+										                       0X000000FF, 
+										                       0XFF000000); +/
+                                if( loadedSurface == null )
+	                            {
+		                            writeln( "Unable to load image");
+	                            }								
+
+                                SDL_Surface *screenSurface = SDL_GetWindowSurface( g.sdl.window ); 								
+                               
+  		                        SDL_Surface *optimizedSurface = SDL_ConvertSurface( loadedSurface, screenSurface.format, 0 );
+		                        if( optimizedSurface == null )
+		                        {
+			                        writeln( "Unable to optimize image" );
+		                        } 
+
+							//Apply the PNG image
+				                SDL_BlitSurface( optimizedSurface, null, screenSurface, null );								
+                                 SDL_UpdateWindowSurface( g.sdl.window );                               
+                            }							
+                            break;							
+							
+													
 						case SDL_MOUSEBUTTONDOWN:
                            if( event.button.button == SDL_BUTTON_LEFT )
                             {
@@ -277,7 +339,7 @@ int main()
 								
 								// Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
 								
-                                h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);
+                                h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
 
                                 //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
 								
