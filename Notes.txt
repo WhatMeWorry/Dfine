@@ -39,3 +39,37 @@ if(rock_tex is null || paper_tex is null || scissors_tex is null)
 }
 
 
+
+
+
+
+If you would like to scale an image while maintaining the same aspect ratio, then multiply the 
+rectangle w and h by any scalar value:
+
+// just don't let the scalar be a negative number
+// SDL_RenderCopy doesn't like it's rectangles to be size-negative.
+
+void scaleRect(SDL_Rect &pos, float scalar)
+{
+  pos.w = ((float) pos.w) * scalar;
+  pos.h = ((float) pos.h) * scalar;
+}
+
+Here’s some other “helpful hints”
+
+void setRectPosition(SDL_Rect &pos, int x, int y)
+{
+  pos.x = x;
+  pos.y = y;
+}
+void moveRect(SDL_Rect &pos, int x, int y)
+{
+  pos.x += x;
+  pos.y += y;
+}
+// again: error checking to avoid negative width and height could be used
+void resizeRect(SDL_Rect &pos, int w, int h)
+{
+  pos.w = w;
+  pos.h = h;
+}

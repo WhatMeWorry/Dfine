@@ -298,8 +298,24 @@ int main()
                             if( event.key.keysym.sym == SDLK_F2 )
                             {
 							    writeln("user pressed the Function Key F2");
-								SDL_Surface *loadedSurface = IMG_Load(toStringz("hex.png"));
+								SDL_Texture* sdlTex = IMG_LoadTexture(g.sdl.renderer, toStringz("hex.png"));
 								
+                                if( sdlTex == null ) { writeln( "Unable to load image"); }
+	                		    writeln("IMG_load() worked");
+
+                                SDL_Rect dst;
+                                dst.x = 118;
+                                dst.y = 142;
+                                dst.w = 148;
+                                dst.h = 148;
+
+
+                                SDL_RenderCopy( g.sdl.renderer, sdlTex, null, &dst );									
+	                            // Update window
+	                            SDL_RenderPresent( g.sdl.renderer );
+								
+								/+
+								SDL_Surface *loadedSurface = IMG_Load(toStringz("hex.png"));
                                 /+ loadedSurface = SDL_CreateRGBSurface(SDL_SWSURFACE,
                                                                g.sdl.screenWidth, 
                                                                g.sdl.screenHeight, 
@@ -312,18 +328,16 @@ int main()
 	                            {
 		                            writeln( "Unable to load image");
 	                            }								
-
                                 SDL_Surface *screenSurface = SDL_GetWindowSurface( g.sdl.window ); 								
-                               
   		                        SDL_Surface *optimizedSurface = SDL_ConvertSurface( loadedSurface, screenSurface.format, 0 );
 		                        if( optimizedSurface == null )
 		                        {
 			                        writeln( "Unable to optimize image" );
 		                        } 
-
-							//Apply the PNG image
+							    //Apply the PNG image
 				                SDL_BlitSurface( optimizedSurface, null, screenSurface, null );								
-                                 SDL_UpdateWindowSurface( g.sdl.window );                               
+                                SDL_UpdateWindowSurface( g.sdl.window ); 
+                                +/								
                             }							
                             break;							
 							
