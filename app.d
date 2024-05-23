@@ -104,11 +104,15 @@ Globals g;
 
 int main() 
 {
-    HexBoard h = HexBoard(.3, 7, 7);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(.10, 11, 11);  // hex board is created with NDC coordinates
+
+    h.displayHexBoard();  // hex board initially defined in NDC (Normalized Device Coordinates)
 
     h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);	
 
-    h.displayHexBoard();
+    h.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
+
+    h.displayHexBoardScreenCoordinates();
 
     glfwSetErrorCallback(&errorCallback);
 
@@ -298,17 +302,32 @@ int main()
                             if( event.key.keysym.sym == SDLK_F2 )
                             {
 							    writeln("user pressed the Function Key F2");
-								SDL_Texture* sdlTex = IMG_LoadTexture(g.sdl.renderer, toStringz("hex.png"));
+								SDL_Texture* sdlTex = IMG_LoadTexture(g.sdl.renderer, toStringz("hexBlue.png"));
 								
                                 if( sdlTex == null ) { writeln( "Unable to load image"); }
 	                		    writeln("IMG_load() worked");
+								
+								int w;
+								int he;
+								
+								SDL_QueryTexture(sdlTex, null, null, &w, &he);
+                                writeln("w,h = ", w, ",", he);
+								
 
                                 SDL_Rect dst;
-                                dst.x = 118;
-                                dst.y = 142;
-                                dst.w = 148;
-                                dst.h = 148;
+                                //dst.x = 0;
+                                //dst.y = 0;
+								
+                                //dst.w = 148;
+                                //dst.h = 148;
+								
+								dst.x = h.hexes[2][2].texturePoint.sc.x;
+                                dst.y = h.hexes[2][2].texturePoint.sc.y;
+                                //dst.w = dst.x + 300;
+								//dst.h = dst.y + roundTo!int((300 * 0.866)); // Keep Aspect ration
 
+                                dst.w = h.sc.diameter;
+								dst.h = h.sc.perpendicular;
 
                                 SDL_RenderCopy( g.sdl.renderer, sdlTex, null, &dst );									
 	                            // Update window

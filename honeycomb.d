@@ -2,7 +2,7 @@
 module honeycomb;
 
 
-import std.conv: roundTo;
+import std.conv: roundTo, to;
 import std.stdio: writeln, readf;
 import core.stdc.stdlib: exit;
 import std.range;
@@ -162,7 +162,15 @@ D3_point defineHexCenter(float x, float y, float apothem, float radius)
     return center;
 } 
 
-
+D2_NDC defineTextureStartingPoint(float x, float y, float perpendicular)
+{
+    D2_NDC anchor;
+	
+    anchor.x = x;
+    anchor.y = y + perpendicular;
+	
+    return anchor;
+} 
 
 struct D2_point
 {
@@ -171,18 +179,25 @@ struct D2_point
 }
 
 
-struct D2_NDC
+struct D2_NDC  // normalized device coordinates 2d point
 {
     float x;
     float y; 
 }
 
-
-struct D2_SC
+struct D2_SC   // screen cordinates 2d point
 {
     int x;
-    int y; 
+    int y;
 }
+
+
+struct D2_DUAL  // same point but in different units
+{
+    D2_NDC ndc; // normalized device coordinates
+    D2_SC  sc;  // screen coordinates
+}
+
 
 
 struct D3_point
@@ -191,6 +206,7 @@ struct D3_point
     float y; 
     float z;
 }
+
 
 
 struct Edges
@@ -216,9 +232,11 @@ struct SelectedHex
 
 struct Hex
 {
-    D3_point[6] points;  // each hex is made up of 6 vertices
-    D2_point[6] sc;      // screen coordinates
-    D3_point center;     // each hex has a center
+    D3_point[6] points;    // each hex is made up of 6 vertices
+    D2_point[6] sc;        // screen coordinates
+    D3_point center;       // each hex has a center
+	D2_DUAL texturePoint;  // each hex has conceptual rectange. Use its upper left
+                           // corner as target rectangle for texture application							 
 }
 
 
@@ -272,7 +290,18 @@ struct HexBoard
     float halfRadius;	
     float perpendicular;	
     float apothem;
+	
+    struct SC
+    {	
+        int diameter;  // diameter is used to define all the other hex parameters 
+        int radius;	
+        int halfRadius;	
+        int perpendicular;	
+        int apothem;
+    }		
 
+    SC sc;
+	
     Hex[][] hexes;  // = new int[][](5, 2);	
 
     SelectedHex selectedHex; 
@@ -288,6 +317,7 @@ struct HexBoard
 	
     void displayHexBoard()
     {
+        writeln("===== Values are in Normalized Device Coordinates =====");
         foreach(r; 0..maxRows)
         {
             foreach(c; 0..maxCols)
@@ -295,11 +325,30 @@ struct HexBoard
                 //writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );    	
                 foreach(p; 0..6)
                 {
-                    //writeln("hexes(r,c) ) ", hexes[r][c].points[p] );                   
+                    writeln("hexes(r,c) ) ", hexes[r][c].points[p] );                   
                 }				 	
             }
         }			
     }
+
+    void displayHexBoardScreenCoordinates()
+    {
+	    writeln("===== Values are in Screen Coordinates =====");
+        foreach(r; 0..maxRows)
+        {
+            foreach(c; 0..maxCols)
+            {
+                //writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );    	
+                foreach(p; 0..6)
+                {
+				    if (p == 5)
+                         writeln("hexes(", r, ",", c, ") = ", hexes[r][c].sc[p] );                   
+                }
+                writeln("hexes texture Point = ", hexes[r][c].texturePoint);				
+            }
+        }			
+    }
+
 	
     // DEFINE HEX BOARD
 	
@@ -307,7 +356,7 @@ struct HexBoard
     {	
         // start at the bottom left corner of NDC window, drawing from left to right, bottom to top.
 		
-        float x = edge.left;      // NDC Normalized Device Coordinates start at -1.0
+        float x = edge.left;      // NDC (Normalized Device Coordinates) start at -1.0
         float y = edge.bottom; 
 
         writeln("inside initializeHexBoard");		
@@ -321,6 +370,12 @@ struct HexBoard
 														   apothem, halfRadius, radius);
 			
                 hexes[row][col].center = defineHexCenter(x, y, apothem, radius);
+				
+				hexes[row][col].texturePoint.ndc = defineTextureStartingPoint(x, y, perpendicular);
+				
+				//D2_NDC temp = hexes[row][col].texturePoint.ndc;
+				
+				//hexes[row][col].texturePoint.ndc = convertPointFromNDCtoSC(temp, int screenWidth, int screenHeight)
 				
                 // writeln("hexes[row][col].center = ", hexes[row][col].center);
 				
@@ -346,6 +401,8 @@ struct HexBoard
         }  
     }	
 	
+    // screenWidth and screeHeight are not know by struct HexBoard
+    // this function can only be called from outside of this module
 	
     void convertNDCoordsToScreenCoords(int screenWidth, int screenHeight)
     {
@@ -355,18 +412,59 @@ struct HexBoard
             {	
                 foreach(v; 0..6)
                 {
-                    float NDCx = hexes[r][c].points[v].x;
+                    float NDCx = hexes[r][c].points[v].x;  // makes following statements more legable
                     float NDCy = hexes[r][c].points[v].y;
 					
                     hexes[r][c].sc[v].x = roundTo!int((NDCx + 1.0) * 0.5 * screenWidth); 
                     hexes[r][c].sc[v].y = roundTo!int((1.0 - NDCy) * 0.5 * screenHeight); 					
                 }
+				
+                D2_NDC temp = hexes[r][c].texturePoint.ndc; // make func call easier to read
+				
+				hexes[r][c].texturePoint.sc = convertPointFromNDCtoSC(temp, screenWidth, screenHeight);			
             }				
         }  
-    }		
+    }
+
+    // screenWidth and screeHeight are not know by struct HexBoard
+    // this function can only be called from outside of this module
+	
+    void convertNDClengthsToSClengths(int screenWidth, int screenHeight)
+    {
+	    float screenCoordinatesLength = 2.0;  // from -1.0 to 1.0
+		
+		float perCentOfEntireLength = diameter / screenCoordinatesLength;
+		
+        sc.diameter = roundTo!int(perCentOfEntireLength * screenWidth);	
+		
+        //radius        = diameter * 0.5;	
+        //halfRadius    = radius   * 0.5;						
+        //perpendicular = diameter * 0.866;	
+		
+        sc.perpendicular =   roundTo!int( to!float(sc.diameter) * 0.866 );
+	
+        writeln("sc.diameter = ", sc.diameter);
+        writeln("sc.perpendicular = ", sc.perpendicular);		
+        //apothem       = perpendicular * 0.5; 	
+    }
+	
+	
+    D2_SC convertPointFromNDCtoSC(D2_NDC ndc, int screenWidth, int screenHeight)
+    {	
+        D2_SC sc;
+		
+        sc.x = roundTo!int((ndc.x + 1.0) * 0.5 * screenWidth);    
+        sc.y = roundTo!int((1.0 - ndc.y) * 0.5 * screenHeight);
+
+        return sc;		
+    }	
+	
 
 
     // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+	
+	// screenWidth and screeHeight are not know by struct HexBoard
+    // this function can only be called from outside of this module
 	
     void convertScreenCoordinatesToNormalizedDeviceCoordinates(int screenWidth, int screenHeight)
     {
