@@ -104,7 +104,7 @@ Globals g;
 
 int main() 
 {
-    HexBoard h = HexBoard(.10, 11, 11);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(.05, 50, 50);  // hex board is created with NDC coordinates
 
     h.displayHexBoard();  // hex board initially defined in NDC (Normalized Device Coordinates)
 
@@ -182,23 +182,16 @@ int main()
             printf( "sdl Window could not be created. SDL_Error: %s\n", SDL_GetError() );
         }	
         else
-        {
-            //Get window surface
-            //g.sdl.screenSurface = SDL_GetWindowSurface( g.sdl.window );
-
-            //Fill the surface white
-            //SDL_FillRect( g.sdl.screenSurface, null, SDL_MapRGB( g.sdl.screenSurface.format, 0xFF, 0xFF, 0xFF ) );
-            
-            //Update the surface
-            //SDL_UpdateWindowSurface( g.sdl.window );
-			
+        {	
             //Create renderer for window
             g.sdl.renderer = SDL_CreateRenderer( g.sdl.window, -1, SDL_RENDERER_ACCELERATED );
             if( g.sdl.renderer == null )
             {
                 printf( "Renderer could not be created. SDL Error: %s\n", SDL_GetError() );
-                //success = false;
             }
+			h.setRenderOfHexboard(g.sdl.renderer);
+			
+            h.initializeHexTextures(g);			
 			
             //Clear screen
             SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
@@ -239,13 +232,10 @@ int main()
                         SDL_RenderDrawLine( g.sdl.renderer, s[3].x, s[3].y, s[4].x, s[4].y);							
                         SDL_RenderDrawLine( g.sdl.renderer, s[4].x, s[4].y, s[5].x, s[5].y);		
                         SDL_RenderDrawLine( g.sdl.renderer, s[5].x, s[5].y, s[0].x, s[0].y);
-						
                     }				 						
                 }
             }				
-							//Apply the PNG image
-				//SDL_BlitSurface( gPNGSurface, NULL, gScreenSurface, NULL );
-	
+
             // Update screen
             SDL_RenderPresent( g.sdl.renderer );			
 
@@ -302,7 +292,7 @@ int main()
                             if( event.key.keysym.sym == SDLK_F2 )
                             {
 							    writeln("user pressed the Function Key F2");
-								SDL_Texture* sdlTex = IMG_LoadTexture(g.sdl.renderer, toStringz("hexBlue.png"));
+								SDL_Texture* sdlTex = IMG_LoadTexture(g.sdl.renderer, toStringz(`.\Assets\Textures\hexBlue.png`));
 								
                                 if( sdlTex == null ) { writeln( "Unable to load image"); }
 	                		    writeln("IMG_load() worked");
@@ -315,16 +305,9 @@ int main()
 								
 
                                 SDL_Rect dst;
-                                //dst.x = 0;
-                                //dst.y = 0;
-								
-                                //dst.w = 148;
-                                //dst.h = 148;
 								
 								dst.x = h.hexes[2][2].texturePoint.sc.x;
                                 dst.y = h.hexes[2][2].texturePoint.sc.y;
-                                //dst.w = dst.x + 300;
-								//dst.h = dst.y + roundTo!int((300 * 0.866)); // Keep Aspect ration
 
                                 dst.w = h.sc.diameter;
 								dst.h = h.sc.perpendicular;
@@ -332,6 +315,8 @@ int main()
                                 SDL_RenderCopy( g.sdl.renderer, sdlTex, null, &dst );									
 	                            // Update window
 	                            SDL_RenderPresent( g.sdl.renderer );
+								
+								writeln("g.sdl.renderer = ", g.sdl.renderer);
 								
 								/+
 								SDL_Surface *loadedSurface = IMG_Load(toStringz("hex.png"));
@@ -357,9 +342,14 @@ int main()
 				                SDL_BlitSurface( optimizedSurface, null, screenSurface, null );								
                                 SDL_UpdateWindowSurface( g.sdl.window ); 
                                 +/								
-                            }							
+                            }
+							 
+                            if( event.key.keysym.sym == SDLK_F3 )
+                            {	
+                                writeln("SDLK_F3");							
+                                h.displayHexTextures();
+							}
                             break;							
-							
 													
 						case SDL_MOUSEBUTTONDOWN:
                            if( event.button.button == SDL_BUTTON_LEFT )

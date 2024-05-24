@@ -6,11 +6,15 @@ import std.conv: roundTo, to;
 import std.stdio: writeln, readf;
 import core.stdc.stdlib: exit;
 import std.range;
+import std.random;
+
+import bindbc.sdl;
 
 import std.math.rounding: floor;
 import std.math.algebraic: abs;
 
-
+import app;
+import std.string;
 /+
 From:  https://wiki.dlang.org/Dense_multidimensional_arrays
 
@@ -27,8 +31,8 @@ assert(matrix[0][0] == 1);
 assert(matrix[1][1] == 5);
 
 However, this approach is not so memory-efficient, because the outer array is a separate block of memory 
-containing references to the inner arrays. Array lookups require multiple indirections, so there is a s
-light performance hit.
+containing references to the inner arrays. Array lookups require multiple indirections, so there is a 
+slight performance hit.
 
 Note that with the "jagged" array scheme, the "2nd dimensions" arrays may either all be allocated individually, 
 or simply be slices of a single very big 1D array. Both schemes are valid.
@@ -236,7 +240,9 @@ struct Hex
     D2_point[6] sc;        // screen coordinates
     D3_point center;       // each hex has a center
 	D2_DUAL texturePoint;  // each hex has conceptual rectange. Use its upper left
-                           // corner as target rectangle for texture application							 
+                           // corner as target rectangle for texture application
+                            
+    SDL_Texture* texture;  // each hex has a terrain texture							
 }
 
 
@@ -270,7 +276,9 @@ struct HexBoard
 		
         // can't call from here because we need the apps windows screen size which is 
         // unknown to the hex board. 
-        //convertNDCoordsToScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates		
+        //convertNDCoordsToScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates
+
+        renderer = null;  // renderer for this hex board		
     }
 	
     enum invalid = -1;  // -1 means a row or column is invalid
@@ -303,6 +311,8 @@ struct HexBoard
     SC sc;
 	
     Hex[][] hexes;  // = new int[][](5, 2);	
+	
+	SDL_Renderer* renderer;
 
     SelectedHex selectedHex; 
 
@@ -315,9 +325,14 @@ struct HexBoard
 
     uint numberOfColumns(){ return maxCols; }
 	
+	void setRenderOfHexboard(SDL_Renderer *rend)
+	{
+        renderer = rend;
+    }
+	
     void displayHexBoard()
     {
-        writeln("===== Values are in Normalized Device Coordinates =====");
+        //writeln("===== Values are in Normalized Device Coordinates =====");
         foreach(r; 0..maxRows)
         {
             foreach(c; 0..maxCols)
@@ -325,7 +340,7 @@ struct HexBoard
                 //writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );    	
                 foreach(p; 0..6)
                 {
-                    writeln("hexes(r,c) ) ", hexes[r][c].points[p] );                   
+                    //writeln("hexes(r,c) ) ", hexes[r][c].points[p] );                   
                 }				 	
             }
         }			
@@ -333,7 +348,7 @@ struct HexBoard
 
     void displayHexBoardScreenCoordinates()
     {
-	    writeln("===== Values are in Screen Coordinates =====");
+	    //writeln("===== Values are in Screen Coordinates =====");
         foreach(r; 0..maxRows)
         {
             foreach(c; 0..maxCols)
@@ -342,9 +357,11 @@ struct HexBoard
                 foreach(p; 0..6)
                 {
 				    if (p == 5)
-                         writeln("hexes(", r, ",", c, ") = ", hexes[r][c].sc[p] );                   
+                    {
+                         //writeln("hexes(", r, ",", c, ") = ", hexes[r][c].sc[p] ); 
+                    }						 
                 }
-                writeln("hexes texture Point = ", hexes[r][c].texturePoint);				
+                //writeln("hexes texture Point = ", hexes[r][c].texturePoint);				
             }
         }			
     }
@@ -372,12 +389,10 @@ struct HexBoard
                 hexes[row][col].center = defineHexCenter(x, y, apothem, radius);
 				
 				hexes[row][col].texturePoint.ndc = defineTextureStartingPoint(x, y, perpendicular);
+
+
 				
-				//D2_NDC temp = hexes[row][col].texturePoint.ndc;
 				
-				//hexes[row][col].texturePoint.ndc = convertPointFromNDCtoSC(temp, int screenWidth, int screenHeight)
-				
-                // writeln("hexes[row][col].center = ", hexes[row][col].center);
 				
                 if (col.isEven)
                 {
@@ -443,8 +458,8 @@ struct HexBoard
 		
         sc.perpendicular =   roundTo!int( to!float(sc.diameter) * 0.866 );
 	
-        writeln("sc.diameter = ", sc.diameter);
-        writeln("sc.perpendicular = ", sc.perpendicular);		
+        //writeln("sc.diameter = ", sc.diameter);
+        //writeln("sc.perpendicular = ", sc.perpendicular);		
         //apothem       = perpendicular * 0.5; 	
     }
 	
@@ -481,5 +496,86 @@ struct HexBoard
 	    // So that the mouse click and subtract the edge.  	
 		
     }			
-	
+
+
+    void initializeHexTextures(Globals g)
+    {	
+        writeln("inside initializeHexTextures");
+        writeln("Globals = ", g);		
+        foreach(r; 0..maxRows)
+        {
+            foreach(c; 0..maxCols)
+            {	
+
+
+	            import std.random : uniform;
+				auto rnd = Random(unpredictableSeed);
+
+                // Generate an integer in 0,1,2,3,4
+                auto a = uniform(0, 5, rnd);
+
+                string s;
+				switch (a)
+                {
+                    case 0:
+                        s = "hexBricks.png";
+                    break;
+                    case 1:
+                        s = "hexRed.png";
+                    break;			
+			
+                    default:
+                        s = "hexBlue.png";
+                }
+
+                SDL_Texture* tempTex = IMG_LoadTexture(g.sdl.renderer, 
+				                                       //toStringz(`.\Assets\Textures\hexBricks.png`));
+				                                       toStringz(`.\Assets\Textures\` ~ s));													   
+	            if( tempTex == null ) 
+		        { 
+                    writeln( "Unable to load image"); 
+                }
+                else
+                {
+                    //writeln( "Loading image worked"); 		
+                }
+	    
+                hexes[r][c].texture = tempTex;
+				
+				
+            }
+        }
+    }
+
+
+    void displayHexTextures()
+    {	
+        writeln("inside displayHexTextures");
+ 	
+        foreach(r; 0..maxRows)
+        {
+            foreach(c; 0..maxCols)
+            {
+			    //writeln("inside displayHexTextures");  
+                SDL_Rect dst;
+								
+			    dst.x = hexes[r][c].texturePoint.sc.x;
+                dst.y = hexes[r][c].texturePoint.sc.y;
+
+                dst.w = sc.diameter;
+			    dst.h = sc.perpendicular;
+
+                //writeln("dst = ", dst);
+				//writeln("renderer = ", renderer);
+				//writeln("hexes[r][c].texture = ", hexes[r][c].texture);
+                SDL_RenderCopy( renderer, hexes[r][c].texture, null, &dst );									
+	                            // Update window
+	            SDL_RenderPresent( renderer );
+
+			
+            }
+        }	
+    }	
+		
+		
 }
