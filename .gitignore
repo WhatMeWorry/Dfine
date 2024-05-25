@@ -7,6 +7,9 @@
 *.dylib
 //*.dll
 
+# Backup files
+*.bak
+
 # Compiled Static libraries
 *.a
 *.lib

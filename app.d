@@ -59,6 +59,8 @@ module app;
 import honeycomb;
 import select_hex;
 
+import libraries.load_sdl_libraries;
+
 import glfw3.api;
 import core.stdc.stdio;
 
@@ -84,7 +86,7 @@ struct SDL_STRUCT
 {
     const int  screenWidth = 1024;
     const int screenHeight = 1024;  // .866 * 1024		
-    SDL_Window* window = null;            // The window we'll be rendering to
+    SDL_Window* window = null;      // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
 }	
@@ -104,6 +106,8 @@ Globals g;
 
 int main() 
 {
+    load_sdl_libraries(); 
+
     HexBoard h = HexBoard(.05, 50, 50);  // hex board is created with NDC coordinates
 
     h.displayHexBoard();  // hex board initially defined in NDC (Normalized Device Coordinates)
@@ -123,47 +127,6 @@ int main()
 	
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
-    SDL_version v;
-  
-    auto sdl = loadSDL();
-    writeln("loadSDL returned: ", sdl);
-    SDL_GetVersion(&v);
-    writeln("SDL version loaded is: ", v.major, ".", v.minor, ".", v.patch);
-  
-    auto sdlInit = SDL_Init(SDL_INIT_EVERYTHING);
-    writeln("SDL_Init returned (0 is success): ", sdlInit);
-
-    auto image = loadSDLImage();
-    writeln("loadSDLImage returned: ", image); 
-    SDL_IMAGE_VERSION(&v);
-    writeln("Image version loaded is: ", v.major, ".", v.minor, ".", v.patch);
-    auto imageInit = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
-    writeln("IMG_init returned (0 is failure): ", imageInit);
-
-
-    auto ttf = loadSDLTTF();
-    writeln("loadSDLTTF returned: ", ttf);
-    SDL_TTF_VERSION(&v);
-    writeln("TTF version loaded is: ", v.major, ".", v.minor, ".", v.patch);
-    auto ttfInit = TTF_Init();
-    writeln("TTF_Init returned: (0 is success): ", ttfInit);
-
-    auto mixer = loadSDLMixer();
-    writeln("loadSDLMixer returned: ", mixer); 
-    SDL_MIXER_VERSION(&v);
-    writeln("MIXER version loaded is: ", v.major, "x", v.minor, ".", v.patch);
-  
-    auto mixerInit = Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);							
-    writeln("Mix_Init returned: ", mixerInit);
-  
-    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 1024 ) < 0 )
-    {
-        writeln("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
-    }
-	
-    auto net = loadSDLNet();
-    writeln("loadSDLNet returned: ", net);	
-	
 
     // Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )

@@ -59,14 +59,19 @@ module app;
 import honeycomb;
 import select_hex;
 
+import libraries.load_sdl_libraries;
+
 import glfw3.api;
 import core.stdc.stdio;
 
 import std.conv : roundTo;
 
 import std.stdio : writeln;
+import std.string;
 
 import bindbc.sdl;
+import bindbc.sdl : IMG_SavePNG;
+
 import bindbc.loader;
 
 
@@ -79,9 +84,9 @@ struct GLFW_STRUCT
 
 struct SDL_STRUCT
 {
-    const int  SCREEN_WIDTH = 800;
-    const int SCREEN_HEIGHT = 800;		
-    SDL_Window* window = null;            // The window we'll be rendering to
+    const int  screenWidth = 1024;
+    const int screenHeight = 1024;  // .866 * 1024		
+    SDL_Window* window = null;      // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
 }	
@@ -101,11 +106,17 @@ Globals g;
 
 int main() 
 {
-    HexBoard h = HexBoard(.33, 7, 7);  // hex board is created with NDC coordinates
+    load_sdl_libraries(); 
 
-    h.convertNDCoordsToScreenCoords(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);	
+    HexBoard h = HexBoard(.05, 50, 50);  // hex board is created with NDC coordinates
 
-    h.displayHexBoard();
+    h.displayHexBoard();  // hex board initially defined in NDC (Normalized Device Coordinates)
+
+    h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);	
+
+    h.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
+
+    h.displayHexBoardScreenCoordinates();
 
     glfwSetErrorCallback(&errorCallback);
 
@@ -116,42 +127,7 @@ int main()
 	
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
-    SDL_version v;
-  
-    auto sdl = loadSDL();
-    writeln("loadSDL returned: ", sdl);
-    SDL_GetVersion(&v);
-    writeln("SDL version loaded is: ", v.major, ".", v.minor, ".", v.patch);
-  
-    auto sdlInit = SDL_Init(SDL_INIT_EVERYTHING);
-    writeln("SDL_Init returned (0 is success): ", sdlInit);
-
-    auto image = loadSDLImage();
-    writeln("loadSDLImage returned: ", image); 
-    SDL_IMAGE_VERSION(&v);
-    writeln("Image version loaded is: ", v.major, ".", v.minor, ".", v.patch);
-    auto imageInit = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
-    writeln("IMG_init returned: ", imageInit);
-
-    auto ttf = loadSDLTTF();
-    writeln("loadSDLTTF returned: ", ttf);
-    SDL_TTF_VERSION(&v);
-    writeln("TTF version loaded is: ", v.major, ".", v.minor, ".", v.patch);
-    auto ttfInit = TTF_Init();
-    writeln("TTF_Init returned: (0 is success): ", ttfInit);
-
-    auto mixer = loadSDLMixer();
-    writeln("loadSDLMixer returned: ", mixer); 
-    SDL_MIXER_VERSION(&v);
-    writeln("MIXER version loaded is: ", v.major, "x", v.minor, ".", v.patch);
-  
-    auto mixerInit = Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);							
-    writeln("Mix_Init returned: ", mixerInit);
-  
-    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 1024 ) < 0 )
-    {
-        writeln("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
-    }
+/
 
     // Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -163,30 +139,23 @@ int main()
         //Create window
         g.sdl.window = SDL_CreateWindow( "SDL Tutorial", 
                                          SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                                         g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT, 
+                                         g.sdl.screenWidth, g.sdl.screenHeight, 
                                          SDL_WINDOW_SHOWN );
         if( g.sdl.window == null )
         {
             printf( "sdl Window could not be created. SDL_Error: %s\n", SDL_GetError() );
         }	
         else
-        {
-            //Get window surface
-            //g.sdl.screenSurface = SDL_GetWindowSurface( g.sdl.window );
-
-            //Fill the surface white
-            //SDL_FillRect( g.sdl.screenSurface, null, SDL_MapRGB( g.sdl.screenSurface.format, 0xFF, 0xFF, 0xFF ) );
-            
-            //Update the surface
-            //SDL_UpdateWindowSurface( g.sdl.window );
-			
+        {	
             //Create renderer for window
             g.sdl.renderer = SDL_CreateRenderer( g.sdl.window, -1, SDL_RENDERER_ACCELERATED );
             if( g.sdl.renderer == null )
             {
                 printf( "Renderer could not be created. SDL Error: %s\n", SDL_GetError() );
-                //success = false;
             }
+			h.setRenderOfHexboard(g.sdl.renderer);
+			
+            h.initializeHexTextures(g);			
 			
             //Clear screen
             SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
@@ -227,11 +196,10 @@ int main()
                         SDL_RenderDrawLine( g.sdl.renderer, s[3].x, s[3].y, s[4].x, s[4].y);							
                         SDL_RenderDrawLine( g.sdl.renderer, s[4].x, s[4].y, s[5].x, s[5].y);		
                         SDL_RenderDrawLine( g.sdl.renderer, s[5].x, s[5].y, s[0].x, s[0].y);
-						
                     }				 						
                 }
             }				
-			
+
             // Update screen
             SDL_RenderPresent( g.sdl.renderer );			
 
@@ -259,8 +227,94 @@ int main()
                                 writeln("user pressed the Escape Key");			
                                 running = false;
                             }
-                            break;
 							
+                            if( event.key.keysym.sym == SDLK_F1 )
+                            {
+                                writeln("user pressed the Function Key F1");
+
+                                SDL_Surface *screenshot; 
+	
+                                screenshot = SDL_CreateRGBSurface(SDL_SWSURFACE,
+                                                                  g.sdl.screenWidth, 
+                                                                  g.sdl.screenHeight, 
+                                                                  32, 
+																  0x00FF0000, 
+									                              0X0000FF00, 
+										                          0X000000FF, 
+										                          0XFF000000); 
+										  
+                                SDL_RenderReadPixels(g.sdl.renderer, 
+								                     null, 
+													 SDL_PIXELFORMAT_ARGB8888, 
+                                                     screenshot.pixels, 
+													 screenshot.pitch);
+                                //SDL_SavePNG(screenshot, "screenshot.png"); 
+								IMG_SavePNG(screenshot, "screenshot.png"); 
+                                SDL_FreeSurface(screenshot); 
+                            }							
+							
+                            if( event.key.keysym.sym == SDLK_F2 )
+                            {
+							    writeln("user pressed the Function Key F2");
+								SDL_Texture* sdlTex = IMG_LoadTexture(g.sdl.renderer, toStringz(`.\Assets\Textures\hexBlue.png`));
+								
+                                if( sdlTex == null ) { writeln( "Unable to load image"); }
+	                		    writeln("IMG_load() worked");
+								
+								int w;
+								int he;
+								
+								SDL_QueryTexture(sdlTex, null, null, &w, &he);
+                                writeln("w,h = ", w, ",", he);
+								
+
+                                SDL_Rect dst;
+								
+								dst.x = h.hexes[2][2].texturePoint.sc.x;
+                                dst.y = h.hexes[2][2].texturePoint.sc.y;
+
+                                dst.w = h.sc.diameter;
+								dst.h = h.sc.perpendicular;
+
+                                SDL_RenderCopy( g.sdl.renderer, sdlTex, null, &dst );									
+	                            // Update window
+	                            SDL_RenderPresent( g.sdl.renderer );
+								
+								writeln("g.sdl.renderer = ", g.sdl.renderer);
+								
+								/+
+								SDL_Surface *loadedSurface = IMG_Load(toStringz("hex.png"));
+                                /+ loadedSurface = SDL_CreateRGBSurface(SDL_SWSURFACE,
+                                                               g.sdl.screenWidth, 
+                                                               g.sdl.screenHeight, 
+                                                               32, 
+															   0x00FF0000, 
+									                           0X0000FF00, 
+										                       0X000000FF, 
+										                       0XFF000000); +/
+                                if( loadedSurface == null )
+	                            {
+		                            writeln( "Unable to load image");
+	                            }								
+                                SDL_Surface *screenSurface = SDL_GetWindowSurface( g.sdl.window ); 								
+  		                        SDL_Surface *optimizedSurface = SDL_ConvertSurface( loadedSurface, screenSurface.format, 0 );
+		                        if( optimizedSurface == null )
+		                        {
+			                        writeln( "Unable to optimize image" );
+		                        } 
+							    //Apply the PNG image
+				                SDL_BlitSurface( optimizedSurface, null, screenSurface, null );								
+                                SDL_UpdateWindowSurface( g.sdl.window ); 
+                                +/								
+                            }
+							 
+                            if( event.key.keysym.sym == SDLK_F3 )
+                            {	
+                                writeln("SDLK_F3");							
+                                h.displayHexTextures();
+							}
+                            break;							
+													
 						case SDL_MOUSEBUTTONDOWN:
                            if( event.button.button == SDL_BUTTON_LEFT )
                             {
@@ -272,7 +326,7 @@ int main()
 								
 								// Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
 								
-                                h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.SCREEN_WIDTH, g.sdl.SCREEN_HEIGHT);
+                                h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
 
                                 //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
 								
