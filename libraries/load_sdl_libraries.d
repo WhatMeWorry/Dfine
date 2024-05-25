@@ -25,7 +25,7 @@ void load_sdl_libraries()
 	
     writeln("parentDirectoryOfThisPath = ", parentDirectoryOfThisPath);
   
-    string pathToLibs = parentDirectoryOfThisPath ~ "\\" ~ "libraries" ~ "\\";
+    string pathToLibs = parentDirectoryOfThisPath ~ `\` ~ "libraries" ~ `\`;
 	writeln("pathToLibs = ", pathToLibs);
   
   

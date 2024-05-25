@@ -11,8 +11,10 @@ buildRequirements "silenceDeprecations"
 
 sourcePaths "."
 sourcePaths "libraries"
+sourcePaths "textures"
 
 versions "SDL_2_30" "SDL_TTF" "SDL_Image" "SDL_Mixer" "SDL_Net"
 
 
-importPaths "Libraries"
+importPaths "libraries"
+importPaths "textures"

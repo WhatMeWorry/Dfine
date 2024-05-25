@@ -60,6 +60,7 @@ import honeycomb;
 import select_hex;
 
 import libraries.load_sdl_libraries;
+import textures.load_textures;
 
 import glfw3.api;
 import core.stdc.stdio;
@@ -84,8 +85,8 @@ struct GLFW_STRUCT
 
 struct SDL_STRUCT
 {
-    const int  screenWidth = 1024;
-    const int screenHeight = 1024;  // .866 * 1024		
+    const int  screenWidth = 2024;
+    const int screenHeight = 2024;  // .866 * 1024		
     SDL_Window* window = null;      // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
@@ -96,6 +97,8 @@ struct Globals
     int i;
     GLFW_STRUCT glfw;
     SDL_STRUCT sdl;
+	
+    TextureEntry[] texEntries;
 }	
  
 Globals g;
@@ -107,8 +110,10 @@ Globals g;
 int main() 
 {
     load_sdl_libraries(); 
+	
+ 
 
-    HexBoard h = HexBoard(.05, 50, 50);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(.012, 200, 220);  // hex board is created with NDC coordinates
 
     h.displayHexBoard();  // hex board initially defined in NDC (Normalized Device Coordinates)
 
@@ -154,7 +159,10 @@ int main()
             }
 			h.setRenderOfHexboard(g.sdl.renderer);
 			
-            h.initializeHexTextures(g);			
+            //h.initializeHexTextures(g);			
+            g.texEntries = load_textures(g);
+			
+            writeln(g.texEntries);
 			
             //Clear screen
             SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
@@ -309,7 +317,8 @@ int main()
 							 
                             if( event.key.keysym.sym == SDLK_F3 )
                             {	
-                                writeln("SDLK_F3");							
+                                writeln("SDLK_F3");
+                                h.initializeHexTextures(g);  								
                                 h.displayHexTextures();
 							}
                             break;							

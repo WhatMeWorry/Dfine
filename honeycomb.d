@@ -499,50 +499,18 @@ struct HexBoard
 
 
     void initializeHexTextures(Globals g)
-    {	
-        writeln("inside initializeHexTextures");
-        writeln("Globals = ", g);		
+    {
+	    import std.random : uniform;
+		auto rnd = Random(unpredictableSeed);	
+ 
         foreach(r; 0..maxRows)
         {
             foreach(c; 0..maxCols)
             {	
-
-
-	            import std.random : uniform;
-				auto rnd = Random(unpredictableSeed);
-
                 // Generate an integer in 0,1,2,3,4
                 auto a = uniform(0, 5, rnd);
 
-                string s;
-				switch (a)
-                {
-                    case 0:
-                        s = "hexBricks.png";
-                    break;
-                    case 1:
-                        s = "hexRed.png";
-                    break;			
-			
-                    default:
-                        s = "hexBlue.png";
-                }
-
-                SDL_Texture* tempTex = IMG_LoadTexture(g.sdl.renderer, 
-				                                       //toStringz(`.\Assets\Textures\hexBricks.png`));
-				                                       toStringz(`.\Assets\Textures\` ~ s));													   
-	            if( tempTex == null ) 
-		        { 
-                    writeln( "Unable to load image"); 
-                }
-                else
-                {
-                    //writeln( "Loading image worked"); 		
-                }
-	    
-                hexes[r][c].texture = tempTex;
-				
-				
+                hexes[r][c].texture = g.texEntries[a].texture;
             }
         }
     }
