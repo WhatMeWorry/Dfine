@@ -7,12 +7,6 @@ import std.conv: roundTo;
 import std.math.rounding: floor;
 
 
-struct D2_NDC
-{
-    float x;
-    float y; 
-}
-
 //   |  \________|/          |  \________|/          |  \________|/
 //   |XX/        |\          |XX/        |\          |XX/        |\ 
 //   |X/         | \         |X/         | \         |X/         | \ 
@@ -70,7 +64,7 @@ struct D2_NDC
 //            opposite         
 
 
-bool clickedInSmallTriangle(D3_point mouseClick, D3_point hexCenter, float radius)
+bool clickedInSmallTriangle(D2_NDC mouseClick, D2_NDC hexCenter, float radius)
 {
     immutable float tanOf60  =  1.7320508;
     immutable float tanOf300 = -1.7320508;
@@ -94,28 +88,8 @@ bool clickedInSmallTriangle(D3_point mouseClick, D3_point hexCenter, float radiu
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/+
-A hexboard will be passed in my reference (for speed sake) consisting of NDC coordinates and a screen
-coordinate pair consisting of an x and y value of where the mouse was clicked  
-+/
+// A hexboard will be passed in my reference (for speed sake) consisting of NDC coordinates and a screen
+// coordinate pair consisting of an x and y value of where the mouse was clicked  
 
 
 bool getHexThatWasClickedWithMouse( ref HexBoard h)
@@ -206,17 +180,7 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
     int hexRow = h.invalid;
     int hexCol = h.invalid;					
 
-    //D3_point NDC;        // will just use the x,y coordinates (not z)
-	
-    //D2_point hexCenter;  // will just use the x,y coordinates (not z
-
-    struct D2_NDC
-    {
-        float x;
-        float y; 
-    }
-	
-    D3_point hexCenter;
+    D2_NDC hexCenter;
 	
     //================================= UL ========================================= 
   
@@ -226,10 +190,6 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
         hexCol = gridCol;
 
         hexCenter = h.hexes[hexRow][hexCol].center;	
-		
-        //hexCenter.x = h.hexes[hexRow][hexCol].points[0].x; // + (h.radius/2.0);  // move the bottom vertex to right a bit
-        //h.hexes[hexRow][hexCol].points[0].x = 2;
-        //hexCenter.y = h.hexes[hexRow][hexCol].points[0].y; // + (h.apothem);   // move 
 		
         if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))	 					
         {
@@ -257,7 +217,7 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
         if (gridRow >= 1)  
         {
             hexRow = (gridRow/2) - 1;    // LR gridRows = {2, 4, 6, 8,...}  mapped to row = {0, 1, 2, 3,...}
-            hexCol = gridCol;	          //                0 handled by else block below				
+            hexCol = gridCol;	         //                0 handled by else block below				
  
             hexCenter = h.hexes[hexRow][hexCol].center;
 
@@ -348,7 +308,6 @@ bool getHexThatWasClickedWithMouse( ref HexBoard h)
 
 
 /+
-
 extern(C) void mouseButtonCallback(GLFWwindow* winMain, int button, int action, int mods) nothrow
 {
     try  // try is needed because of the nothrow
@@ -359,17 +318,7 @@ extern(C) void mouseButtonCallback(GLFWwindow* winMain, int button, int action, 
                 if (action == GLFW_PRESS)
                 {
                     double xPos, yPos;
- 
-
- 
-
-
-
-
-
-
-						
-
+					
                 }
                 else if (action == GLFW_RELEASE)
                 {
@@ -383,6 +332,4 @@ extern(C) void mouseButtonCallback(GLFWwindow* winMain, int button, int action, 
     {
     }
 }
-
-
 +/

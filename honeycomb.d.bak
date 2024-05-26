@@ -39,9 +39,8 @@ or simply be slices of a single very big 1D array. Both schemes are valid.
 
 A dynamic rectangular jagged array may be dynamically allocated at once using the multi-dim allocation syntax:
 
-//Allocates a dynamic array containing
-//  2 dynamic arrays containing
-//    5 ints
+Allocate a dynamic array containing 2 dynamic arrays containing 5 ints
+
 int[][] matrix = new int[][](5, 2);
 
 Note that in this example, the dimensions don't need to be known at compile time. Also note that this works for 
@@ -73,9 +72,6 @@ double[columns][] gridInfo = new double[columns][](rows);
 
 This creates a multidimensional dynamic array with dense storage: all the array elements are contiguous in memory.
 
-+/
-
-/+
 https://web.cse.ohio-state.edu/~shen.94/5542/4-coordinates.pdf
 
 What are the visible coordinates range?
@@ -100,7 +96,6 @@ That is, assume (x,y) is in NDC, (i,j) is in SC, then
 i = (x – (-1))/2.0 * Imax
 j = (y – (-1))/2.0 * Jmax
 
-
 https://www.gamedev.net/forums/topic/685104-ndc-to-pixel-space/
 
 I used mathematics and my conclusion was:
@@ -108,79 +103,10 @@ I used mathematics and my conclusion was:
 float pixelX = (NDCx + 1.0f) * 0.5 * screenWidth;
 float pixelY = (1.0f - NDCy) * 0.5 * screenHeight;
 
-
 +/
 
-bool isOdd(uint value)
-{
-    return(!(value % 2) == 0); 
-}
 
-bool isEven(uint value)
-{
-    return((value % 2) == 0);   
-}
 
-                             // x, y is the lower left corner of the rectangle touching all vertices
-D3_point[6] defineHexVertices(float x, float y, float perpendicular, float diameter, float apothem, float halfRadius, float radius)
-{
-    D3_point[6] points;
-	
-    points[0].x = x + halfRadius;
-    points[0].y = y;	
-    points[0].z = 0.0;	
-
-    points[1].x = x + halfRadius + radius;
-    points[1].y = y;
-    points[1].z = 0.0;		
-		
-    points[2].x = x + diameter;
-    points[2].y = y + apothem;
-    points[2].z = 0.0;		
-	
-    points[3].x = x + halfRadius + radius;
-    points[3].y = y + perpendicular;
-    points[3].z = 0.0;		
-	
-    points[4].x = x + halfRadius;
-    points[4].y = y + perpendicular;
-    points[4].z = 0.0;	
-	
-    points[5].x = x;
-    points[5].y = y + apothem;
-    points[5].z = 0.0;	
-	
-    // writeln("points = ", points);
-	
-    return points;
-} 
-
-D3_point defineHexCenter(float x, float y, float apothem, float radius)
-{
-    D3_point center;
-	
-    center.x = x + radius;
-    center.y = y + apothem;
-    center.z = 0.0;
-	
-    return center;
-} 
-
-D2_NDC defineTextureStartingPoint(float x, float y, float perpendicular)
-{
-    D2_NDC anchor;
-	
-    anchor.x = x;
-    anchor.y = y + perpendicular;
-	
-    return anchor;
-} 
-
-struct D2_point
-{
-    int x;
-    int y; 
-}
 
 
 struct D2_NDC  // normalized device coordinates 2d point
@@ -202,17 +128,6 @@ struct D2_DUAL  // same point but in different units
     D2_SC  sc;  // screen coordinates
 }
 
-
-
-struct D3_point
-{
-    float x;
-    float y; 
-    float z;
-}
-
-
-
 struct Edges
 {                // This is the hex board edges, not the window's and is in NDC units
     float top;   // The hex board can be smaller, larger or identical to the window size
@@ -223,8 +138,8 @@ struct Edges
 
 struct MouseClick
 {   	
-    D3_point ndc;  // normalized device coordinates 
-    D2_SC  sc;   // screen coordinates
+    D2_NDC  ndc;  // normalized device coordinates 
+    D2_SC   sc;   // screen coordinates
 }		
 
 struct SelectedHex
@@ -234,15 +149,94 @@ struct SelectedHex
 }
 
 
+
+
+
+
+
+
+
+
+
+
+bool isOdd(uint value)
+{
+    return(!(value % 2) == 0); 
+}
+
+bool isEven(uint value)
+{
+    return((value % 2) == 0);   
+}
+
+// x, y is the lower left corner of the rectangle touching all vertices
+
+D2_NDC[6] defineHexVertices(float x, float y, float perpendicular, float diameter, 
+                            float apothem, float halfRadius, float radius)
+{
+    D2_NDC[6] points;
+	
+    points[0].x = x + halfRadius;
+    points[0].y = y;	
+
+    points[1].x = x + halfRadius + radius;
+    points[1].y = y;	
+		
+    points[2].x = x + diameter;
+    points[2].y = y + apothem;		
+	
+    points[3].x = x + halfRadius + radius;
+    points[3].y = y + perpendicular;	
+	
+    points[4].x = x + halfRadius;
+    points[4].y = y + perpendicular;
+	
+    points[5].x = x;
+    points[5].y = y + apothem;
+	
+    return points;
+} 
+
+
+D2_NDC defineHexCenter(float x, float y, float apothem, float radius)
+{
+    D2_NDC center;
+	
+    center.x = x + radius;
+    center.y = y + apothem;
+	
+    return center;
+} 
+
+
+D2_NDC defineTextureStartingPoint(float x, float y, float perpendicular)
+{
+    D2_NDC anchor;
+	
+    anchor.x = x;
+    anchor.y = y + perpendicular;
+	
+    return anchor;
+} 
+
+
+struct D2_point
+{
+    int x;
+    int y; 
+}
+
+
+
+
 struct Hex
 {
-    D3_point[6] points;    // each hex is made up of 6 vertices
-    D2_point[6] sc;        // screen coordinates
-    D3_point center;       // each hex has a center
-	D2_DUAL texturePoint;  // each hex has conceptual rectange. Use its upper left
-                           // corner as target rectangle for texture application
-                            
-    SDL_Texture* texture;  // each hex has a terrain texture							
+    D2_NDC[6] points;       // each hex is made up of 6 vertices
+    D2_SC[6]  sc;           // screen coordinates
+    D2_NDC    center;       // each hex has a center
+	D2_DUAL   texturePoint; // each hex has conceptual rectange. Use its upper left
+                            // corner as target rectangle for texture application   
+    SDL_Texture* texture;   // each hex has a terrain texture							
 }
 
 
@@ -301,7 +295,7 @@ struct HexBoard
 	
     struct SC
     {	
-        int diameter;  // diameter is used to define all the other hex parameters 
+        int diameter;  // Same as above block but in Screen Coordinates (integers) 
         int radius;	
         int halfRadius;	
         int perpendicular;	
@@ -318,7 +312,7 @@ struct HexBoard
 
     MouseClick mouseClick;
 	
-    //D3_point hexCenter;  // will just use the x,y coordinates (not z)
+    D3_point hexCenter;  // will just use the x,y coordinates (not z)
 	
 
     uint numberOfRows(){ return maxRows; }
@@ -457,10 +451,6 @@ struct HexBoard
         //perpendicular = diameter * 0.866;	
 		
         sc.perpendicular =   roundTo!int( to!float(sc.diameter) * 0.866 );
-	
-        //writeln("sc.diameter = ", sc.diameter);
-        //writeln("sc.perpendicular = ", sc.perpendicular);		
-        //apothem       = perpendicular * 0.5; 	
     }
 	
 	
@@ -486,7 +476,7 @@ struct HexBoard
 	
         mouseClick.ndc.x =   (mouseClick.sc.x / (screenWidth / 2.0)) - 1.0;   // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
                                                                               // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0 	
-																	
+																
         mouseClick.ndc.y = -((mouseClick.sc.y / (screenHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
                                                                               // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0
 																			  
@@ -511,8 +501,6 @@ struct HexBoard
                 auto a = uniform(0, 5, rnd);
 
                 hexes[r][c].texture = g.texEntries[a].texture;
-				texEntries
-				
             }
         }
     }

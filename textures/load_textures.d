@@ -1,6 +1,4 @@
    
-// If absent, the module name is taken to be the same name (stripped of path and 
-// extension) of the source file name.  
 
 module textures.load_textures;
  
@@ -30,24 +28,17 @@ struct TextureEntry
     SDL_Texture *texture; 
 }
 
-//void load_textures(Globals g)
+
+
 TextureEntry[] load_textures(Globals g)
 {
     if (g.sdl.renderer == null)
     {
-        writeln("Can't load textures if g.sdl.renderer is null");
+        writeln("Must have renderer before we can load textures.");
         exit(1);
     }
 
-
-
-
- 
-
     TextureEntry[] textures;
-	//textures.length = Ids.end;  // this creates empty entries which are then appedned onto
-	
-	
 	
     // find the full path to the executable and from there the textures
     // are beneath it in the directory: textures	
