@@ -160,95 +160,63 @@ enum Direction
 } 
 
 
-/+         _____
-          /     \
-    _____/       \
-   /     \       /
-  /       \_____/            
-  \       /     |  
-   \_____/      |_______ start the second column pair at this point
-
-  1  2 3  4 5 6  7th segment is the part that overshoots the far right edge of the hex board
-
-+/
-
-
 
 float calculateHexDiameter(int rows, int cols, Direction fill )
 {
-  
+    float totalSegments;
+    float diameter;
+    float widthPerSegment;
+	
+	float heightPerHex;
+
+     /+   note: all vertical segments are same size. The 
+     | \         | /         | \         | /         | \         | /
+     |  \________|/          |  \________|/          |  \________|/__|
+     |  /        |\          |  /        |\          |  /        |\  |
+     | /         | \         | /         | \         | /         | \ |
+     |/          |  \____|___|/          |  \________|/  |       |  \|    
+     |\ |    |   |  /|   |   |\  |   |   |  /|       |\  |   |   |  /|
+     | \|    |   | / |   |   | \ |   |   | / |   |   | \ |   |   | / |
+     |  \____|___|/__|___|___|  \|___|___|/__|___|___|  \|___|___|/__|
+     | 1|  2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |10|| 11|12 |13 |14 |15 | 16|
+     +/
+
     // The width of any given NDC system is always 2.0 units.  (-1.0 to 1.0)
-  
-    // Definitions: float TwoHexColumnsWidth = diameter + (1.5 * side);	
 
     if (fill == Direction.horizontally)
     {	
-        if (isEven(cols))
-        {
-            int numberOfTwoColPairsAcrossBoardWidth = cols / 2;
-
-            // Since hex columns are staggered, Two adjacent hex column widths can be 
-            // divided up into 7 equal sections: the left hex column comprises 4 sections 
-            // while the right hex column has 3 sections.
-	
-            writeln("numberOfTwoColPairsAcrossBoardWidth = ", numberOfTwoColPairsAcrossBoardWidth);
-
-            float ndcWidthOfJustTwoCols = 2.0 / numberOfTwoColPairsAcrossBoardWidth;
+        totalSegments = (cols * 3) + 1;
 			
-            writeln("ndcWidthOfJustTwoCols = ", ndcWidthOfJustTwoCols);
+        writeln("cols = ", cols);	            			
+        writeln("totalSegments = ", totalSegments);	
 
-            // The hexboad constructor uses the diameter of the first hex in the lower left
-            // of the hex board. This then means that we need 4/6 of the two column width.
+        widthPerSegment = 2.0 / totalSegments;
 
-            float hexDiameter = (4.0/6.0) * ndcWidthOfJustTwoCols;
+        writeln("widthPerSegment = ", widthPerSegment);	
 
+        writeln("Should be 2.0 = ", totalSegments * widthPerSegment);				
 
-			float    overHang = (1.0/6.0) * ndcWidthOfJustTwoCols;    writeln("overHang = ", overHang);
-			
-			float distribOverEachPair = overHang / to!float(numberOfTwoColPairsAcrossBoardWidth);
-			
-			writeln("distribOverEachPair = ", distribOverEachPair);
+        diameter = 4.0 * widthPerSegment;  // 4 segments equal a hex diameter 
+	 
+        writeln("diameter = ", diameter);	
 
-            ndcWidthOfJustTwoCols -= distribOverEachPair;
+        return diameter;		
 
-  			writeln("ndcWidthOfJustTwoCols = ", ndcWidthOfJustTwoCols);          			
-
-            hexDiameter = (4.0/6.0) * ndcWidthOfJustTwoCols;
-
-            return hexDiameter;
-
-
-            /+	
-		    writeln("hexDiameter = ", hexDiameter); 
-			
-			float overHang = 1.0/4.0 * hexDiameter;
-			
-		    writeln("overHang = ", overHang); 	
-	
-            float spreadOut = (overHang / to!float(numberOfTwoColPairsAcrossBoardWidth));
-
-		    writeln("spreadOut = ", spreadOut);
-			
-			
-			float adjustedWidthOfJustTwoCols = hexDiameter - spreadOut;
-
- 		    writeln("adjustedWidthOfJustTwoCols = ", adjustedWidthOfJustTwoCols); 
-			
-
-            	
-				
-			//hexDiameter = (4.0/6.0) * adjustedWidthOfJustTwoCols;		
-			
-
-			
-			return adjustedWidthOfJustTwoCols;	
-			+/
-			
-			
-            
-        }
     } 	
-	
+    if (fill == Direction.vertically)
+    {
+        heightPerHex = 2.0 / rows;
+		
+		writeln("heightPerHex = ", heightPerHex);
+		
+        // perpendicular = diameter * 0.866; or
+        // diameter = perpendicular / 0.866;
+		
+        diameter = heightPerHex / 0.866;
+		
+		return diameter;
+        		
+    }	
     return 0.0;
 }	
 
@@ -284,7 +252,7 @@ D2_NDC[6] defineHexVertices(float x, float y, float perpendicular, float diamete
     points[1].y = y;	
 		
     points[2].x = x + diameter;
-    points[2].y = y + apothem;		
+    points[2].y = y + apothem;	
 	
     points[3].x = x + halfRadius + radius;
     points[3].y = y + perpendicular;	
@@ -335,24 +303,6 @@ struct Hex
                             // corner as target rectangle for texture application   
     SDL_Texture* texture;   // each hex has a terrain texture							
 }
-
-
-
-
-/+     _________
-      /         \
-     /           \
-    /.............\
-    \             
-     \
-      \________
-+/
-
-
-
-
-
-
 
 
 struct HexBoard

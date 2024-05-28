@@ -109,13 +109,15 @@ int main()
 {
     load_sdl_libraries(); 
 	
-    g.sdl.screenWidth  = 1024;
-    g.sdl.screenHeight = 1024;
+    g.sdl.screenWidth  = 900;
+    g.sdl.screenHeight = 900;
 
 
-    int rowCount = 10;
-	int colCount = 10;
+    int rowCount = 50;
+	int colCount = 50;
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
+	
+    //float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.vertically );
 	
     writeln("hexDiameter = ", hexDiameter);
 	
