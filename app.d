@@ -85,8 +85,8 @@ struct GLFW_STRUCT
 
 struct SDL_STRUCT
 {
-    const int  screenWidth = 2024;
-    const int screenHeight = 2024;  // .866 * 1024		
+    int screenWidth = 4024;
+    int screenHeight = 2024;  // .866 * 1024		
     SDL_Window* window = null;      // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
@@ -101,9 +101,7 @@ struct Globals
     TextureEntry[] texEntries;
 }	
  
-Globals g;
-
-/// Global variables idea taken from Mike Shah
+Globals g;  // put a the globals variable together in one place
 
 
 
@@ -111,9 +109,23 @@ int main()
 {
     load_sdl_libraries(); 
 	
- 
+    g.sdl.screenWidth  = 1024;
+    g.sdl.screenHeight = 1024;
 
-    HexBoard h = HexBoard(.012, 200, 220);  // hex board is created with NDC coordinates
+
+    int rowCount = 10;
+	int colCount = 10;
+    float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
+	
+    writeln("hexDiameter = ", hexDiameter);
+	
+    //return 1;
+
+    //hexDiameter = .6;	
+    HexBoard h = HexBoard(hexDiameter, rowCount, colCount);  // hex board is created with NDC coordinates
+
+                          // diameter
+    //HexBoard h = HexBoard(.05, 50, 50);  // hex board is created with NDC coordinates
 
     h.displayHexBoard();  // hex board initially defined in NDC (Normalized Device Coordinates)
 
@@ -150,7 +162,9 @@ int main()
             printf( "sdl Window could not be created. SDL_Error: %s\n", SDL_GetError() );
         }	
         else
-        {	
+        {
+            SDL_SetWindowResizable(g.sdl.window, true);
+		
             //Create renderer for window
             g.sdl.renderer = SDL_CreateRenderer( g.sdl.window, -1, SDL_RENDERER_ACCELERATED );
             if( g.sdl.renderer == null )

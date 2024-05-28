@@ -100,9 +100,14 @@ https://www.gamedev.net/forums/topic/685104-ndc-to-pixel-space/
 
 I used mathematics and my conclusion was:
 
+From SC to NDC
+
 float pixelX = (NDCx + 1.0f) * 0.5 * screenWidth;
 float pixelY = (1.0f - NDCy) * 0.5 * screenHeight;
 
+when NDCx is -1 we get 0 and when NDCx is  1 we get screenWidth
+
+when NDCy is  1 we get 0 and when NDCy is -1 we get screenHeight
 +/
 
 
@@ -148,15 +153,106 @@ struct SelectedHex
     int col;
 }
 
+enum Direction 
+{ 
+    vertically,
+    horizontally
+} 
+
+
+/+         _____
+          /     \
+    _____/       \
+   /     \       /
+  /       \_____/            
+  \       /     |  
+   \_____/      |_______ start the second column pair at this point
+
+  1  2 3  4 5 6  7th segment is the part that overshoots the far right edge of the hex board
+
++/
 
 
 
+float calculateHexDiameter(int rows, int cols, Direction fill )
+{
+  
+    // The width of any given NDC system is always 2.0 units.  (-1.0 to 1.0)
+  
+    // Definitions: float TwoHexColumnsWidth = diameter + (1.5 * side);	
+
+    if (fill == Direction.horizontally)
+    {	
+        if (isEven(cols))
+        {
+            int numberOfTwoColPairsAcrossBoardWidth = cols / 2;
+
+            // Since hex columns are staggered, Two adjacent hex column widths can be 
+            // divided up into 7 equal sections: the left hex column comprises 4 sections 
+            // while the right hex column has 3 sections.
+	
+            writeln("numberOfTwoColPairsAcrossBoardWidth = ", numberOfTwoColPairsAcrossBoardWidth);
+
+            float ndcWidthOfJustTwoCols = 2.0 / numberOfTwoColPairsAcrossBoardWidth;
+			
+            writeln("ndcWidthOfJustTwoCols = ", ndcWidthOfJustTwoCols);
+
+            // The hexboad constructor uses the diameter of the first hex in the lower left
+            // of the hex board. This then means that we need 4/6 of the two column width.
+
+            float hexDiameter = (4.0/6.0) * ndcWidthOfJustTwoCols;
 
 
+			float    overHang = (1.0/6.0) * ndcWidthOfJustTwoCols;    writeln("overHang = ", overHang);
+			
+			float distribOverPairs = overHang / to!float(numberOfTwoColPairsAcrossBoardWidth);
+			
+			writeln("distribOverPairs = ", distribOverPairs);
+	
+
+            return hexDiameter;
 
 
+            /+	
+		    writeln("hexDiameter = ", hexDiameter); 
+			
+			float overHang = 1.0/4.0 * hexDiameter;
+			
+		    writeln("overHang = ", overHang); 	
+	
+            float spreadOut = (overHang / to!float(numberOfTwoColPairsAcrossBoardWidth));
 
+		    writeln("spreadOut = ", spreadOut);
+			
+			
+			float adjustedWidthOfJustTwoCols = hexDiameter - spreadOut;
 
+ 		    writeln("adjustedWidthOfJustTwoCols = ", adjustedWidthOfJustTwoCols); 
+			
+
+            	
+				
+			//hexDiameter = (4.0/6.0) * adjustedWidthOfJustTwoCols;		
+			
+
+			
+			return adjustedWidthOfJustTwoCols;	
+			+/
+			
+			
+            
+        }
+    } 	
+	
+    return 0.0;
+}	
+
+/+
+Just do a linear mapping from [-1,-1] x [1,1] to [0,0] x [Imax, Jmax]
+That is, assume (x,y) is in NDC, (i,j) is in SC, then
+i = (x – (-1))/2.0 * Imax
+j = (y – (-1))/2.0 * Jmax
++/
 
 
 bool isOdd(uint value)
@@ -225,10 +321,6 @@ struct D2_point
     int x;
     int y; 
 }
-
-
-
-
 struct Hex
 {
     D2_NDC[6] points;       // each hex is made up of 6 vertices
@@ -238,6 +330,24 @@ struct Hex
                             // corner as target rectangle for texture application   
     SDL_Texture* texture;   // each hex has a terrain texture							
 }
+
+
+
+
+/+     _________
+      /         \
+     /           \
+    /.............\
+    \             
+     \
+      \________
++/
+
+
+
+
+
+
 
 
 struct HexBoard
@@ -312,9 +422,6 @@ struct HexBoard
 
     MouseClick mouseClick;
 	
-    D3_point hexCenter;  // will just use the x,y coordinates (not z)
-	
-
     uint numberOfRows(){ return maxRows; }
 
     uint numberOfColumns(){ return maxCols; }
@@ -450,7 +557,7 @@ struct HexBoard
         //halfRadius    = radius   * 0.5;						
         //perpendicular = diameter * 0.866;	
 		
-        sc.perpendicular =   roundTo!int( to!float(sc.diameter) * 0.866 );
+        sc.perpendicular = roundTo!int( to!float(sc.diameter) * 0.866 );
     }
 	
 	
@@ -474,7 +581,7 @@ struct HexBoard
     void convertScreenCoordinatesToNormalizedDeviceCoordinates(int screenWidth, int screenHeight)
     {
 	
-        mouseClick.ndc.x =   (mouseClick.sc.x / (screenWidth / 2.0)) - 1.0;   // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
+        mouseClick.ndc.x =   (mouseClick.sc.x / (screenWidth  / 2.0)) - 1.0;   // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
                                                                               // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0 	
 																
         mouseClick.ndc.y = -((mouseClick.sc.y / (screenHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
@@ -534,6 +641,14 @@ struct HexBoard
             }
         }	
     }	
+    
+    /+
+    float calculateHexDiameter(int screenWidth, int screenHeight,
+                               int rows, int cols, FillHexBoard fillDirection )
+    {
+        float hexDiameter;
 		
-		
+        return hexDiameter;
+    }	
+    +/		
 }
