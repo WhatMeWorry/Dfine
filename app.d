@@ -189,7 +189,7 @@ int main()
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
             //SDL_RenderFillRect( g.sdl.renderer, &fillRect );
 
-            D2_point[6] s;
+            D2_SC[6] s;
             uint maxRows = h.numberOfRows();
             uint maxCols = h.numberOfColumns();			
             foreach(r; 0..maxRows)
@@ -361,7 +361,7 @@ int main()
 									
 									int x = h.selectedHex.row;   int y = h.selectedHex.col;
                                     
-									D2_point[4] t;
+									D2_SC[4] t;
                    					
 									t[0].x = h.hexes[x][y].sc[0].x;
 									t[0].y = h.hexes[x][y].sc[0].y;	

@@ -187,21 +187,9 @@ float calculateHexDiameter(int rows, int cols, Direction fill )
     {	
         totalSegments = (cols * 3) + 1;
 			
-        writeln("cols = ", cols);	            			
-        writeln("totalSegments = ", totalSegments);	
-
         widthPerSegment = 2.0 / totalSegments;
 
-        writeln("widthPerSegment = ", widthPerSegment);	
-
-        writeln("Should be 2.0 = ", totalSegments * widthPerSegment);				
-
-        diameter = 4.0 * widthPerSegment;  // 4 segments equal a hex diameter 
-	 
-        writeln("diameter = ", diameter);	
-
-        return diameter;		
-
+        diameter = 4.0 * widthPerSegment;  // 4 segments equal a hex diameter 	
     } 	
     if (fill == Direction.vertically)
     {
@@ -213,19 +201,11 @@ float calculateHexDiameter(int rows, int cols, Direction fill )
         // diameter = perpendicular / 0.866;
 		
         diameter = heightPerHex / 0.866;
-		
-		return diameter;
-        		
     }	
-    return 0.0;
+	
+    return diameter;
 }	
 
-/+
-Just do a linear mapping from [-1,-1] x [1,1] to [0,0] x [Imax, Jmax]
-That is, assume (x,y) is in NDC, (i,j) is in SC, then
-i = (x – (-1))/2.0 * Imax
-j = (y – (-1))/2.0 * Jmax
-+/
 
 
 bool isOdd(uint value)
@@ -289,11 +269,6 @@ D2_NDC defineTextureStartingPoint(float x, float y, float perpendicular)
 } 
 
 
-struct D2_point
-{
-    int x;
-    int y; 
-}
 struct Hex
 {
     D2_NDC[6] points;       // each hex is made up of 6 vertices
@@ -445,10 +420,6 @@ struct HexBoard
                 hexes[row][col].center = defineHexCenter(x, y, apothem, radius);
 				
 				hexes[row][col].texturePoint.ndc = defineTextureStartingPoint(x, y, perpendicular);
-
-
-				
-				
 				
                 if (col.isEven)
                 {
@@ -536,7 +507,7 @@ struct HexBoard
     void convertScreenCoordinatesToNormalizedDeviceCoordinates(int screenWidth, int screenHeight)
     {
 	
-        mouseClick.ndc.x =   (mouseClick.sc.x / (screenWidth  / 2.0)) - 1.0;   // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
+        mouseClick.ndc.x =   (mouseClick.sc.x / (screenWidth  / 2.0)) - 1.0;  // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
                                                                               // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0 	
 																
         mouseClick.ndc.y = -((mouseClick.sc.y / (screenHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
@@ -590,20 +561,9 @@ struct HexBoard
 				//writeln("hexes[r][c].texture = ", hexes[r][c].texture);
                 SDL_RenderCopy( renderer, hexes[r][c].texture, null, &dst );									
 	                            // Update window
-	            SDL_RenderPresent( renderer );
-
-			
+	            SDL_RenderPresent( renderer );		
             }
         }	
     }	
-    
-    /+
-    float calculateHexDiameter(int screenWidth, int screenHeight,
-                               int rows, int cols, FillHexBoard fillDirection )
-    {
-        float hexDiameter;
-		
-        return hexDiameter;
-    }	
-    +/		
+	
 }
