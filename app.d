@@ -61,6 +61,7 @@ import select_hex;
 
 import libraries.load_sdl_libraries;
 import textures.load_textures;
+import a_star.spot;
 
 import glfw3.api;
 import core.stdc.stdio;
@@ -98,7 +99,7 @@ struct Globals
     GLFW_STRUCT glfw;
     SDL_STRUCT sdl;
 	
-    TextureEntry[] texEntries;
+    Texture[] textures;
 }	
  
 Globals g;  // put a the globals variable together in one place
@@ -113,10 +114,10 @@ int main()
     g.sdl.screenHeight = 900;
 
 
-    int rowCount = 50;
-	int colCount = 50;
-    float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
+    int rowCount = 7;
+	int colCount = 7;
 	
+    float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
     //float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.vertically );
 	
     writeln("hexDiameter = ", hexDiameter);
@@ -176,9 +177,9 @@ int main()
 			h.setRenderOfHexboard(g.sdl.renderer);
 			
             //h.initializeHexTextures(g);			
-            g.texEntries = load_textures(g);
+            g.textures = load_textures(g);
 			
-            writeln(g.texEntries);
+            writeln(g.textures);
 			
             //Clear screen
             SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
@@ -278,57 +279,7 @@ int main()
 							
                             if( event.key.keysym.sym == SDLK_F2 )
                             {
-							    writeln("user pressed the Function Key F2");
-								SDL_Texture* sdlTex = IMG_LoadTexture(g.sdl.renderer, toStringz(`.\Assets\Textures\hexBlue.png`));
-								
-                                if( sdlTex == null ) { writeln( "Unable to load image"); }
-	                		    writeln("IMG_load() worked");
-								
-								int w;
-								int he;
-								
-								SDL_QueryTexture(sdlTex, null, null, &w, &he);
-                                writeln("w,h = ", w, ",", he);
-								
-
-                                SDL_Rect dst;
-								
-								dst.x = h.hexes[2][2].texturePoint.sc.x;
-                                dst.y = h.hexes[2][2].texturePoint.sc.y;
-
-                                dst.w = h.sc.diameter;
-								dst.h = h.sc.perpendicular;
-
-                                SDL_RenderCopy( g.sdl.renderer, sdlTex, null, &dst );									
-	                            // Update window
-	                            SDL_RenderPresent( g.sdl.renderer );
-								
-								writeln("g.sdl.renderer = ", g.sdl.renderer);
-								
-								/+
-								SDL_Surface *loadedSurface = IMG_Load(toStringz("hex.png"));
-                                /+ loadedSurface = SDL_CreateRGBSurface(SDL_SWSURFACE,
-                                                               g.sdl.screenWidth, 
-                                                               g.sdl.screenHeight, 
-                                                               32, 
-															   0x00FF0000, 
-									                           0X0000FF00, 
-										                       0X000000FF, 
-										                       0XFF000000); +/
-                                if( loadedSurface == null )
-	                            {
-		                            writeln( "Unable to load image");
-	                            }								
-                                SDL_Surface *screenSurface = SDL_GetWindowSurface( g.sdl.window ); 								
-  		                        SDL_Surface *optimizedSurface = SDL_ConvertSurface( loadedSurface, screenSurface.format, 0 );
-		                        if( optimizedSurface == null )
-		                        {
-			                        writeln( "Unable to optimize image" );
-		                        } 
-							    //Apply the PNG image
-				                SDL_BlitSurface( optimizedSurface, null, screenSurface, null );								
-                                SDL_UpdateWindowSurface( g.sdl.window ); 
-                                +/								
+                                writeln("SDLK_F2 used to just display one blue hex. Replaced with F3");
                             }
 							 
                             if( event.key.keysym.sym == SDLK_F3 )
@@ -336,6 +287,9 @@ int main()
                                 writeln("SDLK_F3");
                                 h.initializeHexTextures(g);  								
                                 h.displayHexTextures();
+								writeln("g = ", g);
+                                enteringLandOfPathFinding( h, g );
+								writeln("After call");
 							}
                             break;							
 													
@@ -360,7 +314,12 @@ int main()
                            			writeln("Hex selected was (", h.selectedHex.row, ", ", h.selectedHex.col, ")");	
 									
 									int x = h.selectedHex.row;   int y = h.selectedHex.col;
-                                    
+ 
+                                    Location start;  start.r = 0; start.c = 0;
+									Location end;     end.r = x; end.c = y;
+                                    uint len = asTheBirdFlys( start, end);
+
+ 
 									D2_SC[4] t;
                    					
 									t[0].x = h.hexes[x][y].sc[0].x;

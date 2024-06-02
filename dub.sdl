@@ -13,6 +13,7 @@ buildRequirements "silenceDeprecations"
 sourcePaths "."
 sourcePaths "libraries"
 sourcePaths "textures"
+sourcePaths "a_star"   // without: app.d(64,8): Error: unable to read module `path_finding`
 
 versions "SDL_2_30" "SDL_TTF" "SDL_Image" "SDL_Mixer" "SDL_Net"
 

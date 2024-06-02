@@ -15,6 +15,10 @@ import std.math.algebraic: abs;
 
 import app;
 import std.string;
+
+import textures.load_textures;
+import a_star.spot;
+
 /+
 From:  https://wiki.dlang.org/Dense_multidimensional_arrays
 
@@ -113,7 +117,6 @@ when NDCy is  1 we get 0 and when NDCy is -1 we get screenHeight
 
 
 
-
 struct D2_NDC  // normalized device coordinates 2d point
 {
     float x;
@@ -153,6 +156,12 @@ struct SelectedHex
     int col;
 }
 
+struct Location
+{
+    int r;
+    int c;
+}
+
 enum Direction 
 { 
     vertically,
@@ -165,8 +174,7 @@ float calculateHexDiameter(int rows, int cols, Direction fill )
 {
     float totalSegments;
     float diameter;
-    float widthPerSegment;
-	
+    float widthPerSegment;	
 	float heightPerHex;
 
      /+   note: all vertical segments are same size. The 
@@ -276,7 +284,7 @@ struct Hex
     D2_NDC    center;       // each hex has a center
 	D2_DUAL   texturePoint; // each hex has conceptual rectange. Use its upper left
                             // corner as target rectangle for texture application   
-    SDL_Texture* texture;   // each hex has a terrain texture							
+    Texture   texture;	
 }
 
 
@@ -343,8 +351,10 @@ struct HexBoard
     }		
 
     SC sc;
-	
+	                // each hex board has-a structure of hexes
     Hex[][] hexes;  // = new int[][](5, 2);	
+
+    Spot[][] spots;  // each hex board has-a structure of path properties
 	
 	SDL_Renderer* renderer;
 
@@ -531,9 +541,11 @@ struct HexBoard
             foreach(c; 0..maxCols)
             {	
                 // Generate an integer in 0,1,2,3,4
-                auto a = uniform(0, 5, rnd);
-
-                hexes[r][c].texture = g.texEntries[a].texture;
+                auto a = uniform(0, 8, rnd);
+                //hexes[r][c].texture.id = g.textures[a].id;				
+                //hexes[r][c].texture.fileName = g.textures[a].fileName;
+                //hexes[r][c].texture.ptr = g.textures[a].ptr;
+				hexes[r][c].texture = g.textures[a];
             }
         }
     }
@@ -541,29 +553,24 @@ struct HexBoard
 
     void displayHexTextures()
     {	
-        writeln("inside displayHexTextures");
- 	
         foreach(r; 0..maxRows)
         {
             foreach(c; 0..maxCols)
             {
-			    //writeln("inside displayHexTextures");  
                 SDL_Rect dst;
 								
 			    dst.x = hexes[r][c].texturePoint.sc.x;
                 dst.y = hexes[r][c].texturePoint.sc.y;
 
                 dst.w = sc.diameter;
-			    dst.h = sc.perpendicular;
+                dst.h = sc.perpendicular;
 
-                //writeln("dst = ", dst);
-				//writeln("renderer = ", renderer);
-				//writeln("hexes[r][c].texture = ", hexes[r][c].texture);
-                SDL_RenderCopy( renderer, hexes[r][c].texture, null, &dst );									
+                SDL_RenderCopy( renderer, hexes[r][c].texture.ptr, null, &dst );									
 	                            // Update window
-	            SDL_RenderPresent( renderer );		
+                // SDL_RenderPresent( renderer );  // DO OUTSIDE OF LOOP!!!		
             }
-        }	
+        }
+        SDL_RenderPresent( renderer );			
     }	
 	
 }

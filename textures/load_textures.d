@@ -15,22 +15,25 @@ enum Ids
 { 
     solidRed,   // 0 
     solidBlue,  // 1
-    solidGreen,   
+    solidGreen,  
+    solidBrown,
+    solidBlack,
+    solidWhite,	
     bricks,
     nops,
     end         // always leave this at end of the enum    
 } 
 
-struct TextureEntry 
+struct Texture 
 { 
     Ids id; 
     string fileName; 
-    SDL_Texture *texture; 
+    SDL_Texture *ptr; 
 }
 
 
 
-TextureEntry[] load_textures(Globals g)
+Texture[] load_textures(Globals g)
 {
     if (g.sdl.renderer == null)
     {
@@ -38,7 +41,7 @@ TextureEntry[] load_textures(Globals g)
         exit(1);
     }
 
-    TextureEntry[] textures;
+    Texture[] textures;
 	
     // find the full path to the executable and from there the textures
     // are beneath it in the directory: textures	
@@ -46,35 +49,53 @@ TextureEntry[] load_textures(Globals g)
     string complete = dirName(thisExePath()) ~ `\textures\`;	
 	
 
-    TextureEntry t;	
+    Texture t;	
     t.id = Ids.solidRed; 
 	t.fileName = "hexRed.png";
-    t.texture = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.texture == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
     
     t.id = Ids.solidBlue; 
 	t.fileName = "hexBlue.png";
-    t.texture = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.texture == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
 
     t.id = Ids.solidGreen; 
 	t.fileName = "hexGreen.png";
-    t.texture = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.texture == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
- 
+	
+    t.id = Ids.solidBlack; 
+	t.fileName = "hexBlack.png";
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;	
+	
+    t.id = Ids.solidWhite; 
+	t.fileName = "hexWhite.png";
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;		
+	
+    t.id = Ids.solidBrown; 
+	t.fileName = "hexBrown.png";
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;	
+	
     t.id = Ids.bricks; 
 	t.fileName = "hexBricks.png";
-    t.texture = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.texture == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
 	
     t.id = Ids.nops; 
 	t.fileName = "hexNops.png";
-    t.texture = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.texture == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;	
 	
     foreach(texEntry; textures)
