@@ -110,12 +110,12 @@ int main()
 {
     load_sdl_libraries(); 
 	
-    g.sdl.screenWidth  = 900;
-    g.sdl.screenHeight = 900;
+    g.sdl.screenWidth  = 2000;
+    g.sdl.screenHeight = 2000;
 
 
-    int rowCount = 7;
-	int colCount = 7;
+    int rowCount = 15;
+	int colCount = 15;
 	
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
     //float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.vertically );
@@ -315,8 +315,13 @@ int main()
 									
 									int x = h.selectedHex.row;   int y = h.selectedHex.col;
  
-                                    Location start;  start.r = 0; start.c = 0;
-									Location end;     end.r = x; end.c = y;
+                                    HexPosition start;  
+									HexPosition end;     
+                                    start.row = 0; 
+                                    start.column = 1;
+                                    end.row = x; 
+                                    end.column = y;
+									
                                     uint len = asTheBirdFlys( start, end);
 
  

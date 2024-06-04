@@ -156,10 +156,10 @@ struct SelectedHex
     int col;
 }
 
-struct Location
+struct HexPosition
 {
-    int r;
-    int c;
+    int row;
+    int column;
 }
 
 enum Direction 

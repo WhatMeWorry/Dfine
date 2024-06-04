@@ -21,7 +21,7 @@ struct Spot
 }
 
 
-struct HexSlope
+struct Slope
 {
     int rise;
     int run;
@@ -47,75 +47,52 @@ struct HexSlope
 
 
 
-uint asTheBirdFlys( Location begin, Location finish)
+uint asTheBirdFlys( HexPosition begin, HexPosition end)
 {
     writeln("****************************");
+	
+	
+    if ( (begin.row <= end.row) && (begin.column <= end.column))
+    {
+        writeln("start in lower left, end in upper right");	
+    }
+    if ( (begin.row > end.row) && (begin.column > end.column))
+    {
+        writeln("start in upper right, end in lower left left");
+        writeln("REVERSI");	
+        HexPosition temp;
+		temp = begin;
+		begin = end;
+		end = temp;
+    }	
+   
 
-    //writeln("begin = ", begin);
-    //writeln("finish = ", finish);	
-
-    Location delta;
- 
-    // delta columns and delta rows are perfect. This is when start, end = { (0,0) to (w, h) } 
-	//                                                or when start, end = { (w,h) to (0, 0) } 
-
-    delta.c = abs(begin.c - finish.c);
-    delta.r = abs(begin.r - finish.r);
-
-    //writeln("delta.c = ", delta.c);   
-    //writeln("delta.r = ", delta.r);   
-
-    HexSlope slope; 
-
-	slope.rise = delta.r;	
-	slope.run = delta.c;
-
-    writeln("slope.rise = ", slope.rise);
-    writeln("slope.run  = ", slope.run);   
+    Slope delta; 
  
     int length;
 	
-    writeln("slope.rise * 0.866 = ", slope.rise * 0.866);
-    writeln("slope.run *  0.75 = ", slope.run * 0.75);	
-
+    delta.run = abs(begin.column - end.column);
+	
+    delta.rise = abs(begin.row - end.row);  // r for rows (not rise or run)
+	
+    int hexesToCutOff = delta.run / 2;  // did not need a float	
+	
+    //writeln("delta.run = ", delta.run);	
+    //writeln("delta.rise = ", delta.rise);
+    //writeln("hexesToCutOff = ", hexesToCutOff);
+	
+    if (delta.rise <= hexesToCutOff)
+    {
+        length = delta.run;  
  
-    if (slope.rise * 0.866 > slope.run * 0.75)
-	{
-        writeln("rise > run");
-	    //writeln("delta.r = ", delta.r);	
-        //delta.r 	 
     }
-
-    // The slope of 30 degrees goes in lock step with the length of the run (delta.c)  
-    // For every 2 hexes of run, we get 1 hex closer to the end of the rise (delta.r)
-
-    //float howManyPairs = delta.c / 2.0;
-
-
+    else
+    {
+        length = delta.run + abs(delta.rise - hexesToCutOff);		
+    }
 	
-    //length = slope.run + (slope.rise - to!int(floor(howManyPairs)));	
-
-
-    // Unlike square game boards (chess, checkers) if moving horizontal and vertically
-    // is 1.0, then moving diagonally is 1.4
-	
-    length = slope.rise + slope.run;
-
-    //writeln("howManyPairs = ", howManyPairs);      	
-	
-    //writeln("length = ", length);  
-	
-
-    //int angle30 = to!int( ceil(to!float(delta.c) / 2.0) );	
-
-    //writeln("angle30 len = ", angle30);
-	
-    //delta.y = abs(a.y - b.y) - 1;	
-
-    //writeln("delta cols = ", delta.c);
-	
-    //writeln("delta rows = ", delta.r);	
-
+	writeln("length = ", length);		
+ 
     return 1;
 }
 
