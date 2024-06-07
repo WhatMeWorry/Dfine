@@ -110,8 +110,8 @@ int main()
 {
     load_sdl_libraries(); 
 	
-    g.sdl.screenWidth  = 2000;
-    g.sdl.screenHeight = 2000;
+    g.sdl.screenWidth  = 1000;
+    g.sdl.screenHeight = 1000;
 
 
     int rowCount = 15;
@@ -311,18 +311,41 @@ int main()
                                 if (getHexThatWasClickedWithMouse(h))
                                 {
                                     //writeln("Success!****************************************************");
-                           			writeln("Hex selected was (", h.selectedHex.row, ", ", h.selectedHex.col, ")");	
+                           			//writeln("Hex selected was (", h.selectedHex.row, ", ", h.selectedHex.col, ")");	
 									
 									int x = h.selectedHex.row;   int y = h.selectedHex.col;
  
                                     HexPosition start;  
 									HexPosition end;     
-                                    start.row = 0; 
-                                    start.column = 1;
+                                    start.row = 6;    // start(0,0) and start(2,2) worked
+                                    start.column = 7;
                                     end.row = x; 
                                     end.column = y;
 									
-                                    uint len = asTheBirdFlys( start, end);
+									h.setHexRowTexture(g, start.row, Ids.solidBlue);
+									
+                                    h.setHexTexture(g, start, Ids.solidGreen);
+									
+                                    h.displayHexTextures();
+									
+                                    writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
+									
+									//whatQuadrant(start, end);
+									
+									//nileDelta(start, end);
+									
+									//quadOne(start, end);
+									
+									int distance = calculateLength(start, end);
+									
+									writeln("DISTANCE = ", distance);
+									
+									
+									
+									
+									
+									//writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
+                                    //uint len = asTheBirdFlys( start, end);
 
  
 									D2_SC[4] t;

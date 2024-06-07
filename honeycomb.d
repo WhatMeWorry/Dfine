@@ -550,6 +550,20 @@ struct HexBoard
         }
     }
 
+    void setHexTexture(Globals g, HexPosition hex, Ids id)
+    {
+        hexes[hex.row][hex.column].texture = g.textures[id];
+    }
+
+
+    void setHexRowTexture(Globals g, int row, Ids id)  
+	{
+        foreach(c; 0..maxCols)
+        {
+            hexes[row][c].texture = g.textures[id]; 
+        }			
+    }
+
 
     void displayHexTextures()
     {	
