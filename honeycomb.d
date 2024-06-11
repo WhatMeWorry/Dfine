@@ -355,6 +355,7 @@ struct HexBoard
     Hex[][] hexes;  // = new int[][](5, 2);	
 
     Spot[][] spots;  // each hex board has-a structure of path properties
+                     // think of this a being superimposed over the hexes array.
 	
 	SDL_Renderer* renderer;
 
@@ -541,7 +542,7 @@ struct HexBoard
             foreach(c; 0..maxCols)
             {	
                 // Generate an integer in 0,1,2,3,4
-                auto a = uniform(0, 8, rnd);
+                auto a = uniform(0, 6, rnd);
                 //hexes[r][c].texture.id = g.textures[a].id;				
                 //hexes[r][c].texture.fileName = g.textures[a].fileName;
                 //hexes[r][c].texture.ptr = g.textures[a].ptr;

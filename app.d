@@ -114,8 +114,8 @@ int main()
     g.sdl.screenHeight = 1000;
 
 
-    int rowCount = 15;
-	int colCount = 15;
+    int rowCount = 7;
+	int colCount = 7;
 	
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
     //float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.vertically );
@@ -318,7 +318,7 @@ int main()
                                     HexPosition start;  
 									HexPosition end;     
                                     start.row = 6;    // start(0,0) and start(2,2) worked
-                                    start.column = 7;
+                                    start.column = 0;
                                     end.row = x; 
                                     end.column = y;
 									
@@ -330,23 +330,9 @@ int main()
 									
                                     writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
 									
-									//whatQuadrant(start, end);
-									
-									//nileDelta(start, end);
-									
-									//quadOne(start, end);
-									
-									int distance = calculateLength(start, end);
+									int distance = calculateDistanceBetweenHexes(start, end);
 									
 									writeln("DISTANCE = ", distance);
-									
-									
-									
-									
-									
-									//writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
-                                    //uint len = asTheBirdFlys( start, end);
-
  
 									D2_SC[4] t;
                    					

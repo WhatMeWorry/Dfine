@@ -5,6 +5,8 @@ module a_star.spot;
 
 import std.stdio;
 
+import std.algorithm.mutation : remove;
+
 import std.math : ceil, floor;
 
 import std.string;
@@ -14,13 +16,24 @@ import core.stdc.stdlib;  // for exit()
 import honeycomb;
 import app;
 
+
+struct Location   // screen cordinates 2d point
+{
+    int r;
+    int c;
+}
+
+
 struct Spot
 {
-    
-    float f;
-    float g;
-    float h;  // huristic
+    Location location; 
+    Location[6] neighbors;  // ignoring edges of a hex board, each hex has 6 adjoining neighbors	
+    uint f;
+    uint g;
+    uint h;  // heuristic
+	
 }
+
 
 
 struct Slope
@@ -41,41 +54,179 @@ bool isEven(uint value)
     return((value % 2) == 0);   
 }
 
+/+
+enum Dir 
+{ 
+    N,   // North 
+    NE,  // North-East
+    SE,  // South-East  
+    S,   // South
+    SW,  // South-West
+    NW	 // North-West
+} 
++/
 
-//   |\          |  /        |\          |  /        |\          |  /
-//   |X\         | /         |X\         | /         |X\         | /
-//   |XX\________|/__________|XX\________|/__________|XX\________|/__
-//   |  /        |\          |  /         \          |  /        |\ 
-//   | /         |X\         | /           \         | /         |X\ 
-//   |/          |XX\________|/      2      \________|/          |XX\
-//   |\          |  /         \             /        |\          |  /
-//   |X\         | /           \           /         |X\         | /
-//   |XX\________|/      1      \_________/          |XX\________|/__
-//   |  /         \             /        |\          |  /        |\ 
-//   | /           \           /         |X\         | /         |X\ 
-//   |/      0      \________ /          |XX\________|/          |XX\    
-//   |\             /        |\          |  /        |\          |  /
-//   | \           /         |X\         | /         |X\         | /
-//   |  \________ /__________|XX\________|/__________|XX\________|/__
+const uint N  = 0;  // North  
+const uint NE = 1;  // North-East
+const uint SE = 2;  // South-East
+const uint S  = 3;  // South
+const uint SW = 4;  // South-West
+const uint NW = 5;  // North-West
 
 
-void moveSouthWest(ref HexPosition h)
+void addNeighbors(ref HexBoard h)
 {
-    if (isEven(h.column))
-    {
-        h.row = h.row - 1;
+    foreach(r; 0..(h.maxRows))
+    {	
+        foreach(c; 0..(h.maxCols))
+        {
+            if (c.isEven)
+            {   
+			    writeln("WEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+                // north
+                if (r+1 <= h.maxRows)
+                {
+                    h.spots[r][c].neighbors[N].r = r+1;
+                    h.spots[r][c].neighbors[N].c = c;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[N].r = -1;
+                    h.spots[r][c].neighbors[N].c = -1;
+                }								
+                // north-east
+                if (c+1 <= h.maxCols)
+                {
+                    h.spots[r][c].neighbors[NE].r = r;
+                    h.spots[r][c].neighbors[NE].c = c+1;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[NE].r = -1;
+                    h.spots[r][c].neighbors[NE].c = -1;
+                }											
+                // south-east
+                if ((c+1 <= h.maxCols) && (r-1 >= 0))
+                {
+                    h.spots[r][c].neighbors[SE].r = r-1;
+                    h.spots[r][c].neighbors[SE].c = c+1;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[SE].r = -1;
+                    h.spots[r][c].neighbors[SE].c = -1;
+                }																	
+                // south
+                if (r-1 >= 0)
+                {
+                    h.spots[r][c].neighbors[S].r = r-1;
+                    h.spots[r][c].neighbors[S].c = c;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[S].r = -1;
+                    h.spots[r][c].neighbors[S].c = -1;
+                }															
+                // south-west
+                if ((r-1 >= 0) && (c-1 >= 0))
+                {
+                    h.spots[r][c].neighbors[SW].r = r-1;
+                    h.spots[r][c].neighbors[SW].c = c-1;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[SW].r = -1;
+                    h.spots[r][c].neighbors[SW].c = -1;
+                }								
+                // north-west				
+                if (c-1 >= 0)
+                {
+                    h.spots[r][c].neighbors[NW].r = r;
+                    h.spots[r][c].neighbors[NW].c = c-1;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[NW].r = -1;
+                    h.spots[r][c].neighbors[NW].c = -1;
+                }											
+            }
+            else   // ON ODD COLUMN
+            {
+			    writeln("ODD   ODD   ODD");
+                // north
+                if (r+1 <= h.maxRows)
+                {
+                    h.spots[r][c].neighbors[N].r = r+1;
+                    h.spots[r][c].neighbors[N].c = c;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[N].r = -1;
+                    h.spots[r][c].neighbors[N].c = -1;
+                }								
+                // north-east
+                if ((r+1 <= h.maxRows) && (c+1 <= h.maxCols))
+                {
+                    h.spots[r][c].neighbors[NE].r = r+1;
+                    h.spots[r][c].neighbors[NE].c = c+1;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[NE].r = -1;
+                    h.spots[r][c].neighbors[NE].c = -1;
+                }											
+                // south-east
+                if (c+1 <= h.maxCols)
+                {
+                    h.spots[r][c].neighbors[SE].r = r;
+                    h.spots[r][c].neighbors[SE].c = c+1;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[SE].r = -1;
+                    h.spots[r][c].neighbors[SE].c = -1;
+                }																	
+                // south
+                if (r-1 >= 0)
+                {
+                    h.spots[r][c].neighbors[S].r = r-1;
+                    h.spots[r][c].neighbors[S].c = c;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[S].r = -1;
+                    h.spots[r][c].neighbors[S].c = -1;
+                }															
+                // south-west
+                if (c-1 >= 0)
+                {
+                    h.spots[r][c].neighbors[SW].r = r;
+                    h.spots[r][c].neighbors[SW].c = c-1;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[SW].r = -1;
+                    h.spots[r][c].neighbors[SW].c = -1;
+                }								
+                // north-west				
+                if ((r+1 <= h.maxRows) && (c-1 >= 0))
+                {
+                    h.spots[r][c].neighbors[NW].r = r;
+                    h.spots[r][c].neighbors[NW].c = c-1;
+                }
+                else 
+                {
+                    h.spots[r][c].neighbors[NW].r = -1;
+                    h.spots[r][c].neighbors[NW].c = -1;
+                }										
+            }
 		
-		if (h.row == -1)
-		    h.row = 0;  // this takes care of a corner case on bottom 
-                        // edge of hexboard when row can become negative 1
-
-        h.column = h.column - 1;   
-    }	
-    else
-    {
-        h.column = h.column - 1;   	    
+            //writeln("hB.hexes[r][c].texture.id = ", hB.hexes[r][c].texture.id);
+            //hB.spots[r][c].location.r = r;
+            //hB.spots[r][c].location.c = c;			
+        }
     }
-}
+}	
 
 
 
@@ -95,10 +246,10 @@ uint whatQuadrant(HexPosition a, HexPosition b)
         else
             { writeln("Quad III");  /* (+,+) */  return 4; }
 }
-            
 
+          
 
-int calculateLength(HexPosition a, HexPosition b)
+int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
 {
     if (a == b)
     {
@@ -118,342 +269,168 @@ int calculateLength(HexPosition a, HexPosition b)
 
     uint quad = whatQuadrant(a, b);
 
-if (a.column.isEven)
-{
-    if ((quad == 1) || (quad == 2))
-	{
-        Slope delta; 
-        int length;
-	
-        delta.run = abs(a.column - b.column);
-        delta.rise = abs(a.row - b.row);
-
-        int hexesToCutOff = delta.run / 2;  // did not need a float	
-	
-        //writeln("delta.run = ", delta.run);	
-        //writeln("delta.rise = ", delta.rise);
-        writeln("hexesToCutOff = ", hexesToCutOff);
-	
-        if (delta.rise <= hexesToCutOff)
-            length = delta.run;  
-        else
-            length = delta.run + abs(delta.rise - hexesToCutOff);	
-        return length;
-	}
-    if ((quad == 3) || (quad == 4))
-	{
-        Slope delta; 
-        int length;
-	
-        delta.run = abs(a.column - b.column);
-        delta.rise = abs(a.row - b.row);
-		
-        int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
-
-        writeln("hexesToCutOff = ", hexesToCutOff);	
-
-        if (delta.rise <= hexesToCutOff)
-            length = delta.run;  
-        else
-            length = delta.run + abs(delta.rise - hexesToCutOff);	
-        return length;
-    }	
-}
-
-if (a.column.isOdd)
-{
-    writeln("ODD==========================");
-    if ((quad == 1) || (quad == 2))
-	{
-        Slope delta; 
-        int length;
-	
-        delta.run = abs(a.column - b.column);
-        delta.rise = abs(a.row - b.row);
-
-        //int hexesToCutOff = delta.run / 2;  // did not need a float	
-        int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
-		
-        //writeln("delta.run = ", delta.run);	
-        //writeln("delta.rise = ", delta.rise);
-        writeln("hexesToCutOff = ", hexesToCutOff);
-	
-        if (delta.rise <= hexesToCutOff)
-            length = delta.run;  
-        else
-            length = delta.run + abs(delta.rise - hexesToCutOff);	
-        return length;
-	}
-    if ((quad == 3) || (quad == 4))
-	{
-        Slope delta; 
-        int length;
-	
-        delta.run = abs(a.column - b.column);
-        delta.rise = abs(a.row - b.row);
-		
-        //int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
-        int hexesToCutOff = delta.run / 2;  // did not need a float	
-        writeln("hexesToCutOff = ", hexesToCutOff);	
-
-        if (delta.rise <= hexesToCutOff)
-            length = delta.run;  
-        else
-            length = delta.run + abs(delta.rise - hexesToCutOff);	
-        return length;
-    }	
-}
-
-
-	
-	
-    return 0;   	
-	
-}
-
-
-void quadOne(HexPosition a, HexPosition b)
-{
-    Slope delta; 
-    int length;
-	
-    delta.run = abs(a.column - b.column);
-    delta.rise = abs(a.row - b.row);
-
-    int hexesToCutOff = delta.run / 2;  // did not need a float	
-	
-    writeln("delta.run = ", delta.run);	
-    writeln("delta.rise = ", delta.rise);
-    writeln("hexesToCutOff = ", hexesToCutOff);
-	
-    if (delta.rise <= hexesToCutOff)
-        length = delta.run;  
-    else
-        length = delta.run + abs(delta.rise - hexesToCutOff);
-    writeln("lengh = ", length);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void nileDelta(HexPosition a, HexPosition b)
-{
-    if (a.row.isEven)
-        write("(even,");
-    else
-        write("(odd,");
-		
     if (a.column.isEven)
-        writeln("even)");
-    else
-        writeln("odd)");
-
-
-    writeln("delta row: ", abs(a.row - b.row));   
-    writeln("delta column: ", abs(a.column - b.column));
-
-    if (b.row.isEven)
-        write("(even,");
-    else
-        write("(odd,");
-		
-    if (b.column.isEven)
-        writeln("even)");
-    else
-        writeln("odd)");
-
-    HexPosition delta;
-	
-	delta.column = a.column - b.column;
-		
-    if (delta.column < 0)
-        writeln("hex is to the right of starting hex");
-    else if (delta.column > 0)
-        writeln("hex is to the left of starting hex");
-    else
-        writeln("hex is in the same column as starting hex");
-   		
-    writeln("****************************");
-}
-
-
-uint asTheBirdFlys( HexPosition begin, HexPosition end)
-{
-    //writeln("****************************");
-
-    Slope delta; 
-    int length;
-
-    //writeln("begin hex = ", begin, "   end hex = ", end);
-
-    if (begin == end)
     {
-        writeln("selected END HEX is same as START HEX");
-        return 0;
-    }
+        if ((quad == 1) || (quad == 2))
+	    {
+            Slope delta; 
+            int length;
 	
-    writeln("begin (", begin.row, ", ", begin.column, ")   end (", end.row, ",", end.column, ")" );	
+            delta.run = abs(a.column - b.column);
+            delta.rise = abs(a.row - b.row);
+
+            int hexesToCutOff = delta.run / 2;  // did not need a float	
 	
-    if (begin.column.isOdd())
-    {
-        writeln("begin.column ", begin.column, " is odd");
-        // make the beginning odd column even by moving is over to the left.
-        // Since this is a hexboard, it is a southwest move. Or (0,-1) which is keep row the same, but 
-        // subtract one from the column.
-
-        moveSouthWest(begin);
-		
-        moveSouthWest(end);		
-
-        writeln("begin (", begin.row, ", ", begin.column, ")   end (", end.row, ",", end.column, ")" );			
-    }
-
-
-                                 //              r,c       r,c
-    if (begin.column.isEven())   // Worked with (0,0) and (3,0).  So both even and odd rows works so long as column is even.
-    {
-        if ( (begin.row <= end.row) && (begin.column <= end.column))
-        {
-            //writeln("start in lower left, end in upper right");	
+            //writeln("hexesToCutOff = ", hexesToCutOff);
+	
+            if (delta.rise <= hexesToCutOff)
+                length = delta.run;  
+            else
+                length = delta.run + abs(delta.rise - hexesToCutOff);	
+            return length;
         }
-        if ( (begin.row >= end.row) && (begin.column >= end.column))
-        {
-            //writeln("start in upper right, end in lower left left");
-            writeln("REVERSI");	
-            HexPosition temp;
-		    temp = begin;
-		    begin = end;
-		    end = temp;
+        if ((quad == 3) || (quad == 4))
+	    {
+            Slope delta; 
+            int length;
+	
+            delta.run = abs(a.column - b.column);
+            delta.rise = abs(a.row - b.row);
+		
+            int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
+     
+            writeln("hexesToCutOff = ", hexesToCutOff);	
+
+            if (delta.rise <= hexesToCutOff)
+                length = delta.run;  
+            else
+                length = delta.run + abs(delta.rise - hexesToCutOff);	
+            return length;
         }	
+    }
 
-        delta.run = abs(begin.column - end.column);
-	
-        delta.rise = abs(begin.row - end.row);  // r for rows (not rise or run)
-	
-        int hexesToCutOff = delta.run / 2;  // did not need a float	
-	
-        writeln("delta.run = ", delta.run);	
-        writeln("delta.rise = ", delta.rise);
-        writeln("hexesToCutOff = ", hexesToCutOff);
-	
-        if (delta.rise <= hexesToCutOff)
+    if (a.column.isOdd)
+    {
+        if ((quad == 1) || (quad == 2))
         {
-            length = delta.run;  
-        }
-        else
-        {
-            length = delta.run + abs(delta.rise - hexesToCutOff);
-        }
-	}
+            Slope delta; 
+            int length;
 	
-	writeln("length = ", length);		
- 
-    return 1;
+            delta.run = abs(a.column - b.column);
+            delta.rise = abs(a.row - b.row);
+
+            //int hexesToCutOff = delta.run / 2;  // did not need a float	
+            int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
+		
+            writeln("hexesToCutOff = ", hexesToCutOff);
+	
+            if (delta.rise <= hexesToCutOff)
+                length = delta.run;  
+            else
+                length = delta.run + abs(delta.rise - hexesToCutOff);	
+            return length;
+        }
+        if ((quad == 3) || (quad == 4))
+        {
+            Slope delta; 
+            int length;
+	
+            delta.run = abs(a.column - b.column);
+            delta.rise = abs(a.row - b.row);
+		
+            //int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
+            int hexesToCutOff = delta.run / 2;  // did not need a float	
+            writeln("hexesToCutOff = ", hexesToCutOff);	
+
+            if (delta.rise <= hexesToCutOff)
+                length = delta.run;  
+            else
+                length = delta.run + abs(delta.rise - hexesToCutOff);	
+            return length;
+        }	
+    }
+    return 0;   	
 }
 
 
 
 // Spot[][] spots;    // put in HexBoard object. So a hexBoard "has-a" spots object	
 
+Spot[] openSet;    // needs to be evaluated
+Spot[] closedSet;  // stores all nodes that have finished being evaluated. Don't need to revisit
+
 void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 {
     writeln("inside enteringLandOfPathFinding");
-	
-	D2_SC start;	
-    D2_SC end;
 
-    start.x = 0;
-    start.y = 0;
-    end.x = hB.maxRows;
-    end.y = hB.maxCols;  
-	
-    //D2_SC diff = asTheBirdFlys(start, end);
-	
-    // writeln("hB = ", hB);  // This displays a ton of data as expected
-    // writeln("g = ", g);    // 
+    Spot begin;
+    Spot end;
 
+    begin.location.r = 0;
+    begin.location.c = 0;
+    end.location.r = hB.maxRows;
+    end.location.c = hB.maxCols;  
+	
     hB.spots = new Spot[][](hB.maxRows, hB.maxCols);
 
     writeln("hB.spots = ", hB.spots);
 	
     foreach(r; 0..(hB.maxRows))
-    {
+    {	
         foreach(c; 0..(hB.maxCols))
         {
-            writeln("hB.hexes[r][c].texture.id = ", hB.hexes[r][c].texture.id);
-			
-            //writeln(hB.spots.
-
-            //h = asBirdFly(  ) 
-	
+            //writeln("hB.hexes[r][c].texture.id = ", hB.hexes[r][c].texture.id);
+            hB.spots[r][c].location.r = r;
+            hB.spots[r][c].location.c = c;			
         }
     }
+    
+    addNeighbors(hB);	
+	
 
+    writeln("hB.spots = ", hB.spots);	
 
+    openSet ~= begin; 
+	writeln("A - openSet.length = ", openSet.length);
+	
+    while (openSet.length > 0)   // while there are spots that still need evaluating
+    {
+	    ulong winner = 0;
+        Spot current; // current is the node in openSet having the lowest f score
+    
+        foreach(i; 0..openSet.length)
+        {
+            writeln("i = ", i);
+            if (openSet[i].f < openSet[winner].f)
+            {
+                winner = i;
+            }
+        }
 		
+		current = openSet[winner];
+		
+        if (current == end)
+        {
+             writeln("DONE!!!");
+        }
+
+        writeln("1 openSet.length = ", openSet.length);  
+ 
+        openSet = openSet.remove(winner);  // openSet.remove(current)
+		
+        writeln("2 openSet.length = ", openSet.length);
+
+        writeln("3 closedSet.length = ", closedSet.length);
+		
+        closedSet ~= current;    // closedSet.push(current)
+		
+        writeln("4 closedSet.length = ", closedSet.length);
+		
+       
+
+        break;
+		
+    }
+	
+	
 }
-
-
-
-
-
-/*  THIS WORKED FOR EVEN COLUMNS
-
-    if ((quad == 1) || (quad == 2))
-	{
-        Slope delta; 
-        int length;
-	
-        delta.run = abs(a.column - b.column);
-        delta.rise = abs(a.row - b.row);
-
-        int hexesToCutOff = delta.run / 2;  // did not need a float	
-	
-        //writeln("delta.run = ", delta.run);	
-        //writeln("delta.rise = ", delta.rise);
-        writeln("hexesToCutOff = ", hexesToCutOff);
-	
-        if (delta.rise <= hexesToCutOff)
-            length = delta.run;  
-        else
-            length = delta.run + abs(delta.rise - hexesToCutOff);	
-        return length;
-	}
-    if ((quad == 3) || (quad == 4))
-	{
-        Slope delta; 
-        int length;
-	
-        delta.run = abs(a.column - b.column);
-        delta.rise = abs(a.row - b.row);
-		
-        int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
-
-        writeln("hexesToCutOff = ", hexesToCutOff);	
-
-        if (delta.rise <= hexesToCutOff)
-            length = delta.run;  
-        else
-            length = delta.run + abs(delta.rise - hexesToCutOff);	
-        return length;
-    }	
-	
-*/
-
-
-
-
-
-

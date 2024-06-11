@@ -19,8 +19,8 @@ enum Ids
     solidBrown,
     solidBlack,
     solidWhite,	
-    bricks,
-    nops,
+    //bricks,
+    //nops,
     end         // always leave this at end of the enum    
 } 
 
@@ -85,7 +85,7 @@ Texture[] load_textures(Globals g)
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
 	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;	
-	
+/+	
     t.id = Ids.bricks; 
 	t.fileName = "hexBricks.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
@@ -97,7 +97,7 @@ Texture[] load_textures(Globals g)
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
 	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;	
-	
++/	
     foreach(texEntry; textures)
     {
         writeln("texEntry = ", texEntry);
