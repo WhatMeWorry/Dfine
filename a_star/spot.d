@@ -76,150 +76,108 @@ const uint NW = 5;  // North-West
 
 void addNeighbors(ref HexBoard h)
 {
-    foreach(r; 0..(h.maxRows))
-    {	
-        foreach(c; 0..(h.maxCols))
-        {
+    foreach(int r; 0..(h.maxRows))        // Note: maxRows and maxCols are defined as uint 
+    {	                                  // this caused problems with < 0 boundary checking
+        foreach(int c; 0..(h.maxCols))    // causing -1 to be 4294967295
+        {                                 // had to declare the local r and c as ints
+		
+            foreach(int i; 0..6)
+            {
+                h.spots[r][c].neighbors[i].r = -1;
+                h.spots[r][c].neighbors[i].c = -1;  
+            }			
             if (c.isEven)
-            {   
-			    writeln("WEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+            {	
                 // north
-                if (r+1 <= h.maxRows)
+                if (r+1 <= h.maxRows-1)
                 {
                     h.spots[r][c].neighbors[N].r = r+1;
                     h.spots[r][c].neighbors[N].c = c;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[N].r = -1;
-                    h.spots[r][c].neighbors[N].c = -1;
-                }								
+				
                 // north-east
-                if (c+1 <= h.maxCols)
+                if (c+1 <= (h.maxCols-1))
                 {
                     h.spots[r][c].neighbors[NE].r = r;
                     h.spots[r][c].neighbors[NE].c = c+1;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[NE].r = -1;
-                    h.spots[r][c].neighbors[NE].c = -1;
-                }											
-                // south-east
-                if ((c+1 <= h.maxCols) && (r-1 >= 0))
+				
+                // south-east  
+                if ((c+1 <= h.maxCols-1) && (r-1 >= 0))
                 {
                     h.spots[r][c].neighbors[SE].r = r-1;
                     h.spots[r][c].neighbors[SE].c = c+1;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[SE].r = -1;
-                    h.spots[r][c].neighbors[SE].c = -1;
-                }																	
+				
                 // south
                 if (r-1 >= 0)
                 {
                     h.spots[r][c].neighbors[S].r = r-1;
                     h.spots[r][c].neighbors[S].c = c;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[S].r = -1;
-                    h.spots[r][c].neighbors[S].c = -1;
-                }															
+				
                 // south-west
                 if ((r-1 >= 0) && (c-1 >= 0))
                 {
                     h.spots[r][c].neighbors[SW].r = r-1;
                     h.spots[r][c].neighbors[SW].c = c-1;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[SW].r = -1;
-                    h.spots[r][c].neighbors[SW].c = -1;
-                }								
+				
                 // north-west				
                 if (c-1 >= 0)
                 {
                     h.spots[r][c].neighbors[NW].r = r;
                     h.spots[r][c].neighbors[NW].c = c-1;
-                }
-                else 
-                {
-                    h.spots[r][c].neighbors[NW].r = -1;
-                    h.spots[r][c].neighbors[NW].c = -1;
-                }											
+                }			
             }
-            else   // ON ODD COLUMN
+            else   // On Odd Column
             {
-			    writeln("ODD   ODD   ODD");
                 // north
-                if (r+1 <= h.maxRows)
+                if (r+1 <= h.maxRows-1)
                 {
                     h.spots[r][c].neighbors[N].r = r+1;
                     h.spots[r][c].neighbors[N].c = c;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[N].r = -1;
-                    h.spots[r][c].neighbors[N].c = -1;
-                }								
+				
                 // north-east
-                if ((r+1 <= h.maxRows) && (c+1 <= h.maxCols))
+                if ((r+1 <= h.maxRows-1) && (c+1 <= h.maxCols-1))
                 {
                     h.spots[r][c].neighbors[NE].r = r+1;
                     h.spots[r][c].neighbors[NE].c = c+1;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[NE].r = -1;
-                    h.spots[r][c].neighbors[NE].c = -1;
-                }											
+ 			
                 // south-east
-                if (c+1 <= h.maxCols)
+                if (c+1 <= h.maxCols-1)
                 {
                     h.spots[r][c].neighbors[SE].r = r;
                     h.spots[r][c].neighbors[SE].c = c+1;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[SE].r = -1;
-                    h.spots[r][c].neighbors[SE].c = -1;
-                }																	
+ 				
                 // south
                 if (r-1 >= 0)
                 {
                     h.spots[r][c].neighbors[S].r = r-1;
                     h.spots[r][c].neighbors[S].c = c;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[S].r = -1;
-                    h.spots[r][c].neighbors[S].c = -1;
-                }															
+ 			
                 // south-west
                 if (c-1 >= 0)
                 {
                     h.spots[r][c].neighbors[SW].r = r;
                     h.spots[r][c].neighbors[SW].c = c-1;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[SW].r = -1;
-                    h.spots[r][c].neighbors[SW].c = -1;
-                }								
+ 			
                 // north-west				
-                if ((r+1 <= h.maxRows) && (c-1 >= 0))
+                if ((r+1 <= h.maxRows-1) && (c-1 >= 0))
                 {
-                    h.spots[r][c].neighbors[NW].r = r;
+                    h.spots[r][c].neighbors[NW].r = r+1;
                     h.spots[r][c].neighbors[NW].c = c-1;
                 }
-                else 
-                {
-                    h.spots[r][c].neighbors[NW].r = -1;
-                    h.spots[r][c].neighbors[NW].c = -1;
-                }										
             }
+			
+            writeln("(r,c) = ", "(", r, ",", c, ")"); 
+		    writeln("h.spots[r][c].neighbors = ", h.spots[r][c].neighbors);					
+
 		
             //writeln("hB.hexes[r][c].texture.id = ", hB.hexes[r][c].texture.id);
             //hB.spots[r][c].location.r = r;
