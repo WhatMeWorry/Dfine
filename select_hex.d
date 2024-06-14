@@ -92,11 +92,8 @@ bool clickedInSmallTriangle(D2_NDC mouseClick, D2_NDC hexCenter, float radius)
 // coordinate pair consisting of an x and y value of where the mouse was clicked  
 
 
-bool getHexThatWasClickedWithMouse( ref HexBoard h)
+bool getHexMouseClickedOn( ref HexBoard h)
 {
-    //writeln("inside getHexThatWasClickedWithMouse");
-
-
     //writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
     //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
 

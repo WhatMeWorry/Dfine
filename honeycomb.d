@@ -565,6 +565,13 @@ struct HexBoard
         }			
     }
 
+    void setHexColTexture(Globals g, int col, Ids id)  
+	{
+        foreach(r; 0..maxRows)
+        {
+            hexes[r][col].texture = g.textures[id]; 
+        }			
+    }
 
     void displayHexTextures()
     {	

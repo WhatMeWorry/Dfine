@@ -100,7 +100,7 @@ Texture[] load_textures(Globals g)
 +/	
     foreach(texEntry; textures)
     {
-        writeln("texEntry = ", texEntry);
+        //writeln("texEntry = ", texEntry);
     }
 
     return textures;

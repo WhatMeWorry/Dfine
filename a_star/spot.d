@@ -24,17 +24,31 @@ struct Location   // screen cordinates 2d point
 }
 
 
+
 struct Spot
 {
-    Location location; 
+    //@disable this();   // disables default constructor
+	/+
+    this() 
+    {
+        // These three parametes suffice to define the hexboard as well as each individual hex
+        location.r = -1;
+        location.c = -1;
+ 		previous.r = -1;		
+ 		previous.c = -1;
+    }
+    +/	
+
+    Location location = Location(-1,-1);   // each spot needs to know where it is on the hexboard
     Location[6] neighbors;  // ignoring edges of a hex board, each hex has 6 adjoining neighbors	
     uint f;
     uint g;
     uint h;  // heuristic
+    Location previous = Location(-1,-1);
 	
 }
 
-
+uint tempG;
 
 struct Slope
 {
@@ -175,13 +189,8 @@ void addNeighbors(ref HexBoard h)
                 }
             }
 			
-            writeln("(r,c) = ", "(", r, ",", c, ")"); 
-		    writeln("h.spots[r][c].neighbors = ", h.spots[r][c].neighbors);					
-
-		
-            //writeln("hB.hexes[r][c].texture.id = ", hB.hexes[r][c].texture.id);
-            //hB.spots[r][c].location.r = r;
-            //hB.spots[r][c].location.c = c;			
+            //writeln("(r,c) = ", "(", r, ",", c, ")"); 
+		    //writeln("h.spots[r][c].neighbors = ", h.spots[r][c].neighbors);					
         }
     }
 }	
@@ -310,6 +319,131 @@ int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
     return 0;   	
 }
 
+void displaySet(ref Spot[] set)
+{
+writeln("-------- entering displaySet");
+    foreach(elem; set)
+    {
+        writeln("elem = ", elem);
+    }
+writeln("-------- leaving displaySet");	
+}
+
+
+// foo(variable, arguments)
+
+// if there is no member function named foo that can be called on variable with the provided arguments, 
+// then the compiler also tries to compile the following expression:
+
+/// variable.foo(arguments)   elem.isIn(openset)
+
+bool isIn(Location elem, Spot[] set)
+{
+    foreach(e; set)
+    {
+        if (e.location == elem)
+            return true;		
+    }
+	return false;
+}
+
+bool isNotIn(Location elem, Spot[] set)
+{
+    foreach(e; set)
+    {
+        if (e.location == elem)
+            return false;		
+    }
+	return true;
+}
+
+// foo(variable, arguments)  ===== UFCS =====>  variable.foo(arguments)  
+// includes(set, element)    ===== UFCS =====>  set.includes(element)  
+
+// UFCS usage:  if (set.includes(element))
+//                  // element is in set 
+
+bool includes(Spot[] set, Location element)
+{
+    foreach(e; set)
+    {
+        if (e.location == element)
+            return true;		
+    }
+	return false;
+}
+
+// UFCS usage:  if (set.excludes(element))
+//                  // element is not in set 
+
+bool excludes(Spot[] set, Location element)
+{
+    foreach(e; set)
+    {
+        if (e.location == element)
+            return false;		
+    }
+	return true;
+}
+
+
+
+
+
+Location[] getNeighbors(Spot spot)
+{
+    Location[] locs;
+
+    foreach(loc; spot.neighbors)
+    {
+        if (loc != invalidLoc)
+            locs ~= loc;
+    } 
+    return locs;
+}
+
+
+Spot lowestFscore(ref ulong c, Spot[] set)
+{
+    Spot min;
+	
+    assert(set.length > 0);
+    min = set[0];
+    foreach(int i, s; set)
+    {
+	    if (set[i].f < min.f)
+		{
+		    min = set[i];
+		    c = i;
+        }	
+    }
+
+    return min;
+}
+
+
+// h.spots[r][c].neighbors[i].r = -1;
+
+void buildShortestPath(Spot current, ref HexBoard h)
+{
+    Spot temp = current;
+    path ~= temp.location;
+    while(temp.previous != invalidLoc)
+    {
+        path ~= temp.previous;
+        temp = h.spots[temp.previous.r][temp.previous.c];
+    }
+}
+
+// f(n) = g(n) + h(n)
+//
+// f(n) is the 
+// g(n) is the known length from the beginning. Since we have been keeping track, this is a know value
+// h(n) is an "educated guess" as to the length to the end.  We could used geometic distance or taxi distance.
+
+// The A* algorithm finishes in one of two conditions:
+// 1) The algorithm arrives at the end. We now know successfully know the shortest path.
+// 2) No nodes in the openSet remain to be evaluated. This means that there is no solution.
 
 
 // Spot[][] spots;    // put in HexBoard object. So a hexBoard "has-a" spots object	
@@ -317,21 +451,27 @@ int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
 Spot[] openSet;    // needs to be evaluated
 Spot[] closedSet;  // stores all nodes that have finished being evaluated. Don't need to revisit
 
+Spot current; // current is the node in openSet having the lowest f score
+
+Location[] path;  // hold shortest path
+
+Location invalidLoc = { -1, -1 };
+
 void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 {
     writeln("inside enteringLandOfPathFinding");
 
-    Spot begin;
-    Spot end;
+    Location begin;
+    Location end;
 
-    begin.location.r = 0;
-    begin.location.c = 0;
-    end.location.r = hB.maxRows;
-    end.location.c = hB.maxCols;  
+    begin.r = 0;
+    begin.c = 0;
+    end.r = hB.maxRows;
+    end.c = hB.maxCols;  
 	
     hB.spots = new Spot[][](hB.maxRows, hB.maxCols);
 
-    writeln("hB.spots = ", hB.spots);
+    //writeln("hB.spots = ", hB.spots);
 	
     foreach(r; 0..(hB.maxRows))
     {	
@@ -345,49 +485,74 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     
     addNeighbors(hB);	
 	
-
     writeln("hB.spots = ", hB.spots);	
+	
+    openSet ~= hB.spots[begin.r][begin.c];
+	
+	displaySet(openSet);
 
-    openSet ~= begin; 
-	writeln("A - openSet.length = ", openSet.length);
 	
     while (openSet.length > 0)   // while there are spots that still need evaluating
-    {
-	    ulong winner = 0;
-        Spot current; // current is the node in openSet having the lowest f score
-    
-        foreach(i; 0..openSet.length)
-        {
-            writeln("i = ", i);
-            if (openSet[i].f < openSet[winner].f)
-            {
-                winner = i;
-            }
-        }
+    {   
+	    //ulong winner = 0;
+
+        ulong c;
+		current = lowestFscore(c, openSet);  // find the node with the smallest f score.
 		
-		current = openSet[winner];
-		
-        if (current == end)
+        if (current.location == end)
         {
+		     buildShortestPath(current, hB);
              writeln("DONE!!!");
+             return;
         }
-
-        writeln("1 openSet.length = ", openSet.length);  
  
-        openSet = openSet.remove(winner);  // openSet.remove(current)
+        openSet = openSet.remove(c);  // openSet.remove(current)		
+        closedSet ~= current;         // closedSet.push(current)
 		
-        writeln("2 openSet.length = ", openSet.length);
 
-        writeln("3 closedSet.length = ", closedSet.length);
+        writeln("openSet contains");
+        displaySet(openSet);
 		
-        closedSet ~= current;    // closedSet.push(current)
+        writeln("closedSet contains");
+        displaySet(closedSet);	       
 		
-        writeln("4 closedSet.length = ", closedSet.length);
+        Location[] neighbors = getNeighbors(current);   // cull out the (-1,-1)
 		
-       
+		writeln("neighbors = ", neighbors);
 
-        break;
+        // Time 32:15 in Coding Train Youtube video
+		// all neighbors will be added to open set, but before we put them
+		// in the open set, we need to evaluate them
+		// What if neighbor is in the closed set?
 		
+		foreach(neighbor; neighbors)
+        {
+		    Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
+		    writeln("neighbor = ", neighbor);
+			
+            if (closedSet.excludes(neighbor))  // 32:33 
+			{                                         // ignore neighbor already evaluated
+                tempG = current.g + 1;
+				
+                if (openSet.includes(neighbor))  // 35:30
+                {
+                    if (tempG < neighborSpot.g)
+                    {
+					    neighborSpot.g = tempG;
+					}
+	                else
+				    {
+					    neighborSpot.g = tempG;
+						openSet ~= neighborSpot;
+					}
+				}
+				
+				neighbor.g = calculateDistanceBetweenHexes(neighbor, end);
+				neighbor.f = neighbor.g + neighbor.h;
+				neighbot.previous = current;
+ 
+            }
+        }			
     }
 	
 	

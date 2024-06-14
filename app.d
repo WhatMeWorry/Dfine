@@ -110,14 +110,15 @@ int main()
 {
     load_sdl_libraries(); 
 	
-    g.sdl.screenWidth  = 1000;
-    g.sdl.screenHeight = 1000;
+    g.sdl.screenWidth  = 700;
+    g.sdl.screenHeight = 700;
 
 
-    int rowCount = 7;
-	int colCount = 7;
+    int rowCount = 3;
+	int colCount = 3;
 	
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
+	
     //float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.vertically );
 	
     writeln("hexDiameter = ", hexDiameter);
@@ -287,7 +288,7 @@ int main()
                                 writeln("SDLK_F3");
                                 h.initializeHexTextures(g);  								
                                 h.displayHexTextures();
-								writeln("g = ", g);
+								//writeln("g = ", g);
                                 enteringLandOfPathFinding( h, g );
 								writeln("After call");
 							}
@@ -296,8 +297,6 @@ int main()
 						case SDL_MOUSEBUTTONDOWN:
                            if( event.button.button == SDL_BUTTON_LEFT )
                             {
-                                //writeln("user pressed the Left Mouse Button");	
-
                                 SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
 
                                 //writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
@@ -306,26 +305,27 @@ int main()
 								
                                 h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
 
-                                //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
+                                writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
 								
-                                if (getHexThatWasClickedWithMouse(h))
-                                {
-                                    //writeln("Success!****************************************************");
-                           			//writeln("Hex selected was (", h.selectedHex.row, ", ", h.selectedHex.col, ")");	
-									
+                                if (getHexMouseClickedOn(h))
+                                {	
 									int x = h.selectedHex.row;   int y = h.selectedHex.col;
  
                                     HexPosition start;  
-									HexPosition end;     
-                                    start.row = 6;    // start(0,0) and start(2,2) worked
+									HexPosition end; 
+									
+                                    start.row = 0;
                                     start.column = 0;
+									
                                     end.row = x; 
                                     end.column = y;
 									
-									h.setHexRowTexture(g, start.row, Ids.solidBlue);
+                                    h.setHexRowTexture(g, start.row, Ids.solidBlue);
 									
+                                    h.setHexColTexture(g, start.column, Ids.solidWhite);									
+
                                     h.setHexTexture(g, start, Ids.solidGreen);
-									
+
                                     h.displayHexTextures();
 									
                                     writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
