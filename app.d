@@ -80,14 +80,14 @@ import bindbc.loader;
 struct GLFW_STRUCT
 {	
     const int SCREEN_WIDTH = 640;
-    const int SCREEN_HEIGHT = 480;		
+    const int SCREEN_HEIGHT = 480;
     GLFWwindow* window;  
 }
 
 struct SDL_STRUCT
 {
     int screenWidth = 4024;
-    int screenHeight = 2024;  // .866 * 1024		
+    int screenHeight = 2024;  // .866 * 1024
     SDL_Window* window = null;      // The window we'll be rendering to
 	SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
@@ -110,8 +110,8 @@ int main()
 {
     load_sdl_libraries(); 
 	
-    g.sdl.screenWidth  = 700;
-    g.sdl.screenHeight = 700;
+    g.sdl.screenWidth  = 1000;
+    g.sdl.screenHeight = 1000;
 
 
     int rowCount = 5;
@@ -125,7 +125,7 @@ int main()
 	
     //return 1;
 
-    //hexDiameter = .6;	
+    //hexDiameter = .6;
     HexBoard h = HexBoard(hexDiameter, rowCount, colCount);  // hex board is created with NDC coordinates
 
                           // diameter
@@ -143,9 +143,9 @@ int main()
 
     if (!glfwInit()) { return -1; }
     scope(exit) glfwTerminate();
-	
+
     // https://github.com/BindBC/bindbc-sdl/issues/53	
-	
+
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
 
@@ -153,35 +153,35 @@ int main()
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
     {
         writeln( "SDL could not initialize. SDL_Error: %s\n", SDL_GetError() );
-    }	
+    }
     else
     {
         //Create window
-        g.sdl.window = SDL_CreateWindow( "SDL Tutorial", 
+        g.sdl.window = SDL_CreateWindow( "SDL Tutorial",
                                          SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
                                          g.sdl.screenWidth, g.sdl.screenHeight, 
                                          SDL_WINDOW_SHOWN );
         if( g.sdl.window == null )
         {
             printf( "sdl Window could not be created. SDL_Error: %s\n", SDL_GetError() );
-        }	
+        }
         else
         {
             SDL_SetWindowResizable(g.sdl.window, true);
-		
+
             //Create renderer for window
             g.sdl.renderer = SDL_CreateRenderer( g.sdl.window, -1, SDL_RENDERER_ACCELERATED );
             if( g.sdl.renderer == null )
             {
                 printf( "Renderer could not be created. SDL Error: %s\n", SDL_GetError() );
             }
-			h.setRenderOfHexboard(g.sdl.renderer);
-			
-            //h.initializeHexTextures(g);			
+            h.setRenderOfHexboard(g.sdl.renderer);
+
+            //h.initializeHexTextures(g);
             g.textures = load_textures(g);
-			
+
             writeln(g.textures);
-			
+
             //Clear screen
             SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
             SDL_RenderClear( g.sdl.renderer );		

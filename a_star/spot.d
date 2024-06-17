@@ -204,14 +204,14 @@ uint whatQuadrant(HexPosition a, HexPosition b)
 
     if (dR < 0)
         if (dC < 0)
-            { writeln("Quad I");    /* (-,-) */  return 1; }
+            { /+writeln("Quad I");+/    /* (-,-) */  return 1; }
         else
-            { writeln("Quad II");   /* (-,+) */  return 2; }
+            { /+writeln("Quad II");+/   /* (-,+) */  return 2; }
     else
         if (dC < 0)
-            { writeln("Quad IV");   /* (+,-) */  return 3; }
+            { /+writeln("Quad IV");+/   /* (+,-) */  return 3; }
         else
-            { writeln("Quad III");  /* (+,+) */  return 4; }
+            { /+writeln("Quad III");+/  /* (+,+) */  return 4; }
 }
 
           
@@ -220,17 +220,17 @@ int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
 {
     if (a == b)
     {
-        writeln("End is same as Start");
+        //writeln("End is same as Start");
         return 0;
     }
     if (a.row == b.row)
     {
-        writeln("On same row");
+        //writeln("On same row");
         return (abs(a.column - b.column));
     }
     if (a.column == b.column)
     {
-        writeln("On same column");
+        //writeln("On same column");
         return (abs(a.row - b.row));
     }
 
@@ -253,7 +253,7 @@ int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
             if (delta.rise <= hexesToCutOff)
                 length = delta.run;  
             else
-                length = delta.run + abs(delta.rise - hexesToCutOff);	
+                length = delta.run + abs(delta.rise - hexesToCutOff);
             return length;
         }
         if ((quad == 3) || (quad == 4))
@@ -264,9 +264,9 @@ int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
             delta.run = abs(a.column - b.column);
             delta.rise = abs(a.row - b.row);
 
-            int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
-     
-            writeln("hexesToCutOff = ", hexesToCutOff);	
+            int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float
+
+            //writeln("hexesToCutOff = ", hexesToCutOff);	
 
             if (delta.rise <= hexesToCutOff)
                 length = delta.run;  
@@ -286,10 +286,10 @@ int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
             delta.run = abs(a.column - b.column);
             delta.rise = abs(a.row - b.row);
 
-            //int hexesToCutOff = delta.run / 2;  // did not need a float	
+            //int hexesToCutOff = delta.run / 2;  // did not need a float
             int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
 
-            writeln("hexesToCutOff = ", hexesToCutOff);
+            //writeln("hexesToCutOff = ", hexesToCutOff);
 
             if (delta.rise <= hexesToCutOff)
                 length = delta.run;  
@@ -307,7 +307,7 @@ int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
 
             //int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
             int hexesToCutOff = delta.run / 2;  // did not need a float	
-            writeln("hexesToCutOff = ", hexesToCutOff);	
+            //writeln("hexesToCutOff = ", hexesToCutOff);	
 
             if (delta.rise <= hexesToCutOff)
                 length = delta.run;  
@@ -335,12 +335,16 @@ bool isNotEmpty(Spot[] set)
 
 void displaySet(ref Spot[] set, string comment = "")
 {
-    writeln("-------- entering set ", comment);
+    writeln("");
+    writeln("set ", comment, " has the following elements");
     foreach(elem; set)
     {
-        writeln("elem = ", elem);
+        write(elem.location);
+        write("    ");
     }
-    writeln("-------- leaving set ", comment);
+    writeln("");
+    writeln("end set ", comment);
+
 }
 
 
@@ -498,13 +502,13 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     }
     
     addNeighbors(hB);
-	
+
     //===========================================================================
     //  Path finding starts here
     //===========================================================================
-	
-	
-	
+
+
+
     //writeln("hB.spots = ", hB.spots);
 
     openSet ~= hB.spots[begin.r][begin.c];  // put the start node on the openList (leave its f at zero)
@@ -513,7 +517,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
 
     while (openSet.isNotEmpty)     // while there are spots that still need evaluating
-    {   		
+    {
         ulong c;                             
         current = lowestFscore(c, openSet);  // find the node with the smallest f value.
                                              // set the current spot to the spot with the least f value
@@ -545,11 +549,13 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         {
             Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
             writeln("neighbor = ", neighbor);			
-			
+
             if (closedSet.includes(neighbor))  // if child is in the closedList
                 continue;                          // continue to beginning of for loop
 
             // Create the f, g, and h values
+            neighborSpot.previous = current.location;
+
             neighborSpot.g = current.g + 1;  // 1 will be replaced with distance between child and current or terrain cost to be added later
             neighborSpot.h = calculateDistanceBetweenHexes( cast(HexPosition) neighbor, cast(HexPosition) end);
             neighborSpot.f = neighborSpot.g + neighborSpot.h;
@@ -557,10 +563,10 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
             if (openSet.includes(neighbor))   // if child.position is in the openList's nodes positions
             {
                 if (neighborSpot.g > current.g)
-                    continue;                         // continue to beginning of for loop				
+                    continue;                         // continue to beginning of for loop
             }
-			
-            openSet ~= neighborSpot;		
+
+            openSet ~= neighborSpot;
 
 
 
