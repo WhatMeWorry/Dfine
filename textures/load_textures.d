@@ -18,7 +18,7 @@ enum Ids
     solidGreen,  
     solidBrown,
     solidBlack,
-    solidWhite,	
+    solidWhite,
     //bricks,
     //nops,
     end         // always leave this at end of the enum    
@@ -42,67 +42,67 @@ Texture[] load_textures(Globals g)
     }
 
     Texture[] textures;
-	
+
     // find the full path to the executable and from there the textures
     // are beneath it in the directory: textures	
         
     string complete = dirName(thisExePath()) ~ `\textures\`;	
-	
 
-    Texture t;	
+
+    Texture t;
     t.id = Ids.solidRed; 
-	t.fileName = "hexRed.png";
+    t.fileName = "hexRed.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
     
     t.id = Ids.solidBlue; 
-	t.fileName = "hexBlue.png";
+    t.fileName = "hexBlue.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
 
     t.id = Ids.solidGreen; 
-	t.fileName = "hexGreen.png";
+    t.fileName = "hexGreen.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
-	
+
     t.id = Ids.solidBlack; 
-	t.fileName = "hexBlack.png";
+    t.fileName = "hexBlack.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
-    textures ~= t;	
-	
-    t.id = Ids.solidWhite; 
-	t.fileName = "hexWhite.png";
-    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
-    textures ~= t;		
-	
-    t.id = Ids.solidBrown; 
-	t.fileName = "hexBrown.png";
-    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
-    textures ~= t;	
-/+	
-    t.id = Ids.bricks; 
-	t.fileName = "hexBricks.png";
-    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
-	
-    t.id = Ids.nops; 
-	t.fileName = "hexNops.png";
+
+    t.id = Ids.solidWhite; 
+    t.fileName = "hexWhite.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
-	if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
-    textures ~= t;	
-+/	
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;
+
+    t.id = Ids.solidBrown; 
+    t.fileName = "hexBrown.png";
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;
+/+
+    t.id = Ids.bricks; 
+    t.fileName = "hexBricks.png";
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;
+
+    t.id = Ids.nops; 
+    t.fileName = "hexNops.png";
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));	
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;
++/
     foreach(texEntry; textures)
     {
         //writeln("texEntry = ", texEntry);
     }
 
     return textures;
-	
+
 }
