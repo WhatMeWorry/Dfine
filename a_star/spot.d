@@ -40,10 +40,10 @@ struct Spot
     +/
 
     Location location = Location(-1,-1);   // each spot needs to know where it is on the hexboard
-    Location[6] neighbors;  // ignoring edges of a hex board, each hex has 6 adjoining neighbors	
+    Location[6] neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), Location(-1,-1), Location(-1,-1), Location(-1,-1)];  // ignoring edges of a hex board, each hex has 6 adjoining neighbors	
     uint f;
     uint g;
-    uint h;  // heuristic
+    uint h;
     Location previous = Location(-1,-1);
 
 }
@@ -429,13 +429,14 @@ Spot lowestFscore(ref ulong c, Spot[] set)
     min = set[0];
     foreach(int i, s; set)
     {
+        writeln("set[i].f = ",set[i].f, "   and min.f = ", min.f); 
         if (set[i].f < min.f)
         {
             min = set[i];
             c = i;
         }
     }
-
+    
     return min;
 }
 
@@ -470,6 +471,7 @@ Spot[] openSet;    // needs to be evaluated
 Spot[] closedSet;  // stores all nodes that have finished being evaluated. Don't need to revisit
 
 Spot current; // current is the node in openSet having the lowest f score
+Spot start;   // the beginning node (spot, hex) of the path   
 
 Location[] path;  // hold shortest path
 
@@ -511,32 +513,45 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
     //writeln("hB.spots = ", hB.spots);
 
-    openSet ~= hB.spots[begin.r][begin.c];  // put the start node on the openList (leave its f at zero)
+
+    start = hB.spots[begin.r][begin.c];
+
+    start.g = 0;  // the beginning of the path as no history (of walked spots)
+    start.h = calculateDistanceBetweenHexes( cast(HexPosition) start.location, cast(HexPosition) end);  // heuristic
+    start.f = start.g + start.h;
+	
+    writeln("start.f = ", start.f);
+
+    openSet ~= start;  // put the start node on the openList (leave its f at zero)
 
     displaySet(openSet, "openSet");
 
-
     while (openSet.isNotEmpty)     // while there are spots that still need evaluating
     {
+        writeln("---------------------------MAIN LOOP-------------------------------------");
+
         ulong c;                             
         current = lowestFscore(c, openSet);  // find the node with the smallest f value.
                                              // set the current spot to the spot with the least f value
 
-        openSet = openSet.remove(c);  // openSet.remove(current)  remove the currentNode from the openList
-        closedSet ~= current;         // closedSet.push(current)  add the currentNode to the closedList
-
+        writeln("current.location = ", current.location);
 
         if (current.location == end)
         {
+			writeln("hB.spots = ", hB.spots);
              buildShortestPath(current, hB);
              writeln("DONE!!!");
              return;
         }
+		
+        // Move best option from openSet to closedSet
+        openSet = openSet.remove(c);  // openSet.remove(current)  remove the currentNode from the openList
+        closedSet ~= current;         // closedSet.push(current)  add the currentNode to the closedList
 
-        displaySet(openSet, "openSet");
-        displaySet(closedSet, "closedSet");
+        //displaySet(openSet, "openSet");
+        //displaySet(closedSet, "closedSet");
 
-        Location[] neighbors = getNeighbors(current);   // cull out the (-1,-1)
+        Location[] neighbors = getNeighbors(current);   // get neighbors of current and cull out the (-1,-1)
 
         writeln("neighbors = ", neighbors);
 
@@ -545,65 +560,52 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         // in the open set, we need to evaluate them
         // What if neighbor is in the closed set?
 
-        foreach(neighbor; neighbors)   // for each child in the children
+        foreach(neighbor; neighbors)   // for each neighbor of current
         {
             Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
-            writeln("neighbor = ", neighbor);			
+            //writeln("neighbor = ", neighbor);
 
-            if (closedSet.includes(neighbor))  // if child is in the closedList
-                continue;                          // continue to beginning of for loop
-
-            // Create the f, g, and h values
-            neighborSpot.previous = current.location;
-
-            neighborSpot.g = current.g + 1;  // 1 will be replaced with distance between child and current or terrain cost to be added later
-            neighborSpot.h = calculateDistanceBetweenHexes( cast(HexPosition) neighbor, cast(HexPosition) end);
-            neighborSpot.f = neighborSpot.g + neighborSpot.h;
-			
-            if (openSet.includes(neighbor))   // if child.position is in the openList's nodes positions
+            if (closedSet.excludes(neighbor))  // ignore the neighbor which is alread evaluated
             {
-                if (neighborSpot.g > current.g)
-                    continue;                         // continue to beginning of for loop
+                writeln("1111111111111111111111 neighbor already evaluated");
+                continue;                      // continue to beginning of for loop
             }
 
-            openSet ~= neighborSpot;
+             uint tempG = current.g + 1; //  + dist_between(current, neighbor) // replace with terrain cost of neighbor 
+			 
+             writeln("tempG = ", tempG);
 
+             if (openSet.excludes(neighbor))   // discover a new node?
+             {
+                 writeln("2222222222222222222 discoverd a new node");
+                 openSet ~= neighborSpot;
+             }
+             else 
+             {
+                 if (tempG >= neighborSpot.g)
+                 {
+                      writeln("333333333333333333 this is now a better path");
+                      continue;      // this is not a better pat
+                 }
+             }
+ 
+            // Create the f, g, and h values
+            writeln("current.location is added to path", current.location);
+            neighborSpot.previous = current.location;
+			
+            neighborSpot.g = tempG;
+            neighborSpot.f = neighborSpot.g + calculateDistanceBetweenHexes( cast(HexPosition) neighborSpot.location, cast(HexPosition) end);
 
-
-            /+
-            if (closedSet.excludes(neighbor))  // 32:33 
-            {                                         // ignore neighbor already evaluated
-                tempG = current.g + 1;
-
-                if (openSet.includes(neighbor))  // 35:30
-                {
-                    if (tempG < neighborSpot.g)
-                    {
-                       neighborSpot.g = tempG;
-                    }
-                    else
-                    {
-                        neighborSpot.g = tempG;
-                        openSet ~= neighborSpot;
-						writeln("ADD NEIGHBOR TO OPENSET");
-                    }
-                }
-				
-				//HexPosition s = { 0, 0};  distance == 6 which is correct
-				//HexPosition e = { 4, 4};
-				//int i = calculateDistanceBetweenHexes( s, e);
-				
-                int distance = calculateDistanceBetweenHexes( cast(HexPosition) neighbor, cast(HexPosition) end);
-                writeln("distance = ", distance);
-
-                neighborSpot.h = distance;
-
-                neighborSpot.f = neighborSpot.g + neighborSpot.h;
-                neighborSpot.previous = current.location;
+            if (openSet.excludes(neighbor))  
+            {
+                writeln("add neighbor to openSet");
+                openSet ~= neighborSpot;
             }
-			+/
+
         }
     }
+	
+
 	writeln("openSet is empty");
 
 
