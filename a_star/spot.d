@@ -4,6 +4,7 @@ module a_star.spot;
  
 
 import std.stdio;
+import std.process : executeShell;     // executeShell()
 
 import std.algorithm.mutation : remove;
 
@@ -23,6 +24,36 @@ struct Location   // screen cordinates 2d point
     int c;
 }
 
+void writeAndPause(string s = "")
+{
+    writeln();
+    writeln(s);
+    version(Windows)
+    {  
+        // pause command prints out
+        // "Press any key to continue..."
+
+        // auto ret = executeShell("pause");
+        // if (ret.status == 0)
+        //     writeln(ret.output);
+
+        // The functions capture what the child process prints to both its standard output 
+        // and standard error streams, and return this together with its exit code.
+        // The problem is we don't have the pause return output until after the user
+        // hits a key.
+
+        writeln();
+        writeln("Press any key to continue...");       
+        executeShell("pause");  // don't bother with standard output the child returns
+
+    }
+    else // Mac OS or Linux
+    {
+        writeln("Press any key to continue...");
+        executeShell(`read -n1 -r`);    // -p option did not work
+    }
+    writeln();
+}
 
 
 struct Spot
@@ -218,7 +249,8 @@ uint whatQuadrant(HexPosition a, HexPosition b)
 
           
 
-int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
+// int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
+int heuristic(HexPosition a, HexPosition b)
 {
     if (a == b)
     {
@@ -329,7 +361,7 @@ bool isNotEmpty(Spot[] set)
     if (set.length > 0)
         return true;
     else
-	    return false;
+        return false;
 }
 
 
@@ -338,14 +370,19 @@ bool isNotEmpty(Spot[] set)
 void displaySet(ref Spot[] set, string comment = "")
 {
     writeln("");
-    writeln("set ", comment, " has the following elements");
-    foreach(elem; set)
+    if (set.length > 0)
     {
-        write(elem.location);
-        write("    ");
+        writeln("set ", comment, " has the following elements");
+        foreach(elem; set)
+        {
+            write("    ", elem.location);
+        }
+        writeln();
     }
-    writeln("");
-    writeln("end set ", comment);
+    else
+    {
+        writeln("set ", comment, " is empty");
+    }
 
 }
 
@@ -517,46 +554,72 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     start = hB.spots[begin.r][begin.c];
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
-    start.h = calculateDistanceBetweenHexes( cast(HexPosition) start.location, cast(HexPosition) end);  // heuristic
+    start.h = heuristic( cast(HexPosition) start.location, cast(HexPosition) end);  // heuristic
     start.f = start.g + start.h;
-	
-    writeln("start.f = ", start.f);
+
+    writeln("start.g = ", start.g);
+    writeln("start.h = ", start.h);
+    writeln("start.f = ", start.f);	
 
     openSet ~= start;  // put the start node on the openList (leave its f at zero)
 
-    displaySet(openSet, "openSet");
-
     while (openSet.isNotEmpty)     // while there are spots that still need evaluating
     {
-        writeln("     ");
+        displaySet(openSet, "openset");
+        //writeAndPause("while openSet is not empty");
 
         ulong c;                             
         current = lowestFscore(c, openSet);  // find the node with the smallest f value.
                                              // set the current spot to the spot with the least f value
 
-        writeln("NEW Current = ", current.location);
+        writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        writeln("Current = ", current.location);
+        writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        //writeAndPause();
 
         if (current.location == end)
         {
-			 writeln("hB.spots = ", hB.spots);
-             buildShortestPath(current, hB);
-             writeln("DONE!!!");
-			 writeln("current.location = ",current.location);
-			 writeln("current.previous = ",current.previous);
-             return;
+            //writeln("hB.spots = ", hB.spots);
+            buildShortestPath(current, hB);
+            writeln("DONE!!!");
+
+            Location[] path;
+            Location here = hB.spots[end.r][end.c].location;
+            while (here != invalidLoc)
+            {
+                path ~= here;
+                here = hB.spots[here.r][here.c].previous;
+            }
+
+            foreach( p; path)
+            {
+                writeln("p = ", p);
+            }
+
+            /+
+            foreach(i; 0..(hB.maxRows))
+            {
+                foreach(j; 0..(hB.maxCols))
+                {
+                    writeln(" i, j ", i, ",", j);
+                    writeln("hB.spots[i][j] = ", hB.spots[i][j]);
+                    //writeln("hB.spots[i][j].previous = ",  hB.spots[i][j].previous);
+                }
+            }
+            +/
+            return;
         }
-		
-        // Best option moves from openSet to closedSet
-		
-        openSet = openSet.remove(c);  // openSet.remove(current)  remove the currentNode from the openList
-        closedSet ~= current;         // closedSet.push(current)  add the currentNode to the closedList
 
         //displaySet(openSet, "openSet");
         //displaySet(closedSet, "closedSet");
 
-        Location[] neighbors = getNeighbors(current);   // get neighbors of current and cull out the (-1,-1)
+        openSet = openSet.remove(c);  // openSet.remove(current)  remove the currentNode from the openList
+        closedSet ~= current;         // closedSet.push(current)  add the currentNode to the closedList
 
-        writeln("neighbors = ", neighbors);
+        displaySet(openSet, "openSet");
+        displaySet(closedSet, "closedSet");
+
+        Location[] neighbors = getNeighbors(current);   // get neighbors of current and cull out the (-1,-1)
 
         // Time 32:15 in Coding Train Youtube video
         // all neighbors will be added to open set, but before we put them
@@ -566,11 +629,15 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
             Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
-            writeln("foreach neighbor = ", neighbor);
+            writeln();
+            writeln("------------------------------------------");
+            writeln("neighbor = ", neighbor);
+            writeln("------------------------------------------");
+            //writeAndPause();
 
             if (closedSet.excludes(neighbor))  // only proceed with this neighbor if it hasn't already been evaluated.
             {
-                distance = calculateDistanceBetweenHexes( cast(HexPosition) neighborSpot.location, cast(HexPosition) current.location);
+                distance = heuristic( cast(HexPosition) neighborSpot.location, cast(HexPosition) current.location);
 
                 tempG = current.g + distance;
 
@@ -580,32 +647,36 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
                 if (openSet.excludes(neighbor))  // if neighbor is not in openSet, then add it
                 {
-				    writeln("place neighbor in openSet");
+                    writeln("place neighbor in openSet");
                     openSet ~= neighborSpot;
                 }
                 else
                 {
-				    writeln("neighbor WAS IN OPENSET");
+                    writeln("neighbor WAS IN OPENSET");
                     if (tempG >= neighborSpot.g)
                     {
                         // No, it's not a better path
-						writeln("No, it is not a better path");
+                        writeln("No, it is not a better path");
                         continue;
                     }
                 } 
             
                 neighborSpot.g = tempG;
-                neighborSpot.h = calculateDistanceBetweenHexes( cast(HexPosition) neighborSpot.location, cast(HexPosition) end);
+                neighborSpot.h = heuristic( cast(HexPosition) neighborSpot.location, cast(HexPosition) end);
                 neighborSpot.f = neighborSpot.g + neighborSpot.h;
                 neighborSpot.previous = current.location;
-				
-				writeln("================== ANOTHER NEIGHBOR PROCESSED ==================================");
-				writeln("current.location = ", current.location);
-				writeln("neighborSpot.location f g h = ", neighborSpot.location, " ", neighborSpot.f, " ", neighborSpot.g, " ", neighborSpot.h);
-				writeln("neighborSpot.previous = ", neighborSpot.previous);
+
+                //Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
+
+                hB.spots[neighborSpot.location.r][neighborSpot.location.c].previous = current.location;
+
+                writeln("================== ANOTHER NEIGHBOR PROCESSED ==================================");
+                writeln("neighborSpot.location f g h = ", neighborSpot.location, " ", neighborSpot.f, " ", neighborSpot.g, " ", neighborSpot.h);
+                writeln("neighborSpot.previous = ", neighborSpot.previous);
             }
         }
         writeln("finished with neighbors for current");
     }
     writeln("emptyset is empty");
+
 }

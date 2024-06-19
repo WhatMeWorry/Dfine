@@ -114,8 +114,8 @@ int main()
     g.sdl.screenHeight = 1000;
 
 
-    int rowCount = 3;
-	int colCount = 3;
+    int rowCount = 8;
+	int colCount = 8;
 	
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
 	
@@ -330,7 +330,7 @@ int main()
 									
                                     writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
 									
-									int distance = calculateDistanceBetweenHexes(start, end);
+									int distance = heuristic(start, end);
 									
 									writeln("DISTANCE = ", distance);
  
