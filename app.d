@@ -78,7 +78,7 @@ import bindbc.loader;
 
 
 struct GLFW_STRUCT
-{	
+{   
     const int SCREEN_WIDTH = 640;
     const int SCREEN_HEIGHT = 480;
     GLFWwindow* window;  
@@ -89,18 +89,18 @@ struct SDL_STRUCT
     int screenWidth = 4024;
     int screenHeight = 2024;  // .866 * 1024
     SDL_Window* window = null;      // The window we'll be rendering to
-	SDL_Renderer* renderer = null;
+    SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
-}	
+}
 
 struct Globals
 {
     int i;
     GLFW_STRUCT glfw;
     SDL_STRUCT sdl;
-	
+
     Texture[] textures;
-}	
+}
  
 Globals g;  // put a the globals variable together in one place
 
@@ -109,20 +109,20 @@ Globals g;  // put a the globals variable together in one place
 int main() 
 {
     load_sdl_libraries(); 
-	
+
     g.sdl.screenWidth  = 1000;
     g.sdl.screenHeight = 1000;
 
 
-    int rowCount = 8;
-	int colCount = 8;
-	
+    int rowCount = 25;
+    int colCount = 25;
+
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
-	
+
     //float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.vertically );
-	
+
     writeln("hexDiameter = ", hexDiameter);
-	
+
     //return 1;
 
     //hexDiameter = .6;
@@ -133,7 +133,9 @@ int main()
 
     h.displayHexBoard();  // hex board initially defined in NDC (Normalized Device Coordinates)
 
-    h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);	
+    //writeAndPause("After displayHexBoard");
+
+    h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight); 
 
     h.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
 
@@ -144,7 +146,7 @@ int main()
     if (!glfwInit()) { return -1; }
     scope(exit) glfwTerminate();
 
-    // https://github.com/BindBC/bindbc-sdl/issues/53	
+    // https://github.com/BindBC/bindbc-sdl/issues/53   
 
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
@@ -184,8 +186,8 @@ int main()
 
             //Clear screen
             SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
-            SDL_RenderClear( g.sdl.renderer );		
-			
+            SDL_RenderClear( g.sdl.renderer );
+
             //Render red filled quad
             //SDL_Rect fillRect = { g.sdl.SCREEN_WIDTH / 4, g.sdl.SCREEN_HEIGHT / 4, g.sdl.SCREEN_WIDTH / 2, g.sdl.SCREEN_HEIGHT / 2 };
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
@@ -193,13 +195,13 @@ int main()
 
             D2_SC[6] s;
             uint maxRows = h.numberOfRows();
-            uint maxCols = h.numberOfColumns();			
+            uint maxCols = h.numberOfColumns();
             foreach(r; 0..maxRows)
             {
                 foreach(c; 0..maxCols)
                 {  
                     // writeln("r = ", r, " c = ", c);
-					
+
                     foreach(p; 0..6)
                     {
                         s[0].x = h.hexes[r][c].sc[0].x;
@@ -209,27 +211,27 @@ int main()
                         s[2].x = h.hexes[r][c].sc[2].x;
                         s[2].y = h.hexes[r][c].sc[2].y;
                         s[3].x = h.hexes[r][c].sc[3].x;
-                        s[3].y = h.hexes[r][c].sc[3].y;						
+                        s[3].y = h.hexes[r][c].sc[3].y;
                         s[4].x = h.hexes[r][c].sc[4].x;
-                        s[4].y = h.hexes[r][c].sc[4].y;	
+                        s[4].y = h.hexes[r][c].sc[4].y;
                         s[5].x = h.hexes[r][c].sc[5].x;
-                        s[5].y = h.hexes[r][c].sc[5].y;	
-						
+                        s[5].y = h.hexes[r][c].sc[5].y;
+
                         SDL_RenderDrawLine( g.sdl.renderer, s[0].x, s[0].y, s[1].x, s[1].y);
-                        SDL_RenderDrawLine( g.sdl.renderer, s[1].x, s[1].y, s[2].x, s[2].y);						
-                        SDL_RenderDrawLine( g.sdl.renderer, s[2].x, s[2].y, s[3].x, s[3].y);						
-                        SDL_RenderDrawLine( g.sdl.renderer, s[3].x, s[3].y, s[4].x, s[4].y);							
-                        SDL_RenderDrawLine( g.sdl.renderer, s[4].x, s[4].y, s[5].x, s[5].y);		
+                        SDL_RenderDrawLine( g.sdl.renderer, s[1].x, s[1].y, s[2].x, s[2].y);
+                        SDL_RenderDrawLine( g.sdl.renderer, s[2].x, s[2].y, s[3].x, s[3].y);
+                        SDL_RenderDrawLine( g.sdl.renderer, s[3].x, s[3].y, s[4].x, s[4].y);
+                        SDL_RenderDrawLine( g.sdl.renderer, s[4].x, s[4].y, s[5].x, s[5].y);
                         SDL_RenderDrawLine( g.sdl.renderer, s[5].x, s[5].y, s[0].x, s[0].y);
-                    }				 						
+                    }
                 }
-            }				
+            }
 
             // Update screen
-            SDL_RenderPresent( g.sdl.renderer );			
+            SDL_RenderPresent( g.sdl.renderer );
 
             // https://thenumb.at/cpp-course/sdl2/03/03.html
-			
+
             SDL_Event event;
             bool running = true;
 
@@ -239,136 +241,148 @@ int main()
                 {
                     switch(event.type) 
                     {
-			            case SDL_QUIT:
-						
+                        case SDL_QUIT:
+
                             writeln("user clicked on close button of windows");
-				            running = false;
-				            break;
-							
-						case SDL_KEYDOWN:
-						
+                            running = false;
+                            break;
+
+                        case SDL_KEYDOWN:
+
                             if( event.key.keysym.sym == SDLK_ESCAPE )
                             {
-                                writeln("user pressed the Escape Key");			
+                                writeln("user pressed the Escape Key");
                                 running = false;
                             }
-							
+
                             if( event.key.keysym.sym == SDLK_F1 )
                             {
                                 writeln("user pressed the Function Key F1");
 
                                 SDL_Surface *screenshot; 
-	
+
                                 screenshot = SDL_CreateRGBSurface(SDL_SWSURFACE,
                                                                   g.sdl.screenWidth, 
                                                                   g.sdl.screenHeight, 
                                                                   32, 
-																  0x00FF0000, 
-									                              0X0000FF00, 
-										                          0X000000FF, 
-										                          0XFF000000); 
-										  
+                                                                  0x00FF0000, 
+                                                                  0X0000FF00, 
+                                                                  0X000000FF, 
+                                                                  0XFF000000); 
+
                                 SDL_RenderReadPixels(g.sdl.renderer, 
-								                     null, 
-													 SDL_PIXELFORMAT_ARGB8888, 
+                                                     null, 
+                                                     SDL_PIXELFORMAT_ARGB8888, 
                                                      screenshot.pixels, 
-													 screenshot.pitch);
+                                                     screenshot.pitch);
                                 //SDL_SavePNG(screenshot, "screenshot.png"); 
-								IMG_SavePNG(screenshot, "screenshot.png"); 
+                                IMG_SavePNG(screenshot, "screenshot.png"); 
                                 SDL_FreeSurface(screenshot); 
-                            }							
-							
+                            }                           
+                            
                             if( event.key.keysym.sym == SDLK_F2 )
                             {
                                 writeln("SDLK_F2 used to just display one blue hex. Replaced with F3");
                             }
-							 
+                             
+
                             if( event.key.keysym.sym == SDLK_F3 )
-                            {	
+                            {
                                 writeln("SDLK_F3");
-                                h.initializeHexTextures(g);  								
+                                h.initializeHexTextures(g);
                                 h.displayHexTextures();
-								//writeln("g = ", g);
+                                //writeln("g = ", g);
                                 enteringLandOfPathFinding( h, g );
-								writeln("After call");
-							}
-                            break;							
-													
-						case SDL_MOUSEBUTTONDOWN:
+                                writeln("After call");
+                            }
+
+                            if( event.key.keysym.sym == SDLK_F12 )
+                            {   
+                                writeln("F12 Key Pressed");
+                                //h.initializeHexTextures(g);
+                                //h.displayHexTextures();
+                                //writeln("g = ", g);
+                                enteringLandOfPathFinding( h, g );
+                                h.displayHexTextures();
+                            }
+                            break;
+
+
+                        case SDL_MOUSEBUTTONDOWN:
                            if( event.button.button == SDL_BUTTON_LEFT )
                             {
                                 SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
 
                                 //writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
-								
-								// Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
-								
+                                
+                                // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+                                
                                 h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
 
                                 writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
-								
+                                
                                 if (getHexMouseClickedOn(h))
-                                {	
-									int x = h.selectedHex.row;   int y = h.selectedHex.col;
+                                {   
+                                    int x = h.selectedHex.row;   int y = h.selectedHex.col;
  
                                     HexPosition start;  
-									HexPosition end; 
-									
+                                    HexPosition end; 
+                                    
                                     start.row = 0;
                                     start.column = 0;
-									
+                                    
                                     end.row = x; 
                                     end.column = y;
-									
+                                    
                                     h.setHexRowTexture(g, start.row, Ids.solidBlue);
-									
-                                    h.setHexColTexture(g, start.column, Ids.solidWhite);									
+                                    
+                                    h.setHexColTexture(g, start.column, Ids.solidWhite);                                    
 
                                     h.setHexTexture(g, start, Ids.solidGreen);
 
                                     h.displayHexTextures();
-									
+                                    
                                     writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
-									
-									int distance = heuristic(start, end);
-									
-									writeln("DISTANCE = ", distance);
+                                    
+                                    int distance = heuristic(start, end);
+                                    
+                                    writeln("DISTANCE = ", distance);
  
-									D2_SC[4] t;
-                   					
-									t[0].x = h.hexes[x][y].sc[0].x;
-									t[0].y = h.hexes[x][y].sc[0].y;	
-									t[1].x = h.hexes[x][y].sc[1].x;
-									t[1].y = h.hexes[x][y].sc[1].y;
-									t[2].x = h.hexes[x][y].sc[3].x;
-									t[2].y = h.hexes[x][y].sc[3].y;	
-									t[3].x = h.hexes[x][y].sc[4].x;
-									t[3].y = h.hexes[x][y].sc[4].y;
+                                    D2_SC[4] t;
+                                    
+                                    t[0].x = h.hexes[x][y].sc[0].x;
+                                    t[0].y = h.hexes[x][y].sc[0].y; 
+                                    t[1].x = h.hexes[x][y].sc[1].x;
+                                    t[1].y = h.hexes[x][y].sc[1].y;
+                                    t[2].x = h.hexes[x][y].sc[3].x;
+                                    t[2].y = h.hexes[x][y].sc[3].y; 
+                                    t[3].x = h.hexes[x][y].sc[4].x;
+                                    t[3].y = h.hexes[x][y].sc[4].y;
 
                                     //writeln(t);
-									
-									SDL_RenderDrawLine( g.sdl.renderer, t[0].x, t[0].y, t[1].x, t[1].y);
-									SDL_RenderDrawLine( g.sdl.renderer, t[1].x, t[1].y, t[2].x, t[2].y);
-									SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
-									SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);									
+                                    
+                                    SDL_RenderDrawLine( g.sdl.renderer, t[0].x, t[0].y, t[1].x, t[1].y);
+                                    SDL_RenderDrawLine( g.sdl.renderer, t[1].x, t[1].y, t[2].x, t[2].y);
+                                    SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
+                                    SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);                                    
                                 }
-								
-								SDL_RenderPresent( g.sdl.renderer );
+                                
+                                SDL_RenderPresent( g.sdl.renderer );
 
 
-								
+                                
                             }
-                            break;			
+                            break;          
 
-                        default: break;											
+                        default: break;                                         
                     }
                 }
             }
             return 0;           
         }
     }  
-	
-	
+    
+    
     //printClipboardState();
     //printJoystickState();
     //printMonitorState();
@@ -377,12 +391,12 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
     WindowData data;
-	
+    
     g.glfw.window = glfwCreateWindow(g.glfw.SCREEN_WIDTH, g.glfw.SCREEN_HEIGHT, 
-	                                 "Black window - press F11 to toggle fullscreen, press ESC to exit", 
+                                     "Black window - press F11 to toggle fullscreen, press ESC to exit", 
                                      null, null);
     scope(exit) glfwDestroyWindow(g.glfw.window);
-	
+    
     if (!g.glfw.window) 
     { 
         glfwTerminate();
@@ -538,7 +552,7 @@ void printJoystickState()
             printf("Joystick %d not present\n", js);
         }
     }
-	
-	
+    
+    
 
 }

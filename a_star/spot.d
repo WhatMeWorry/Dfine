@@ -16,7 +16,7 @@ import core.stdc.stdlib;  // for exit()
 
 import honeycomb;
 import app;
-
+import textures.load_textures;
 
 struct Location   // screen cordinates 2d point
 {
@@ -71,7 +71,8 @@ struct Spot
     +/
 
     Location location = Location(-1,-1);   // each spot needs to know where it is on the hexboard
-    Location[6] neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), Location(-1,-1), Location(-1,-1), Location(-1,-1)];  // ignoring edges of a hex board, each hex has 6 adjoining neighbors	
+    Location[6] neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), Location(-1,-1), 
+                             Location(-1,-1), Location(-1,-1)];  // ignoring edges, each hex has 6 adjoining neighbors
     uint f;
     uint g;
     uint h;
@@ -280,7 +281,7 @@ int heuristic(HexPosition a, HexPosition b)
             delta.run = abs(a.column - b.column);
             delta.rise = abs(a.row - b.row);
 
-            int hexesToCutOff = delta.run / 2;  // did not need a float	
+            int hexesToCutOff = delta.run / 2;  // did not need a float
 
             //writeln("hexesToCutOff = ", hexesToCutOff);
 
@@ -300,12 +301,12 @@ int heuristic(HexPosition a, HexPosition b)
 
             int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float
 
-            //writeln("hexesToCutOff = ", hexesToCutOff);	
+            //writeln("hexesToCutOff = ", hexesToCutOff);
 
             if (delta.rise <= hexesToCutOff)
                 length = delta.run;  
             else
-                length = delta.run + abs(delta.rise - hexesToCutOff);	
+                length = delta.run + abs(delta.rise - hexesToCutOff);
             return length;
         }
     }
@@ -321,14 +322,14 @@ int heuristic(HexPosition a, HexPosition b)
             delta.rise = abs(a.row - b.row);
 
             //int hexesToCutOff = delta.run / 2;  // did not need a float
-            int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
+            int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float
 
             //writeln("hexesToCutOff = ", hexesToCutOff);
 
             if (delta.rise <= hexesToCutOff)
                 length = delta.run;  
             else
-                length = delta.run + abs(delta.rise - hexesToCutOff);	
+                length = delta.run + abs(delta.rise - hexesToCutOff);
             return length;
         }
         if ((quad == 3) || (quad == 4))
@@ -339,14 +340,14 @@ int heuristic(HexPosition a, HexPosition b)
             delta.run = abs(a.column - b.column);
             delta.rise = abs(a.row - b.row);
 
-            //int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float	
-            int hexesToCutOff = delta.run / 2;  // did not need a float	
-            //writeln("hexesToCutOff = ", hexesToCutOff);	
+            //int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float
+            int hexesToCutOff = delta.run / 2;  // did not need a float
+            //writeln("hexesToCutOff = ", hexesToCutOff);
 
             if (delta.rise <= hexesToCutOff)
                 length = delta.run;  
             else
-                length = delta.run + abs(delta.rise - hexesToCutOff);	
+                length = delta.run + abs(delta.rise - hexesToCutOff);
             return length;
         }
     }
@@ -372,16 +373,16 @@ void displaySet(ref Spot[] set, string comment = "")
     writeln("");
     if (set.length > 0)
     {
-        writeln("set ", comment, " has the following elements");
+        //writeln("set ", comment, " has the following elements");
         foreach(elem; set)
         {
-            write("    ", elem.location);
+            //write("    ", elem.location);
         }
-        writeln();
+        //writeln();
     }
     else
     {
-        writeln("set ", comment, " is empty");
+        //writeln("set ", comment, " is empty");
     }
 
 }
@@ -504,7 +505,7 @@ void buildShortestPath(Spot current, ref HexBoard h)
 // 2) No nodes in the openSet remain to be evaluated. This means that there is no solution.
 
 
-// Spot[][] spots;    // put in HexBoard object. So a hexBoard "has-a" spots object	
+// Spot[][] spots;    // put in HexBoard object. So a hexBoard "has-a" spots object
 
 Spot[] openSet;    // needs to be evaluated
 Spot[] closedSet;  // stores all nodes that have finished being evaluated. Don't need to revisit
@@ -557,9 +558,9 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     start.h = heuristic( cast(HexPosition) start.location, cast(HexPosition) end);  // heuristic
     start.f = start.g + start.h;
 
-    writeln("start.g = ", start.g);
-    writeln("start.h = ", start.h);
-    writeln("start.f = ", start.f);	
+    //writeln("start.g = ", start.g);
+    //writeln("start.h = ", start.h);
+    //writeln("start.f = ", start.f);
 
     openSet ~= start;  // put the start node on the openList (leave its f at zero)
 
@@ -572,9 +573,9 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         current = lowestFscore(c, openSet);  // find the node with the smallest f value.
                                              // set the current spot to the spot with the least f value
 
-        writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        //writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         writeln("Current = ", current.location);
-        writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        //writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         //writeAndPause();
 
         if (current.location == end)
@@ -594,6 +595,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
             foreach( p; path)
             {
                 writeln("p = ", p);
+                hB.setHexTexture(g, cast(HexPosition) p, Ids.solidGreen);
             }
 
             /+
@@ -629,10 +631,10 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
             Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
-            writeln();
-            writeln("------------------------------------------");
+            //writeln();
+            //writeln("------------------------------------------");
             writeln("neighbor = ", neighbor);
-            writeln("------------------------------------------");
+            //writeln("------------------------------------------");
             //writeAndPause();
 
             if (closedSet.excludes(neighbor))  // only proceed with this neighbor if it hasn't already been evaluated.
@@ -641,22 +643,22 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
                 tempG = current.g + distance;
 
-                writeln("tempG = ", tempG, "    distance = ", distance);
+                //writeln("tempG = ", tempG, "    distance = ", distance);
 
                 // is this a better path than before?
 
                 if (openSet.excludes(neighbor))  // if neighbor is not in openSet, then add it
                 {
-                    writeln("place neighbor in openSet");
+                    //writeln("place neighbor in openSet");
                     openSet ~= neighborSpot;
                 }
                 else
                 {
-                    writeln("neighbor WAS IN OPENSET");
+                    //writeln("neighbor WAS IN OPENSET");
                     if (tempG >= neighborSpot.g)
                     {
                         // No, it's not a better path
-                        writeln("No, it is not a better path");
+                        //writeln("No, it is not a better path");
                         continue;
                     }
                 } 
@@ -670,9 +672,9 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
                 hB.spots[neighborSpot.location.r][neighborSpot.location.c].previous = current.location;
 
-                writeln("================== ANOTHER NEIGHBOR PROCESSED ==================================");
-                writeln("neighborSpot.location f g h = ", neighborSpot.location, " ", neighborSpot.f, " ", neighborSpot.g, " ", neighborSpot.h);
-                writeln("neighborSpot.previous = ", neighborSpot.previous);
+                //writeln("================== ANOTHER NEIGHBOR PROCESSED ==================================");
+                //writeln("neighborSpot.location f g h = ", neighborSpot.location, " ", neighborSpot.f, " ", neighborSpot.g, " ", neighborSpot.h);
+                //writeln("neighborSpot.previous = ", neighborSpot.previous);
             }
         }
         writeln("finished with neighbors for current");

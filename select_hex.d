@@ -74,15 +74,15 @@ bool clickedInSmallTriangle(D2_NDC mouseClick, D2_NDC hexCenter, float radius)
 
     float adjacent = mouseClick.x - leftPointX;
     float opposite = mouseClick.y - leftPointY;
-	
+    
     // tan(theta) = opposite / adjacent     
-	
+    
     float angle = opposite / adjacent;  // opposite is positive for hex sides /  (leaning Southwest to Northeast)
                                         // opposite is negative for hex sides \  (leaning Northwest to Southeast)
     if (angle >= 0.0)            
         return (angle > tanOf60);    // angle is positive
     else                           
-        return (angle < tanOf300);	 // angle is negative		
+        return (angle < tanOf300);     // angle is negative        
 }
 
 
@@ -115,13 +115,13 @@ bool getHexMouseClickedOn( ref HexBoard h)
     //   |/__________|__\________|/__________|__\________|/__________|  \    
     //   |\          |  /        |\          |  /        |\          |  /
     //   |Lower Left |Lower Right| Lower Left|Lower Right| Lower Left| Lower Right
-    //   |__\________|/__________|__\________|/__________|__\________|/__	
-	
+    //   |__\________|/__________|__\________|/__________|__\________|/__    
+    
     float offsetFromBottom = h.mouseClick.ndc.y - (-1.0);
-	
+    
     uint gridRow = roundTo!uint(floor(offsetFromBottom / h.apothem));
 
-    float offsetFromLeft = h.mouseClick.ndc.x - (-1.0);						
+    float offsetFromLeft = h.mouseClick.ndc.x - (-1.0);
 
     uint gridCol = roundTo!uint(floor(offsetFromLeft / (h.radius + h.halfRadius)));
 
@@ -129,12 +129,12 @@ bool getHexMouseClickedOn( ref HexBoard h)
     if (h.mouseClick.ndc.x > h.edge.right)  // clicked to the right of the hex board's right edge
     {
         writeln("Clicked outside of the hex board's right edge");
-        return false;						
+        return false;
     }
     if (h.mouseClick.ndc.y > h.edge.top)    // clicked above the hex board's top edge
     {
         writeln("Clicked above the hex board's top edge");
-        return false;						
+        return false;
     }
 
     //writeln("[gridRow,gridCol] = [", gridRow, ",", gridCol, "]");
@@ -151,7 +151,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
     //   |___________|___________|___________|___________|___________|___    
     //   |           |           |           |           |           |   
     //   |Lower Left |Lower Right| Lower Left|Lower Right| Lower Left| Lower Right
-    //   |___________|___________|___________|___________|___________|___	
+    //   |___________|___________|___________|___________|___________|___    
 
 
     // We can exclude 3/4 of the hexBoard just by finding the quadrant that was mouse clicked on
@@ -164,48 +164,48 @@ bool getHexMouseClickedOn( ref HexBoard h)
         if (gridCol.isEven)
             quadrant = Quads.LL; // (e,e)
         else
-            quadrant = Quads.LR; // (e,o)					
+            quadrant = Quads.LR; // (e,o)
     }
     else // gridRow isOdd
     {
         if (gridCol.isEven)
             quadrant = Quads.UL; // (o,e)
         else
-            quadrant = Quads.UR; // (o,o)					
+            quadrant = Quads.UR; // (o,o)
     }
 
     int hexRow = h.invalid;
-    int hexCol = h.invalid;					
+    int hexCol = h.invalid;
 
     D2_NDC hexCenter;
-	
+    
     //================================= UL ========================================= 
   
     if (quadrant == Quads.UL)   // Upper Left Quadrant
-    { 					
+    {
         hexRow = (gridRow-1) / 2;  // UL gridRows = {1, 3, 5, 7,...} mapped to row = {0, 1, 2, 3,...}
         hexCol = gridCol;
 
-        hexCenter = h.hexes[hexRow][hexCol].center;	
-		
-        if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))	 					
+        hexCenter = h.hexes[hexRow][hexCol].center;
+
+        if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
         {
             if(hexCol == 0)  // corner case if select small triangle on far left of board  
             {  
-				writeln("Select small triangle on far left of board");
+                writeln("Select small triangle on far left of board");
                 return false;
             }
             else
             {
-                hexCol -= 1;		
-            }            
+                hexCol -= 1;
+            }
         }
-		
+
         h.selectedHex.row = hexRow;
-        h.selectedHex.col = hexCol;		
+        h.selectedHex.col = hexCol;
  
-        return true;		
-    }	
+        return true;
+    }
 
     //================================= LR ========================================= 
 
@@ -214,7 +214,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
         if (gridRow >= 1)  
         {
             hexRow = (gridRow/2) - 1;    // LR gridRows = {2, 4, 6, 8,...}  mapped to row = {0, 1, 2, 3,...}
-            hexCol = gridCol;	         //                0 handled by else block below				
+            hexCol = gridCol;             //                0 handled by else block below
  
             hexCenter = h.hexes[hexRow][hexCol].center;
 
@@ -225,57 +225,57 @@ bool getHexMouseClickedOn( ref HexBoard h)
             }
         }
         else   // degenerate case, only for very bottom row on hexboard
-        {							
+        {
             hexRow = 0; 
             hexCol = gridCol;
-							
+
             hexCenter = h.hexes[hexRow][hexCol].center;
-							
+
             hexCenter.y = (hexCenter.y - h.perpendicular);
-						
+
             if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
             {
-                hexCol -= 1;	
+                hexCol -= 1;
             }
             else
             {
-                h.selectedHex.row = h.invalid; 
-                h.selectedHex.col = h.invalid;	
-                return false;				
+                h.selectedHex.row = h.invalid;
+                h.selectedHex.col = h.invalid;
+                return false;
             }
         }
-		
-        h.selectedHex.row = hexRow;				
-        h.selectedHex.col = hexCol;				
-        return true;		
+        
+        h.selectedHex.row = hexRow;
+        h.selectedHex.col = hexCol;
+        return true;
     }
 
-    //================================= UR =========================================						
-	
+    //================================= UR =========================================
+    
     if (quadrant == Quads.UR)    // Upper Right Quadrant
     { 
         hexRow = (gridRow-1) / 2;    // UR gridRows = {1, 3, 5, 7,...} mapped to row = {0, 1, 2, 3,...}
-        hexCol = gridCol;					
+        hexCol = gridCol;
  
         hexCenter = h.hexes[hexRow][hexCol].center;
 
         if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
         {
-            hexCol -= 1;								   
+            hexCol -= 1;
         }
-		
+        
         h.selectedHex.row = hexRow;
-        h.selectedHex.col = hexCol;	
-		
-        return true;   // always returns success because no degenerate case 		
-    }													
-	
-    //================================= LL =========================================						
-	
+        h.selectedHex.col = hexCol;    
+        
+        return true;   // always returns success because no degenerate case         
+    }
+    
+    //================================= LL =========================================
+    
     if (quadrant == Quads.LL)    // Lower Left Quadrant
     { 
         hexRow = gridRow / 2;    // gridRows = {0, 2, 4, 6,...} mapped to row = {0, 1, 2, 3,...}
-        hexCol = gridCol;	
+        hexCol = gridCol;
 
         hexCenter = h.hexes[hexRow][hexCol].center;
 
@@ -294,10 +294,10 @@ bool getHexMouseClickedOn( ref HexBoard h)
             }
         }
         h.selectedHex.row = hexRow;
-        h.selectedHex.col = hexCol;		
+        h.selectedHex.col = hexCol;
  
-        return true;				
-    }	
+        return true;
+    }
 
     return false;  // should never get here but if so just assume failure
 }
@@ -315,14 +315,14 @@ extern(C) void mouseButtonCallback(GLFWwindow* winMain, int button, int action, 
                 if (action == GLFW_PRESS)
                 {
                     double xPos, yPos;
-					
+                    
                 }
                 else if (action == GLFW_RELEASE)
                 {
                     //mouseButtonLeftDown = false;
                 }
-			    break;
-		    default: assert(0);
+                break;
+            default: assert(0);
         }
     }
     catch(Exception e)
