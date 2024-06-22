@@ -551,6 +551,20 @@ struct HexBoard
         }
     }
 
+
+    void clearAllHexTextures()
+    {
+        foreach(r; 0..maxRows)
+        {
+            foreach(c; 0..maxCols)
+            {    
+                hexes[r][c].texture = Texture(Ids.none, "", null);
+            }
+        }
+    }
+
+
+
     void setHexTexture(Globals g, HexPosition hex, Ids id)
     {
         hexes[hex.row][hex.column].texture = g.textures[id];
@@ -579,20 +593,76 @@ struct HexBoard
         {
             foreach(c; 0..maxCols)
             {
-                SDL_Rect dst;
+                if (hexes[r][c].texture.ptr != null)
+                {
+                    SDL_Rect dst;
                 
-                dst.x = hexes[r][c].texturePoint.sc.x;
-                dst.y = hexes[r][c].texturePoint.sc.y;
+                    dst.x = hexes[r][c].texturePoint.sc.x;
+                    dst.y = hexes[r][c].texturePoint.sc.y;
 
-                dst.w = sc.diameter;
-                dst.h = sc.perpendicular;
+                    dst.w = sc.diameter;
+                    dst.h = sc.perpendicular;
 
-                SDL_RenderCopy( renderer, hexes[r][c].texture.ptr, null, &dst );
+                    SDL_RenderCopy( renderer, hexes[r][c].texture.ptr, null, &dst );
                                 // Update window
-                // SDL_RenderPresent( renderer );  // DO OUTSIDE OF LOOP!!!
+                    // SDL_RenderPresent( renderer );  // DO OUTSIDE OF LOOP!!!
+                }
             }
         }
         SDL_RenderPresent( renderer );
+    }
+
+
+
+
+    void drawHexBoard()
+    {
+        SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
+        //Clear screen
+        SDL_RenderClear( g.sdl.renderer );
+
+        SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
+
+        //uint maxRows = numberOfRows();
+        //uint maxCols = numberOfColumns();
+        foreach(r; 0..maxRows)
+        {
+            foreach(c; 0..maxCols)
+            {  
+                // writeln("r = ", r, " c = ", c);
+
+                foreach(p; 0..6)
+                {
+                    SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].sc[0].x, 
+                                                        hexes[r][c].sc[0].y, 
+                                                        hexes[r][c].sc[1].x, 
+                                                        hexes[r][c].sc[1].y);
+                    SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].sc[1].x, 
+                                                        hexes[r][c].sc[1].y, 
+                                                        hexes[r][c].sc[2].x, 
+                                                        hexes[r][c].sc[2].y);
+                    SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].sc[2].x, 
+                                                        hexes[r][c].sc[2].y, 
+                                                        hexes[r][c].sc[3].x, 
+                                                        hexes[r][c].sc[3].y);
+                    SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].sc[3].x, 
+                                                        hexes[r][c].sc[3].y, 
+                                                        hexes[r][c].sc[4].x, 
+                                                        hexes[r][c].sc[4].y);
+                    SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].sc[4].x, 
+                                                        hexes[r][c].sc[4].y, 
+                                                        hexes[r][c].sc[5].x, 
+                                                        hexes[r][c].sc[5].y);
+                    SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].sc[5].x, 
+                                                        hexes[r][c].sc[5].y, 
+                                                        hexes[r][c].sc[0].x, 
+                                                        hexes[r][c].sc[0].y);
+                }
+            }
+        }
+
+        // Update screen
+        SDL_RenderPresent( g.sdl.renderer );
     }
     
 }

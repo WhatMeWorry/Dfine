@@ -186,12 +186,11 @@ int main()
 
             //Clear screen
             SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
+			
+			//Clear screen
             SDL_RenderClear( g.sdl.renderer );
 
-            //Render red filled quad
-            //SDL_Rect fillRect = { g.sdl.SCREEN_WIDTH / 4, g.sdl.SCREEN_HEIGHT / 4, g.sdl.SCREEN_WIDTH / 2, g.sdl.SCREEN_HEIGHT / 2 };
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
-            //SDL_RenderFillRect( g.sdl.renderer, &fillRect );
 
             D2_SC[6] s;
             uint maxRows = h.numberOfRows();
@@ -280,11 +279,13 @@ int main()
                                 SDL_FreeSurface(screenshot); 
                             }                           
                             
-                            if( event.key.keysym.sym == SDLK_F2 )
+                            if( event.key.keysym.sym == SDLK_DELETE )
                             {
-                                writeln("SDLK_F2 used to just display one blue hex. Replaced with F3");
+                                writeln("SDLK_DELETE used to just clear out all hex textures");
+                                h.clearAllHexTextures();
+								h.drawHexBoard;
                             }
-                             
+
 
                             if( event.key.keysym.sym == SDLK_F3 )
                             {

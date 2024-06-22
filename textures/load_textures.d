@@ -21,6 +21,7 @@ enum Ids
     solidWhite,
     //bricks,
     //nops,
+    none = -1,
     end         // always leave this at end of the enum    
 } 
 
