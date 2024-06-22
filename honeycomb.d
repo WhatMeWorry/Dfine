@@ -312,7 +312,7 @@ struct HexBoard
         hexes = new Hex[][](maxRows, maxCols);
 		
 		spots = new Spot[][](maxRows, maxCols);
-		
+
 		foreach(i; 0..maxRows)
         {
             foreach(j; 0..maxCols)

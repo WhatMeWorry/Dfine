@@ -546,9 +546,9 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     start.h = heuristic( cast(HexPosition) start.location, cast(HexPosition) end);  // heuristic
     start.f = start.g + start.h;
 
-    //writeln("start.g = ", start.g);
-    //writeln("start.h = ", start.h);
-    //writeln("start.f = ", start.f);
+    writeln("start.g = ", start.g);
+    writeln("start.h = ", start.h);
+    writeln("start.f = ", start.f);
 
     openSet ~= start;  // put the start node on the openList (leave its f at zero)
 
@@ -564,9 +564,9 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         current = lowestFscore(c, openSet);  // find the node with the smallest f value.
                                              // set the current spot to the spot with the least f value
 
-        //writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        //writeln("Current = ", current.location);
-        //writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        writeln("Current = ", current.location);
+        writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         //writeAndPause();
 
         if (current.location == end)
@@ -611,10 +611,10 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
             Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
-            //writeln();
-            //writeln("------------------------------------------");
-            //writeln("neighbor = ", neighbor);
-            //writeln("------------------------------------------");
+            writeln();
+            writeln("------------------------------------------");
+            writeln("neighbor = ", neighbor);
+            writeln("------------------------------------------");
             //writeAndPause();
 
             if (closedSet.excludes(neighbor))  // only proceed with this neighbor if it hasn't already been evaluated.
@@ -622,17 +622,17 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                 //distance = heuristic( cast(HexPosition) neighborSpot.location, cast(HexPosition) current.location);
 
                 distance = neighborSpot.terrainCost;
-				//writeln("distance = ", distance);
+				writeln("distance = ", distance);
 
                 tempG = current.g + distance;
 
-                //writeln("tempG = ", tempG, "    distance = ", distance);
+                writeln("tempG = ", tempG, "    distance = ", distance);
 
                 // is this a better path than before?
 
                 if (openSet.excludes(neighbor))  // if neighbor is not in openSet, then add it
                 {
-                    //writeln("place neighbor in openSet");
+                    writeln("place neighbor in openSet");
                     openSet ~= neighborSpot;
                 }
                 else
@@ -641,7 +641,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                     if (tempG >= neighborSpot.g)
                     {
                         // No, it's not a better path
-                        //writeln("No, it is not a better path");
+                        writeln("No, it is not a better path");
                         continue;
                     }
                 } 
@@ -655,12 +655,12 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
                 hB.spots[neighborSpot.location.r][neighborSpot.location.c].previous = current.location;
 
-                //writeln("================== ANOTHER NEIGHBOR PROCESSED ==================================");
-                //writeln("neighborSpot.location f g h = ", neighborSpot.location, " ", neighborSpot.f, " ", neighborSpot.g, " ", neighborSpot.h);
-                //writeln("neighborSpot.previous = ", neighborSpot.previous);
+                writeln("================== ANOTHER NEIGHBOR PROCESSED ==================================");
+                writeln("neighborSpot.location f g h = ", neighborSpot.location, " ", neighborSpot.f, " ", neighborSpot.g, " ", neighborSpot.h);
+                writeln("neighborSpot.previous = ", neighborSpot.previous);
             }
         }
-        //writeln("finished with neighbors for current");
+        writeln("finished with neighbors for current");
     }
     writeln("openSet is empty");
 
