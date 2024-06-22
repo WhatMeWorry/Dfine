@@ -114,8 +114,8 @@ int main()
     g.sdl.screenHeight = 1000;
 
 
-    int rowCount = 25;
-    int colCount = 25;
+    int rowCount = 3;
+    int colCount = 3;
 
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
 
@@ -179,15 +179,21 @@ int main()
             }
             h.setRenderOfHexboard(g.sdl.renderer);
 
-            //h.initializeHexTextures(g);
             g.textures = load_textures(g);
+
+            h.initializeHexTextures(g);
 
             writeln(g.textures);
 
+            h.drawHexBoard;
+
+            h.displayHexTextures();
+
+            /+
             //Clear screen
             SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
-			
-			//Clear screen
+
+            //Clear screen
             SDL_RenderClear( g.sdl.renderer );
 
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
@@ -228,6 +234,13 @@ int main()
 
             // Update screen
             SDL_RenderPresent( g.sdl.renderer );
+            +/
+
+
+
+
+
+
 
             // https://thenumb.at/cpp-course/sdl2/03/03.html
 
@@ -286,7 +299,6 @@ int main()
 								h.drawHexBoard;
                             }
 
-
                             if( event.key.keysym.sym == SDLK_F3 )
                             {
                                 writeln("SDLK_F3");
@@ -310,11 +322,11 @@ int main()
 
 
                         case SDL_MOUSEBUTTONDOWN:
-                           if( event.button.button == SDL_BUTTON_LEFT )
+                            if( event.button.button == SDL_BUTTON_LEFT )
                             {
                                 SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
 
-                                //writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
+                                writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
                                 
                                 // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
                                 
@@ -335,19 +347,21 @@ int main()
                                     end.row = x; 
                                     end.column = y;
                                     
-                                    h.setHexRowTexture(g, start.row, Ids.solidBlue);
+                                    //h.setHexRowTexture(g, start.row, Ids.solidRed);
                                     
-                                    h.setHexColTexture(g, start.column, Ids.solidWhite);                                    
+                                    //h.setHexColTexture(g, start.column, Ids.solidRed);                                    
 
-                                    h.setHexTexture(g, start, Ids.solidGreen);
+                                    //h.setHexTexture(g, start, Ids.solidBlack);
+									                    // h.selectedHex has end point
+									enteringLandOfPathFinding( h, g );
 
                                     h.displayHexTextures();
                                     
-                                    writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
+                                    //writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
                                     
-                                    int distance = heuristic(start, end);
+                                    //int distance = heuristic(start, end);
                                     
-                                    writeln("DISTANCE = ", distance);
+                                    //writeln("DISTANCE = ", distance);
  
                                     D2_SC[4] t;
                                     
@@ -367,11 +381,8 @@ int main()
                                     SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
                                     SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);                                    
                                 }
-                                
+                         
                                 SDL_RenderPresent( g.sdl.renderer );
-
-
-                                
                             }
                             break;          
 

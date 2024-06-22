@@ -69,6 +69,12 @@ Texture[] load_textures(Globals g)
     if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
 
+    t.id = Ids.solidBrown; 
+    t.fileName = "hexBrown.png";
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;
+
     t.id = Ids.solidBlack; 
     t.fileName = "hexBlack.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));
@@ -81,11 +87,6 @@ Texture[] load_textures(Globals g)
     if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
 
-    t.id = Ids.solidBrown; 
-    t.fileName = "hexBrown.png";
-    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));
-    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
-    textures ~= t;
 /+
     t.id = Ids.bricks; 
     t.fileName = "hexBricks.png";

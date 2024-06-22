@@ -77,6 +77,8 @@ struct Spot
     uint g;
     uint h;
     Location previous = Location(-1,-1);
+	
+	uint terrainCost;
 
 }
 
@@ -370,19 +372,18 @@ bool isNotEmpty(Spot[] set)
 
 void displaySet(ref Spot[] set, string comment = "")
 {
-    writeln("");
     if (set.length > 0)
     {
-        //writeln("set ", comment, " has the following elements");
+        writeln("set ", comment, " has the following elements");
         foreach(elem; set)
         {
-            //write("    ", elem.location);
+            write("    ", elem.location, " ");
         }
         //writeln();
     }
     else
     {
-        //writeln("set ", comment, " is empty");
+        writeln("set ", comment, " is empty");
     }
 
 }
@@ -521,36 +522,23 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 {
     writeln("inside enteringLandOfPathFinding");
 
+    writeln("path.length = ", path.length);
+
     Location begin;
     Location end;
 
     begin.r = 0;
     begin.c = 0;
-    end.r = hB.maxRows - 1;
-    end.c = hB.maxCols - 1;  
-
-    hB.spots = new Spot[][](hB.maxRows, hB.maxCols);
-
-    //writeln("hB.spots = ", hB.spots);
-
-    foreach(r; 0..(hB.maxRows))
-    {
-        foreach(c; 0..(hB.maxCols))
-        {
-            //writeln("hB.hexes[r][c].texture.id = ", hB.hexes[r][c].texture.id);
-            hB.spots[r][c].location.r = r;
-            hB.spots[r][c].location.c = c;
-        }
-    }
+    //end.r = hB.maxRows - 1;
+    //end.c = hB.maxCols - 1;  
+	end.r = hB.selectedHex.row;
+	end.c = hB.selectedHex.col;
     
     addNeighbors(hB);
 
     //===========================================================================
     //  Path finding starts here
     //===========================================================================
-
-    //writeln("hB.spots = ", hB.spots);
-
 
     start = hB.spots[begin.r][begin.c];
 
@@ -564,9 +552,12 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
     openSet ~= start;  // put the start node on the openList (leave its f at zero)
 
+
+    displaySet(openSet, "openSet BEFORE WHILE");
+	
     while (openSet.isNotEmpty)     // while there are spots that still need evaluating
     {
-        displaySet(openSet, "openset");
+        displaySet(openSet, "openSet");
         //writeAndPause("while openSet is not empty");
 
         ulong c;                             
@@ -574,14 +565,14 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                                              // set the current spot to the spot with the least f value
 
         //writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        writeln("Current = ", current.location);
+        //writeln("Current = ", current.location);
         //writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         //writeAndPause();
 
         if (current.location == end)
         {
             //writeln("hB.spots = ", hB.spots);
-            buildShortestPath(current, hB);
+            //buildShortestPath(current, hB);
             writeln("DONE!!!");
 
             Location[] path;
@@ -595,20 +586,9 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
             foreach( p; path)
             {
                 writeln("p = ", p);
-                hB.setHexTexture(g, cast(HexPosition) p, Ids.solidGreen);
+                hB.setHexTexture(g, cast(HexPosition) p, Ids.solidBlack);
             }
 
-            /+
-            foreach(i; 0..(hB.maxRows))
-            {
-                foreach(j; 0..(hB.maxCols))
-                {
-                    writeln(" i, j ", i, ",", j);
-                    writeln("hB.spots[i][j] = ", hB.spots[i][j]);
-                    //writeln("hB.spots[i][j].previous = ",  hB.spots[i][j].previous);
-                }
-            }
-            +/
             return;
         }
 
@@ -618,8 +598,8 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         openSet = openSet.remove(c);  // openSet.remove(current)  remove the currentNode from the openList
         closedSet ~= current;         // closedSet.push(current)  add the currentNode to the closedList
 
-        displaySet(openSet, "openSet");
-        displaySet(closedSet, "closedSet");
+        //displaySet(openSet, "openSet");
+        //displaySet(closedSet, "closedSet");
 
         Location[] neighbors = getNeighbors(current);   // get neighbors of current and cull out the (-1,-1)
 
@@ -633,13 +613,16 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
             Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
             //writeln();
             //writeln("------------------------------------------");
-            writeln("neighbor = ", neighbor);
+            //writeln("neighbor = ", neighbor);
             //writeln("------------------------------------------");
             //writeAndPause();
 
             if (closedSet.excludes(neighbor))  // only proceed with this neighbor if it hasn't already been evaluated.
             {
-                distance = heuristic( cast(HexPosition) neighborSpot.location, cast(HexPosition) current.location);
+                //distance = heuristic( cast(HexPosition) neighborSpot.location, cast(HexPosition) current.location);
+
+                distance = neighborSpot.terrainCost;
+				//writeln("distance = ", distance);
 
                 tempG = current.g + distance;
 
@@ -677,8 +660,8 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                 //writeln("neighborSpot.previous = ", neighborSpot.previous);
             }
         }
-        writeln("finished with neighbors for current");
+        //writeln("finished with neighbors for current");
     }
-    writeln("emptyset is empty");
+    writeln("openSet is empty");
 
 }

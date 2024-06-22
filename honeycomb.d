@@ -310,6 +310,17 @@ struct HexBoard
         edge.right  = edge.left + (maxCols * (radius + halfRadius));             
         
         hexes = new Hex[][](maxRows, maxCols);
+		
+		spots = new Spot[][](maxRows, maxCols);
+		
+		foreach(i; 0..maxRows)
+        {
+            foreach(j; 0..maxCols)
+            {
+                spots[i][j].location.r = i;
+                spots[i][j].location.c = j;
+            }
+        }
 
         initializeHexBoard();
         
@@ -541,15 +552,44 @@ struct HexBoard
         {
             foreach(c; 0..maxCols)
             {    
-                // Generate an integer in 0,1,2,3,4
-                auto a = uniform(0, 6, rnd);
+                // Generate an integer in 0,1,2,3,4,5
+                auto a = uniform(0, 10, rnd);
                 //hexes[r][c].texture.id = g.textures[a].id;
                 //hexes[r][c].texture.fileName = g.textures[a].fileName;
                 //hexes[r][c].texture.ptr = g.textures[a].ptr;
-                hexes[r][c].texture = g.textures[a];
+				
+                switch(a) 
+                {
+                    case 0,1,2,3,4:
+					    {
+                            writeln("solidGreen");
+                            hexes[r][c].texture = g.textures[Ids.solidGreen];
+							spots[r][c].terrainCost = 1;
+						}
+                        break;
+                    case 5,6,7:
+					    {
+                            writeln("solidBrown");
+                            hexes[r][c].texture = g.textures[Ids.solidBrown];
+							spots[r][c].terrainCost = 9;
+						}
+                        break;
+                    case 8,9:
+					    {
+                            writeln("solidBlue");
+                            hexes[r][c].texture = g.textures[Ids.solidBlue];
+							spots[r][c].terrainCost = 999;
+						}
+                        break;          
+                    default: break;                                         
+                }
+                //hexes[r][c].texture = g.textures[a];
+	
             }
         }
     }
+
+
 
 
     void clearAllHexTextures()
@@ -617,20 +657,23 @@ struct HexBoard
 
     void drawHexBoard()
     {
-        SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, 0xFF );
+        SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, SDL_ALPHA_OPAQUE );
         //Clear screen
         SDL_RenderClear( g.sdl.renderer );
 
-        SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
+        SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, SDL_ALPHA_OPAQUE );        
 
-        //uint maxRows = numberOfRows();
-        //uint maxCols = numberOfColumns();
         foreach(r; 0..maxRows)
         {
             foreach(c; 0..maxCols)
             {  
                 // writeln("r = ", r, " c = ", c);
-
+                SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &hexes[r][c].sc[0], 6);
+                SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].sc[5].x,  // close off the hex  
+                                                    hexes[r][c].sc[5].y, 
+                                                    hexes[r][c].sc[0].x, 
+                                                    hexes[r][c].sc[0].y);
+                /+
                 foreach(p; 0..6)
                 {
                     SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].sc[0].x, 
@@ -658,6 +701,7 @@ struct HexBoard
                                                         hexes[r][c].sc[0].x, 
                                                         hexes[r][c].sc[0].y);
                 }
+                +/
             }
         }
 
