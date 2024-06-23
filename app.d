@@ -310,6 +310,12 @@ int main()
                                 writeln("After call");
                             }
 
+                            /+if( event.key.keysym.sym == SDLK_F8 )
+                            {
+                                writeln("SDLK_F8");
+								playWithSpots( h, g );
+                            }+/
+
                             if( event.key.keysym.sym == SDLK_F12 )
                             {   
                                 writeln("F12 Key Pressed");

@@ -18,6 +18,7 @@ import honeycomb;
 import app;
 import textures.load_textures;
 
+
 struct Location   // screen cordinates 2d point
 {
     int r;
@@ -28,15 +29,13 @@ struct Location   // screen cordinates 2d point
 
 void debugSpots( ref HexBoard hB )
 {
+    writeln("Spots = ");
     foreach(i; 0..(hB.maxRows))
     {
         foreach(j; 0..(hB.maxCols))
         {
-            writeln("spots[i][j].location = ", hB.spots[i][j].location);
-            //writeln("neighbors = ", hB.spots[i][j].neighbors);
-            writeln("f g h = ", hB.spots[i][j].f, " ", hB.spots[i][j].g, " ", hB.spots[i][j].h);
-            //writeln("previous = ", hB.spots[i][j].previous);
-            writeln("terrainCost = ", hB.spots[i][j].terrainCost);
+            writeln(hB.spots[i][j].location, "  f g h = ", hB.spots[i][j].f, " ", hB.spots[i][j].g, " ", 
+            hB.spots[i][j].h, "  terrain = ", hB.spots[i][j].terrainCost);
         }
     }
 }
@@ -377,7 +376,7 @@ int heuristic(HexPosition a, HexPosition b)
 // foo(variable, arguments)  ===== UFCS =====>  variable.foo(arguments)
 // isNotEmpty(set)           ===== UFCS =====>  set.isNotEmpty() or set.isNotEmpty
 
-bool isNotEmpty(Spot[] set)
+bool isNotEmpty(Location[] set)
 {
     if (set.length > 0)
         return true;
@@ -388,15 +387,15 @@ bool isNotEmpty(Spot[] set)
 
 
 
-void displaySet(ref Spot[] set, string comment = "")
+void displaySet(Location[] set, string comment = "")
 {
     writeln();
     if (set.length > 0)
     {
         writeln("set ", comment, " has the following elements");
-        foreach(elem; set)
+        foreach(element; set)
         {
-            write("    ", elem.location, " ");
+            write("    (", element.r, ",", element.c, ")" );
         }
         //writeln();
     }
@@ -454,12 +453,12 @@ bool includes(Spot[] set, Location element)
 // UFCS usage:  if (set.excludes(element))
 //                  // element is not in set 
 
-bool excludes(Spot[] set, Location element)
+bool excludes(Location[] set, Location item)
 {
-    foreach(e; set)
+    foreach(element; set)
     {
-        if (e.location == element)
-            return false;
+        if (element == item)    
+            return false;      // item is in the set
     }
     return true;
 }
@@ -468,30 +467,37 @@ bool excludes(Spot[] set, Location element)
 
 
 
-Location[] getNeighbors(Spot spot)
+Location[] getNeighbors(Location loc, ref HexBoard hB)
 {
     Location[] locs;
+	
+	Location[6] neighbors = hB.spots[loc.r][loc.c].neighbors;
 
-    foreach(loc; spot.neighbors)
+    foreach(n; neighbors)
     {
-        if (loc != invalidLoc)
-            locs ~= loc;
+        if (n != invalidLoc)  // strip out invalid neighbors (edge of hexboard)
+            locs ~= n;
     } 
     return locs;
 }
 
 
-Spot lowestFscore(ref ulong c, Spot[] set)
+Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
 {
-    Spot min;
+    Location min;
 
     assert(set.length > 0);
-    min = set[0];
+    //min = set[0];
+	writeln(".....................................................");
+	writeln("             lowestFscore");
+	writeln(".....................................................");
     foreach(int i, s; set)
     {
-        writeln("set[i] = ", set[i]);
-        writeln("s = ", s);
-        writeln("i = ", i);
+	    writeln("(", s.r, ",", s.c, ") f = ", hB.spots[s.r][s.c].f);
+        //writeln("set[i] = ", set[i]);
+        //writeln("s = ", s);
+        //writeln("i = ", i);
+        //writeln("spots[s.location.r][s.location.c].location = ", hB.spots[s.r][s.c].location);
         /+
         writeln("set[i].f = ",set[i].f, "   and min.f = ", min.f); 
         if (set[i].f < min.f)
@@ -499,7 +505,7 @@ Spot lowestFscore(ref ulong c, Spot[] set)
             min = set[i];
             c = i;
         }
-		+/
+        +/
     }
     
     return min;
@@ -532,10 +538,10 @@ void buildShortestPath(Spot current, ref HexBoard h)
 
 // Spot[][] spots;    // put in HexBoard object. So a hexBoard "has-a" spots object
 
-Spot[] openSet;    // needs to be evaluated
-Spot[] closedSet;  // stores all nodes that have finished being evaluated. Don't need to revisit
+Location[] openSet;    // needs to be evaluated
+Location[] closedSet;  // stores all nodes that have finished being evaluated. Don't need to revisit
 
-Spot current; // current is the node in openSet having the lowest f score
+Location current; // current is the node in openSet having the lowest f score
 Spot start;   // the beginning node (spot, hex) of the path   
 
 Location[] path;  // hold shortest path
@@ -572,7 +578,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 	
 	hB.spots[begin.r][begin.c] = start;
 
-    openSet ~= start;  // put the start node on the openList (leave its f at zero)
+    openSet ~= start.location;  // put the start node on the openList (leave its f at zero)
 
 
     displaySet(openSet, "openSet BEFORE WHILE");
@@ -581,20 +587,21 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     {
         writeln();
         displaySet(openSet, "openSet");
-        //writeAndPause("while openSet is not empty");
+		
+        writeAndPause("while openSet is not empty");
 
         ulong c;                             
-        current = lowestFscore(c, openSet);  // find the node with the smallest f value.
+        current = lowestFscore(c, openSet, hB);  // find the node with the smallest f value.
                                              // set the current spot to the spot with the least f value
 
         writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        writeln("lowest F score in openset Current = ", current.location);
+        writeln("lowest F score in openset CURRENT = ", current);
 		//writeln("hB.spots = ", hB.spots);
 		
         writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         //writeAndPause();
 
-        if (current.location == end)
+        if (current == end)
         {
             //writeln("hB.spots = ", hB.spots);
             //buildShortestPath(current, hB);
@@ -628,7 +635,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         //displaySet(openSet, "openSet");
         //displaySet(closedSet, "closedSet");
 
-        Location[] neighbors = getNeighbors(current);   // get neighbors of current and cull out the (-1,-1)
+        Location[] neighbors = getNeighbors(current, hB);   // get neighbors of current and cull out the (-1,-1)
 
         // Time 32:15 in Coding Train Youtube video
         // all neighbors will be added to open set, but before we put them
@@ -651,7 +658,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                 distance = neighborSpot.terrainCost;
 				writeln("distance = ", distance);
 
-                tempG = current.g + distance;
+                //tempG = current.g + distance;
 
                 writeln("tempG = ", tempG, "    distance = ", distance);
 
@@ -660,7 +667,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                 if (openSet.excludes(neighbor))  // if neighbor is not in openSet, then add it
                 {
                     writeln("place neighbor in openSet");
-                    openSet ~= neighborSpot;
+                    openSet ~= neighbor;
                 }
                 else
                 {
@@ -676,7 +683,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                 neighborSpot.g = tempG;
                 neighborSpot.h = heuristic( cast(HexPosition) neighborSpot.location, cast(HexPosition) end);
                 neighborSpot.f = neighborSpot.g + neighborSpot.h;
-                neighborSpot.previous = current.location;
+                //neighborSpot.previous = current.location;
 
                 hB.spots[neighbor.r][neighbor.c] = neighborSpot;
 
@@ -694,3 +701,49 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     writeln("openSet is empty");
 
 }
+
+/+
+struct Node
+{
+    Location loc;
+    int f;
+    int g;
+}
++/
+
+/+
+void displaySet(ref Node[] set)  // with or without ref, the f's were changed by the assignment
+{
+    foreach(i, n; set)
+    {
+        writeln("i = ", i );
+	    writeln("set[i] = ", set[i]);
+		set[i].f = 777;
+    }
+}
++/
+
+/+
+void playWithSpots( HexBoard hB, Globals g )
+{
+Node[] openSet;    
+Node[] closedSet;
+//      openSet = openSet.remove(c);  // remove the currentNode from the openSet
+//      closedSet ~= current;         // add the currentNode to the closedSet
+Node n1 = { Location(1, 1), 11, 11 };
+Node n2 = { Location(2, 2), 22, 22 };
+Node n3 = { Location(3, 3), 33, 33 };
+Node n4 = { Location(4, 4), 44, 44 };
+openSet ~= n2;
+openSet ~= n1;
+openSet ~= n4;
+openSet ~= n3;
+writeln("openSet = ", openSet);
+displaySet(openSet);
+writeln("openSet = ", openSet);
+openSet = openSet.remove(2);
+writeln("openSet = ", openSet);
+openSet = openSet.remove(1);
+writeln("openSet = ", openSet);
+}
++/
