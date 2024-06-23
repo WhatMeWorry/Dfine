@@ -24,6 +24,24 @@ struct Location   // screen cordinates 2d point
     int c;
 }
 
+
+
+void debugSpots( ref HexBoard hB )
+{
+    foreach(i; 0..(hB.maxRows))
+    {
+        foreach(j; 0..(hB.maxCols))
+        {
+            writeln("spots[i][j].location = ", hB.spots[i][j].location);
+            //writeln("neighbors = ", hB.spots[i][j].neighbors);
+            writeln("f g h = ", hB.spots[i][j].f, " ", hB.spots[i][j].g, " ", hB.spots[i][j].h);
+            //writeln("previous = ", hB.spots[i][j].previous);
+            writeln("terrainCost = ", hB.spots[i][j].terrainCost);
+        }
+    }
+}
+
+
 void writeAndPause(string s = "")
 {
     writeln();
@@ -372,6 +390,7 @@ bool isNotEmpty(Spot[] set)
 
 void displaySet(ref Spot[] set, string comment = "")
 {
+    writeln();
     if (set.length > 0)
     {
         writeln("set ", comment, " has the following elements");
@@ -385,7 +404,7 @@ void displaySet(ref Spot[] set, string comment = "")
     {
         writeln("set ", comment, " is empty");
     }
-
+   writeln();
 }
 
 
@@ -470,12 +489,17 @@ Spot lowestFscore(ref ulong c, Spot[] set)
     min = set[0];
     foreach(int i, s; set)
     {
-        //writeln("set[i].f = ",set[i].f, "   and min.f = ", min.f); 
+        writeln("set[i] = ", set[i]);
+        writeln("s = ", s);
+        writeln("i = ", i);
+        /+
+        writeln("set[i].f = ",set[i].f, "   and min.f = ", min.f); 
         if (set[i].f < min.f)
         {
             min = set[i];
             c = i;
         }
+		+/
     }
     
     return min;
@@ -520,19 +544,15 @@ Location invalidLoc = { -1, -1 };
 
 void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 {
-    writeln("inside enteringLandOfPathFinding");
-
-    writeln("path.length = ", path.length);
-
     Location begin;
     Location end;
 
     begin.r = 0;
     begin.c = 0;
-    //end.r = hB.maxRows - 1;
-    //end.c = hB.maxCols - 1;  
-	end.r = hB.selectedHex.row;
-	end.c = hB.selectedHex.col;
+    end.r = hB.maxRows - 1;
+    end.c = hB.maxCols - 1;  
+    //end.r = hB.selectedHex.row;
+    //end.c = hB.selectedHex.col;
     
     addNeighbors(hB);
 
@@ -549,6 +569,8 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     writeln("start.g = ", start.g);
     writeln("start.h = ", start.h);
     writeln("start.f = ", start.f);
+	
+	hB.spots[begin.r][begin.c] = start;
 
     openSet ~= start;  // put the start node on the openList (leave its f at zero)
 
@@ -557,6 +579,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 	
     while (openSet.isNotEmpty)     // while there are spots that still need evaluating
     {
+        writeln();
         displaySet(openSet, "openSet");
         //writeAndPause("while openSet is not empty");
 
@@ -565,7 +588,9 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                                              // set the current spot to the spot with the least f value
 
         writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        writeln("Current = ", current.location);
+        writeln("lowest F score in openset Current = ", current.location);
+		//writeln("hB.spots = ", hB.spots);
+		
         writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         //writeAndPause();
 
@@ -594,9 +619,11 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
         //displaySet(openSet, "openSet");
         //displaySet(closedSet, "closedSet");
+		
+        writeln("move currentNode from openList to closedSet");
 
-        openSet = openSet.remove(c);  // openSet.remove(current)  remove the currentNode from the openList
-        closedSet ~= current;         // closedSet.push(current)  add the currentNode to the closedList
+        openSet = openSet.remove(c);  // remove the currentNode from the openSet
+        closedSet ~= current;         // add the currentNode to the closedSet
 
         //displaySet(openSet, "openSet");
         //displaySet(closedSet, "closedSet");
@@ -651,13 +678,15 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                 neighborSpot.f = neighborSpot.g + neighborSpot.h;
                 neighborSpot.previous = current.location;
 
-                //Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
+                hB.spots[neighbor.r][neighbor.c] = neighborSpot;
 
-                hB.spots[neighborSpot.location.r][neighborSpot.location.c].previous = current.location;
+                //hB.spots[neighborSpot.location.r][neighborSpot.location.c].previous = current.location;
 
                 writeln("================== ANOTHER NEIGHBOR PROCESSED ==================================");
                 writeln("neighborSpot.location f g h = ", neighborSpot.location, " ", neighborSpot.f, " ", neighborSpot.g, " ", neighborSpot.h);
                 writeln("neighborSpot.previous = ", neighborSpot.previous);
+				
+				debugSpots( hB );
             }
         }
         writeln("finished with neighbors for current");

@@ -181,7 +181,7 @@ int main()
 
             g.textures = load_textures(g);
 
-            h.initializeHexTextures(g);
+            //h.initializeHexTextures(g);
 
             writeln(g.textures);
 
@@ -303,6 +303,7 @@ int main()
                             {
                                 writeln("SDLK_F3");
                                 h.initializeHexTextures(g);
+								h.debugSpots();
                                 h.displayHexTextures();
                                 //writeln("g = ", g);
                                 enteringLandOfPathFinding( h, g );

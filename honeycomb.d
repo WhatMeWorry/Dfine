@@ -562,21 +562,21 @@ struct HexBoard
                 {
                     case 0,1,2,3,4:
 					    {
-                            writeln("solidGreen");
+                            //writeln("solidGreen");
                             hexes[r][c].texture = g.textures[Ids.solidGreen];
 							spots[r][c].terrainCost = 1;
 						}
                         break;
                     case 5,6,7:
 					    {
-                            writeln("solidBrown");
+                            //writeln("solidBrown");
                             hexes[r][c].texture = g.textures[Ids.solidBrown];
 							spots[r][c].terrainCost = 9;
 						}
                         break;
                     case 8,9:
 					    {
-                            writeln("solidBlue");
+                            //writeln("solidBlue");
                             hexes[r][c].texture = g.textures[Ids.solidBlue];
 							spots[r][c].terrainCost = 999;
 						}
