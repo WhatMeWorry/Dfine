@@ -180,6 +180,8 @@ int main()
             h.setRenderOfHexboard(g.sdl.renderer);
 
             g.textures = load_textures(g);
+			
+			writeln("g.textures = ", g.textures);
 
             //h.initializeHexTextures(g);
 
@@ -307,6 +309,7 @@ int main()
                                 h.displayHexTextures();
                                 //writeln("g = ", g);
                                 enteringLandOfPathFinding( h, g );
+								h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
                                 writeln("After call");
                             }
 
@@ -325,6 +328,9 @@ int main()
                                 enteringLandOfPathFinding( h, g );
                                 h.displayHexTextures();
                             }
+
+							SDL_RenderPresent( g.sdl.renderer );  // refresh screen for any keydown event
+							
                             break;
 
 
@@ -395,6 +401,7 @@ int main()
 
                         default: break;                                         
                     }
+				    
                 }
             }
             return 0;           

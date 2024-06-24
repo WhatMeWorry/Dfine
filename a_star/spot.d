@@ -587,9 +587,9 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 		
         //writeAndPause("while openSet is not empty");
 
-        ulong c;                             
+        ulong c;
         current = lowestFscore(c, openSet, hB);  // find the node with the smallest f value.
-                                             // set the current spot to the spot with the least f value
+                                                 // set the current spot to the spot with the least f value
 
         writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         writeln("lowest F score in openset CURRENT = ", current);
@@ -615,7 +615,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
             foreach( p; path)
             {
                 writeln("p = ", p);
-                hB.setHexTexture(g, cast(HexPosition) p, Ids.solidBlack);
+                hB.setHexTexture(g, cast(HexPosition) p, Ids.blackDot);
             }
 
             return;
@@ -679,7 +679,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                 hB.spots[neighbor.r][neighbor.c].g = tempG;
 
                 hB.spots[neighbor.r][neighbor.c].h = neighborH;
-				
+
                 hB.spots[neighbor.r][neighbor.c].f = tempG + neighborH;
 
                 hB.spots[neighbor.r][neighbor.c].previous = current;

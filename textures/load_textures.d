@@ -19,6 +19,7 @@ enum Ids
     solidBrown,
     solidBlack,
     solidWhite,
+	blackDot,
     //bricks,
     //nops,
     none = -1,
@@ -83,6 +84,12 @@ Texture[] load_textures(Globals g)
 
     t.id = Ids.solidWhite; 
     t.fileName = "hexWhite.png";
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;
+	
+    t.id = Ids.blackDot; 
+    t.fileName = "blackDot.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));
     if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
