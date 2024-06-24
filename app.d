@@ -114,8 +114,8 @@ int main()
     g.sdl.screenHeight = 1000;
 
 
-    int rowCount = 3;
-    int colCount = 3;
+    int rowCount = 5;
+    int colCount = 5;
 
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
 

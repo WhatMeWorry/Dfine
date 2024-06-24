@@ -35,7 +35,7 @@ void debugSpots( ref HexBoard hB )
         foreach(j; 0..(hB.maxCols))
         {
             writeln(hB.spots[i][j].location, "  f g h = ", hB.spots[i][j].f, " ", hB.spots[i][j].g, " ", 
-            hB.spots[i][j].h, "  terrain = ", hB.spots[i][j].terrainCost);
+            hB.spots[i][j].h, "  terrain = ", hB.spots[i][j].terrainCost, "  previous = ", hB.spots[i][j].previous);
         }
     }
 }
@@ -487,27 +487,24 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
     Location min;
 
     assert(set.length > 0);
-    //min = set[0];
-	writeln(".....................................................");
+	
+    min = set[0];
+	
+	writeln("-----------------------------------------------------");
 	writeln("             lowestFscore");
-	writeln(".....................................................");
+	writeln("-----------------------------------------------------");
     foreach(int i, s; set)
     {
-	    writeln("(", s.r, ",", s.c, ") f = ", hB.spots[s.r][s.c].f);
-        //writeln("set[i] = ", set[i]);
-        //writeln("s = ", s);
-        //writeln("i = ", i);
-        //writeln("spots[s.location.r][s.location.c].location = ", hB.spots[s.r][s.c].location);
-        /+
-        writeln("set[i].f = ",set[i].f, "   and min.f = ", min.f); 
-        if (set[i].f < min.f)
+	    writeln("i = ", i, " (", s.r, ",", s.c, ") f = ", hB.spots[s.r][s.c].f);
+
+        //if (set[i].f < min.f)
+		if (hB.spots[s.r][s.c].f < hB.spots[min.r][min.c].f)
         {
-            min = set[i];
+            min = s;
             c = i;
         }
-        +/
     }
-    
+    writeln("index ", c, " or min = ", min, " is lowest f");
     return min;
 }
 
@@ -588,7 +585,7 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
         writeln();
         displaySet(openSet, "openSet");
 		
-        writeAndPause("while openSet is not empty");
+        //writeAndPause("while openSet is not empty");
 
         ulong c;                             
         current = lowestFscore(c, openSet, hB);  // find the node with the smallest f value.
@@ -637,9 +634,8 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
         Location[] neighbors = getNeighbors(current, hB);   // get neighbors of current and cull out the (-1,-1)
 
-        // Time 32:15 in Coding Train Youtube video
-        // all neighbors will be added to open set, but before we put them
-        // in the open set, we need to evaluate them
+        // Time 32:15 in Coding Train Youtube video  all neighbors will be added to open set, 
+		// but before we put them in the open set, we need to evaluate them
         // What if neighbor is in the closed set?
 
         foreach(neighbor; neighbors)   // for each neighbor of current
@@ -653,25 +649,25 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
             if (closedSet.excludes(neighbor))  // only proceed with this neighbor if it hasn't already been evaluated.
             {
-                //distance = heuristic( cast(HexPosition) neighborSpot.location, cast(HexPosition) current.location);
+                uint currentG = hB.spots[current.r][current.c].g;
+                uint neighborG = hB.spots[neighbor.r][neighbor.c].terrainCost;
+                uint neighborH = heuristic( cast(HexPosition) neighbor, cast(HexPosition) end);
 
-                distance = neighborSpot.terrainCost;
-				writeln("distance = ", distance);
+                writeln("currentG, neighborG, neighborH = ", currentG, " ", neighborG, " ", neighborH);
 
-                //tempG = current.g + distance;
-
-                writeln("tempG = ", tempG, "    distance = ", distance);
+                tempG = currentG + neighborG;
+                writeln("tempG = currentG + neighborG = ", tempG);
 
                 // is this a better path than before?
 
                 if (openSet.excludes(neighbor))  // if neighbor is not in openSet, then add it
                 {
-                    writeln("place neighbor in openSet");
+                    writeln("neighbor was not in openSet, add to openSet");
                     openSet ~= neighbor;
                 }
                 else
                 {
-                    //writeln("neighbor WAS IN OPENSET");
+                    writeln("neighbor was in openSet");
                     if (tempG >= neighborSpot.g)
                     {
                         // No, it's not a better path
@@ -679,21 +675,18 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
                         continue;
                     }
                 } 
-            
-                neighborSpot.g = tempG;
-                neighborSpot.h = heuristic( cast(HexPosition) neighborSpot.location, cast(HexPosition) end);
-                neighborSpot.f = neighborSpot.g + neighborSpot.h;
-                //neighborSpot.previous = current.location;
+                writeln("UPDATE HEXBOARD neighbor F G and H");
+                hB.spots[neighbor.r][neighbor.c].g = tempG;
 
-                hB.spots[neighbor.r][neighbor.c] = neighborSpot;
+                hB.spots[neighbor.r][neighbor.c].h = neighborH;
+				
+                hB.spots[neighbor.r][neighbor.c].f = tempG + neighborH;
 
-                //hB.spots[neighborSpot.location.r][neighborSpot.location.c].previous = current.location;
+                hB.spots[neighbor.r][neighbor.c].previous = current;
 
                 writeln("================== ANOTHER NEIGHBOR PROCESSED ==================================");
-                writeln("neighborSpot.location f g h = ", neighborSpot.location, " ", neighborSpot.f, " ", neighborSpot.g, " ", neighborSpot.h);
-                writeln("neighborSpot.previous = ", neighborSpot.previous);
-				
-				debugSpots( hB );
+
+                debugSpots( hB );
             }
         }
         writeln("finished with neighbors for current");
