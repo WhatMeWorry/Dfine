@@ -108,6 +108,9 @@ Globals g;  // put a the globals variable together in one place
 
 int main() 
 {
+
+
+
     load_sdl_libraries(); 
 
     g.sdl.screenWidth  = 1000;
@@ -239,11 +242,6 @@ int main()
             +/
 
 
-
-
-
-
-
             // https://thenumb.at/cpp-course/sdl2/03/03.html
 
             SDL_Event event;
@@ -297,40 +295,35 @@ int main()
                             if( event.key.keysym.sym == SDLK_DELETE )
                             {
                                 writeln("SDLK_DELETE used to just clear out all hex textures");
-                                h.clearAllHexTextures();
-								h.drawHexBoard;
+                                h.clearHexBoard();
+                                h.drawHexBoard;
                             }
 
                             if( event.key.keysym.sym == SDLK_F3 )
                             {
-                                writeln("SDLK_F3");
-                                h.initializeHexTextures(g);
-								h.debugSpots();
+                                import std.process : executeShell;
+                                executeShell("cls");
+								
+								writeln("1");
+								
+                                h.setHexboardTexturesAndTerrain(g);
+								writeln("2");
                                 h.displayHexTextures();
-                                //writeln("g = ", g);
-                                enteringLandOfPathFinding( h, g );
-								h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
-                                writeln("After call");
+								writeln("3");
+                                findShortestPath( h, g );
+								writeln("4");
+                                h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
+								writeln("5");
                             }
-
-                            /+if( event.key.keysym.sym == SDLK_F8 )
-                            {
-                                writeln("SDLK_F8");
-								playWithSpots( h, g );
-                            }+/
 
                             if( event.key.keysym.sym == SDLK_F12 )
                             {   
                                 writeln("F12 Key Pressed");
-                                //h.initializeHexTextures(g);
-                                //h.displayHexTextures();
-                                //writeln("g = ", g);
-                                enteringLandOfPathFinding( h, g );
+                                findShortestPath( h, g );
                                 h.displayHexTextures();
                             }
 
-							SDL_RenderPresent( g.sdl.renderer );  // refresh screen for any keydown event
-							
+                            SDL_RenderPresent( g.sdl.renderer );  // refresh screen for any keydown event
                             break;
 
 
@@ -351,14 +344,14 @@ int main()
                                 {   
                                     int x = h.selectedHex.row;   int y = h.selectedHex.col;
  
-                                    HexPosition start;  
-                                    HexPosition end; 
+                                    Location start;  
+                                    Location end; 
                                     
-                                    start.row = 0;
-                                    start.column = 0;
+                                    start.r = 0;
+                                    start.c = 0;
                                     
-                                    end.row = x; 
-                                    end.column = y;
+                                    end.r = x; 
+                                    end.c = y;
                                     
                                     //h.setHexRowTexture(g, start.row, Ids.solidRed);
                                     
@@ -366,7 +359,7 @@ int main()
 
                                     //h.setHexTexture(g, start, Ids.solidBlack);
 									                    // h.selectedHex has end point
-									enteringLandOfPathFinding( h, g );
+									findShortestPath( h, g );
 
                                     h.displayHexTextures();
                                     

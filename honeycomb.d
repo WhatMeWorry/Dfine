@@ -156,11 +156,13 @@ struct SelectedHex
     int col;
 }
 
-struct HexPosition
+
+struct Location   // holds a hex of a hexboard
 {
-    int row;
-    int column;
+    int r;  // row in hexboard
+    int c;  // column of hexboard
 }
+
 
 enum Direction 
 { 
@@ -543,7 +545,7 @@ struct HexBoard
     }
 
 
-    void initializeHexTextures(Globals g)
+    void setHexboardTexturesAndTerrain(Globals g)
     {
         import std.random : uniform;
         auto rnd = Random(unpredictableSeed);    
@@ -592,22 +594,30 @@ struct HexBoard
 
 
 
-    void clearAllHexTextures()
+    void clearHexBoard()
     {
         foreach(r; 0..maxRows)
         {
             foreach(c; 0..maxCols)
             {    
                 hexes[r][c].texture = Texture(Ids.none, "", null);
+                // spots[r][c].location = Location(-1,-1); // DO NOT CHANGE!!!
+                spots[r][c].neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), 
+                                         Location(-1,-1), Location(-1,-1), Location(-1,-1)]; 
+                spots[r][c].f = 0;
+                spots[r][c].g = 0;
+                spots[r][c].h = 0;
+                spots[r][c].previous = Location(-1,-1);
+                spots[r][c].terrainCost = 0;
             }
         }
     }
 
 
 
-    void setHexTexture(Globals g, HexPosition hex, Ids id)
+    void setHexTexture(Globals g, Location hex, Ids id)
     {
-        hexes[hex.row][hex.column].texture = g.textures[id];
+        hexes[hex.r][hex.c].texture = g.textures[id];
     }
 
 

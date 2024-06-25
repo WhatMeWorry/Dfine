@@ -1,29 +1,17 @@
 
-
 module a_star.spot;
  
-
 import std.stdio;
 import std.process : executeShell;     // executeShell()
-
 import std.algorithm.mutation : remove;
-
 import std.math : ceil, floor;
-
 import std.string;
-import std.conv;
 import core.stdc.stdlib;  // for exit()
 
 import honeycomb;
 import app;
 import textures.load_textures;
-
-
-struct Location   // screen cordinates 2d point
-{
-    int r;
-    int c;
-}
+import distance;
 
 
 
@@ -76,41 +64,24 @@ void writeAndPause(string s = "")
 struct Spot
 {
     //@disable this();   // disables default constructor
-/+
-    this() 
-    {
-        // These three parametes suffice to define the hexboard as well as each individual hex
-        location.r = -1;
-        location.c = -1;
-        previous.r = -1;
-        previous.c = -1;
-    }
-    +/
 
     Location location = Location(-1,-1);   // each spot needs to know where it is on the hexboard
+
     Location[6] neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), Location(-1,-1), 
                              Location(-1,-1), Location(-1,-1)];  // ignoring edges, each hex has 6 adjoining neighbors
     uint f;
     uint g;
     uint h;
     Location previous = Location(-1,-1);
-	
-	uint terrainCost;
-
+    uint terrainCost;
 }
 
 uint tempG;
 ulong c;
-int distance;
-
-struct Slope
-{
-    int rise;
-    int run;
-}
 
 
 
+/+
 bool isOdd(uint value)
 {
     return(!(value % 2) == 0); 
@@ -120,6 +91,9 @@ bool isEven(uint value)
 {
     return((value % 2) == 0);
 }
++/
+
+
 
 /+
 enum Dir 
@@ -241,7 +215,6 @@ void addNeighbors(ref HexBoard h)
                     h.spots[r][c].neighbors[NW].c = c-1;
                 }
             }
-
             //writeln("(r,c) = ", "(", r, ",", c, ")"); 
             //writeln("h.spots[r][c].neighbors = ", h.spots[r][c].neighbors);
         }
@@ -250,195 +223,32 @@ void addNeighbors(ref HexBoard h)
 
 
 
-uint whatQuadrant(HexPosition a, HexPosition b)
-{
-    int dR = a.row - b.row;
-    int dC = a.column - b.column;
-
-    if (dR < 0)
-        if (dC < 0)
-            { /+writeln("Quad I");+/    /* (-,-) */  return 1; }
-        else
-            { /+writeln("Quad II");+/   /* (-,+) */  return 2; }
-    else
-        if (dC < 0)
-            { /+writeln("Quad IV");+/   /* (+,-) */  return 3; }
-        else
-            { /+writeln("Quad III");+/  /* (+,+) */  return 4; }
-}
-
-          
-
-// int calculateDistanceBetweenHexes(HexPosition a, HexPosition b)
-int heuristic(HexPosition a, HexPosition b)
-{
-    if (a == b)
-    {
-        //writeln("End is same as Start");
-        return 0;
-    }
-    if (a.row == b.row)
-    {
-        //writeln("On same row");
-        return (abs(a.column - b.column));
-    }
-    if (a.column == b.column)
-    {
-        //writeln("On same column");
-        return (abs(a.row - b.row));
-    }
-
-    uint quad = whatQuadrant(a, b);
-
-    if (a.column.isEven)
-    {
-        if ((quad == 1) || (quad == 2))
-        {
-            Slope delta; 
-            int length;
-
-            delta.run = abs(a.column - b.column);
-            delta.rise = abs(a.row - b.row);
-
-            int hexesToCutOff = delta.run / 2;  // did not need a float
-
-            //writeln("hexesToCutOff = ", hexesToCutOff);
-
-            if (delta.rise <= hexesToCutOff)
-                length = delta.run;  
-            else
-                length = delta.run + abs(delta.rise - hexesToCutOff);
-            return length;
-        }
-        if ((quad == 3) || (quad == 4))
-        {
-            Slope delta; 
-            int length;
-
-            delta.run = abs(a.column - b.column);
-            delta.rise = abs(a.row - b.row);
-
-            int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float
-
-            //writeln("hexesToCutOff = ", hexesToCutOff);
-
-            if (delta.rise <= hexesToCutOff)
-                length = delta.run;  
-            else
-                length = delta.run + abs(delta.rise - hexesToCutOff);
-            return length;
-        }
-    }
-
-    if (a.column.isOdd)
-    {
-        if ((quad == 1) || (quad == 2))
-        {
-            Slope delta; 
-            int length;
-
-            delta.run = abs(a.column - b.column);
-            delta.rise = abs(a.row - b.row);
-
-            //int hexesToCutOff = delta.run / 2;  // did not need a float
-            int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float
-
-            //writeln("hexesToCutOff = ", hexesToCutOff);
-
-            if (delta.rise <= hexesToCutOff)
-                length = delta.run;  
-            else
-                length = delta.run + abs(delta.rise - hexesToCutOff);
-            return length;
-        }
-        if ((quad == 3) || (quad == 4))
-        {
-            Slope delta; 
-            int length;
-
-            delta.run = abs(a.column - b.column);
-            delta.rise = abs(a.row - b.row);
-
-            //int hexesToCutOff = to!int(ceil(to!float(delta.run) / 2.0));  // did not need a float
-            int hexesToCutOff = delta.run / 2;  // did not need a float
-            //writeln("hexesToCutOff = ", hexesToCutOff);
-
-            if (delta.rise <= hexesToCutOff)
-                length = delta.run;  
-            else
-                length = delta.run + abs(delta.rise - hexesToCutOff);
-            return length;
-        }
-    }
-    return 0;
-}
-
-// foo(variable, arguments)  ===== UFCS =====>  variable.foo(arguments)
-// isNotEmpty(set)           ===== UFCS =====>  set.isNotEmpty() or set.isNotEmpty
-
-bool isNotEmpty(Location[] set)
-{
-    if (set.length > 0)
-        return true;
-    else
-        return false;
-}
 
 
 
 
-void displaySet(Location[] set, string comment = "")
+void displaySet(Location[] set, string name = "")
 {
     writeln();
     if (set.length > 0)
     {
-        writeln("set ", comment, " has the following elements");
+        writeln("Set ", name, " has the following elements");
         foreach(element; set)
         {
             write("    (", element.r, ",", element.c, ")" );
         }
-        //writeln();
     }
     else
     {
-        writeln("set ", comment, " is empty");
+        writeln("set ", name, " is empty");
     }
-   writeln();
+    writeln();
 }
 
 
-// foo(variable, arguments)
-
-// if there is no member function named foo that can be called on variable with the provided arguments, 
-// then the compiler also tries to compile the following expression:
-
-/// variable.foo(arguments)   elem.isIn(openset)
-
-bool isIn(Location elem, Spot[] set)
-{
-    foreach(e; set)
-    {
-        if (e.location == elem)
-            return true;
-    }
-    return false;
-}
-
-bool isNotIn(Location elem, Spot[] set)
-{
-    foreach(e; set)
-    {
-        if (e.location == elem)
-            return false;
-    }
-    return true;
-}
-
-// foo(variable, arguments)  ===== UFCS =====>  variable.foo(arguments)
-// includes(set, element)    ===== UFCS =====>  set.includes(element)
 
 // UFCS usage:  if (set.includes(element))
-//                  // element is in set 
+//                  writeln("element is in set"); 
 
 bool includes(Spot[] set, Location element)
 {
@@ -450,28 +260,67 @@ bool includes(Spot[] set, Location element)
     return false;
 }
 
+
+ 
+// UFCS usage:  if (element.isInSet(open))
+//                  writeln("element is in set open");
+
+bool isInSet(Location element, Location[] set)
+{
+    foreach(item; set)
+    {
+        if (item == element)
+            return true;
+    }
+    return false;
+}
+
+
+
 // UFCS usage:  if (set.excludes(element))
-//                  // element is not in set 
+//                   writeln("element is not in set");
 
 bool excludes(Location[] set, Location item)
 {
     foreach(element; set)
     {
-        if (element == item)    
-            return false;      // item is in the set
+        if (element == item)
+            return false;
     }
     return true;
 }
 
 
+// UFCS usage:  if (element.isNotInSet(open))
+//                  writeln("element is not in set open");
 
+bool isNotInSet(Location element, Location[] set)
+{
+    foreach(item; set) 
+    {
+        if (item == element)
+            return false;
+    }
+    return true;
+}
+
+// foo(variable, arguments)  == UFCS ==>  variable.foo(arguments)
+// isNotEmpty(set)           == UFCS ==>  set.isNotEmpty() or set.isNotEmpty
+
+bool isNotEmpty(Location[] set)
+{
+    if (set.length > 0)
+        return true;
+    else
+        return false;
+}
 
 
 Location[] getNeighbors(Location loc, ref HexBoard hB)
 {
     Location[] locs;
-	
-	Location[6] neighbors = hB.spots[loc.r][loc.c].neighbors;
+
+    Location[6] neighbors = hB.spots[loc.r][loc.c].neighbors;
 
     foreach(n; neighbors)
     {
@@ -487,40 +336,25 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
     Location min;
 
     assert(set.length > 0);
-	
+
     min = set[0];
-	
-	writeln("-----------------------------------------------------");
-	writeln("             lowestFscore");
-	writeln("-----------------------------------------------------");
+
+    writeln();
+    writeln("---------- lowest F score ----------");
     foreach(int i, s; set)
     {
-	    writeln("i = ", i, " (", s.r, ",", s.c, ") f = ", hB.spots[s.r][s.c].f);
-
-        //if (set[i].f < min.f)
-		if (hB.spots[s.r][s.c].f < hB.spots[min.r][min.c].f)
+        writeln(" (", s.r, ",", s.c, ") f = ", hB.spots[s.r][s.c].f);
+        if (hB.spots[s.r][s.c].f < hB.spots[min.r][min.c].f)
         {
             min = s;
             c = i;
         }
     }
-    writeln("index ", c, " or min = ", min, " is lowest f");
+    writeln("lowest f score is (", min.r, ",", min.c, ") f = ", hB.spots[min.r][min.c].f);
+    writeln();
     return min;
 }
 
-
-// h.spots[r][c].neighbors[i].r = -1;
-
-void buildShortestPath(Spot current, ref HexBoard h)
-{
-    Spot temp = current;
-    path ~= temp.location;
-    while(temp.previous != invalidLoc)
-    {
-        path ~= temp.previous;
-        temp = h.spots[temp.previous.r][temp.previous.c];
-    }
-}
 
 // f(n) = g(n) + h(n)
 //
@@ -530,23 +364,25 @@ void buildShortestPath(Spot current, ref HexBoard h)
 
 // The A* algorithm finishes in one of two conditions:
 // 1) The algorithm arrives at the end. We now know successfully know the shortest path.
-// 2) No nodes in the openSet remain to be evaluated. This means that there is no solution.
+// 2) No nodes in the open remain to be evaluated. This means that there is no solution.
 
-
-// Spot[][] spots;    // put in HexBoard object. So a hexBoard "has-a" spots object
-
-Location[] openSet;    // needs to be evaluated
-Location[] closedSet;  // stores all nodes that have finished being evaluated. Don't need to revisit
-
-Location current; // current is the node in openSet having the lowest f score
-Spot start;   // the beginning node (spot, hex) of the path   
-
-Location[] path;  // hold shortest path
+// ================== BAD BUG!  MOVE THESE VARIABLES INSIDE findShortestPath ===================
+// Otherwise the dynamic arrays will hold values of previous runs.
+//Location[] open;    // open set contains nodes that need to be evaluated
+//Location[] closed;  // closed set stores all nodes that have finished being evaluated. Don't need to revisit
+//Location[] path;  // hold shortest path
 
 Location invalidLoc = { -1, -1 };
 
-void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
+void findShortestPath( ref HexBoard hB, Globals g )
 {
+    Location[] open;    // open set contains nodes that need to be evaluated
+    Location[] closed;  // closed set stores all nodes that have finished being evaluated. Don't need to revisit
+
+    Location[] path;
+
+    Location current; // current is the node in open having the lowest f score 
+
     Location begin;
     Location end;
 
@@ -554,8 +390,6 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     begin.c = 0;
     end.r = hB.maxRows - 1;
     end.c = hB.maxCols - 1;  
-    //end.r = hB.selectedHex.row;
-    //end.c = hB.selectedHex.col;
     
     addNeighbors(hB);
 
@@ -563,48 +397,35 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
     //  Path finding starts here
     //===========================================================================
 
+    Spot start;  // start is a full node, not just a location
+
     start = hB.spots[begin.r][begin.c];
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
-    start.h = heuristic( cast(HexPosition) start.location, cast(HexPosition) end);  // heuristic
+    start.h = heuristic(start.location, end);  // heuristic
     start.f = start.g + start.h;
 
     writeln("start.g = ", start.g);
     writeln("start.h = ", start.h);
     writeln("start.f = ", start.f);
-	
-	hB.spots[begin.r][begin.c] = start;
 
-    openSet ~= start.location;  // put the start node on the openList (leave its f at zero)
+    hB.spots[begin.r][begin.c] = start;
 
+    open ~= start.location;  // put the start node on the openList (leave its f at zero)
 
-    displaySet(openSet, "openSet BEFORE WHILE");
-	
-    while (openSet.isNotEmpty)     // while there are spots that still need evaluating
+    while (open.isNotEmpty)     // while there are spots that still need evaluating
     {
         writeln();
-        displaySet(openSet, "openSet");
-		
-        //writeAndPause("while openSet is not empty");
+        displaySet(open, "open");
+        displaySet(closed, "closed");
 
         ulong c;
-        current = lowestFscore(c, openSet, hB);  // find the node with the smallest f value.
-                                                 // set the current spot to the spot with the least f value
+        current = lowestFscore(c, open, hB);  // find the node with the smallest f value.
 
-        writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         writeln("lowest F score in openset CURRENT = ", current);
-		//writeln("hB.spots = ", hB.spots);
-		
-        writeln("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        //writeAndPause();
 
         if (current == end)
         {
-            //writeln("hB.spots = ", hB.spots);
-            //buildShortestPath(current, hB);
-            writeln("DONE!!!");
-
-            Location[] path;
             Location here = hB.spots[end.r][end.c].location;
             while (here != invalidLoc)
             {
@@ -615,43 +436,33 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
             foreach( p; path)
             {
                 writeln("p = ", p);
-                hB.setHexTexture(g, cast(HexPosition) p, Ids.blackDot);
+                hB.setHexTexture(g, p, Ids.blackDot);
             }
 
             return;
         }
 
-        //displaySet(openSet, "openSet");
-        //displaySet(closedSet, "closedSet");
-		
-        writeln("move currentNode from openList to closedSet");
-
-        openSet = openSet.remove(c);  // remove the currentNode from the openSet
-        closedSet ~= current;         // add the currentNode to the closedSet
-
-        //displaySet(openSet, "openSet");
-        //displaySet(closedSet, "closedSet");
+        open = open.remove(c);  // remove the currentNode from the open
+        closed ~= current;      // add the currentNode to the closed
 
         Location[] neighbors = getNeighbors(current, hB);   // get neighbors of current and cull out the (-1,-1)
 
         // Time 32:15 in Coding Train Youtube video  all neighbors will be added to open set, 
-		// but before we put them in the open set, we need to evaluate them
+        // but before we put them in the open set, we need to evaluate them
         // What if neighbor is in the closed set?
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
             Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
             writeln();
-            writeln("------------------------------------------");
             writeln("neighbor = ", neighbor);
-            writeln("------------------------------------------");
             //writeAndPause();
 
-            if (closedSet.excludes(neighbor))  // only proceed with this neighbor if it hasn't already been evaluated.
+            if (closed.excludes(neighbor))  // only proceed with this neighbor if it hasn't already been evaluated.
             {
                 uint currentG = hB.spots[current.r][current.c].g;
                 uint neighborG = hB.spots[neighbor.r][neighbor.c].terrainCost;
-                uint neighborH = heuristic( cast(HexPosition) neighbor, cast(HexPosition) end);
+                uint neighborH = heuristic(neighbor, end);
 
                 writeln("currentG, neighborG, neighborH = ", currentG, " ", neighborG, " ", neighborH);
 
@@ -660,22 +471,22 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
                 // is this a better path than before?
 
-                if (openSet.excludes(neighbor))  // if neighbor is not in openSet, then add it
+                //if (open.excludes(neighbor))  // if neighbor is not in open set, then add it
+                if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
                 {
-                    writeln("neighbor was not in openSet, add to openSet");
-                    openSet ~= neighbor;
+                    writeln("neighbor was not in open, add to open");
+                    open ~= neighbor;
                 }
                 else
                 {
-                    writeln("neighbor was in openSet");
+                    writeln("neighbor was in open");
                     if (tempG >= neighborSpot.g)
                     {
-                        // No, it's not a better path
                         writeln("No, it is not a better path");
                         continue;
                     }
                 } 
-                writeln("UPDATE HEXBOARD neighbor F G and H");
+
                 hB.spots[neighbor.r][neighbor.c].g = tempG;
 
                 hB.spots[neighbor.r][neighbor.c].h = neighborH;
@@ -684,14 +495,14 @@ void enteringLandOfPathFinding( ref HexBoard hB, Globals g )
 
                 hB.spots[neighbor.r][neighbor.c].previous = current;
 
-                writeln("================== ANOTHER NEIGHBOR PROCESSED ==================================");
+                writeln("========================================== neighbor(", neighbor.r, ",", neighbor.c, ") was updated" );
 
-                debugSpots( hB );
+                //debugSpots( hB );
             }
         }
         writeln("finished with neighbors for current");
     }
-    writeln("openSet is empty");
+    writeln("open is empty");
 
 }
 
@@ -702,41 +513,39 @@ struct Node
     int f;
     int g;
 }
-+/
 
-/+
+
 void displaySet(ref Node[] set)  // with or without ref, the f's were changed by the assignment
 {
     foreach(i, n; set)
     {
         writeln("i = ", i );
-	    writeln("set[i] = ", set[i]);
-		set[i].f = 777;
+        writeln("set[i] = ", set[i]);
+        set[i].f = 777;
     }
 }
-+/
 
-/+
+
 void playWithSpots( HexBoard hB, Globals g )
 {
-Node[] openSet;    
-Node[] closedSet;
-//      openSet = openSet.remove(c);  // remove the currentNode from the openSet
-//      closedSet ~= current;         // add the currentNode to the closedSet
+Node[] open;    
+Node[] closed;
+//      open = open.remove(c);  // remove the currentNode from the open
+//      closed ~= current;         // add the currentNode to the closed
 Node n1 = { Location(1, 1), 11, 11 };
 Node n2 = { Location(2, 2), 22, 22 };
 Node n3 = { Location(3, 3), 33, 33 };
 Node n4 = { Location(4, 4), 44, 44 };
-openSet ~= n2;
-openSet ~= n1;
-openSet ~= n4;
-openSet ~= n3;
-writeln("openSet = ", openSet);
-displaySet(openSet);
-writeln("openSet = ", openSet);
-openSet = openSet.remove(2);
-writeln("openSet = ", openSet);
-openSet = openSet.remove(1);
-writeln("openSet = ", openSet);
+open ~= n2;
+open ~= n1;
+open ~= n4;
+open ~= n3;
+writeln("open = ", open);
+displaySet(open);
+writeln("open = ", open);
+open = open.remove(2);
+writeln("open = ", open);
+open = open.remove(1);
+writeln("open = ", open);
 }
 +/
