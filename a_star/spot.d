@@ -340,17 +340,17 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
     min = set[0];
 
     writeln();
-    writeln("---------- lowest F score ----------");
+    //writeln("---------- lowest F score ----------");
     foreach(int i, s; set)
     {
-        writeln(" (", s.r, ",", s.c, ") f = ", hB.spots[s.r][s.c].f);
+        //writeln(" (", s.r, ",", s.c, ") f = ", hB.spots[s.r][s.c].f);
         if (hB.spots[s.r][s.c].f < hB.spots[min.r][min.c].f)
         {
             min = s;
             c = i;
         }
     }
-    writeln("lowest f score is (", min.r, ",", min.c, ") f = ", hB.spots[min.r][min.c].f);
+    //writeln("lowest f score is (", min.r, ",", min.c, ") f = ", hB.spots[min.r][min.c].f);
     writeln();
     return min;
 }
@@ -416,8 +416,8 @@ void findShortestPath( ref HexBoard hB, Globals g )
     while (open.isNotEmpty)     // while there are spots that still need evaluating
     {
         writeln();
-        displaySet(open, "open");
-        displaySet(closed, "closed");
+        //displaySet(open, "open");
+        //displaySet(closed, "closed");
 
         ulong c;
         current = lowestFscore(c, open, hB);  // find the node with the smallest f value.

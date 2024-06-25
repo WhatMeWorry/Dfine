@@ -117,8 +117,8 @@ int main()
     g.sdl.screenHeight = 1000;
 
 
-    int rowCount = 5;
-    int colCount = 5;
+    int rowCount = 30;
+    int colCount = 30;
 
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
 
@@ -303,17 +303,15 @@ int main()
                             {
                                 import std.process : executeShell;
                                 executeShell("cls");
-								
-								writeln("1");
-								
+
                                 h.setHexboardTexturesAndTerrain(g);
-								writeln("2");
+	
                                 h.displayHexTextures();
-								writeln("3");
+
                                 findShortestPath( h, g );
-								writeln("4");
+
                                 h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
-								writeln("5");
+	
                             }
 
                             if( event.key.keysym.sym == SDLK_F12 )
