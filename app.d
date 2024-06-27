@@ -109,6 +109,108 @@ Globals g;  // put a the globals variable together in one place
 int main() 
 {
 
+/+ 
+
+All results were run on a 
+
+Lenovo AMD Ryzen 5 PRO 5650GE with
+AMD Cezanne - Internal GPU [Lenovo]
+8 GB RAM with
+Microsoft Windows 11 Professional (x64) Build 22631.3737 (23H2)
+DUB version 1.37.0, built on May  2 2024
+DMD64 D Compiler v2.108.1
+
+100x100 returned these times. 
+
+1 sec, 347 ms
+2 secs, 620 ms
+1 sec, 791 ms
+1 sec, 238 ms
+1 sec, 106 ms
+2 secs, 664 ms
+1 sec, 243 ms
+1 sec, 247 ms
+
+--------------------------------------------
+125x125 
+
+Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappear???
+
+3 secs, 284 ms,
+3 secs, 994 ms,
+3 secs, 538 ms,
+5 secs, 111 ms
+3 secs, 258 ms
+6 secs, 598 ms
+6 secs, 221 ms
+4 secs, 381 ms
+6 secs, 325 ms
+6 secs, 552 ms
+3 secs, 928 ms
+3 secs, 783 ms
+
+--------------------------------------------
+
+150x150 returned these times BUT BLACK DOTS WERE NOT DISPLAYED???
+7 secs, 342 ms
+8 secs, 851 ms
+4 secs, 321 ms
+7 secs, 721 ms
+12 secs, 978 ms
+9 secs, 71 ms
+
+150x150 again and THIS TIME THEY ALL DISPLAYED PERFECTLY
+13 secs, 555 ms
+4 secs, 35 ms
+13 secs, 479 ms
+13 secs, 486 ms
+8 secs, 522 ms
+13 secs, 390 ms
+2 secs, 641 ms
+6 secs, 844 ms
+13 secs, 854 ms
+
+200x200 again and they all displayed perfectly
+
+24 secs, 758 ms
+39 secs, 292 ms
+41 secs, 607 ms
+27 secs, 293 ms
+
+250x250 again and they all displayed perfectly
+1 minute, 10 secs, 490 ms
+53 secs, 52 msecs
+55 secs, 91 ms
+1 minute, 5 secs
+1 minute, 6 secs
+
+300x300 they all displayed perfectly
+3 minutes, 31 secs
+1 minute, 26 secs
+1 minute, 36 secs
+1 minute, 28 secs
+
+350x350 they all displayed perfectly
+3 minutes, 33 secs
+3 minutes, 33 secs
+1 minute, 59 secs
+
+400x400 they all displayed perfectly
+11 minutes, 30 secs
+5 minutes, 31 secs
+6 minutes, 33 secs
+
+500x500 too small to see if any black dots were displayed
+13 minutes, 35 secs
+12 minutes, 24 secs
+
+1000x1000 too small to see if any black dots were displayed But finally finished!
+4 hours, 26 minutes, 20 secs
+
+
+
++/
+
 
 
     load_sdl_libraries(); 
@@ -116,9 +218,8 @@ int main()
     g.sdl.screenWidth  = 1000;
     g.sdl.screenHeight = 1000;
 
-
-    int rowCount = 30;
-    int colCount = 30;
+    int rowCount = 100;
+    int colCount = 100;
 
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
 
@@ -143,6 +244,8 @@ int main()
     h.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
 
     h.displayHexBoardScreenCoordinates();
+
+
 
     glfwSetErrorCallback(&errorCallback);
 
@@ -305,13 +408,21 @@ int main()
                                 executeShell("cls");
 
                                 h.setHexboardTexturesAndTerrain(g);
-	
-                                h.displayHexTextures();
 
+                                h.displayHexTextures();
+								
+                                import std.datetime.stopwatch;
+                                auto watch = StopWatch(AutoStart.no);
+                                watch.start();
+                                //                                          millisecond 
+                                // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
+                                //                                                microsecond
                                 findShortestPath( h, g );
+								
+								writeln(watch.peek()); 
 
                                 h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
-	
+
                             }
 
                             if( event.key.keysym.sym == SDLK_F12 )

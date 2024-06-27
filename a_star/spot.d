@@ -17,13 +17,15 @@ import distance;
 
 void debugSpots( ref HexBoard hB )
 {
-    writeln("Spots = ");
+    //writeln("Spots = ");
     foreach(i; 0..(hB.maxRows))
     {
         foreach(j; 0..(hB.maxCols))
         {
+        /+
             writeln(hB.spots[i][j].location, "  f g h = ", hB.spots[i][j].f, " ", hB.spots[i][j].g, " ", 
-            hB.spots[i][j].h, "  terrain = ", hB.spots[i][j].terrainCost, "  previous = ", hB.spots[i][j].previous);
+                    hB.spots[i][j].h, "  terrain = ", hB.spots[i][j].terrainCost, "  previous = ", hB.spots[i][j].previous);
+        +/
         }
     }
 }
@@ -31,8 +33,8 @@ void debugSpots( ref HexBoard hB )
 
 void writeAndPause(string s = "")
 {
-    writeln();
-    writeln(s);
+    //writeln();
+    //writeln(s);
     version(Windows)
     {  
         // pause command prints out
@@ -47,7 +49,7 @@ void writeAndPause(string s = "")
         // The problem is we don't have the pause return output until after the user
         // hits a key.
 
-        writeln();
+        //writeln();
         writeln("Press any key to continue...");       
         executeShell("pause");  // don't bother with standard output the child returns
 
@@ -229,10 +231,10 @@ void addNeighbors(ref HexBoard h)
 
 void displaySet(Location[] set, string name = "")
 {
-    writeln();
+    //writeln();
     if (set.length > 0)
     {
-        writeln("Set ", name, " has the following elements");
+        //writeln("Set ", name, " has the following elements");
         foreach(element; set)
         {
             write("    (", element.r, ",", element.c, ")" );
@@ -240,9 +242,9 @@ void displaySet(Location[] set, string name = "")
     }
     else
     {
-        writeln("set ", name, " is empty");
+        //writeln("set ", name, " is empty");
     }
-    writeln();
+    //writeln();
 }
 
 
@@ -339,7 +341,7 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
 
     min = set[0];
 
-    writeln();
+    //writeln();
     //writeln("---------- lowest F score ----------");
     foreach(int i, s; set)
     {
@@ -351,7 +353,7 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
         }
     }
     //writeln("lowest f score is (", min.r, ",", min.c, ") f = ", hB.spots[min.r][min.c].f);
-    writeln();
+    //writeln();
     return min;
 }
 
@@ -405,9 +407,9 @@ void findShortestPath( ref HexBoard hB, Globals g )
     start.h = heuristic(start.location, end);  // heuristic
     start.f = start.g + start.h;
 
-    writeln("start.g = ", start.g);
-    writeln("start.h = ", start.h);
-    writeln("start.f = ", start.f);
+    //writeln("start.g = ", start.g);
+    //writeln("start.h = ", start.h);
+    //writeln("start.f = ", start.f);
 
     hB.spots[begin.r][begin.c] = start;
 
@@ -415,14 +417,14 @@ void findShortestPath( ref HexBoard hB, Globals g )
 
     while (open.isNotEmpty)     // while there are spots that still need evaluating
     {
-        writeln();
+        //writeln();
         //displaySet(open, "open");
         //displaySet(closed, "closed");
 
         ulong c;
         current = lowestFscore(c, open, hB);  // find the node with the smallest f value.
 
-        writeln("lowest F score in openset CURRENT = ", current);
+        //writeln("lowest F score in openset CURRENT = ", current);
 
         if (current == end)
         {
@@ -435,7 +437,7 @@ void findShortestPath( ref HexBoard hB, Globals g )
 
             foreach( p; path)
             {
-                writeln("p = ", p);
+                //writeln("p = ", p);
                 hB.setHexTexture(g, p, Ids.blackDot);
             }
 
@@ -454,8 +456,8 @@ void findShortestPath( ref HexBoard hB, Globals g )
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
             Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
-            writeln();
-            writeln("neighbor = ", neighbor);
+            //writeln();
+            //writeln("neighbor = ", neighbor);
             //writeAndPause();
 
             if (closed.excludes(neighbor))  // only proceed with this neighbor if it hasn't already been evaluated.
@@ -464,25 +466,25 @@ void findShortestPath( ref HexBoard hB, Globals g )
                 uint neighborG = hB.spots[neighbor.r][neighbor.c].terrainCost;
                 uint neighborH = heuristic(neighbor, end);
 
-                writeln("currentG, neighborG, neighborH = ", currentG, " ", neighborG, " ", neighborH);
+                //writeln("currentG, neighborG, neighborH = ", currentG, " ", neighborG, " ", neighborH);
 
                 tempG = currentG + neighborG;
-                writeln("tempG = currentG + neighborG = ", tempG);
+                //writeln("tempG = currentG + neighborG = ", tempG);
 
                 // is this a better path than before?
 
                 //if (open.excludes(neighbor))  // if neighbor is not in open set, then add it
                 if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
                 {
-                    writeln("neighbor was not in open, add to open");
+                    //writeln("neighbor was not in open, add to open");
                     open ~= neighbor;
                 }
                 else
                 {
-                    writeln("neighbor was in open");
+                    //writeln("neighbor was in open");
                     if (tempG >= neighborSpot.g)
                     {
-                        writeln("No, it is not a better path");
+                        //writeln("No, it is not a better path");
                         continue;
                     }
                 } 
@@ -495,14 +497,14 @@ void findShortestPath( ref HexBoard hB, Globals g )
 
                 hB.spots[neighbor.r][neighbor.c].previous = current;
 
-                writeln("========================================== neighbor(", neighbor.r, ",", neighbor.c, ") was updated" );
+                //writeln("========================================== neighbor(", neighbor.r, ",", neighbor.c, ") was updated" );
 
                 //debugSpots( hB );
             }
         }
-        writeln("finished with neighbors for current");
+        //writeln("finished with neighbors for current");
     }
-    writeln("open is empty");
+    //writeln("open is empty");
 
 }
 
