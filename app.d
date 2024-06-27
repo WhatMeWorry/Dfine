@@ -98,12 +98,10 @@ struct Globals
     int i;
     GLFW_STRUCT glfw;
     SDL_STRUCT sdl;
-
     Texture[] textures;
 }
  
 Globals g;  // put a the globals variable together in one place
-
 
 
 int main() 
