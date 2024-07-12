@@ -18,9 +18,9 @@ import distance;
 void debugSpots( ref HexBoard hB )
 {
     //writeln("Spots = ");
-    foreach(i; 0..(hB.maxRows))
+    foreach(i; 0..(hB.rows))
     {
-        foreach(j; 0..(hB.maxCols))
+        foreach(j; 0..(hB.columns))
         {
         /+
             writeln(hB.spots[i][j].location, "  f g h = ", hB.spots[i][j].f, " ", hB.spots[i][j].g, " ", 
@@ -119,9 +119,9 @@ const uint NW = 5;  // North-West
 
 void addNeighbors(ref HexBoard h)
 {
-    foreach(int r; 0..(h.maxRows))        // Note: maxRows and maxCols are defined as uint 
+    foreach(int r; 0..(h.rows))        // Note: rows and columns are defined as uint 
     {                                     // this caused problems with < 0 boundary checking
-        foreach(int c; 0..(h.maxCols))    // causing -1 to be 4294967295
+        foreach(int c; 0..(h.columns))    // causing -1 to be 4294967295
         {                                 // had to declare the local r and c as ints
 
             foreach(int i; 0..6)
@@ -132,21 +132,21 @@ void addNeighbors(ref HexBoard h)
             if (c.isEven)
             {
                 // north
-                if (r+1 <= h.maxRows-1)
+                if (r+1 <= h.lastRow)
                 {
                     h.spots[r][c].neighbors[N].r = r+1;
                     h.spots[r][c].neighbors[N].c = c;
                 }
 
                 // north-east
-                if (c+1 <= (h.maxCols-1))
+                if (c+1 <= h.lastColumn)
                 {
                     h.spots[r][c].neighbors[NE].r = r;
                     h.spots[r][c].neighbors[NE].c = c+1;
                 }
 
                 // south-east  
-                if ((c+1 <= h.maxCols-1) && (r-1 >= 0))
+                if ((c+1 <= h.lastColumn) && (r-1 >= 0))
                 {
                     h.spots[r][c].neighbors[SE].r = r-1;
                     h.spots[r][c].neighbors[SE].c = c+1;
@@ -176,21 +176,21 @@ void addNeighbors(ref HexBoard h)
             else   // On Odd Column
             {
                 // north
-                if (r+1 <= h.maxRows-1)
+                if (r+1 <= h.lastRow)
                 {
                     h.spots[r][c].neighbors[N].r = r+1;
                     h.spots[r][c].neighbors[N].c = c;
                 }
 
                 // north-east
-                if ((r+1 <= h.maxRows-1) && (c+1 <= h.maxCols-1))
+                if ((r+1 <= h.lastRow) && (c+1 <= h.lastColumn))
                 {
                     h.spots[r][c].neighbors[NE].r = r+1;
                     h.spots[r][c].neighbors[NE].c = c+1;
                 }
 
                 // south-east
-                if (c+1 <= h.maxCols-1)
+                if (c+1 <= h.lastColumn)
                 {
                     h.spots[r][c].neighbors[SE].r = r;
                     h.spots[r][c].neighbors[SE].c = c+1;
@@ -211,7 +211,7 @@ void addNeighbors(ref HexBoard h)
                 }
 
                 // north-west
-                if ((r+1 <= h.maxRows-1) && (c-1 >= 0))
+                if ((r+1 <= h.lastRow) && (c-1 >= 0))
                 {
                     h.spots[r][c].neighbors[NW].r = r+1;
                     h.spots[r][c].neighbors[NW].c = c-1;
@@ -237,7 +237,7 @@ void displaySet(Location[] set, string name = "")
         //writeln("Set ", name, " has the following elements");
         foreach(element; set)
         {
-            write("    (", element.r, ",", element.c, ")" );
+            //write("    (", element.r, ",", element.c, ")" );
         }
     }
     else
@@ -343,10 +343,10 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
 
     //writeln();
     writeln("---------- lowest F score ----------");
-	writeln("set.length = ", set.length);
+    writeln("set.length = ", set.length);
     foreach(int i, s; set)
     {
-        writeln(" (", s.r, ",", s.c, ")");
+        //writeln(" (", s.r, ",", s.c, ")");
         if (hB.spots[s.r][s.c].f < hB.spots[min.r][min.c].f)
         {
             min = s;
@@ -413,8 +413,8 @@ void findShortestPath( ref HexBoard hB, Globals g )
 
     begin.r = 0;
     begin.c = 0;
-    end.r = hB.maxRows - 1;
-    end.c = hB.maxCols - 1;  
+    end.r = hB.rows - 1;
+    end.c = hB.columns - 1;  
     
     addNeighbors(hB);
 
@@ -445,9 +445,9 @@ void findShortestPath( ref HexBoard hB, Globals g )
         //displaySet(closed, "closed");
 
         ulong c;
-		writeln("open.length ", open.length);
+        writeln("open.length ", open.length);
         current = lowestFscore(c, open, hB);  // find the node with the smallest f value.
-		writeln("open.length ", open.length);
+        writeln("open.length ", open.length);
 
         //writeln("lowest F score in openset CURRENT = ", current);
 

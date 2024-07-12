@@ -298,8 +298,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
             h.setRenderOfHexboard(g.sdl.renderer);
 
             g.textures = load_textures(g);
-			
-			writeln("g.textures = ", g.textures);
+
+            writeln("g.textures = ", g.textures);
 
             //h.initializeHexTextures(g);
 
@@ -308,8 +308,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
             h.drawHexBoard;
 
             h.displayHexTextures();
-			
-			writeln("after displayHexTextures");
+
+            writeln("after displayHexTextures");
 
             /+
             //Clear screen
@@ -321,11 +321,11 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
 
             D2_SC[6] s;
-            uint maxRows = h.numberOfRows();
-            uint maxCols = h.numberOfColumns();
-            foreach(r; 0..maxRows)
+            //uint maxRows = h.numberOfRows();
+            //uint maxCols = h.numberOfColumns();
+            foreach(r; 0..rows)
             {
-                foreach(c; 0..maxCols)
+                foreach(c; 0..maxassdsCols)
                 {  
                     // writeln("r = ", r, " c = ", c);
 
@@ -422,25 +422,25 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                                 //executeShell("cls");
 
                                 h.setHexboardTexturesAndTerrain(g);
-								
-								writeln("after setHexboardTexturesAndTerrain");
+
+                                writeln("after setHexboardTexturesAndTerrain");
 
                                 h.displayHexTextures();
-								
-								writeln("after displayHexTextures");
-								
+
+                                writeln("after displayHexTextures");
+
                                 import std.datetime.stopwatch;
                                 auto watch = StopWatch(AutoStart.no);
                                 watch.start();
                                 //                                          millisecond 
                                 // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
                                 //                                                microsecond
-								
-                                h.validateHexboard();							
-								
+
+                                h.validateHexboard();
+
                                 findShortestPath( h, g );
-								
-								writeln(watch.peek()); 
+
+                                writeln(watch.peek()); 
 
                                 h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
 
@@ -488,8 +488,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                                     //h.setHexColTexture(g, start.column, Ids.solidRed);                                    
 
                                     //h.setHexTexture(g, start, Ids.solidBlack);
-									                    // h.selectedHex has end point
-									findShortestPath( h, g );
+                                    // h.selectedHex has end point
+                                    findShortestPath( h, g );
 
                                     h.displayHexTextures();
                                     
@@ -515,19 +515,19 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                                     SDL_RenderDrawLine( g.sdl.renderer, t[0].x, t[0].y, t[1].x, t[1].y);
                                     SDL_RenderDrawLine( g.sdl.renderer, t[1].x, t[1].y, t[2].x, t[2].y);
                                     SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
-                                    SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);                                    
+                                    SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);
                                 }
                          
                                 SDL_RenderPresent( g.sdl.renderer );
                             }
                             break;          
 
-                        default: break;                                         
+                        default: break;
                     }
-				    
+
                 }
             }
-            return 0;           
+            return 0;
         }
     }  
     

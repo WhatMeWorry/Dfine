@@ -297,28 +297,29 @@ struct HexBoard
     
     this(float d, uint r, uint c) 
     {
-        // These three parametes suffice to define the hexboard as well as each individual hex
+        // These three parameters suffice to define the hexboard: the size (diameter of each hex
+        // in ndc coordinates) as well the number of rows and columns making up the board
         diameter = d;
-        maxRows = r;
-        maxCols = c;        
+        rows = r;
+        columns = c;
         
-        radius        = diameter * 0.5;    
-        halfRadius    = radius   * 0.5;                        
-        perpendicular = diameter * 0.866;    
-        apothem       = perpendicular * 0.5; 
+        radius        = diameter * 0.5;
+        halfRadius    = radius   * 0.5;
+        perpendicular = diameter * 0.866; 
+        apothem       = perpendicular * 0.5;
         
         edge.bottom = -1.0;
-        edge.top    = edge.bottom + (maxRows * perpendicular); 
+        edge.top    = edge.bottom + (rows * perpendicular);
         edge.left   = -1.0;
-        edge.right  = edge.left + (maxCols * (radius + halfRadius));             
+        edge.right  = edge.left + (columns * (radius + halfRadius));
         
-        hexes = new Hex[][](maxRows, maxCols);
-		
-		spots = new Spot[][](maxRows, maxCols);
+        hexes = new Hex[][](rows, columns);
 
-		foreach(i; 0..maxRows)
+        spots = new Spot[][](rows, columns);
+
+        foreach(i; 0..rows)
         {
-            foreach(j; 0..maxCols)
+            foreach(j; 0..columns)
             {
                 spots[i][j].location.r = i;
                 spots[i][j].location.c = j;
@@ -338,10 +339,13 @@ struct HexBoard
     }
     
     enum invalid = -1;  // -1 means a row or column is invalid
-    
-    uint maxRows;  // number of rows on the board [0..rows-1]
-    uint maxCols;  // number of columns on the bord [0..cols-1]
-    
+
+    uint rows;     // number of rows on the board [0..rows-1]
+    uint columns;  // number of columns on the bord [0..cols-1]
+
+    @property lastRow() { return rows-1; }
+    @property lastColumn() { return columns-1; }
+
     Edges edge;
 
     // diameter is a user defined constant in NDC units, so needs to be between [0.0, 2.0)
@@ -376,11 +380,7 @@ struct HexBoard
     SelectedHex selectedHex; 
 
     MouseClick mouseClick;
-    
-    uint numberOfRows(){ return maxRows; }
 
-    uint numberOfColumns(){ return maxCols; }
-    
     void setRenderOfHexboard(SDL_Renderer *rend)
     {
         renderer = rend;
@@ -389,9 +389,9 @@ struct HexBoard
     void displayHexBoard()
     {
         //writeln("===== Values are in Normalized Device Coordinates =====");
-        foreach(r; 0..maxRows)
+        foreach(r; 0..rows)
         {
-            foreach(c; 0..maxCols)
+            foreach(c; 0..columns)
             {
                 //writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );
                 foreach(p; 0..6)
@@ -405,9 +405,9 @@ struct HexBoard
     void displayHexBoardScreenCoordinates()
     {
         //writeln("===== Values are in Screen Coordinates =====");
-        foreach(r; 0..maxRows)
+        foreach(r; 0..rows)
         {
-            foreach(c; 0..maxCols)
+            foreach(c; 0..columns)
             {
                 //writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );
                 foreach(p; 0..6)
@@ -434,10 +434,10 @@ struct HexBoard
 
         writeln("inside initializeHexBoard");
  
-        foreach(row; 0..maxRows)
+        foreach(row; 0..rows)
         {
             // writeln("inside foreach row, row = ", row);
-            foreach(col; 0..maxCols)
+            foreach(col; 0..columns)
             {    
                 hexes[row][col].points = defineHexVertices(x, y, perpendicular, diameter, 
                                                            apothem, halfRadius, radius);
@@ -459,7 +459,7 @@ struct HexBoard
         
             x = edge.left;  // start a new row and column on the left
         
-            if (maxCols.isOdd)
+            if (columns.isOdd)
             {
                 y -= apothem;
             }
@@ -473,9 +473,9 @@ struct HexBoard
     
     void convertNDCoordsToScreenCoords(int screenWidth, int screenHeight)
     {
-        foreach(r; 0..maxRows)
+        foreach(r; 0..rows)
         {
-            foreach(c; 0..maxCols)
+            foreach(c; 0..columns)
             {    
                 foreach(v; 0..6)
                 {
@@ -551,9 +551,9 @@ struct HexBoard
         import std.random : uniform;
         auto rnd = Random(unpredictableSeed);    
  
-        foreach(r; 0..maxRows)
+        foreach(r; 0..rows)
         {
-            foreach(c; 0..maxCols)
+            foreach(c; 0..columns)
             {    
                 // Generate an integer in 0,1,2,3,4,5
                 auto a = uniform(0, 10, rnd);
@@ -597,9 +597,9 @@ struct HexBoard
 
     void clearHexBoard()
     {
-        foreach(r; 0..maxRows)
+        foreach(r; 0..rows)
         {
-            foreach(c; 0..maxCols)
+            foreach(c; 0..columns)
             {    
                 hexes[r][c].texture = Texture(Ids.none, "", null);
                 // spots[r][c].location = Location(-1,-1); // DO NOT CHANGE!!!
@@ -624,7 +624,7 @@ struct HexBoard
 
     void setHexRowTexture(Globals g, int row, Ids id)  
     {
-        foreach(c; 0..maxCols)
+        foreach(c; 0..columns)
         {
             hexes[row][c].texture = g.textures[id]; 
         }
@@ -632,7 +632,7 @@ struct HexBoard
 
     void setHexColTexture(Globals g, int col, Ids id)  
     {
-        foreach(r; 0..maxRows)
+        foreach(r; 0..rows)
         {
             hexes[r][col].texture = g.textures[id]; 
         }            
@@ -640,9 +640,9 @@ struct HexBoard
 
     void displayHexTextures()
     {    
-        foreach(r; 0..maxRows)
+        foreach(r; 0..rows)
         {
-            foreach(c; 0..maxCols)
+            foreach(c; 0..columns)
             {
                 if (hexes[r][c].texture.ptr != null)
                 {
@@ -674,9 +674,9 @@ struct HexBoard
 
         SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, SDL_ALPHA_OPAQUE );        
 
-        foreach(r; 0..maxRows)
+        foreach(r; 0..rows)
         {
-            foreach(c; 0..maxCols)
+            foreach(c; 0..columns)
             {  
                 // writeln("r = ", r, " c = ", c);
                 SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &hexes[r][c].sc[0], 6);
@@ -724,12 +724,12 @@ struct HexBoard
 
 void validateHexboard()
 {
-	foreach(i; 0..maxRows)
+	foreach(i; 0..rows)
     {
-        foreach(j; 0..maxCols)
+        foreach(j; 0..columns)
         {
             if ((spots[i][j].location.r < 0) ||
-                (spots[i][j].location.r > maxRows))
+                (spots[i][j].location.r > rows))
             {
 			    writeln("[i][j] = [", i, "][", j, "]");
 			    writeln("Index out of bounds");
