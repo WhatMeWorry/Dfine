@@ -119,11 +119,10 @@ const uint NW = 5;  // North-West
 
 void addNeighbors(ref HexBoard h)
 {
-    foreach(int r; 0..(h.rows))        // Note: rows and columns are defined as uint 
-    {                                     // this caused problems with < 0 boundary checking
-        foreach(int c; 0..(h.columns))    // causing -1 to be 4294967295
-        {                                 // had to declare the local r and c as ints
-
+    foreach(int r; 0..(h.rows))          // Note: rows and columns are defined as uint 
+    {                                    // this caused problems with < 0 boundary checking
+        foreach(int c; 0..(h.columns))   // causing -1 to be 4294967295
+        {                                // had to declare the local r and c as ints
             foreach(int i; 0..6)
             {
                 h.spots[r][c].neighbors[i].r = -1;
@@ -131,43 +130,32 @@ void addNeighbors(ref HexBoard h)
             }
             if (c.isEven)
             {
-                // north
-                if (r+1 <= h.lastRow)
+                if (r+1 <= h.lastRow)                     // north
                 {
                     h.spots[r][c].neighbors[N].r = r+1;
                     h.spots[r][c].neighbors[N].c = c;
                 }
-
-                // north-east
-                if (c+1 <= h.lastColumn)
+                if (c+1 <= h.lastColumn)                  // north-east
                 {
                     h.spots[r][c].neighbors[NE].r = r;
                     h.spots[r][c].neighbors[NE].c = c+1;
                 }
-
-                // south-east  
-                if ((c+1 <= h.lastColumn) && (r-1 >= 0))
+                if ((c+1 <= h.lastColumn) && (r-1 >= 0))  // south-east
                 {
                     h.spots[r][c].neighbors[SE].r = r-1;
                     h.spots[r][c].neighbors[SE].c = c+1;
                 }
-
-                // south
-                if (r-1 >= 0)
+                if (r-1 >= 0)                             // south
                 {
                     h.spots[r][c].neighbors[S].r = r-1;
                     h.spots[r][c].neighbors[S].c = c;
                 }
-
-                // south-west
-                if ((r-1 >= 0) && (c-1 >= 0))
+                if ((r-1 >= 0) && (c-1 >= 0))             // south-west
                 {
                     h.spots[r][c].neighbors[SW].r = r-1;
                     h.spots[r][c].neighbors[SW].c = c-1;
                 }
-
-                // north-west
-                if (c-1 >= 0)
+                if (c-1 >= 0)                             // north-west
                 {
                     h.spots[r][c].neighbors[NW].r = r;
                     h.spots[r][c].neighbors[NW].c = c-1;
@@ -175,43 +163,33 @@ void addNeighbors(ref HexBoard h)
             }
             else   // On Odd Column
             {
-                // north
-                if (r+1 <= h.lastRow)
+                
+                if (r+1 <= h.lastRow)                     // north
                 {
                     h.spots[r][c].neighbors[N].r = r+1;
                     h.spots[r][c].neighbors[N].c = c;
                 }
-
-                // north-east
-                if ((r+1 <= h.lastRow) && (c+1 <= h.lastColumn))
+                if ((r+1 <= h.lastRow) && (c+1 <= h.lastColumn)) // north-east
                 {
                     h.spots[r][c].neighbors[NE].r = r+1;
                     h.spots[r][c].neighbors[NE].c = c+1;
                 }
-
-                // south-east
-                if (c+1 <= h.lastColumn)
+                if (c+1 <= h.lastColumn)                  // south-east
                 {
                     h.spots[r][c].neighbors[SE].r = r;
                     h.spots[r][c].neighbors[SE].c = c+1;
                 }
-
-                // south
-                if (r-1 >= 0)
+                if (r-1 >= 0)                             // south
                 {
                     h.spots[r][c].neighbors[S].r = r-1;
                     h.spots[r][c].neighbors[S].c = c;
                 }
-
-                // south-west
-                if (c-1 >= 0)
+                if (c-1 >= 0)                             // south-west
                 {
                     h.spots[r][c].neighbors[SW].r = r;
                     h.spots[r][c].neighbors[SW].c = c-1;
                 }
-
-                // north-west
-                if ((r+1 <= h.lastRow) && (c-1 >= 0))
+                if ((r+1 <= h.lastRow) && (c-1 >= 0))     // north-west
                 {
                     h.spots[r][c].neighbors[NW].r = r+1;
                     h.spots[r][c].neighbors[NW].c = c-1;
@@ -387,6 +365,8 @@ struct Node{
 }
 
 
+
+
 /+
 //int main()
 int placeHolder() 
@@ -394,28 +374,34 @@ int placeHolder()
 auto priorQ = new RedBlackTree!(Node, "a.f < b.f", true); // true: allowDuplicates
 +/
 
-void findShortestPath( ref HexBoard hB, Globals g )
+
+
+
+
+
+void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
 {
     Location[] open;    // open set contains nodes that need to be evaluated
     Location[] closed;  // closed set stores all nodes that have finished being evaluated. Don't need to revisit
-	
-	
+
 
     open.reserve(8192);
     closed.reserve(8192);
-	
+
     Location[] path;
 
     Location current; // current is the node in open having the lowest f score 
 
-    Location begin;
-    Location end;
+    //Location begin;
+    //Location end;
 
+/+
     begin.r = 0;
     begin.c = 0;
     end.r = hB.rows - 1;
     end.c = hB.columns - 1;  
-    
++/
+
     addNeighbors(hB);
 
     //===========================================================================

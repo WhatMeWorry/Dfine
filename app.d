@@ -239,8 +239,6 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     writeln("hexDiameter = ", hexDiameter);
 
-    //return 1;
-
     //hexDiameter = .6;
     HexBoard h = HexBoard(hexDiameter, rowCount, colCount);  // hex board is created with NDC coordinates
 
@@ -257,8 +255,6 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     h.displayHexBoardScreenCoordinates();
 
-
-
     glfwSetErrorCallback(&errorCallback);
 
     if (!glfwInit()) { return -1; }
@@ -267,7 +263,6 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     // https://github.com/BindBC/bindbc-sdl/issues/53   
 
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
-
 
     // Initialize SDL
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -321,11 +316,9 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
             SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, 0xFF );        
 
             D2_SC[6] s;
-            //uint maxRows = h.numberOfRows();
-            //uint maxCols = h.numberOfColumns();
-            foreach(r; 0..rows)
+            foreach(r; 0..(h.rows))
             {
-                foreach(c; 0..maxassdsCols)
+                foreach(c; 0..(h.columns))
                 {  
                     // writeln("r = ", r, " c = ", c);
 
@@ -438,19 +431,18 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                                 h.validateHexboard();
 
-                                findShortestPath( h, g );
+                                Location begin;
+                                Location end;
+                                begin.r = 0;
+                                begin.c = 0;
+                                end.r = h.lastRow;
+                                end.c = h.lastColumn;  
+
+                                findShortestPath( h, g, begin, end );
 
                                 writeln(watch.peek()); 
 
                                 h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
-
-                            }
-
-                            if( event.key.keysym.sym == SDLK_F12 )
-                            {   
-                                writeln("F12 Key Pressed");
-                                findShortestPath( h, g );
-                                h.displayHexTextures();
                             }
 
                             SDL_RenderPresent( g.sdl.renderer );  // refresh screen for any keydown event
@@ -489,7 +481,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                                     //h.setHexTexture(g, start, Ids.solidBlack);
                                     // h.selectedHex has end point
-                                    findShortestPath( h, g );
+                                    findShortestPath( h, g, start, end );
 
                                     h.displayHexTextures();
                                     
