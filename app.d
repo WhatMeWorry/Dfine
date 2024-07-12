@@ -109,6 +109,20 @@ int main()
 
 /+ 
 
+Lenovo AMD Ryzen 7 PRO 7840U
+AMD Radeon 780M
+16 GB
+Microsoft Windows 11 Professional (x64) Build 22631.3810 (23H2)
+DUB version 1.37.0, built on Apr  1 2024
+DMD64 D Compiler v2.108.0
+
+core.exception.ArrayIndexError@a_star\spot.d(349): index [155] is out of bounds for array of length 100
+core.exception.ArrayIndexError@a_star\spot.d(349): index [168] is out of bounds for array of length 100
+core.exception.ArrayIndexError@a_star\spot.d(349): index [147] is out of bounds for array of length 100
+
+
+===================================================
+
 All results were run on a 
 
 Lenovo AMD Ryzen 5 PRO 5650GE with
@@ -216,8 +230,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 1000;
     g.sdl.screenHeight = 1000;
 
-    int rowCount = 100;
-    int colCount = 100;
+    int rowCount = 20;
+    int colCount = 20;
 
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
 
@@ -294,6 +308,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
             h.drawHexBoard;
 
             h.displayHexTextures();
+			
+			writeln("after displayHexTextures");
 
             /+
             //Clear screen
@@ -403,11 +419,15 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             if( event.key.keysym.sym == SDLK_F3 )
                             {
                                 import std.process : executeShell;
-                                executeShell("cls");
+                                //executeShell("cls");
 
                                 h.setHexboardTexturesAndTerrain(g);
+								
+								writeln("after setHexboardTexturesAndTerrain");
 
                                 h.displayHexTextures();
+								
+								writeln("after displayHexTextures");
 								
                                 import std.datetime.stopwatch;
                                 auto watch = StopWatch(AutoStart.no);
@@ -415,6 +435,9 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                                 //                                          millisecond 
                                 // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
                                 //                                                microsecond
+								
+                                h.validateHexboard();							
+								
                                 findShortestPath( h, g );
 								
 								writeln(watch.peek()); 

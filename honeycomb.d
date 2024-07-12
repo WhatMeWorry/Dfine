@@ -290,6 +290,7 @@ struct Hex
 }
 
 
+
 struct HexBoard
 {
     @disable this();   // disables default constructor HexBoard h;
@@ -718,5 +719,31 @@ struct HexBoard
         // Update screen
         SDL_RenderPresent( g.sdl.renderer );
     }
-    
+ 
+
+
+void validateHexboard()
+{
+	foreach(i; 0..maxRows)
+    {
+        foreach(j; 0..maxCols)
+        {
+            if ((spots[i][j].location.r < 0) ||
+                (spots[i][j].location.r > maxRows))
+            {
+			    writeln("[i][j] = [", i, "][", j, "]");
+			    writeln("Index out of bounds");
+				exit(0);
+            }
+                 
+        }
+    }
+
+}
+
+
+
+
+
+ 
 }

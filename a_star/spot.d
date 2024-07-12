@@ -342,10 +342,11 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
     min = set[0];
 
     //writeln();
-    //writeln("---------- lowest F score ----------");
+    writeln("---------- lowest F score ----------");
+	writeln("set.length = ", set.length);
     foreach(int i, s; set)
     {
-        //writeln(" (", s.r, ",", s.c, ") f = ", hB.spots[s.r][s.c].f);
+        writeln(" (", s.r, ",", s.c, ")");
         if (hB.spots[s.r][s.c].f < hB.spots[min.r][min.c].f)
         {
             min = s;
@@ -376,11 +377,33 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
 
 Location invalidLoc = { -1, -1 };
 
+struct Node{
+    this(Location loc, uint f) {
+        this.loc = loc;
+        this.f = f;
+    }
+    Location loc;  
+    uint f;
+}
+
+
+/+
+//int main()
+int placeHolder() 
+{
+auto priorQ = new RedBlackTree!(Node, "a.f < b.f", true); // true: allowDuplicates
++/
+
 void findShortestPath( ref HexBoard hB, Globals g )
 {
     Location[] open;    // open set contains nodes that need to be evaluated
     Location[] closed;  // closed set stores all nodes that have finished being evaluated. Don't need to revisit
+	
+	
 
+    open.reserve(8192);
+    closed.reserve(8192);
+	
     Location[] path;
 
     Location current; // current is the node in open having the lowest f score 
@@ -422,7 +445,9 @@ void findShortestPath( ref HexBoard hB, Globals g )
         //displaySet(closed, "closed");
 
         ulong c;
+		writeln("open.length ", open.length);
         current = lowestFscore(c, open, hB);  // find the node with the smallest f value.
+		writeln("open.length ", open.length);
 
         //writeln("lowest F score in openset CURRENT = ", current);
 
