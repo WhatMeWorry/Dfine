@@ -12,7 +12,8 @@ import honeycomb;
 import app;
 import textures.load_textures;
 import distance;
-
+import redblacktree;
+import std.container : RedBlackTree;
 
 
 void debugSpots( ref HexBoard hB )
@@ -273,6 +274,21 @@ bool excludes(Location[] set, Location item)
 }
 
 
+minPriorityQueue
+
+bool excludes(Location[] set, Location item)
+{
+    foreach(element; set)
+    {
+        if (element == item)
+            return false;
+    }
+    return true;
+}
+
+
+
+
 // UFCS usage:  if (element.isNotInSet(open))
 //                  writeln("element is not in set open");
 
@@ -295,6 +311,19 @@ bool isNotEmpty(Location[] set)
         return true;
     else
         return false;
+}
+/+  REPLACE ABOVE????
+
+bool isNotEmpty(Location[] set)
+{
+    return (set.length > 0);
+}
++/
+
+
+bool isNotEmpty(minPriorityQueue redBlack)
+{
+    return !(redBlack.empty);
 }
 
 
@@ -357,15 +386,18 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
 
 Location invalidLoc = { -1, -1 };
 
-struct Node{
-    this(Location loc, uint f) {
-        this.loc = loc;
+/+
+struct Node
+{
+    this(Location location, uint f) 
+    {
+        this.location = location;
         this.f = f;
     }
-    Location loc;  
+    Location location;  
     uint f;
 }
-
++/
 
 
 
@@ -550,56 +582,45 @@ writeln("open = ", open);
 }
 +/
 
-
+alias minPriorityQueue = RedBlackTree!(Node, "a.f < b.f", true);
 
 
 void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Location end)
 {
-    Location[] open;    // open set contains nodes that need to be evaluated
-    Location[] closed;  // closed set stores all nodes that have finished being evaluated. Don't need to revisit
+    // auto open = new RedBlackTree!(Node, "a.f < b.f", true); // true: allowDuplicates
+    // auto closed = new RedBlackTree!(Node, "a.f < b.f", true); // true: allowDuplicates
 
+    minPriorityQueue open;
+    minPriorityQueue closed;
 
-    open.reserve(8192);
-    closed.reserve(8192);
+    //placeHolder();
+    
+    // open set contains nodes that need to be evaluated
+    // closed set contains all nodes that have finished being evaluated. Don't need to revisit
 
     Location[] path;
 
-    Location current; // current is the node in open having the lowest f score 
+    Node current; // current is the node in open having the lowest f score 
 
-    //===========================================================================
-    //  Path finding starts here
-    //===========================================================================
-
-    Spot start;  // start is a full node, not just a location
-
-    start = hB.spots[begin.r][begin.c];
+    Spot start = hB.spots[begin.r][begin.c];  // start is a full node, not just a location
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
     start.h = heuristic(start.location, end);  // heuristic
     start.f = start.g + start.h;
 
-    //writeln("start.g = ", start.g);
-    //writeln("start.h = ", start.h);
-    //writeln("start.f = ", start.f);
-
     hB.spots[begin.r][begin.c] = start;
 
-    open ~= start.location;  // put the start node on the openList (leave its f at zero)
+    Node s = Node(start.location, start.f);
+
+    //open ~= start.location;  // put the start node on the open set (leave its f at zero)
+    open.insert(s);
 
     while (open.isNotEmpty)     // while there are spots that still need evaluating
     {
-        //writeln();
-        //displaySet(open, "open");
-        //displaySet(closed, "closed");
+        current = open.front;  // set the the node with the smallest f value to current
+        open.removeFront;      // and remove it from the open min priority queue
 
-        ulong c;
-        writeln("open.length ", open.length);
-        current = lowestFscore(c, open, hB);  // find the node with the smallest f value.
-        writeln("open.length ", open.length);
-
-        //writeln("lowest F score in openset CURRENT = ", current);
-
-        if (current == end)
+        if (current.location == end)
         {
             Location here = hB.spots[end.r][end.c].location;
             while (here != invalidLoc)
@@ -617,10 +638,12 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
             return;
         }
 
-        open = open.remove(c);  // remove the currentNode from the open
-        closed ~= current;      // add the currentNode to the closed
+        //open = open.remove(c);  // remove the currentNode from the open - Removed previously
+        //closed ~= current;      // add the currentNode to the closed
+        
+        closed.insert(current);
 
-        Location[] neighbors = getNeighbors(current, hB);   // get neighbors of current and cull out the (-1,-1)
+        Location[] neighbors = getNeighbors(current.location, hB);   // get neighbors of current and cull out the (-1,-1)
 
         // Time 32:15 in Coding Train Youtube video  all neighbors will be added to open set, 
         // but before we put them in the open set, we need to evaluate them

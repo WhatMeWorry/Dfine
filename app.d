@@ -438,7 +438,9 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                                 end.r = h.lastRow;
                                 end.c = h.lastColumn;  
 
-                                findShortestPath( h, g, begin, end );
+                                //findShortestPath( h, g, begin, end );
+                                
+                                findShortestPathRedBlack( h, g, begin, end );
 
                                 writeln(watch.peek()); 
 

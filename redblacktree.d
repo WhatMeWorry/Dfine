@@ -1,25 +1,25 @@
 
 import std.container : RedBlackTree;
 import std.stdio;
+import honeycomb : Location;
 
-struct Location {
-    int x;  
-    int y;
-}
 
-struct Node{
-    this(Location loc, uint f) {
-        this.loc = loc;
+
+struct Node
+{
+    this(Location locaction, uint f) 
+    {
+        this.location = location;
         this.f = f;
     }
-    Location loc;  
+    Location location;  
     uint f;
 }
 
 
 
 //int main()
-int placeHolder() 
+void placeHolder() 
 {
 auto priorQ = new RedBlackTree!(Node, "a.f < b.f", true); // true: allowDuplicates
 
@@ -28,13 +28,20 @@ Node n2 = Node( Location(3,4), 20);
 Node n3 = Node( Location(5,6), 7);
 Node n4 = Node( Location(7,8), 1);
 Node n5 = Node( Location(9,10), 20);
+
 Node current;
 
+writeln("Before inserts into RedBlackTree");
+
 priorQ.insert(n3);
 priorQ.insert(n2);
 priorQ.insert(n1);
 priorQ.insert(n4);
 priorQ.insert(n5);
+
+writeln("After inserts into RedBlackTree");
+
+writeln("priorQ = ", priorQ);
 
 while(!priorQ.empty) 
 {
@@ -52,10 +59,9 @@ priorQ.insert(n1);
 while(!priorQ.empty) 
 {
     current = priorQ.front;
-    priorQ.removeFront;
     writeln("current = ", current);
+    priorQ.removeFront;
 }
 
 
-return 0;
 }
