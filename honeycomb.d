@@ -328,6 +328,8 @@ struct HexBoard
 
         initializeHexBoard();
         
+        addNeighbors();
+        
         mouseClick.ndc.x = 0.0;
         mouseClick.ndc.y = 0.0;        
         
@@ -386,7 +388,7 @@ struct HexBoard
         renderer = rend;
     }
     
-    void displayHexBoard()
+    void displayHexBoardData()
     {
         //writeln("===== Values are in Normalized Device Coordinates =====");
         foreach(r; 0..rows)
@@ -560,34 +562,33 @@ struct HexBoard
                 //hexes[r][c].texture.id = g.textures[a].id;
                 //hexes[r][c].texture.fileName = g.textures[a].fileName;
                 //hexes[r][c].texture.ptr = g.textures[a].ptr;
-				
+
                 switch(a) 
                 {
                     case 0,1,2,3,4:
-					    {
+                        {
                             //writeln("solidGreen");
                             hexes[r][c].texture = g.textures[Ids.solidGreen];
-							spots[r][c].terrainCost = 1;
-						}
+                            spots[r][c].terrainCost = 1;
+                        }
                         break;
                     case 5,6,7:
-					    {
+                        {
                             //writeln("solidBrown");
                             hexes[r][c].texture = g.textures[Ids.solidBrown];
-							spots[r][c].terrainCost = 9;
-						}
+                            spots[r][c].terrainCost = 9;
+                        }
                         break;
                     case 8,9:
-					    {
+                        {
                             //writeln("solidBlue");
                             hexes[r][c].texture = g.textures[Ids.solidBlue];
-							spots[r][c].terrainCost = 999;
-						}
+                            spots[r][c].terrainCost = 999;
+                        }
                         break;          
                     default: break;                                         
                 }
                 //hexes[r][c].texture = g.textures[a];
-	
             }
         }
     }
@@ -724,16 +725,16 @@ struct HexBoard
 
 void validateHexboard()
 {
-	foreach(i; 0..rows)
+    foreach(i; 0..rows)
     {
         foreach(j; 0..columns)
         {
             if ((spots[i][j].location.r < 0) ||
                 (spots[i][j].location.r > rows))
             {
-			    writeln("[i][j] = [", i, "][", j, "]");
-			    writeln("Index out of bounds");
-				exit(0);
+                writeln("[i][j] = [", i, "][", j, "]");
+                writeln("Index out of bounds");
+                exit(0);
             }
                  
         }
@@ -743,6 +744,97 @@ void validateHexboard()
 
 
 
+const uint N  = 0;  // North
+const uint NE = 1;  // North-East
+const uint SE = 2;  // South-East
+const uint S  = 3;  // South
+const uint SW = 4;  // South-West
+const uint NW = 5;  // North-West
+
+
+void addNeighbors()
+{
+    foreach(int r; 0..rows)          // Note: rows and columns are defined as uint 
+    {                                    // this caused problems with < 0 boundary checking
+        foreach(int c; 0..columns)   // causing -1 to be 4294967295
+        {                                // had to declare the local r and c as ints
+            foreach(int i; 0..6)
+            {
+                spots[r][c].neighbors[i].r = -1;
+                spots[r][c].neighbors[i].c = -1;
+            }
+            if (c.isEven)
+            {
+                if (r+1 <= lastRow)                     // north
+                {
+                    spots[r][c].neighbors[N].r = r+1;
+                    spots[r][c].neighbors[N].c = c;
+                }
+                if (c+1 <= lastColumn)                  // north-east
+                {
+                    spots[r][c].neighbors[NE].r = r;
+                    spots[r][c].neighbors[NE].c = c+1;
+                }
+                if ((c+1 <= lastColumn) && (r-1 >= 0))  // south-east
+                {
+                    spots[r][c].neighbors[SE].r = r-1;
+                    spots[r][c].neighbors[SE].c = c+1;
+                }
+                if (r-1 >= 0)                             // south
+                {
+                    spots[r][c].neighbors[S].r = r-1;
+                    spots[r][c].neighbors[S].c = c;
+                }
+                if ((r-1 >= 0) && (c-1 >= 0))             // south-west
+                {
+                    spots[r][c].neighbors[SW].r = r-1;
+                    spots[r][c].neighbors[SW].c = c-1;
+                }
+                if (c-1 >= 0)                             // north-west
+                {
+                    spots[r][c].neighbors[NW].r = r;
+                    spots[r][c].neighbors[NW].c = c-1;
+                }
+            }
+            else   // On Odd Column
+            {
+                
+                if (r+1 <= lastRow)                     // north
+                {
+                    spots[r][c].neighbors[N].r = r+1;
+                    spots[r][c].neighbors[N].c = c;
+                }
+                if ((r+1 <= lastRow) && (c+1 <= lastColumn)) // north-east
+                {
+                    spots[r][c].neighbors[NE].r = r+1;
+                    spots[r][c].neighbors[NE].c = c+1;
+                }
+                if (c+1 <= lastColumn)                  // south-east
+                {
+                    spots[r][c].neighbors[SE].r = r;
+                    spots[r][c].neighbors[SE].c = c+1;
+                }
+                if (r-1 >= 0)                             // south
+                {
+                    spots[r][c].neighbors[S].r = r-1;
+                    spots[r][c].neighbors[S].c = c;
+                }
+                if (c-1 >= 0)                             // south-west
+                {
+                    spots[r][c].neighbors[SW].r = r;
+                    spots[r][c].neighbors[SW].c = c-1;
+                }
+                if ((r+1 <= lastRow) && (c-1 >= 0))     // north-west
+                {
+                    spots[r][c].neighbors[NW].r = r+1;
+                    spots[r][c].neighbors[NW].c = c-1;
+                }
+            }
+            //writeln("(r,c) = ", "(", r, ",", c, ")"); 
+            //writeln("spots[r][c].neighbors = ", spots[r][c].neighbors);
+        }
+    }
+}
 
 
  

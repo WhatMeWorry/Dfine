@@ -109,6 +109,8 @@ enum Dir
 } 
 +/
 
+/+
+
 const uint N  = 0;  // North
 const uint NE = 1;  // North-East
 const uint SE = 2;  // South-East
@@ -201,7 +203,7 @@ void addNeighbors(ref HexBoard h)
     }
 }
 
-
++/
 
 
 
@@ -384,25 +386,12 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
     Location[] open;    // open set contains nodes that need to be evaluated
     Location[] closed;  // closed set stores all nodes that have finished being evaluated. Don't need to revisit
 
-
     open.reserve(8192);
     closed.reserve(8192);
 
     Location[] path;
 
     Location current; // current is the node in open having the lowest f score 
-
-    //Location begin;
-    //Location end;
-
-/+
-    begin.r = 0;
-    begin.c = 0;
-    end.r = hB.rows - 1;
-    end.c = hB.columns - 1;  
-+/
-
-    addNeighbors(hB);
 
     //===========================================================================
     //  Path finding starts here
@@ -471,7 +460,7 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
             //writeln("neighbor = ", neighbor);
             //writeAndPause();
 
-            if (closed.excludes(neighbor))  // only proceed with this neighbor if it hasn't already been evaluated.
+            if (closed.excludes(neighbor))  // only proceed with unevaluated neighbors
             {
                 uint currentG = hB.spots[current.r][current.c].g;
                 uint neighborG = hB.spots[neighbor.r][neighbor.c].terrainCost;
@@ -507,8 +496,6 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
                 hB.spots[neighbor.r][neighbor.c].f = tempG + neighborH;
 
                 hB.spots[neighbor.r][neighbor.c].previous = current;
-
-                //writeln("========================================== neighbor(", neighbor.r, ",", neighbor.c, ") was updated" );
 
                 //debugSpots( hB );
             }
@@ -562,3 +549,132 @@ open = open.remove(1);
 writeln("open = ", open);
 }
 +/
+
+
+
+
+void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Location end)
+{
+    Location[] open;    // open set contains nodes that need to be evaluated
+    Location[] closed;  // closed set stores all nodes that have finished being evaluated. Don't need to revisit
+
+
+    open.reserve(8192);
+    closed.reserve(8192);
+
+    Location[] path;
+
+    Location current; // current is the node in open having the lowest f score 
+
+    //===========================================================================
+    //  Path finding starts here
+    //===========================================================================
+
+    Spot start;  // start is a full node, not just a location
+
+    start = hB.spots[begin.r][begin.c];
+
+    start.g = 0;  // the beginning of the path as no history (of walked spots)
+    start.h = heuristic(start.location, end);  // heuristic
+    start.f = start.g + start.h;
+
+    //writeln("start.g = ", start.g);
+    //writeln("start.h = ", start.h);
+    //writeln("start.f = ", start.f);
+
+    hB.spots[begin.r][begin.c] = start;
+
+    open ~= start.location;  // put the start node on the openList (leave its f at zero)
+
+    while (open.isNotEmpty)     // while there are spots that still need evaluating
+    {
+        //writeln();
+        //displaySet(open, "open");
+        //displaySet(closed, "closed");
+
+        ulong c;
+        writeln("open.length ", open.length);
+        current = lowestFscore(c, open, hB);  // find the node with the smallest f value.
+        writeln("open.length ", open.length);
+
+        //writeln("lowest F score in openset CURRENT = ", current);
+
+        if (current == end)
+        {
+            Location here = hB.spots[end.r][end.c].location;
+            while (here != invalidLoc)
+            {
+                path ~= here;
+                here = hB.spots[here.r][here.c].previous;
+            }
+
+            foreach( p; path)
+            {
+                //writeln("p = ", p);
+                hB.setHexTexture(g, p, Ids.blackDot);
+            }
+
+            return;
+        }
+
+        open = open.remove(c);  // remove the currentNode from the open
+        closed ~= current;      // add the currentNode to the closed
+
+        Location[] neighbors = getNeighbors(current, hB);   // get neighbors of current and cull out the (-1,-1)
+
+        // Time 32:15 in Coding Train Youtube video  all neighbors will be added to open set, 
+        // but before we put them in the open set, we need to evaluate them
+        // What if neighbor is in the closed set?
+
+        foreach(neighbor; neighbors)   // for each neighbor of current
+        {
+            Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
+            //writeln();
+            //writeln("neighbor = ", neighbor);
+            //writeAndPause();
+
+            if (closed.excludes(neighbor))  // only proceed with unevaluated neighbors
+            {
+                uint currentG = hB.spots[current.r][current.c].g;
+                uint neighborG = hB.spots[neighbor.r][neighbor.c].terrainCost;
+                uint neighborH = heuristic(neighbor, end);
+
+                //writeln("currentG, neighborG, neighborH = ", currentG, " ", neighborG, " ", neighborH);
+
+                tempG = currentG + neighborG;
+                //writeln("tempG = currentG + neighborG = ", tempG);
+
+                // is this a better path than before?
+
+                //if (open.excludes(neighbor))  // if neighbor is not in open set, then add it
+                if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
+                {
+                    //writeln("neighbor was not in open, add to open");
+                    open ~= neighbor;
+                }
+                else
+                {
+                    //writeln("neighbor was in open");
+                    if (tempG >= neighborSpot.g)
+                    {
+                        //writeln("No, it is not a better path");
+                        continue;
+                    }
+                } 
+
+                hB.spots[neighbor.r][neighbor.c].g = tempG;
+
+                hB.spots[neighbor.r][neighbor.c].h = neighborH;
+
+                hB.spots[neighbor.r][neighbor.c].f = tempG + neighborH;
+
+                hB.spots[neighbor.r][neighbor.c].previous = current;
+
+                //debugSpots( hB );
+            }
+        }
+        //writeln("finished with neighbors for current");
+    }
+    //writeln("open is empty");
+
+}

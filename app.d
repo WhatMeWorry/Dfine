@@ -230,8 +230,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 1000;
     g.sdl.screenHeight = 1000;
 
-    int rowCount = 20;
-    int colCount = 20;
+    int rowCount = 100;
+    int colCount = 100;
 
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
 
@@ -245,7 +245,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                           // diameter
     //HexBoard h = HexBoard(.05, 50, 50);  // hex board is created with NDC coordinates
 
-    h.displayHexBoard();  // hex board initially defined in NDC (Normalized Device Coordinates)
+    h.displayHexBoardData();  // hex board initially defined in NDC (Normalized Device Coordinates)
 
     //writeAndPause("After displayHexBoard");
 
