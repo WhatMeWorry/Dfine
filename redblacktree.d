@@ -56,6 +56,17 @@ priorQ.insert(n3);
 priorQ.insert(n2);
 priorQ.insert(n1);
 
+
+
+// https://dlang.org/phobos/std_container_rbtree.html#.RedBlackTree.opBinaryRight
+// https://dlang.org/spec/operatoroverloading.html#binary
+
+if (n3 !in priorQ)
+{
+    writeln("n3 is in the RedBlackTree ");
+}
+
+
 while(!priorQ.empty) 
 {
     current = priorQ.front;

@@ -273,7 +273,7 @@ bool excludes(Location[] set, Location item)
     return true;
 }
 
-
+/+
 minPriorityQueue
 
 bool excludes(Location[] set, Location item)
@@ -285,7 +285,7 @@ bool excludes(Location[] set, Location item)
     }
     return true;
 }
-
++/
 
 
 
@@ -340,6 +340,23 @@ Location[] getNeighbors(Location loc, ref HexBoard hB)
     } 
     return locs;
 }
+
+
+Node[] getNeighbors(Node loc, ref HexBoard hB)
+{
+    Node[] locs;
+
+    Node[6] neighbors = hB.spots[loc.r][loc.c].neighbors;
+
+    foreach(n; neighbors)
+    {
+        if (n != invalidLoc)  // strip out invalid neighbors (edge of hexboard)
+            locs ~= n;
+    } 
+    return locs;
+}
+
+
 
 
 Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
@@ -535,52 +552,11 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
         //writeln("finished with neighbors for current");
     }
     //writeln("open is empty");
-
-}
-
-/+
-struct Node
-{
-    Location loc;
-    int f;
-    int g;
 }
 
 
-void displaySet(ref Node[] set)  // with or without ref, the f's were changed by the assignment
-{
-    foreach(i, n; set)
-    {
-        writeln("i = ", i );
-        writeln("set[i] = ", set[i]);
-        set[i].f = 777;
-    }
-}
 
 
-void playWithSpots( HexBoard hB, Globals g )
-{
-Node[] open;    
-Node[] closed;
-//      open = open.remove(c);  // remove the currentNode from the open
-//      closed ~= current;         // add the currentNode to the closed
-Node n1 = { Location(1, 1), 11, 11 };
-Node n2 = { Location(2, 2), 22, 22 };
-Node n3 = { Location(3, 3), 33, 33 };
-Node n4 = { Location(4, 4), 44, 44 };
-open ~= n2;
-open ~= n1;
-open ~= n4;
-open ~= n3;
-writeln("open = ", open);
-displaySet(open);
-writeln("open = ", open);
-open = open.remove(2);
-writeln("open = ", open);
-open = open.remove(1);
-writeln("open = ", open);
-}
-+/
 
 alias minPriorityQueue = RedBlackTree!(Node, "a.f < b.f", true);
 
@@ -593,7 +569,7 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
     minPriorityQueue open;
     minPriorityQueue closed;
 
-    //placeHolder();
+    placeHolder();
     
     // open set contains nodes that need to be evaluated
     // closed set contains all nodes that have finished being evaluated. Don't need to revisit
@@ -656,7 +632,9 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
             //writeln("neighbor = ", neighbor);
             //writeAndPause();
 
-            if (closed.excludes(neighbor))  // only proceed with unevaluated neighbors
+            // if (closed.excludes(neighbor))  // only proceed with unevaluated neighbors
+            
+            if (neighbor in closed)
             {
                 uint currentG = hB.spots[current.r][current.c].g;
                 uint neighborG = hB.spots[neighbor.r][neighbor.c].terrainCost;
