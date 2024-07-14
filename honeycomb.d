@@ -576,14 +576,14 @@ struct HexBoard
                         {
                             //writeln("solidBrown");
                             hexes[r][c].texture = g.textures[Ids.solidBrown];
-                            spots[r][c].terrainCost = 9;
+                            spots[r][c].terrainCost = 1; // 9
                         }
                         break;
                     case 8,9:
                         {
                             //writeln("solidBlue");
                             hexes[r][c].texture = g.textures[Ids.solidBlue];
-                            spots[r][c].terrainCost = 999;
+                            spots[r][c].terrainCost = 1; // 999
                         }
                         break;          
                     default: break;                                         

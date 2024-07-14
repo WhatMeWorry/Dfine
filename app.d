@@ -76,6 +76,8 @@ import bindbc.sdl : IMG_SavePNG;
 
 import bindbc.loader;
 
+import redblacktree : placeHolder;
+
 
 struct GLFW_STRUCT
 {   
@@ -230,8 +232,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 1000;
     g.sdl.screenHeight = 1000;
 
-    int rowCount = 100;
-    int colCount = 100;
+    int rowCount = 3;
+    int colCount = 3;
 
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
 
@@ -439,8 +441,10 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                                 end.c = h.lastColumn;  
 
                                 //findShortestPath( h, g, begin, end );
-                                
+
                                 findShortestPathRedBlack( h, g, begin, end );
+                                
+                                //placeHolder();
 
                                 writeln(watch.peek()); 
 

@@ -320,6 +320,7 @@ bool isNotEmpty(Location[] set)
 }
 +/
 
+alias minPriorityQueue = RedBlackTree!(Node, "a.f < b.f", true);
 
 bool isNotEmpty(minPriorityQueue redBlack)
 {
@@ -342,18 +343,26 @@ Location[] getNeighbors(Location loc, ref HexBoard hB)
 }
 
 
-Node[] getNeighbors(Node loc, ref HexBoard hB)
+Node[] getAdjNeighbors(Location home, ref HexBoard hB)
 {
-    Node[] locs;
+    Node[] nodes;
+    Node node;
 
-    Node[6] neighbors = hB.spots[loc.r][loc.c].neighbors;
+    writeln("hB.spots[home.r][home.c].neighbors = ", hB.spots[home.r][home.c].neighbors);
 
-    foreach(n; neighbors)
+    //Node[6] neighbors = hB.spots[home.r][home.c].neighbors;
+    
+    foreach(n; hB.spots[home.r][home.c].neighbors)
     {
         if (n != invalidLoc)  // strip out invalid neighbors (edge of hexboard)
-            locs ~= n;
-    } 
-    return locs;
+        {
+            node.location = n;
+            node.f = 0;
+            nodes ~= node;
+        }
+    }    
+    
+    return nodes;
 }
 
 
@@ -414,15 +423,6 @@ struct Node
     Location location;  
     uint f;
 }
-+/
-
-
-
-/+
-//int main()
-int placeHolder() 
-{
-auto priorQ = new RedBlackTree!(Node, "a.f < b.f", true); // true: allowDuplicates
 +/
 
 
@@ -557,22 +557,21 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
 
 
 
+// The alias seemed to cause a run time error, went with new
 
-alias minPriorityQueue = RedBlackTree!(Node, "a.f < b.f", true);
+// alias minPriorityQueue = RedBlackTree!(Node, "a.f < b.f", true);
 
+    //minPriorityQueue open;
+    //minPriorityQueue closed;
+    
 
 void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Location end)
 {
-    // auto open = new RedBlackTree!(Node, "a.f < b.f", true); // true: allowDuplicates
-    // auto closed = new RedBlackTree!(Node, "a.f < b.f", true); // true: allowDuplicates
-
-    minPriorityQueue open;
-    minPriorityQueue closed;
-
-    placeHolder();
-    
     // open set contains nodes that need to be evaluated
     // closed set contains all nodes that have finished being evaluated. Don't need to revisit
+
+    auto open = new RedBlackTree!(Node, "a.f < b.f", true);    // true: allowDuplicates
+    auto closed = new RedBlackTree!(Node, "a.f < b.f", true);
 
     Location[] path;
 
@@ -585,16 +584,19 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
     start.f = start.g + start.h;
 
     hB.spots[begin.r][begin.c] = start;
-
+ 
     Node s = Node(start.location, start.f);
 
-    //open ~= start.location;  // put the start node on the open set (leave its f at zero)
-    open.insert(s);
+    open.insert(s);  // put the start node on the open set (leave its f at zero)
+    
+    writeln("open = ", open);
 
     while (open.isNotEmpty)     // while there are spots that still need evaluating
     {
         current = open.front;  // set the the node with the smallest f value to current
         open.removeFront;      // and remove it from the open min priority queue
+        
+        writeln("current = ", current);
 
         if (current.location == end)
         {
@@ -614,12 +616,13 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
             return;
         }
 
-        //open = open.remove(c);  // remove the currentNode from the open - Removed previously
-        //closed ~= current;      // add the currentNode to the closed
-        
+        writeln("insert current");
+
         closed.insert(current);
 
-        Location[] neighbors = getNeighbors(current.location, hB);   // get neighbors of current and cull out the (-1,-1)
+        Node[] neighbors = getAdjNeighbors(current.location, hB);   // get neighbors of current and cull out the (-1,-1)
+
+        writeln("neighbors = ", neighbors);
 
         // Time 32:15 in Coding Train Youtube video  all neighbors will be added to open set, 
         // but before we put them in the open set, we need to evaluate them
@@ -627,35 +630,31 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
-            Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
-            //writeln();
-            //writeln("neighbor = ", neighbor);
-            //writeAndPause();
-
-            // if (closed.excludes(neighbor))  // only proceed with unevaluated neighbors
+            Spot neighborSpot = hB.spots[neighbor.location.r][neighbor.location.c];
             
-            if (neighbor in closed)
-            {
-                uint currentG = hB.spots[current.r][current.c].g;
-                uint neighborG = hB.spots[neighbor.r][neighbor.c].terrainCost;
-                uint neighborH = heuristic(neighbor, end);
+            writeln("lookin at neighbor ", neighbor);
 
-                //writeln("currentG, neighborG, neighborH = ", currentG, " ", neighborG, " ", neighborH);
+            if (neighbor !in closed)
+            {
+                writeln("neighbor is not in closed set");
+            
+                uint currentG = hB.spots[current.location.r][current.location.c].g;
+                uint neighborG = hB.spots[neighbor.location.r][neighbor.location.c].terrainCost;
+                uint neighborH = heuristic(neighbor.location, end);
 
                 tempG = currentG + neighborG;
-                //writeln("tempG = currentG + neighborG = ", tempG);
 
                 // is this a better path than before?
 
-                //if (open.excludes(neighbor))  // if neighbor is not in open set, then add it
-                if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
+                //if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
+                if (neighbor !in open)
                 {
-                    //writeln("neighbor was not in open, add to open");
-                    open ~= neighbor;
+                    //open ~= neighbor;
+                    open.insert(neighbor);
                 }
                 else
                 {
-                    //writeln("neighbor was in open");
+                    writeln("neighbor was in open");
                     if (tempG >= neighborSpot.g)
                     {
                         //writeln("No, it is not a better path");
@@ -663,19 +662,20 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
                     }
                 } 
 
-                hB.spots[neighbor.r][neighbor.c].g = tempG;
+                hB.spots[neighbor.location.r][neighbor.location.c].g = tempG;
+                
+                hB.spots[neighbor.location.r][neighbor.location.c].h = neighborH;
 
-                hB.spots[neighbor.r][neighbor.c].h = neighborH;
+                hB.spots[neighbor.location.r][neighbor.location.c].f = tempG + neighborH;
 
-                hB.spots[neighbor.r][neighbor.c].f = tempG + neighborH;
-
-                hB.spots[neighbor.r][neighbor.c].previous = current;
+                hB.spots[neighbor.location.r][neighbor.location.c].previous = current.location;
 
                 //debugSpots( hB );
             }
         }
-        //writeln("finished with neighbors for current");
+        writeln("finished with neighbors for current");
     }
     //writeln("open is empty");
 
 }
+
