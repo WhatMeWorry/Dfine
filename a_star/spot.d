@@ -70,7 +70,8 @@ struct Spot
 
     Location location = Location(-1,-1);   // each spot needs to know where it is on the hexboard
 
-    Location[6] neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), Location(-1,-1), 
+    Location[6] neighbors = [Location(-1,-1), Location(-1,-1), 
+                             Location(-1,-1), Location(-1,-1), 
                              Location(-1,-1), Location(-1,-1)];  // ignoring edges, each hex has 6 adjoining neighbors
     uint f;
     uint g;
@@ -328,6 +329,12 @@ bool isNotEmpty(minPriorityQueue redBlack)
 }
 
 
+bool isNotEmpty(uint[Location] associativeArray)
+{
+    return (associativeArray.length > 0);
+}
+
+
 Location[] getNeighbors(Location loc, ref HexBoard hB)
 {
     Location[] locs;
@@ -569,6 +576,13 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
 {
     // open set contains nodes that need to be evaluated
     // closed set contains all nodes that have finished being evaluated. Don't need to revisit
+	
+    // value_type[key_type] associative_array_name;
+
+    // int[string] dayNumbers;	
+
+    uint[Location] openAA;  // open set associative array
+    uint[Location] closedAA;  // closed set associative array
 
     auto open = new RedBlackTree!(Node, "a.f < b.f", true);    // true: allowDuplicates
     auto closed = new RedBlackTree!(Node, "a.f < b.f", true);
@@ -588,13 +602,29 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
     Node s = Node(start.location, start.f);
 
     open.insert(s);  // put the start node on the open set (leave its f at zero)
-    
+    openAA[s.location] = s.f;
+
+/+
+    if (s.location in openAA)
+    {
+        writeln("s.location is in openAA");
+    }
+
+    openAA.remove(s.location);
+
+    if (s.location !in openAA)
+    {
+        writeln("s.location is not in openAA");
+    }
++/
     writeln("open = ", open);
 
-    while (open.isNotEmpty)     // while there are spots that still need evaluating
+    //while (open.isNotEmpty)     // while there are spots that still need evaluating
+    while (openAA.isNotEmpty)
     {
-        current = open.front;  // set the the node with the smallest f value to current
+        current = open.front;  // GETS the the node with the SMALLEST f value to current
         open.removeFront;      // and remove it from the open min priority queue
+        openAA.remove(current.location);
         
         writeln("current = ", current);
 
@@ -619,6 +649,7 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
         writeln("insert current");
 
         closed.insert(current);
+        closedAA[current.location] = current.f;
 
         Node[] neighbors = getAdjNeighbors(current.location, hB);   // get neighbors of current and cull out the (-1,-1)
 
@@ -634,7 +665,7 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
             
             writeln("lookin at neighbor ", neighbor);
 
-            if (neighbor !in closed)
+            if (neighbor.location !in closedAA)
             {
                 writeln("neighbor is not in closed set");
             
@@ -647,10 +678,12 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
                 // is this a better path than before?
 
                 //if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
-                if (neighbor !in open)
+                if (neighbor.location !in openAA)
                 {
                     //open ~= neighbor;
-                    open.insert(neighbor);
+                    openAA[neighbor.location] = neighbor.f;  // Add to Associative Array
+                    open.insert(neighbor);                   // Add to Red Black Tree
+                    
                 }
                 else
                 {

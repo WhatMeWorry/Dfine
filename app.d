@@ -232,8 +232,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 1000;
     g.sdl.screenHeight = 1000;
 
-    int rowCount = 3;
-    int colCount = 3;
+    int rowCount = 50;
+    int colCount = 50;
 
     float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
 
@@ -487,7 +487,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                                     //h.setHexTexture(g, start, Ids.solidBlack);
                                     // h.selectedHex has end point
-                                    findShortestPath( h, g, start, end );
+                                    findShortestPathRedBlack( h, g, start, end );
 
                                     h.displayHexTextures();
                                     
