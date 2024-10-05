@@ -20,8 +20,6 @@ struct Slope
 }
 
 
-
-
 uint whatQuadrant(Location a, Location b)
 {
     int dR = a.r - b.r;

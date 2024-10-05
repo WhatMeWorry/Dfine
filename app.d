@@ -221,35 +221,33 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 1000x1000 too small to see if any black dots were displayed But finally finished!
 4 hours, 26 minutes, 20 secs
 
-
-
 +/
-
-
 
     load_sdl_libraries(); 
 
     g.sdl.screenWidth  = 1000;
     g.sdl.screenHeight = 1000;
 
-    int rowCount = 50;
-    int colCount = 50;
+    uint rows = 3;
+    uint cols = 3;
 
-    float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.horizontally );
+    // calculate the hexes widths so that they fit exactly into a given NDC window
 
-    //float hexDiameter = calculateHexDiameter(rowCount, colCount, Direction.vertically );
+    //float hexWidth = computeHexWidthToFitInWindow(rows, cols);
+    //HexBoard h = HexBoard(hexWidth, rows, cols);  // hex board is created with NDC coordinates
 
-    writeln("hexDiameter = ", hexDiameter);
+    float hexWidth = computeHexWidthToFitInWindow(rows, cols, Direction.horizontal);
 
-    //hexDiameter = .6;
-    HexBoard h = HexBoard(hexDiameter, rowCount, colCount);  // hex board is created with NDC coordinates
+    HexBoard h = HexBoard(hexWidth, rows, cols);
+
+    writeAndPause("==== Constructed hexboard");
 
                           // diameter
     //HexBoard h = HexBoard(.05, 50, 50);  // hex board is created with NDC coordinates
 
     h.displayHexBoardData();  // hex board initially defined in NDC (Normalized Device Coordinates)
 
-    //writeAndPause("After displayHexBoard");
+    writeAndPause("==== After displayHexBoard");
 
     h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight); 
 

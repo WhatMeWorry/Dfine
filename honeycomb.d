@@ -163,24 +163,10 @@ struct Location   // holds a hex of a hexboard
     int c;  // column of hexboard
 }
 
+enum Direction { horizontal, vertical } 
 
-enum Direction 
-{ 
-    vertically,
-    horizontally
-} 
-
-
-
-float calculateHexDiameter(int rows, int cols, Direction fill )
-{
-    float totalSegments;
-    float diameter;
-    float widthPerSegment;
-    float heightPerHex;
-
-     /+   note: all vertical segments are same size. The 
-     | \         | /         | \         | /         | \         | /
+     /+   note: all vertical segments are same size. 
+     | \         | /         | \         | /         | \         | / |
      |  \________|/          |  \________|/          |  \________|/__|
      |  /        |\          |  /        |\          |  /        |\  |
      | /         | \         | /         | \         | /         | \ |
@@ -191,30 +177,25 @@ float calculateHexDiameter(int rows, int cols, Direction fill )
      | 1|  2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |10|| 11|12 |13 |14 |15 | 16|
      +/
 
-    // The width of any given NDC system is always 2.0 units.  (-1.0 to 1.0)
-
-    if (fill == Direction.horizontally)
-    {
-        totalSegments = (cols * 3) + 1;
-
-        widthPerSegment = 2.0 / totalSegments;
-
-        diameter = 4.0 * widthPerSegment;  // 4 segments equal a hex diameter
-    }
-    if (fill == Direction.vertically)
-    {
-        heightPerHex = 2.0 / rows;
-
-        writeln("heightPerHex = ", heightPerHex);
-        
-        // perpendicular = diameter * 0.866; or
-        // diameter = perpendicular / 0.866;
-        
-        diameter = heightPerHex / 0.866;
-    }    
+float computeHexWidthToFitInWindow(uint rows, uint cols, Direction dir )
+{
+    immutable float lengthNDC = 2.0;  // width of any given NDC system is always 2.0 units.  (-1.0 to 1.0)
+    float hexWidth;
     
-    return diameter;
-}    
+    if (dir == Direction.horizontal)
+    {
+        float totalSegments = (cols * 3) + 1;
+        float widthPerSegment = lengthNDC / totalSegments;
+        hexWidth = 4.0 * widthPerSegment;  // 4 segments equal a hex diameter
+    }
+    else
+    {
+        float heightPerHex = lengthNDC / rows;
+        hexWidth = heightPerHex / 0.866;
+    }
+
+    return hexWidth;
+}
 
 
 
@@ -288,7 +269,6 @@ struct Hex
                             // corner as target rectangle for texture application   
     Texture   texture;    
 }
-
 
 
 struct HexBoard
@@ -390,15 +370,15 @@ struct HexBoard
     
     void displayHexBoardData()
     {
-        //writeln("===== Values are in Normalized Device Coordinates =====");
+        writeln("===== Values are in Normalized Device Coordinates =====");
         foreach(r; 0..rows)
         {
             foreach(c; 0..columns)
             {
-                //writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );
+                writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );
                 foreach(p; 0..6)
                 {
-                    //writeln("hexes(r,c) ) ", hexes[r][c].points[p] );
+                    writeln("hexes(r,c) ) ", hexes[r][c].points[p] );
                 }
             }
         }
@@ -512,8 +492,8 @@ struct HexBoard
         
         sc.perpendicular = roundTo!int( to!float(sc.diameter) * 0.866 );
     }
-    
-    
+
+
     D2_SC convertPointFromNDCtoSC(D2_NDC ndc, int screenWidth, int screenHeight)
     {
         D2_SC sc;
@@ -523,7 +503,6 @@ struct HexBoard
 
         return sc;
     }
-    
 
 
     // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)

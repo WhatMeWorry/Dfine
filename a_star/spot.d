@@ -32,10 +32,11 @@ void debugSpots( ref HexBoard hB )
 }
 
 
-void writeAndPause(string s = "")
+//void writeAndPause(string s = "")
+void writeAndPause(string s)
 {
     //writeln();
-    //writeln(s);
+    writeln(s);
     version(Windows)
     {  
         // pause command prints out
