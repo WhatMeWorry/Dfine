@@ -58,10 +58,12 @@ module app;
 
 import honeycomb;
 import select_hex;
+import hexmath;
 
 import libraries.load_sdl_libraries;
 import textures.load_textures;
 import a_star.spot;
+
 
 import glfw3.api;
 import core.stdc.stdio;

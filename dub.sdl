@@ -14,6 +14,7 @@ sourcePaths "."
 sourcePaths "libraries"
 sourcePaths "textures"
 sourcePaths "a_star"   // without: app.d(64,8): Error: unable to read module `path_finding`
+sourcePaths "hexmath"
 
 versions "SDL_2_30" "SDL_TTF_2012" "SDL_Image_200" "SDL_Mixer_200" "SDL_Net_200"
 
