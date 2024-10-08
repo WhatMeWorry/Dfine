@@ -2,11 +2,12 @@
 module hexmath;
 
 import std.stdio;
+import std.math.operations : isClose;
 
 /+ Unit tests can be run in this module with the following commands:
 rdmd -main -unittest hexmath.d
 or
-rdmd -main -unittest hexmath.d
+dmd -main -unittest hexmath.d
 .\hexmath.exe
 +/
 
@@ -22,12 +23,11 @@ bool isEven(uint value)
 
 unittest
 {
-    //assert(isOdd(-2), "-2 is even");
+    assert(isEven(-2), "-2 is even");
     assert(isOdd(-1), "-1 is odd");
     assert(isEven(0), "0 is even");
     assert(isOdd(1),  "1 is odd");
     assert(isEven(2), "2 is even");
-    //assert(false, "force the triggering of this assert");
 }
 
 
@@ -45,12 +45,12 @@ enum Direction { horizontal, vertical }
      | 1|  2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |10|| 11|12 |13 |14 |15 | 16|
      +/
 
-float computeHexWidthToFitInWindow(uint rows, uint cols, Direction dir )
+float hexLengthToFitWindow(uint rows, uint cols, Direction direction )
 {
     immutable float lengthNDC = 2.0;  // width of any given NDC system is always 2.0 units.  (-1.0 to 1.0)
     float hexWidth;
     
-    if (dir == Direction.horizontal)
+    if (direction == Direction.horizontal)
     {
         float totalSegments = (cols * 3) + 1;
         float widthPerSegment = lengthNDC / totalSegments;
@@ -61,15 +61,35 @@ float computeHexWidthToFitInWindow(uint rows, uint cols, Direction dir )
         float heightPerHex = lengthNDC / rows;
         hexWidth = heightPerHex / 0.866;
     }
-    writeln(hexWidth);
-    
+
     return hexWidth;
 }
 
 
 unittest
-{
-    assert(computeHexWidthToFitInWindow(1, 1, Direction.horizontal ) == 2.0f, "This assert failed");
-    assert(computeHexWidthToFitInWindow(3, 3, Direction.horizontal ) == 0.8f, "This assert failed");
-    assert(computeHexWidthToFitInWindow(2, 2, Direction.horizontal ) == 1.14286f, "This assert failed");    
+{   
+    // Horizontal fit
+
+    assert(hexLengthToFitWindow(1, 1, Direction.horizontal).isClose(2.0f), "This assert failed");
+    assert(hexLengthToFitWindow(2, 2, Direction.horizontal).isClose(1.14286f), "This assert failed");
+    assert(hexLengthToFitWindow(3, 3, Direction.horizontal).isClose(0.8f), "This assert failed");
+    assert(hexLengthToFitWindow(5, 5, Direction.horizontal).isClose(0.5f), "This assert failed");
+    assert(hexLengthToFitWindow(25, 25, Direction.horizontal).isClose(0.105263f), "This assert failed");
+    assert(hexLengthToFitWindow(999, 999, Direction.horizontal).isClose(0.00266845f), "This assert failed");
+    
+    assert(hexLengthToFitWindow(999, 1, Direction.horizontal).isClose(2.0f), "This assert failed");
+    assert(hexLengthToFitWindow(1, 999, Direction.horizontal).isClose(0.00266845f), "This assert failed");
+
+    // Vertical fit
+
+    assert(hexLengthToFitWindow(1, 1, Direction.vertical).isClose(2.30947f), "This assert failed");
+    assert(hexLengthToFitWindow(2, 2, Direction.vertical).isClose(1.15473f), "This assert failed");
+    assert(hexLengthToFitWindow(3, 3, Direction.vertical).isClose(0.769823), "This assert failed");
+    assert(hexLengthToFitWindow(5, 5, Direction.vertical).isClose(0.461894f), "This assert failed");
+    assert(hexLengthToFitWindow(25, 25, Direction.vertical).isClose(0.0923788f), "This assert failed");
+    assert(hexLengthToFitWindow(999, 999, Direction.vertical).isClose(0.00231178f), "This assert failed");
+
+    assert(hexLengthToFitWindow(999, 1, Direction.vertical).isClose(0.00231178f), "This assert failed");
+    assert(hexLengthToFitWindow(1, 999, Direction.vertical).isClose(2.30947f), "This assert failed");
+ 
 }

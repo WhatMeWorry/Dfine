@@ -4,7 +4,8 @@ module select_hex;
 import honeycomb;
 import std.stdio;
 import std.conv: roundTo;
-import std.math.rounding: floor;
+import std.math.rounding : floor;
+import hexmath : isEven, isOdd;
 
 
 //   |  \________|/          |  \________|/          |  \________|/
