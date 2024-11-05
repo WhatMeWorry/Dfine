@@ -33,16 +33,16 @@ unittest
 
 enum Direction { horizontal, vertical } 
 
-     /+   note: all vertical segments are same size. 
+     /+   note: all vertical segments are same size. Distortion is caused inherent limitation of font. 
      | \         | /         | \         | /         | \         | / |
      |  \________|/          |  \________|/          |  \________|/__|
      |  /        |\          |  /        |\          |  /        |\  |
      | /         | \         | /         | \         | /         | \ |
      |/          |  \____|___|/          |  \________|/  |       |  \|    
-     |\ |    |   |  /|   |   |\  |   |   |  /|       |\  |   |   |  /|
-     | \|    |   | / |   |   | \ |   |   | / |   |   | \ |   |   | / |
-     |  \____|___|/__|___|___|  \|___|___|/__|___|___|  \|___|___|/__|
-     | 1|  2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |10|| 11|12 |13 |14 |15 | 16|
+     |\  |   |   |  /|   |   |\  |   |   |  /|   |   |\  |   |   |  /|
+     | \ |   |   | / |   |   | \ |   |   | / |   |   | \ |   |   | / |
+     |  \|___|___|/__|___|___|  \|___|___|/__|___|___|  \|___|___|/__|
+     | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |10 | 11|12 |13 |14 |15 | 16|
      +/
 
 float hexLengthToFitWindow(uint rows, uint cols, Direction direction )
