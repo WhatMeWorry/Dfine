@@ -9,6 +9,7 @@ import std.stdio;
 // import std.math.algebraic: abs;
 import std.math;
 import std.conv : to;
+import hexmath : isEven, isOdd;
 
 import honeycomb;
 
@@ -18,8 +19,6 @@ struct Slope
     int rise;
     int run;
 }
-
-
 
 
 uint whatQuadrant(Location a, Location b)
