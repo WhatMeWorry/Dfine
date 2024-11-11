@@ -33,21 +33,33 @@ unittest
 
 enum Direction { horizontal, vertical } 
 
-     /+   note: all vertical segments are same size. Distortion is caused inherent limitation of font. 
+     /+   note: all vertical segments (1-16) are the same size. Some distortion is 
+          caused the inherent limitation of the ascii font. 
+     
      | \         | /         | \         | /         | \         | / |
      |  \________|/          |  \________|/          |  \________|/__|
      |  /        |\          |  /        |\          |  /        |\  |
      | /         | \         | /         | \         | /         | \ |
-     |/          |  \____|___|/          |  \________|/  |       |  \|    
+     |/          |  \________|/          |  \________|/          |  \|
      |\  |   |   |  /|   |   |\  |   |   |  /|   |   |\  |   |   |  /|
      | \ |   |   | / |   |   | \ |   |   | / |   |   | \ |   |   | / |
      |  \|___|___|/__|___|___|  \|___|___|/__|___|___|  \|___|___|/__|
      | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |10 | 11|12 |13 |14 |15 | 16|
+     
+   -1.0                             0.0                             1.0
+         _________      __________      
+        /         \    /          \    
+       /           \  /            \ 
+      /___hexWidth__\/___hexWidth___\  
+      \             /\              /
+       \           /  \            /
+        \_________/    \__________/
+     
      +/
 
-float hexLengthToFitWindow(uint rows, uint cols, Direction direction )
+float hexWidthToFitWindow(uint rows, uint cols, Direction direction )
 {
-    immutable float lengthNDC = 2.0;  // width of any given NDC system is always 2.0 units.  (-1.0 to 1.0)
+    immutable float lengthNDC = 2.0;  // width and height of NDC system is always 2.0 units.  (-1.0 to 1.0)
     float hexWidth;
     
     if (direction == Direction.horizontal)
@@ -70,26 +82,26 @@ unittest
 {   
     // Horizontal fit
 
-    assert(hexLengthToFitWindow(1, 1, Direction.horizontal).isClose(2.0f), "This assert failed");
-    assert(hexLengthToFitWindow(2, 2, Direction.horizontal).isClose(1.14286f), "This assert failed");
-    assert(hexLengthToFitWindow(3, 3, Direction.horizontal).isClose(0.8f), "This assert failed");
-    assert(hexLengthToFitWindow(5, 5, Direction.horizontal).isClose(0.5f), "This assert failed");
-    assert(hexLengthToFitWindow(25, 25, Direction.horizontal).isClose(0.105263f), "This assert failed");
-    assert(hexLengthToFitWindow(999, 999, Direction.horizontal).isClose(0.00266845f), "This assert failed");
+    assert(hexLengthToFitWindow(1, 1, Direction.horizontal).isClose(2.0f), "unit test failed");
+    assert(hexLengthToFitWindow(2, 2, Direction.horizontal).isClose(1.14286f), "unit test failed");
+    assert(hexLengthToFitWindow(3, 3, Direction.horizontal).isClose(0.8f), "unit test failed");
+    assert(hexLengthToFitWindow(5, 5, Direction.horizontal).isClose(0.5f), "unit test failed");
+    assert(hexLengthToFitWindow(25, 25, Direction.horizontal).isClose(0.105263f), "unit test failed");
+    assert(hexLengthToFitWindow(999, 999, Direction.horizontal).isClose(0.00266845f), "unit test failed");
     
-    assert(hexLengthToFitWindow(999, 1, Direction.horizontal).isClose(2.0f), "This assert failed");
-    assert(hexLengthToFitWindow(1, 999, Direction.horizontal).isClose(0.00266845f), "This assert failed");
+    assert(hexLengthToFitWindow(999, 1, Direction.horizontal).isClose(2.0f), "unit test failed");
+    assert(hexLengthToFitWindow(1, 999, Direction.horizontal).isClose(0.00266845f), "unit test failed");
 
     // Vertical fit
 
-    assert(hexLengthToFitWindow(1, 1, Direction.vertical).isClose(2.30947f), "This assert failed");
-    assert(hexLengthToFitWindow(2, 2, Direction.vertical).isClose(1.15473f), "This assert failed");
-    assert(hexLengthToFitWindow(3, 3, Direction.vertical).isClose(0.769823), "This assert failed");
-    assert(hexLengthToFitWindow(5, 5, Direction.vertical).isClose(0.461894f), "This assert failed");
-    assert(hexLengthToFitWindow(25, 25, Direction.vertical).isClose(0.0923788f), "This assert failed");
-    assert(hexLengthToFitWindow(999, 999, Direction.vertical).isClose(0.00231178f), "This assert failed");
+    assert(hexLengthToFitWindow(1, 1, Direction.vertical).isClose(2.30947f), "unit test failed");
+    assert(hexLengthToFitWindow(2, 2, Direction.vertical).isClose(1.15473f), "unit test failed");
+    assert(hexLengthToFitWindow(3, 3, Direction.vertical).isClose(0.769823), "unit test failed");
+    assert(hexLengthToFitWindow(5, 5, Direction.vertical).isClose(0.461894f), "unit test failed");
+    assert(hexLengthToFitWindow(25, 25, Direction.vertical).isClose(0.0923788f), "unit test failed");
+    assert(hexLengthToFitWindow(999, 999, Direction.vertical).isClose(0.00231178f), "unit test failed");
 
-    assert(hexLengthToFitWindow(999, 1, Direction.vertical).isClose(0.00231178f), "This assert failed");
-    assert(hexLengthToFitWindow(1, 999, Direction.vertical).isClose(2.30947f), "This assert failed");
+    assert(hexLengthToFitWindow(999, 1, Direction.vertical).isClose(0.00231178f), "unit test failed");
+    assert(hexLengthToFitWindow(1, 999, Direction.vertical).isClose(2.30947f), "unit test failed");
  
 }

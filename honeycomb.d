@@ -280,23 +280,43 @@ struct HexBoard
     
     this(float d, uint r, uint c) 
     {
-        // These three parameters suffice to define the hexboard: the size (diameter of each hex
-        // in ndc coordinates) as well the number of rows and columns making up the board
+        // These three parameters suffice to define the hexboard: the diameter size of each hex
+        // (in ndc units) and the number of rows and columns making up the board
         diameter = d;
         rows = r;
         columns = c;
         
+        /+    _________           _________
+             /         \         /    |     \ 
+            /           \       /     |      \
+           /___diameter__\     /perpendicular \
+           \             /     \      |       /
+            \           /       \     |      /
+             \_________/         \____|____ / 
+        +/
+
         radius        = diameter * 0.5;
         halfRadius    = radius   * 0.5;
         perpendicular = diameter * 0.866; 
         apothem       = perpendicular * 0.5;
+        
+        /+ The bottom left corner (left edge and bottom edge) of the hexboard will always start at (-1.0,-1.0) 
+           Ideally, the upper right corner (upper edge and right edge) of the hexboard would end at (1.0,1.0) thus
+           perfectly fitting the NDC window. But since the hexboard is asymetric (1.0 in width to .866 in height) rarely 
+           is this the case. If the top edge or bottom edge is less than 1.0, there will simply be a gap between The
+           hexboard and the window. If the the top edge or bottom edge is greater than 1.0, then all geometry greater
+           than one, will simply not be rendered.
+           
+           The function hexWidthToFitWindow() was written to allow either the horizontal or vertical direction to be
+           fitted perfectly within the (-1.0, 1.0) window.  
+        +/
         
         edge.bottom = -1.0;
         edge.top    = edge.bottom + (rows * perpendicular);
         edge.left   = -1.0;
         edge.right  = edge.left + (columns * (radius + halfRadius));
         
-        hexes = new Hex[][](rows, columns);
+        hexes = new Hex[][](rows, columns);  // dynamically allocate all the hexes
 
         spots = new Spot[][](rows, columns);
 
@@ -322,6 +342,8 @@ struct HexBoard
 
         renderer = null;  // renderer for this hex board        
     }
+    
+    
     
     enum invalid = -1;  // -1 means a row or column is invalid
 
@@ -478,7 +500,7 @@ struct HexBoard
         }
     }
 
-    // screenWidth and screeHeight are not know by struct HexBoard
+    // screenWidth and screenHeight are not know by struct HexBoard
     // this function can only be called from outside of this module
 
     void convertNDClengthsToSClengths(int screenWidth, int screenHeight)
