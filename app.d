@@ -107,6 +107,17 @@ struct GLFW_STRUCT
                           (screenWidth, screenHeight)
 +/
 
+/+
+In SDL, SDL_window is used to create a window, while SDL_surface is used to draw to the window
+SDL_window is used to create a window and set flags such as fullscreen, OpenGL, hidden, or obscured.
+SDL_window is a struct that holds all info about the itself: size, position, borders etc.
+SDL_surface is used to abstract an area for drawing, such as loaded images. SDL_surface is a collection 
+of pixels used for software rendering, also known as blitting.
+SDL_Surface is used in software rendering. (SDL_Surface is obsolete)
+SDL_Texture on the other hand, is used in a hardware rendering, textures are stored in VRAM
+SDL_Renderer is a struct that handles all rendering. It is tied to a SDL_Window so it can only render 
+within that SDL_Window. It also keeps track the settings related to the rendering.
++/
 struct SDL_STRUCT
 {
     int screenWidth = 4024;
@@ -115,6 +126,7 @@ struct SDL_STRUCT
     SDL_Renderer* renderer = null;
     //SDL_Surface* screenSurface = null;
 }
+
 
 struct Globals
 {

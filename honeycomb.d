@@ -659,6 +659,18 @@ struct HexBoard
                     dst.w = sc.diameter;
                     dst.h = sc.perpendicular;
 
+                    /+
+                    SDL_RenderCopy(SDL_Renderer* renderer, DL_Texture* texture,
+                    Is used for rendering a SDL_Texture and has the following parameters:
+
+                    SDL_Renderer* renderer,   the renderer you want to use for rendering.
+                    SDL_Texture*  texture,    the texture you want to render.
+                    const SDL_Rect* srcrect,  part of the texture to render, null renders the entire texture.
+                    const SDL_Rect* dstrect   where to render the texture in the window. If the width and height 
+                                              of this SDL_Rect is smaller or larger than the dimensions of the texture 
+                                              itself, the texture will be stretched according to this SDL_Rect.
+                    +/
+                    
                     SDL_RenderCopy( renderer, hexes[r][c].texture.ptr, null, &dst );
                                 // Update window
                     // SDL_RenderPresent( renderer );  // DO OUTSIDE OF LOOP!!!
