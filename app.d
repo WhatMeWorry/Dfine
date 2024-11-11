@@ -88,6 +88,25 @@ struct GLFW_STRUCT
     GLFWwindow* window;  
 }
 
+
+/+ Screen coordinates
+
+(0,0)
+  +---------------------------------+
+  |                                 |
+  |                                 |
+  |                                 |
+  |                                 |
+  |                                 |
+  |                                 |
+  |                                 |
+  |                                 |
+  |                                 |
+  |                                 |
+  +---------------------------------+ 
+                          (screenWidth, screenHeight)
++/
+
 struct SDL_STRUCT
 {
     int screenWidth = 4024;

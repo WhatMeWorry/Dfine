@@ -116,6 +116,47 @@ when NDCx is -1 we get 0 and when NDCx is  1 we get screenWidth
 when NDCy is  1 we get 0 and when NDCy is -1 we get screenHeight
 +/
 
+/+ Cartesian Coordinates
+                                   
+     ^ 
+     |
+     |
+     |
+     |
+     |
+     |
+     |
+     |
+     |
+     |
+     |
+     +------------------------> 
+ (0.0,0.0)
+
++/
+
+/+ Normalized Device Coordinates
+
+Normalized device coordinates (-1, -1) is at the lower-left corner 
+while (+1, +1) is at the top-right 
+
+                                   (1.0,1.0)
+     +---------------------------------+
+     |                                 |
+     |                |                |
+     |                                 |
+     |                |                |
+     |                                 |
+     |    -  -  -   (0.0)   -  -  -    |
+     |                                 |
+     |                |                |
+     |                                 |
+     |                |                |
+     |                                 |
+     +---------------------------------+ 
+(-1.0,-1.0)
+
++/
 
 
 
