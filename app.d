@@ -261,14 +261,12 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 1000;
     g.sdl.screenHeight = 1000;
 
-    uint rows = 10;
-    uint cols = 10;
+    uint rows = 3;
+    uint cols = 3;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Direction.horizontal);
 
     HexBoard h = HexBoard(hexWidth, rows, cols);
-
-    //writeAndPause("==== Constructed hexboard");
 
     h.displayHexBoardData();  // hex board initially defined in NDC (Normalized Device Coordinates)
 

@@ -2,6 +2,9 @@
 *.o
 *.obj
 
+# D coverge files
+*.lst
+
 # Compiled Dynamic libraries
 *.so
 *.dylib

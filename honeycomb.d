@@ -334,8 +334,8 @@ struct HexBoard
         addNeighbors();
         
         mouseClick.ndc.x = 0.0;
-        mouseClick.ndc.y = 0.0;        
-        
+        mouseClick.ndc.y = 0.0;
+
         // can't call from here because we need the apps windows screen size which is 
         // unknown to the hex board. 
         //convertNDCoordsToScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates
@@ -403,7 +403,7 @@ struct HexBoard
                 writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );
                 foreach(p; 0..6)
                 {
-                    writeln("hexes(r,c) ) ", hexes[r][c].points[p] );
+                    writeln("hexes(r,c) ", hexes[r][c].points[p] );
                 }
             }
         }

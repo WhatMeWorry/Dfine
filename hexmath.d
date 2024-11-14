@@ -9,6 +9,10 @@ rdmd -main -unittest hexmath.d
 or
 dmd -main -unittest hexmath.d
 .\hexmath.exe
+or with coverage
+dmd -main -unittest -cov hexmath.d
+.\hexmath.exe
+creates a hexmath.lst file with code coverage statistics
 +/
 
 bool isOdd(uint value)
@@ -82,26 +86,26 @@ unittest
 {   
     // Horizontal fit
 
-    assert(hexLengthToFitWindow(1, 1, Direction.horizontal).isClose(2.0f), "unit test failed");
-    assert(hexLengthToFitWindow(2, 2, Direction.horizontal).isClose(1.14286f), "unit test failed");
-    assert(hexLengthToFitWindow(3, 3, Direction.horizontal).isClose(0.8f), "unit test failed");
-    assert(hexLengthToFitWindow(5, 5, Direction.horizontal).isClose(0.5f), "unit test failed");
-    assert(hexLengthToFitWindow(25, 25, Direction.horizontal).isClose(0.105263f), "unit test failed");
-    assert(hexLengthToFitWindow(999, 999, Direction.horizontal).isClose(0.00266845f), "unit test failed");
+    assert(hexWidthToFitWindow(1, 1, Direction.horizontal).isClose(2.0f), "unit test failed");
+    assert(hexWidthToFitWindow(2, 2, Direction.horizontal).isClose(1.14286f), "unit test failed");
+    assert(hexWidthToFitWindow(3, 3, Direction.horizontal).isClose(0.8f), "unit test failed");
+    assert(hexWidthToFitWindow(5, 5, Direction.horizontal).isClose(0.5f), "unit test failed");
+    assert(hexWidthToFitWindow(25, 25, Direction.horizontal).isClose(0.105263f), "unit test failed");
+    assert(hexWidthToFitWindow(999, 999, Direction.horizontal).isClose(0.00266845f), "unit test failed");
     
-    assert(hexLengthToFitWindow(999, 1, Direction.horizontal).isClose(2.0f), "unit test failed");
-    assert(hexLengthToFitWindow(1, 999, Direction.horizontal).isClose(0.00266845f), "unit test failed");
+    assert(hexWidthToFitWindow(999, 1, Direction.horizontal).isClose(2.0f), "unit test failed");
+    assert(hexWidthToFitWindow(1, 999, Direction.horizontal).isClose(0.00266845f), "unit test failed");
 
     // Vertical fit
 
-    assert(hexLengthToFitWindow(1, 1, Direction.vertical).isClose(2.30947f), "unit test failed");
-    assert(hexLengthToFitWindow(2, 2, Direction.vertical).isClose(1.15473f), "unit test failed");
-    assert(hexLengthToFitWindow(3, 3, Direction.vertical).isClose(0.769823), "unit test failed");
-    assert(hexLengthToFitWindow(5, 5, Direction.vertical).isClose(0.461894f), "unit test failed");
-    assert(hexLengthToFitWindow(25, 25, Direction.vertical).isClose(0.0923788f), "unit test failed");
-    assert(hexLengthToFitWindow(999, 999, Direction.vertical).isClose(0.00231178f), "unit test failed");
+    assert(hexWidthToFitWindow(1, 1, Direction.vertical).isClose(2.30947f), "unit test failed");
+    assert(hexWidthToFitWindow(2, 2, Direction.vertical).isClose(1.15473f), "unit test failed");
+    assert(hexWidthToFitWindow(3, 3, Direction.vertical).isClose(0.769823), "unit test failed");
+    assert(hexWidthToFitWindow(5, 5, Direction.vertical).isClose(0.461894f), "unit test failed");
+    assert(hexWidthToFitWindow(25, 25, Direction.vertical).isClose(0.0923788f), "unit test failed");
+    assert(hexWidthToFitWindow(999, 999, Direction.vertical).isClose(0.00231178f), "unit test failed");
 
-    assert(hexLengthToFitWindow(999, 1, Direction.vertical).isClose(0.00231178f), "unit test failed");
-    assert(hexLengthToFitWindow(1, 999, Direction.vertical).isClose(2.30947f), "unit test failed");
+    assert(hexWidthToFitWindow(999, 1, Direction.vertical).isClose(0.00231178f), "unit test failed");
+    assert(hexWidthToFitWindow(1, 999, Direction.vertical).isClose(2.30947f), "unit test failed");
  
 }
