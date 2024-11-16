@@ -116,9 +116,10 @@ when NDCx is -1 we get 0 and when NDCx is  1 we get screenWidth
 when NDCy is  1 we get 0 and when NDCy is -1 we get screenHeight
 +/
 
-/+ Cartesian Coordinates
+/+
+     CARTESIAN COORDINATES
                                    
-     ^ 
+     + (0.0, maxY)            
      |
      |
      |
@@ -129,33 +130,53 @@ when NDCy is  1 we get 0 and when NDCy is -1 we get screenHeight
      |
      |
      |
-     |
-     +------------------------> 
+     |                      (maxX, 0.0)                  
+     +---------------------------+ 
  (0.0,0.0)
 
-+/
 
-/+ Normalized Device Coordinates
+     NORMALIXED DEVICE COORDINATES
 
 Normalized device coordinates (-1, -1) is at the lower-left corner 
 while (+1, +1) is at the top-right 
 
-                                   (1.0,1.0)
-     +---------------------------------+
-     |                                 |
-     |                |                |
-     |                                 |
-     |                |                |
-     |                                 |
-     |    -  -  -   (0.0)   -  -  -    |
-     |                                 |
-     |                |                |
-     |                                 |
-     |                |                |
-     |                                 |
-     +---------------------------------+ 
+                               (1.0,1.0)
+     +---------------------------+
+     |                           |
+     |             |             |
+     |                           |
+     |             |             |
+     |                           |
+     |  -  -  -  (0.0)  -  -  -  |
+     |                           |
+     |             |             |
+     |                           |
+     |             |             |
+     |                           |
+     +---------------------------+ 
 (-1.0,-1.0)
 
+
+     SCREEN COORDINATES
+
+SDL coordinates, like most graphic engine coordinates, start at the top left corner of 
+the screen/window. The more you go down the screen the more Y increases and as you go 
+across to the right the X increases.
+
+   (0,0)
+     +---------------------------+
+     |                           |
+     |                           |
+     |                           |
+     |                           |
+     |                           |
+     |                           |
+     |                           |
+     |                           |
+     |                           | 
+     |                           |
+     +---------------------------+ 
+                        (maxWidth, maxHeight)
 +/
 
 

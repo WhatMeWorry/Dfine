@@ -4,6 +4,7 @@ module hexmath;
 import std.stdio;
 import std.math.operations : isClose;
 
+
 /+ Unit tests can be run in this module with the following commands:
 rdmd -main -unittest hexmath.d
 or
