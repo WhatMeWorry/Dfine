@@ -128,55 +128,51 @@ when NDCy is  1 we get 0 and when NDCy is -1 we get screenHeight
      |
      |
      |
-     |
-     |
-     |                      (maxX, 0.0)                  
-     +---------------------------+ 
+     |              (maxX, 0.0)                  
+     +-------------------+ 
  (0.0,0.0)
 
 
-     NORMALIXED DEVICE COORDINATES
+     NORMALIXED DEVICE COORDINATES (NDC)
 
 Normalized device coordinates (-1, -1) is at the lower-left corner 
 while (+1, +1) is at the top-right 
 
-                               (1.0,1.0)
-     +---------------------------+
-     |                           |
-     |             |             |
-     |                           |
-     |             |             |
-     |                           |
-     |  -  -  -  (0.0)  -  -  -  |
-     |                           |
-     |             |             |
-     |                           |
-     |             |             |
-     |                           |
-     +---------------------------+ 
+                     (1.0,1.0)
+     +-------------------+
+     |         |         |
+     |                   |
+     |         |         |
+     |                   |
+     | - - - (0.0) - - - |
+     |                   |
+     |         |         |
+     |                   |
+     |         |         |
+     +-------------------+ 
 (-1.0,-1.0)
 
 
-     SCREEN COORDINATES
+     SCREEN COORDINATES (SC)
 
 SDL coordinates, like most graphic engine coordinates, start at the top left corner of 
 the screen/window. The more you go down the screen the more Y increases and as you go 
 across to the right the X increases.
 
    (0,0)
-     +---------------------------+
-     |                           |
-     |                           |
-     |                           |
-     |                           |
-     |                           |
-     |                           |
-     |                           |
-     |                           |
-     |                           | 
-     |                           |
-     +---------------------------+ 
-                        (maxWidth, maxHeight)
+     +-------------------+
+     |                   |
+     |                   |
+     |                   |
+     |                   |
+     |                   |
+     |                   |
+     |                   |
+     |                   |
+     |                   | 
+     |                   |
+     +-------------------+ 
+                (maxWidth, maxHeight)
 +/
 
 

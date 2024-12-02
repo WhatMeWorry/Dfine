@@ -9,7 +9,7 @@ buildRequirements "silenceDeprecations"
 
 //sourceFiles "app.d" "honeycomb.d" "select_hex.d"
 
-sourcePaths "."
+sourcePaths "."         // grabs all .d source files in the root folder of Dfine repository C:\...\Dfine
 sourcePaths "libraries"
 sourcePaths "textures"
 sourcePaths "a_star"   // without: app.d(64,8): Error: unable to read module `path_finding`
