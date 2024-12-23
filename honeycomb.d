@@ -393,10 +393,10 @@ struct HexBoard
     }        
 
     SC sc;
-                    // each hex board has-a structure of hexes
+                    // each hex board has-a 2 dimensional array of hex structures
     Hex[][] hexes;  // = new int[][](5, 2);    
 
-    Spot[][] spots;  // each hex board has-a structure of path properties
+    Spot[][] spots;  // each hex board has-a 2 dimensional array of path properties
                      // think of this a being superimposed over the hexes array.
     
     SDL_Renderer* renderer;

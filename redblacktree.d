@@ -1,9 +1,15 @@
 
+module redblacktree;
+
 import std.container : RedBlackTree;
 import std.stdio;
-import honeycomb : Location;
+//import honeycomb : Location;
 
-
+struct Location   // holds a hex of a hexboard
+{
+    int r;  // row in hexboard
+    int c;  // column of hexboard
+}
 
 struct Node
 {
@@ -17,6 +23,20 @@ struct Node
 }
 
 
+unittest
+{
+    auto priorQ = new RedBlackTree!(Node, "a.f < b.f", true); 
+    Node n1 = Node( Location(1,2), 33);
+    Node n2 = Node( Location(3,4), 20);
+    Node n3 = Node( Location(5,6), 7);
+    writeln("priority Queue priorQ = ", priorQ);
+    writeln(priorQ);
+    writeln(priorQ.front); 
+    
+    //assert(hexWidthToFitWindow(1, 1, Direction.horizontal).isClose(2.0f), "unit test failed");
+    //assert(hexWidthToFitWindow(2, 2, Direction.horizontal).isClose(1.14286f), "unit test failed");
+
+}
 
 //int main()
 void placeHolder() 

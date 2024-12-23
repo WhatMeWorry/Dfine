@@ -96,13 +96,13 @@ SDL_Texture on the other hand, is used in a hardware rendering, textures are sto
 SDL_Renderer is a struct that handles all rendering. It is tied to a SDL_Window so it can only render 
 within that SDL_Window. It also keeps track the settings related to the rendering.
 +/
+
 struct SDL_STRUCT
 {
-    int screenWidth = 4024;
-    int screenHeight = 2024;  // .866 * 1024
+    int screenWidth;
+    int screenHeight;
     SDL_Window* window = null;      // The window we'll be rendering to
     SDL_Renderer* renderer = null;
-    //SDL_Surface* screenSurface = null;
 }
 
 
@@ -235,8 +235,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     load_sdl_libraries(); 
 
-    g.sdl.screenWidth  = 1000;
-    g.sdl.screenHeight = 1000;
+    g.sdl.screenWidth  = 500;
+    g.sdl.screenHeight = 500;
 
     uint rows = 3;
     uint cols = 3;
