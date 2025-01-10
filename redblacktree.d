@@ -1,9 +1,23 @@
 
+/+ Unit tests can be run in this module with the following commands:
+rdmd -main -unittest redblacktree.d
+or
+dmd -main -unittest redblacktree.d
+.\redblacktree.exe
+or with coverage
+dmd -main -unittest -cov redblacktree.d
+.\redblacktree.exe
+creates a redblacktree.lst file with code coverage statistics
++/
+
+
 module redblacktree;
 
-import std.container : RedBlackTree;
+//import std.container : RedBlackTree;
+import std.container.rbtree;
+
 import std.stdio;
-//import honeycomb : Location;
+
 
 struct Location   // holds a hex of a hexboard
 {
@@ -13,98 +27,93 @@ struct Location   // holds a hex of a hexboard
 
 struct Node
 {
-    this(Location locaction, uint f) 
+    this(Location location, uint f) 
     {
         this.location = location;
         this.f = f;
     }
     Location location;  
     uint f;
+    
+    bool opEquals(Node other) const 
+    {
+        return (this.location.r == other.location.r) && 
+               (this.location.c == other.location.c) &&
+               (this.f == other.f);
+    }
 }
 
 
 unittest
 {
-    auto priorQ = new RedBlackTree!(Node, "a.f < b.f", true); 
+    auto priorQ = new RedBlackTree!(Node, "a.f < b.f", true); // true = duplicates are allowed
+    
     Node n1 = Node( Location(1,2), 33);
     Node n2 = Node( Location(3,4), 20);
     Node n3 = Node( Location(5,6), 7);
-    writeln("priority Queue priorQ = ", priorQ);
-    writeln(priorQ);
-    writeln(priorQ.front); 
+    Node n4 = Node( Location(7,8), 1);
+    Node n5 = Node( Location(9,10), 20);
+    Node n6 = Node( Location(11,12), 97);
+    Node n7 = Node( Location(13,14), 20);
     
-    //assert(hexWidthToFitWindow(1, 1, Direction.horizontal).isClose(2.0f), "unit test failed");
-    //assert(hexWidthToFitWindow(2, 2, Direction.horizontal).isClose(1.14286f), "unit test failed");
+    priorQ.insert(n3);
+    priorQ.insert(n2);
+    priorQ.insert(n1);    
+    priorQ.insert(n4);
+    priorQ.insert(n5);
+    priorQ.insert(n7);
+    priorQ.insert(n6);
 
-}
+    assert(n1 in priorQ, "unit test failed");
+    assert(n2 in priorQ, "unit test failed");
+    assert(n3 in priorQ, "unit test failed");
+    assert(n4 in priorQ, "unit test failed");
+    assert(n5 in priorQ, "unit test failed");
+    assert(n6 in priorQ, "unit test failed");
+    assert(n7 in priorQ, "unit test failed");
+    
+    /+
+    writeln("priority Queue priorQ = ", priorQ);
 
-//int main()
-void placeHolder() 
-{
-auto priorQ = new RedBlackTree!(Node, "a.f < b.f", true); // true: allowDuplicates
-
-Node n1 = Node( Location(1,2), 33);
-Node n2 = Node( Location(3,4), 20);
-Node n3 = Node( Location(5,6), 7);
-Node n4 = Node( Location(7,8), 1);
-Node n5 = Node( Location(9,10), 20);
-Node n6 = Node( Location(11,12), 97);
-
-Node current;
-
-writeln("Before inserts into RedBlackTree");
-
-writeln("priorQ = ", priorQ);
-
-priorQ.insert(n3);
-priorQ.insert(n2);
-priorQ.insert(n1);
-priorQ.insert(n4);
-priorQ.insert(n5);
-
-writeln("After 5 Node inserts into RedBlackTree");
-
-writeln("priorQ = ", priorQ);
-
-writeln("---------------------------------");
-
-while(!priorQ.empty) 
-{
+    Node current;
+    while(!priorQ.empty) 
+    {
+        current = priorQ.front;
+        priorQ.removeFront;
+        writeln("current = ", current);
+    }
+    writeln("priority Queue priorQ = ", priorQ);
+    +/
+     
+    Node current;
     current = priorQ.front;
+    assert(current == n4, "unit test failed");
     priorQ.removeFront;
-    writeln("current = ", current);
-}
-
-priorQ.insert(n5);
-priorQ.insert(n4);
-priorQ.insert(n3);
-priorQ.insert(n2);
-priorQ.insert(n1);
-
-
-writeln("priorQ.length = ", priorQ.length);
-
-
-// https://dlang.org/phobos/std_container_rbtree.html#.RedBlackTree.opBinaryRight
-// https://dlang.org/spec/operatoroverloading.html#binary
-
-if (n3 in priorQ)
-{
-    writeln("n3 is in the RedBlackTree ");
-}
-
-if (n6 !in priorQ)
-{
-    writeln("n6 is not in the RedBlackTree ");
-}
-
-
-while(!priorQ.empty) 
-{
+    
     current = priorQ.front;
-    writeln("current = ", current);
+    assert(current == n3, "unit test failed");
     priorQ.removeFront;
+    
+    current = priorQ.front;
+    assert(current == n2, "unit test failed");
+    priorQ.removeFront;
+    
+    current = priorQ.front;
+    assert(current == n5, "unit test failed");
+    priorQ.removeFront;
+    
+    current = priorQ.front;
+    assert(current == n7, "unit test failed");
+    priorQ.removeFront;
+    
+    current = priorQ.front;
+    assert(current == n1, "unit test failed");
+    priorQ.removeFront;
+
+    current = priorQ.front;
+    assert(current == n6, "unit test failed");
+    priorQ.removeFront;
+
+   assert(priorQ.empty, "unit test failed");
 }
 
-
-}

@@ -19,7 +19,7 @@ import std.string;
 import textures.load_textures;
 import a_star.spot;
 import hexmath;
-
+import redblacktree : Location;
 
 /+
 From:  https://wiki.dlang.org/Dense_multidimensional_arrays
@@ -215,18 +215,6 @@ struct SelectedHex
     int row;
     int col;
 }
-
-
-struct Location   // holds a hex of a hexboard
-{
-    int r;  // row in hexboard
-    int c;  // column of hexboard
-}
-
-
-
-
-
 
 
 // x, y is the lower left corner of the rectangle touching all vertices

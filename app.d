@@ -57,8 +57,7 @@ import bindbc.sdl : IMG_SavePNG;
 
 import bindbc.loader;
 
-import redblacktree : placeHolder;
-
+import redblacktree : Location;
 
 /+
 SDL coordinates, like most graphic engine coordinates, start at the top left corner of 
@@ -390,8 +389,6 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                                 //findShortestPath( h, g, begin, end );
 
                                 findShortestPathRedBlack( h, g, begin, end );
-                                
-                                //placeHolder();
 
                                 writeln(watch.peek()); 
 

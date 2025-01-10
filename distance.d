@@ -11,8 +11,8 @@ import std.math;
 import std.conv : to;
 import hexmath : isEven, isOdd;
 
-import honeycomb;
-
+//import honeycomb;
+import redblacktree : Location;
 
 struct Slope
 {
