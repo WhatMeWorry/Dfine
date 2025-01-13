@@ -21,7 +21,7 @@ import std.stdio;
 
 struct Location   // holds a hex of a hexboard
 {
-    int r;  // row in hexboard
+    int r;  // row of hexboard
     int c;  // column of hexboard
 }
 
@@ -64,56 +64,53 @@ unittest
     priorQ.insert(n7);
     priorQ.insert(n6);
 
-    assert(n1 in priorQ, "unit test failed");
-    assert(n2 in priorQ, "unit test failed");
-    assert(n3 in priorQ, "unit test failed");
-    assert(n4 in priorQ, "unit test failed");
-    assert(n5 in priorQ, "unit test failed");
-    assert(n6 in priorQ, "unit test failed");
-    assert(n7 in priorQ, "unit test failed");
-    
-    /+
-    writeln("priority Queue priorQ = ", priorQ);
+    assert(n1 in priorQ);
+    assert(n2 in priorQ,);
+    assert(n3 in priorQ,);
+    assert(n4 in priorQ,);
+    assert(n5 in priorQ,);
+    assert(n6 in priorQ,);
+    assert(n7 in priorQ,);
 
     Node current;
+    
+    /+
     while(!priorQ.empty) 
     {
         current = priorQ.front;
         priorQ.removeFront;
         writeln("current = ", current);
     }
-    writeln("priority Queue priorQ = ", priorQ);
     +/
-     
-    Node current;
+    
     current = priorQ.front;
-    assert(current == n4, "unit test failed");
+    assert(current == n4);
     priorQ.removeFront;
     
     current = priorQ.front;
-    assert(current == n3, "unit test failed");
+    assert(current == n3);
     priorQ.removeFront;
     
     current = priorQ.front;
-    assert(current == n2, "unit test failed");
+    assert(current == n2);
     priorQ.removeFront;
     
     current = priorQ.front;
-    assert(current == n5, "unit test failed");
+    assert(current == n5);
     priorQ.removeFront;
     
     current = priorQ.front;
-    assert(current == n7, "unit test failed");
+    assert(current == n7);
     priorQ.removeFront;
     
     current = priorQ.front;
-    assert(current == n1, "unit test failed");
+    assert(current == n1);
     priorQ.removeFront;
 
     current = priorQ.front;
-    assert(current == n6, "unit test failed");
+    assert(current == n6);
     priorQ.removeFront;
 
-   assert(priorQ.empty, "unit test failed");
+   assert(priorQ.empty);
 }
 
