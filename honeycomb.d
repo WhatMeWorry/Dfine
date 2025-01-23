@@ -15,8 +15,9 @@ import std.math.algebraic: abs;
 
 import app;
 import std.string;
+import hex;
 
-import textures.load_textures;
+import textures.texture;
 import a_star.spot;
 import hexmath;
 import redblacktree : Location;
@@ -176,7 +177,7 @@ across to the right the X increases.
 +/
 
 
-
+/+
 struct D2_NDC  // normalized device coordinates 2d point
 {
     float x;
@@ -195,6 +196,7 @@ struct D2_DUAL  // same point but in different units
     D2_NDC ndc; // normalized device coordinates
     D2_SC  sc;  // screen coordinates
 }
++/
 
 struct Edges
 {                // This is the hex board edges, not the window's and is in NDC units
@@ -206,8 +208,8 @@ struct Edges
 
 struct MouseClick
 {
-    D2_NDC  ndc;  // normalized device coordinates 
-    D2_SC   sc;   // screen coordinates
+    Point2D!(float) ndc;  // normalized device coordinates 
+    Point2D!(int)   sc;   // screen coordinates
 }
 
 struct SelectedHex
@@ -219,10 +221,10 @@ struct SelectedHex
 
 // x, y is the lower left corner of the rectangle touching all vertices
 
-D2_NDC[6] defineHexVertices(float x, float y, float perpendicular, float diameter, 
+Point2D!(float)[6] defineHexVertices(float x, float y, float perpendicular, float diameter, 
                             float apothem, float halfRadius, float radius)
 {
-    D2_NDC[6] points;
+    Point2D!(float)[6] points;
     
     points[0].x = x + halfRadius;
     points[0].y = y;    
@@ -246,9 +248,9 @@ D2_NDC[6] defineHexVertices(float x, float y, float perpendicular, float diamete
 } 
 
 
-D2_NDC defineHexCenter(float x, float y, float apothem, float radius)
+Point2D!(float) defineHexCenter(float x, float y, float apothem, float radius)
 {
-    D2_NDC center;
+    Point2D!(float) center;
     
     center.x = x + radius;
     center.y = y + apothem;
@@ -257,26 +259,15 @@ D2_NDC defineHexCenter(float x, float y, float apothem, float radius)
 } 
 
 
-D2_NDC defineTextureStartingPoint(float x, float y, float perpendicular)
+Point2D!(float) defineTextureStartingPoint(float x, float y, float perpendicular)
 {
-    D2_NDC anchor;
+    Point2D!(float) anchor;
     
     anchor.x = x;
     anchor.y = y + perpendicular;
     
     return anchor;
 } 
-
-
-struct Hex
-{
-    D2_NDC[6] points;       // each hex is made up of 6 vertices
-    D2_SC[6]  sc;           // screen coordinates
-    D2_NDC    center;       // each hex has a center
-    D2_DUAL   texturePoint; // each hex has conceptual rectange. Use its upper left
-                            // corner as target rectangle for texture application   
-    Texture   texture;    
-}
 
 
 struct HexBoard
@@ -321,7 +312,7 @@ struct HexBoard
         edge.left   = -1.0;
         edge.right  = edge.left + (columns * (radius + halfRadius));
         
-        hexes = new Hex[][](rows, columns);  // dynamically allocate all the hexes
+        hexes = new Hex!(float,int)[][](rows, columns);  // dynamically allocate all the hexes
 
         spots = new Spot[][](rows, columns);
 
@@ -382,7 +373,7 @@ struct HexBoard
 
     SC sc;
                     // each hex board has-a 2 dimensional array of hex structures
-    Hex[][] hexes;  // = new int[][](5, 2);    
+    Hex!(float,int)[][]  hexes;  // = new int[][](5, 2);    
 
     Spot[][] spots;  // each hex board has-a 2 dimensional array of path properties
                      // think of this a being superimposed over the hexes array.
@@ -408,7 +399,8 @@ struct HexBoard
                 writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );
                 foreach(p; 0..6)
                 {
-                    writeln("hexes(r,c) ", hexes[r][c].points[p] );
+                    writeln("hexes(r,c) ", hexes[r][c].points.ndc[p] );
+                    writeln("hexes(r,c) ", hexes[r][c].points.sc[p] );
                 }
             }
         }
@@ -451,10 +443,10 @@ struct HexBoard
             // writeln("inside foreach row, row = ", row);
             foreach(col; 0..columns)
             {    
-                hexes[row][col].points = defineHexVertices(x, y, perpendicular, diameter, 
+                hexes[row][col].points.ndc = defineHexVertices(x, y, perpendicular, diameter, 
                                                            apothem, halfRadius, radius);
             
-                hexes[row][col].center = defineHexCenter(x, y, apothem, radius);
+                hexes[row][col].center.ndc = defineHexCenter(x, y, apothem, radius);
                 
                 hexes[row][col].texturePoint.ndc = defineTextureStartingPoint(x, y, perpendicular);
                 
@@ -491,14 +483,14 @@ struct HexBoard
             {    
                 foreach(v; 0..6)
                 {
-                    float NDCx = hexes[r][c].points[v].x;  // makes following statements more legable
-                    float NDCy = hexes[r][c].points[v].y;
+                    float NDCx = hexes[r][c].points.ndc[v].x;  // makes following statements more legable
+                    float NDCy = hexes[r][c].points.ndc[v].y;
                     
-                    hexes[r][c].sc[v].x = roundTo!int((NDCx + 1.0) * 0.5 * screenWidth);
-                    hexes[r][c].sc[v].y = roundTo!int((1.0 - NDCy) * 0.5 * screenHeight);
+                    hexes[r][c].points.sc[v].x = roundTo!int((NDCx + 1.0) * 0.5 * screenWidth);
+                    hexes[r][c].points.sc[v].y = roundTo!int((1.0 - NDCy) * 0.5 * screenHeight);
                 }
                 
-                D2_NDC temp = hexes[r][c].texturePoint.ndc; // make func call easier to read
+                Point2D!(float) temp = hexes[r][c].texturePoint.ndc; // make func call easier to read
                 
                 hexes[r][c].texturePoint.sc = convertPointFromNDCtoSC(temp, screenWidth, screenHeight);
             }
@@ -524,9 +516,9 @@ struct HexBoard
     }
 
 
-    D2_SC convertPointFromNDCtoSC(D2_NDC ndc, int screenWidth, int screenHeight)
+    Point2D!(int) convertPointFromNDCtoSC(Point2D!(float) ndc, int screenWidth, int screenHeight)
     {
-        D2_SC sc;
+        Point2D!(int) sc;
         
         sc.x = roundTo!int((ndc.x + 1.0) * 0.5 * screenWidth);
         sc.y = roundTo!int((1.0 - ndc.y) * 0.5 * screenHeight);
@@ -577,21 +569,21 @@ struct HexBoard
                     case 0,1,2,3,4:
                         {
                             //writeln("solidGreen");
-                            hexes[r][c].texture = g.textures[Ids.solidGreen];
+                            hexes[r][c].textures ~= g.textures[Ids.solidGreen];
                             spots[r][c].terrainCost = 1;
                         }
                         break;
                     case 5,6,7:
                         {
                             //writeln("solidBrown");
-                            hexes[r][c].texture = g.textures[Ids.solidBrown];
+                            hexes[r][c].textures ~= g.textures[Ids.solidBrown];
                             spots[r][c].terrainCost = 9; // 9
                         }
                         break;
                     case 8,9:
                         {
                             //writeln("solidBlue");
-                            hexes[r][c].texture = g.textures[Ids.solidBlue];
+                            hexes[r][c].textures ~= g.textures[Ids.solidBlue];
                             spots[r][c].terrainCost = 999; // 999
                         }
                         break;          
@@ -611,7 +603,8 @@ struct HexBoard
         {
             foreach(c; 0..columns)
             {    
-                hexes[r][c].texture = Texture(Ids.none, "", null);
+                //hexes[r][c].textures = Texture(Ids.none, "", null); // when textures was just a single Texture
+                hexes[r][c].textures.length = 0;  // a=[]; a=null; change the pointer, so one cannot reuse the array
                 // spots[r][c].location = Location(-1,-1); // DO NOT CHANGE!!!
                 spots[r][c].neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), 
                                          Location(-1,-1), Location(-1,-1), Location(-1,-1)]; 
@@ -628,7 +621,7 @@ struct HexBoard
 
     void setHexTexture(Globals g, Location hex, Ids id)
     {
-        hexes[hex.r][hex.c].texture = g.textures[id];
+        hexes[hex.r][hex.c].textures ~= g.textures[id];
     }
 
 
@@ -636,7 +629,7 @@ struct HexBoard
     {
         foreach(c; 0..columns)
         {
-            hexes[row][c].texture = g.textures[id]; 
+            hexes[row][c].textures ~= g.textures[id]; 
         }
     }
 
@@ -644,7 +637,7 @@ struct HexBoard
     {
         foreach(r; 0..rows)
         {
-            hexes[r][col].texture = g.textures[id]; 
+            hexes[r][col].textures ~= g.textures[id]; 
         }            
     }
 
@@ -654,8 +647,10 @@ struct HexBoard
         {
             foreach(c; 0..columns)
             {
-                if (hexes[r][c].texture.ptr != null)
+                foreach(tex; hexes[r][c].textures)
                 {
+                    if (tex.ptr != null)
+                    {
                     SDL_Rect dst;
                 
                     dst.x = hexes[r][c].texturePoint.sc.x;
@@ -676,9 +671,10 @@ struct HexBoard
                                               itself, the texture will be stretched according to this SDL_Rect.
                     +/
                     
-                    SDL_RenderCopy( renderer, hexes[r][c].texture.ptr, null, &dst );
+                    SDL_RenderCopy( renderer, tex.ptr, null, &dst );
                                 // Update window
                     // SDL_RenderPresent( renderer );  // DO OUTSIDE OF LOOP!!!
+                    }
                 }
             }
         }
@@ -701,11 +697,11 @@ struct HexBoard
             foreach(c; 0..columns)
             {  
                 // writeln("r = ", r, " c = ", c);
-                SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &hexes[r][c].sc[0], 6);
-                SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].sc[5].x,  // close off the hex  
-                                                    hexes[r][c].sc[5].y, 
-                                                    hexes[r][c].sc[0].x, 
-                                                    hexes[r][c].sc[0].y);
+                SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &hexes[r][c].points.sc[0], 6);
+                SDL_RenderDrawLine( g.sdl.renderer, hexes[r][c].points.sc[5].x,  // close off the hex  
+                                                    hexes[r][c].points.sc[5].y, 
+                                                    hexes[r][c].points.sc[0].x, 
+                                                    hexes[r][c].points.sc[0].y);
                 /+
                 foreach(p; 0..6)
                 {

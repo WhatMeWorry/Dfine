@@ -10,7 +10,7 @@ import core.stdc.stdlib;  // for exit()
 
 import honeycomb;
 import app;
-import textures.load_textures;
+import textures.texture;
 import distance;
 import redblacktree;
 import std.container : RedBlackTree;

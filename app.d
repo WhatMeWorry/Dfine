@@ -40,8 +40,10 @@ import honeycomb;
 import select_hex;
 import hexmath;
 
+import hex;
+
 import libraries.load_sdl_libraries;
-import textures.load_textures;
+import textures.texture;
 import a_star.spot;
 
 
@@ -441,16 +443,16 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                                     
                                     //writeln("DISTANCE = ", distance);
  
-                                    D2_SC[4] t;
+                                    Point2D!(int)[4] t;
                                     
-                                    t[0].x = h.hexes[x][y].sc[0].x;
-                                    t[0].y = h.hexes[x][y].sc[0].y; 
-                                    t[1].x = h.hexes[x][y].sc[1].x;
-                                    t[1].y = h.hexes[x][y].sc[1].y;
-                                    t[2].x = h.hexes[x][y].sc[3].x;
-                                    t[2].y = h.hexes[x][y].sc[3].y; 
-                                    t[3].x = h.hexes[x][y].sc[4].x;
-                                    t[3].y = h.hexes[x][y].sc[4].y;
+                                    t[0].x = h.hexes[x][y].points.sc[0].x;
+                                    t[0].y = h.hexes[x][y].points.sc[0].y; 
+                                    t[1].x = h.hexes[x][y].points.sc[1].x;
+                                    t[1].y = h.hexes[x][y].points.sc[1].y;
+                                    t[2].x = h.hexes[x][y].points.sc[3].x;
+                                    t[2].y = h.hexes[x][y].points.sc[3].y; 
+                                    t[3].x = h.hexes[x][y].points.sc[4].x;
+                                    t[3].y = h.hexes[x][y].points.sc[4].y;
 
                                     //writeln(t);
                                     

@@ -6,6 +6,7 @@ import std.stdio;
 import std.conv: roundTo;
 import std.math.rounding : floor;
 import hexmath : isEven, isOdd;
+import hex;
 
 
 //   |  \________|/          |  \________|/          |  \________|/
@@ -65,7 +66,7 @@ import hexmath : isEven, isOdd;
 //            opposite         
 
 
-bool clickedInSmallTriangle(D2_NDC mouseClick, D2_NDC hexCenter, float radius)
+bool clickedInSmallTriangle(Point2D!(float) mouseClick, Point2D!(float) hexCenter, float radius)
 {
     immutable float tanOf60  =  1.7320508;
     immutable float tanOf300 = -1.7320508;
@@ -81,9 +82,9 @@ bool clickedInSmallTriangle(D2_NDC mouseClick, D2_NDC hexCenter, float radius)
     float angle = opposite / adjacent;  // opposite is positive for hex sides /  (leaning Southwest to Northeast)
                                         // opposite is negative for hex sides \  (leaning Northwest to Southeast)
     if (angle >= 0.0)            
-        return (angle > tanOf60);    // angle is positive
+        return (angle > tanOf60);       // angle is positive
     else                           
-        return (angle < tanOf300);     // angle is negative        
+        return (angle < tanOf300);      // angle is negative        
 }
 
 
@@ -178,7 +179,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
     int hexRow = h.invalid;
     int hexCol = h.invalid;
 
-    D2_NDC hexCenter;
+    Point2D!(float) hexCenter;
     
     //================================= UL ========================================= 
   
@@ -187,7 +188,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
         hexRow = (gridRow-1) / 2;  // UL gridRows = {1, 3, 5, 7,...} mapped to row = {0, 1, 2, 3,...}
         hexCol = gridCol;
 
-        hexCenter = h.hexes[hexRow][hexCol].center;
+        hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
         if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
         {
@@ -215,9 +216,9 @@ bool getHexMouseClickedOn( ref HexBoard h)
         if (gridRow >= 1)  
         {
             hexRow = (gridRow/2) - 1;    // LR gridRows = {2, 4, 6, 8,...}  mapped to row = {0, 1, 2, 3,...}
-            hexCol = gridCol;             //                0 handled by else block below
+            hexCol = gridCol;            //                0 handled by else block below
  
-            hexCenter = h.hexes[hexRow][hexCol].center;
+            hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
             if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
             {
@@ -230,7 +231,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
             hexRow = 0; 
             hexCol = gridCol;
 
-            hexCenter = h.hexes[hexRow][hexCol].center;
+            hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
             hexCenter.y = (hexCenter.y - h.perpendicular);
 
@@ -258,7 +259,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
         hexRow = (gridRow-1) / 2;    // UR gridRows = {1, 3, 5, 7,...} mapped to row = {0, 1, 2, 3,...}
         hexCol = gridCol;
  
-        hexCenter = h.hexes[hexRow][hexCol].center;
+        hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
         if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
         {
@@ -278,7 +279,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
         hexRow = gridRow / 2;    // gridRows = {0, 2, 4, 6,...} mapped to row = {0, 1, 2, 3,...}
         hexCol = gridCol;
 
-        hexCenter = h.hexes[hexRow][hexCol].center;
+        hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
         if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
         { 

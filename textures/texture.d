@@ -1,7 +1,7 @@
-   
 
-module textures.load_textures;
- 
+
+module textures.texture;
+
 import bindbc.sdl;  
 
 import std.stdio;
@@ -15,11 +15,11 @@ enum Ids
 { 
     solidRed,   // 0 
     solidBlue,  // 1
-    solidGreen,  
+    solidGreen,
     solidBrown,
     solidBlack,
     solidWhite,
-	blackDot,
+    blackDot,
     //bricks,
     //nops,
     none = -1,
@@ -28,9 +28,9 @@ enum Ids
 
 struct Texture 
 { 
-    Ids id; 
-    string fileName; 
-    SDL_Texture *ptr; 
+    Ids id;
+    string fileName;
+    SDL_Texture *ptr;
 }
 
 
@@ -87,7 +87,7 @@ Texture[] load_textures(Globals g)
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));
     if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
-	
+
     t.id = Ids.blackDot; 
     t.fileName = "blackDot.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));
