@@ -15,6 +15,7 @@ import distance;
 import redblacktree;
 import std.container : RedBlackTree;
 
+import windows.simple_directmedia_layer;
 
 void debugSpots( ref HexBoard hB )
 {

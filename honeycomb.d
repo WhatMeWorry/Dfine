@@ -22,6 +22,8 @@ import a_star.spot;
 import hexmath;
 import redblacktree : Location;
 
+import windows.simple_directmedia_layer;
+
 /+
 From:  https://wiki.dlang.org/Dense_multidimensional_arrays
 

@@ -11,6 +11,8 @@ import std.string;
 import app;   // For Globals
 import core.stdc.stdlib;  // for exit()
 
+import windows.simple_directmedia_layer;
+
 enum Ids 
 { 
     solidRed,   // 0 

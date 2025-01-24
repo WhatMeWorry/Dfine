@@ -46,6 +46,8 @@ import libraries.load_sdl_libraries;
 import textures.texture;
 import a_star.spot;
 
+import windows.simple_directmedia_layer;
+
 
 import core.stdc.stdio;
 
@@ -54,8 +56,10 @@ import std.conv : roundTo;
 import std.stdio : writeln;
 import std.string;
 
-import bindbc.sdl;
+// SDL = Simple Directmedia Layer
+import bindbc.sdl : SDL_Window, SDL_Renderer;
 import bindbc.sdl : IMG_SavePNG;
+import bindbc.sdl;  // SDL_* all remaining declarations
 
 import bindbc.loader;
 
@@ -98,21 +102,6 @@ SDL_Renderer is a struct that handles all rendering. It is tied to a SDL_Window 
 within that SDL_Window. It also keeps track the settings related to the rendering.
 +/
 
-struct SDL_STRUCT
-{
-    int screenWidth;
-    int screenHeight;
-    SDL_Window* window = null;      // The window we'll be rendering to
-    SDL_Renderer* renderer = null;
-}
-
-
-struct Globals
-{
-    int i;
-    SDL_STRUCT sdl;
-    Texture[] textures;
-}
  
 Globals g;  // put a the globals variable together in one place
 
@@ -261,219 +250,193 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
     // Initialize SDL
-    if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+    
+    writeln("g = ", g);
+    createSDLwindow(g);
+    writeln("g = ", g);
+    
+    h.setRenderOfHexboard(g.sdl.renderer);
+
+    g.textures = load_textures(g);
+
+    writeln("g.textures = ", g.textures);
+
+    //h.initializeHexTextures(g);
+
+    writeln(g.textures);
+
+    h.drawHexBoard;
+
+    h.displayHexTextures();
+
+    writeln("after displayHexTextures");
+
+    // https://thenumb.at/cpp-course/sdl2/03/03.html
+
+    SDL_Event event;
+    bool running = true;
+
+    while(running) 
     {
-        writeln( "SDL could not initialize. SDL_Error: %s\n", SDL_GetError() );
-    }
-    else
-    {
-        //Create window
-        g.sdl.window = SDL_CreateWindow( "SDL Tutorial",
-                                         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                                         g.sdl.screenWidth, g.sdl.screenHeight, 
-                                         SDL_WINDOW_SHOWN );
-        if( g.sdl.window == null )
+        while(SDL_PollEvent(&event) != 0)
         {
-            printf( "sdl Window could not be created. SDL_Error: %s\n", SDL_GetError() );
-        }
-        else
-        {
-            SDL_SetWindowResizable(g.sdl.window, true);
-
-            // create a renderer for our window
-            g.sdl.renderer = SDL_CreateRenderer( g.sdl.window, -1, SDL_RENDERER_ACCELERATED );
-            if( g.sdl.renderer == null )
+            switch(event.type) 
             {
-                printf( "Renderer could not be created. SDL Error: %s\n", SDL_GetError() );
-            }
-            h.setRenderOfHexboard(g.sdl.renderer);
+                case SDL_QUIT:
 
-            g.textures = load_textures(g);
+                    writeln("user clicked on close button of windows");
+                    running = false;
+                    break;
 
-            writeln("g.textures = ", g.textures);
+                case SDL_KEYDOWN:
 
-            //h.initializeHexTextures(g);
-
-            writeln(g.textures);
-
-            h.drawHexBoard;
-
-            h.displayHexTextures();
-
-            writeln("after displayHexTextures");
-
-            // https://thenumb.at/cpp-course/sdl2/03/03.html
-
-            SDL_Event event;
-            bool running = true;
-
-            while(running) 
-            {
-                while(SDL_PollEvent(&event) != 0)
-                {
-                    switch(event.type) 
+                    if( event.key.keysym.sym == SDLK_ESCAPE )
                     {
-                        case SDL_QUIT:
-
-                            writeln("user clicked on close button of windows");
-                            running = false;
-                            break;
-
-                        case SDL_KEYDOWN:
-
-                            if( event.key.keysym.sym == SDLK_ESCAPE )
-                            {
-                                writeln("user pressed the Escape Key");
-                                running = false;
-                            }
-
-                            if( event.key.keysym.sym == SDLK_F1 )
-                            {
-                                writeln("user pressed the Function Key F1");
-
-                                SDL_Surface *screenshot; 
-
-                                screenshot = SDL_CreateRGBSurface(SDL_SWSURFACE,
-                                                                  g.sdl.screenWidth, 
-                                                                  g.sdl.screenHeight, 
-                                                                  32, 
-                                                                  0x00FF0000, 
-                                                                  0X0000FF00, 
-                                                                  0X000000FF, 
-                                                                  0XFF000000); 
-
-                                SDL_RenderReadPixels(g.sdl.renderer, 
-                                                     null, 
-                                                     SDL_PIXELFORMAT_ARGB8888, 
-                                                     screenshot.pixels, 
-                                                     screenshot.pitch);
-                                //SDL_SavePNG(screenshot, "screenshot.png"); 
-                                IMG_SavePNG(screenshot, "screenshot.png"); 
-                                SDL_FreeSurface(screenshot); 
-                            }                           
-                            
-                            if( event.key.keysym.sym == SDLK_DELETE )
-                            {
-                                writeln("SDLK_DELETE used to just clear out all hex textures");
-                                h.clearHexBoard();
-                                h.drawHexBoard;
-                            }
-
-                            if( event.key.keysym.sym == SDLK_F3 )
-                            {
-                                import std.process : executeShell;
-                                //executeShell("cls");
-
-                                h.setHexboardTexturesAndTerrain(g);
-
-                                writeln("after setHexboardTexturesAndTerrain");
-
-                                h.displayHexTextures();
-
-                                writeln("after displayHexTextures");
-
-                                import std.datetime.stopwatch;
-                                auto watch = StopWatch(AutoStart.no);
-                                watch.start();
-                                //                                          millisecond 
-                                // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
-                                //                                                microsecond
-
-                                h.validateHexboard();
-
-                                Location begin;
-                                Location end;
-                                begin.r = 0;
-                                begin.c = 0;
-                                end.r = h.lastRow;
-                                end.c = h.lastColumn;  
-
-                                //findShortestPath( h, g, begin, end );
-
-                                findShortestPathRedBlack( h, g, begin, end );
-
-                                writeln(watch.peek()); 
-
-                                h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
-                            }
-
-                            SDL_RenderPresent( g.sdl.renderer );  // refresh screen for any keydown event
-                            break;
-
-
-                        case SDL_MOUSEBUTTONDOWN:
-                            if( event.button.button == SDL_BUTTON_LEFT )
-                            {
-                                SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
-
-                                writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
-                                
-                                // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
-                                
-                                h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
-
-                                writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
-                                
-                                if (getHexMouseClickedOn(h))
-                                {   
-                                    int x = h.selectedHex.row;   int y = h.selectedHex.col;
- 
-                                    Location start;  
-                                    Location end; 
-                                    
-                                    start.r = 0;
-                                    start.c = 0;
-                                    
-                                    end.r = x; 
-                                    end.c = y;
-                                    
-                                    //h.setHexRowTexture(g, start.row, Ids.solidRed);
-                                    
-                                    //h.setHexColTexture(g, start.column, Ids.solidRed);                                    
-
-                                    //h.setHexTexture(g, start, Ids.solidBlack);
-                                    // h.selectedHex has end point
-                                    findShortestPathRedBlack( h, g, start, end );
-
-                                    h.displayHexTextures();
-                                    
-                                    //writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
-                                    
-                                    //int distance = heuristic(start, end);
-                                    
-                                    //writeln("DISTANCE = ", distance);
- 
-                                    Point2D!(int)[4] t;
-                                    
-                                    t[0].x = h.hexes[x][y].points.sc[0].x;
-                                    t[0].y = h.hexes[x][y].points.sc[0].y; 
-                                    t[1].x = h.hexes[x][y].points.sc[1].x;
-                                    t[1].y = h.hexes[x][y].points.sc[1].y;
-                                    t[2].x = h.hexes[x][y].points.sc[3].x;
-                                    t[2].y = h.hexes[x][y].points.sc[3].y; 
-                                    t[3].x = h.hexes[x][y].points.sc[4].x;
-                                    t[3].y = h.hexes[x][y].points.sc[4].y;
-
-                                    //writeln(t);
-                                    
-                                    SDL_RenderDrawLine( g.sdl.renderer, t[0].x, t[0].y, t[1].x, t[1].y);
-                                    SDL_RenderDrawLine( g.sdl.renderer, t[1].x, t[1].y, t[2].x, t[2].y);
-                                    SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
-                                    SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);
-                                }
-                         
-                                SDL_RenderPresent( g.sdl.renderer );
-                            }
-                            break;          
-
-                        default: break;
+                        writeln("user pressed the Escape Key");
+                        running = false;
                     }
 
-                }
-            }
-            return 0;
-        }
-    }  
+                    if( event.key.keysym.sym == SDLK_F1 )
+                    {
+                        writeln("user pressed the Function Key F1");
+                        SDL_Surface *screenshot; 
 
+                        screenshot = SDL_CreateRGBSurface(SDL_SWSURFACE,
+                                                          g.sdl.screenWidth, 
+                                                          g.sdl.screenHeight, 
+                                                          32, 
+                                                          0x00FF0000, 
+                                                          0X0000FF00, 
+                                                          0X000000FF, 
+                                                          0XFF000000); 
+
+                        SDL_RenderReadPixels(g.sdl.renderer, 
+                                             null, 
+                                             SDL_PIXELFORMAT_ARGB8888, 
+                                             screenshot.pixels, 
+                                             screenshot.pitch);
+                        //SDL_SavePNG(screenshot, "screenshot.png"); 
+                        IMG_SavePNG(screenshot, "screenshot.png"); 
+                        SDL_FreeSurface(screenshot); 
+                    }                           
+
+                    if( event.key.keysym.sym == SDLK_DELETE )
+                    {
+                        writeln("SDLK_DELETE used to just clear out all hex textures");
+                        h.clearHexBoard();
+                        h.drawHexBoard;
+                    }
+
+                    if( event.key.keysym.sym == SDLK_F3 )
+                    {
+                        import std.process : executeShell;
+                        //executeShell("cls");
+
+                        h.setHexboardTexturesAndTerrain(g);
+
+                        writeln("after setHexboardTexturesAndTerrain");
+
+                        h.displayHexTextures();
+
+                        writeln("after displayHexTextures");
+
+                        import std.datetime.stopwatch;
+                        auto watch = StopWatch(AutoStart.no);
+                        watch.start();
+                        //                                          millisecond 
+                        // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
+                        //                                                microsecond
+
+                        h.validateHexboard();
+
+                        Location begin;
+                        Location end;
+                        begin.r = 0;
+                        begin.c = 0;
+                        end.r = h.lastRow;
+                        end.c = h.lastColumn;  
+
+                        //findShortestPath( h, g, begin, end );
+
+                        findShortestPathRedBlack( h, g, begin, end );
+
+                        writeln(watch.peek()); 
+
+                        h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
+                    }
+
+                    SDL_RenderPresent( g.sdl.renderer );  // refresh screen for any keydown event
+                    break;
+
+
+                case SDL_MOUSEBUTTONDOWN:
+                    if( event.button.button == SDL_BUTTON_LEFT )
+                    {
+                        SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
+
+                        writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
+                                
+                        // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+                                
+                        h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
+
+                        writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
+                                
+                        if (getHexMouseClickedOn(h))
+                        {   
+                            int x = h.selectedHex.row;   int y = h.selectedHex.col;
+ 
+                            Location start;  
+                            Location end; 
+                                    
+                            start.r = 0;
+                            start.c = 0;
+                                    
+                            end.r = x; 
+                            end.c = y;
+                                    
+                            //h.setHexRowTexture(g, start.row, Ids.solidRed);
+                                    
+                            //h.setHexColTexture(g, start.column, Ids.solidRed);                                    
+
+                            //h.setHexTexture(g, start, Ids.solidBlack);
+                            // h.selectedHex has end point
+                            findShortestPathRedBlack( h, g, start, end );
+
+                            h.displayHexTextures();
+                                    
+                            //writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
+                                    
+                            //int distance = heuristic(start, end);
+                                    
+                            //writeln("DISTANCE = ", distance);
+ 
+                            Point2D!(int)[4] t;
+                                   
+                            t[0].x = h.hexes[x][y].points.sc[0].x;
+                            t[0].y = h.hexes[x][y].points.sc[0].y; 
+                            t[1].x = h.hexes[x][y].points.sc[1].x;
+                            t[1].y = h.hexes[x][y].points.sc[1].y;
+                            t[2].x = h.hexes[x][y].points.sc[3].x;
+                            t[2].y = h.hexes[x][y].points.sc[3].y; 
+                            t[3].x = h.hexes[x][y].points.sc[4].x;
+                            t[3].y = h.hexes[x][y].points.sc[4].y;
+
+                            //writeln(t);
+                                    
+                            SDL_RenderDrawLine( g.sdl.renderer, t[0].x, t[0].y, t[1].x, t[1].y);
+                            SDL_RenderDrawLine( g.sdl.renderer, t[1].x, t[1].y, t[2].x, t[2].y);
+                            SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
+                            SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);
+                        }
+                         
+                        SDL_RenderPresent( g.sdl.renderer );
+                    }
+                    break;          
+
+                default: break;
+            }
+        }
+    }
     return 0;
 }
