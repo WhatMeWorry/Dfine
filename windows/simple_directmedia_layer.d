@@ -29,7 +29,7 @@ struct Globals
 void createSDLwindow(ref Globals g)
 {
 
-    if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+    if( SDL_Init( SDL_INIT_EVERYTHING ) < 0 )  // SDL_INIT_VIDEO
     {
         writeln( "SDL could not initialize. SDL_Error: %s\n", SDL_GetError() );
         assert(0);
