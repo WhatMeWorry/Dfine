@@ -1,5 +1,5 @@
 
-module honeycomb;
+module hexboard;
 
 
 import std.conv: roundTo, to;

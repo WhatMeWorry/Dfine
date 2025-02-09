@@ -1,7 +1,7 @@
 
 module select_hex;
 
-import honeycomb;
+import hexboard;
 import std.stdio;
 import std.conv: roundTo;
 import std.math.rounding : floor;

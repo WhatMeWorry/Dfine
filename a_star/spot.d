@@ -8,7 +8,7 @@ import std.math : ceil, floor;
 import std.string;
 import core.stdc.stdlib;  // for exit()
 
-import honeycomb;
+import hexboard;
 import app;
 import textures.texture;
 import distance;

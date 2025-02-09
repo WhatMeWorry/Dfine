@@ -36,7 +36,7 @@ Or will this cause problems further down the road?
 
 module app;
 
-import honeycomb;
+import hexboard;
 import select_hex;
 import hexmath;
 
