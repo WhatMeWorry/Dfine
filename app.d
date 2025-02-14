@@ -37,6 +37,7 @@ Or will this cause problems further down the road?
 module app;
 
 import hexboard;
+import hexboard2;
 import select_hex;
 import hexmath;
 
@@ -228,19 +229,28 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 500;
     g.sdl.screenHeight = 500;
 
-    uint rows = 3;
-    uint cols = 3;
+    uint rows = 2;
+    uint cols = 2;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Direction.horizontal);
 
     HexBoard h = HexBoard(hexWidth, rows, cols);
+    
+    auto h2 = HexBoard2!(float,uint)(hexWidth, rows, cols);
+    auto h3 = HexBoard2!(double,int)(hexWidth, rows, cols);
 
-    h.displayHexBoardData();  // hex board initially defined in NDC (Normalized Device Coordinates)
+    //h.displayHexBoardData();  // hex board initially defined in NDC (Normalized Device Coordinates)
+    
+    //displayHexBoardData(h2);
+    h2.displayHexBoardData();
+    
+    //h3.displayHexBoardData();
 
     writeAndPause("==== After displayHexBoard");
 
     h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight); 
-
+    h2.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);
+    
     h.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
 
     h.displayHexBoardScreenCoordinates();
