@@ -310,6 +310,28 @@ whether they're member functions or free functions.
 +/    
     
 
+void displayHexBoardScreenCoordinates(HB)(HB h)
+{
+    writeln("===== Values are in Screen Coordinates =====");
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {
+            writeln("hexes[", r, "][", c, "].center.sc ", h.hexes[r][c].center.sc );
+            foreach(p; 0..6)
+            {
+                writeln("hexes(", r, ",", c, ") = ", h.hexes[r][c].points.sc[p] ); 
+            }
+            writeln("hexes texture Point = ", h.hexes[r][c].texturePoint.sc);
+        }
+    }
+}
+
+
+
+
+
+
 
 /+
     void displayHexBoardScreenCoordinates(HexBoard2!(F,I) h)
@@ -430,9 +452,27 @@ void convertNDCoordsToScreenCoords(HB, I)(HB h, I screenWidth, I screenHeight)
         }
     }
 }
+
+
+
+//Point2D!(I) convertPointFromNDCtoSC(HB,F, I)(HB h, F ndc, I screenWidth, I screenHeight)
+void convertNDClengthsToSClengths(HB, I)(HB h, I screenWidth, I screenHeight)
+{
+    auto screenCoordinatesLength = 2.0;  // from -1.0 to 1.0
+
+    auto perCentOfEntireLength = h.ndc.diameter / screenCoordinatesLength;
+        
+    h.sc.diameter = roundTo!(I)(perCentOfEntireLength * screenWidth);
+        
+    h.sc.radius        = roundTo!(I)(h.sc.diameter * 0.5);
+    h.sc.halfRadius    = roundTo!(I)(h.sc.radius   * 0.5);
+
+    h.sc.perpendicular = roundTo!(I)(h.sc.diameter * 0.866 );
     
-    
-    
+}
+ 
+
+ 
 /+
     // screenWidth and screenHeight are not know by struct HexBoard
     // this function can only be called from outside of this module
@@ -580,7 +620,54 @@ void convertNDCoordsToScreenCoords(HB, I)(HB h, I screenWidth, I screenHeight)
             hexes[r][col].textures ~= g.textures[id]; 
         }            
     }
++/
 
+void displayHexTextures(HB)(HB h)
+{
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {
+            foreach(tex; h.hexes[r][c].textures)
+            {
+                if (tex.ptr != null)
+                {
+                    SDL_Rect dst;
+                
+                    dst.x = h.hexes[r][c].texturePoint.sc.x;
+                    dst.y = h.hexes[r][c].texturePoint.sc.y;
+
+                    dst.w = h.sc.diameter;
+                    dst.h = h.sc.perpendicular;
+
+                    /+
+                    SDL_RenderCopy(SDL_Renderer* renderer, DL_Texture* texture,
+                    Is used for rendering a SDL_Texture and has the following parameters:
+
+                    SDL_Renderer* renderer,   the renderer you want to use for rendering.
+                    SDL_Texture*  texture,    the texture you want to render.
+                    const SDL_Rect* srcrect,  part of the texture to render, null renders the entire texture.
+                    const SDL_Rect* dstrect   where to render the texture in the window. If the width and height 
+                                              of this SDL_Rect is smaller or larger than the dimensions of the texture 
+                                              itself, the texture will be stretched according to this SDL_Rect.
+                    +/
+                    
+                    SDL_RenderCopy( h.renderer, tex.ptr, null, &dst );
+                                // Update window
+                    // SDL_RenderPresent( renderer );  // DO OUTSIDE OF LOOP!!!
+                }
+            }
+        }
+    }
+    SDL_RenderPresent( h.renderer );
+}
+
+
+
+
+
+
+/+
     void displayHexTextures()
     {    
         foreach(r; 0..rows)
@@ -620,10 +707,37 @@ void convertNDCoordsToScreenCoords(HB, I)(HB h, I screenWidth, I screenHeight)
         }
         SDL_RenderPresent( renderer );
     }
++/
+
+void drawHexBoard(HB)(HB h)
+{
+    SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, SDL_ALPHA_OPAQUE );
+    //Clear screen
+    SDL_RenderClear( g.sdl.renderer );
+
+    SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, SDL_ALPHA_OPAQUE );        
+
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {  
+            // writeln("r = ", r, " c = ", c);
+            //SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &hexes[r][c].points.sc[0], 6);
+            SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &h.hexes[r][c].points.sc[0], 6);
+            
+            SDL_RenderDrawLine( g.sdl.renderer, h.hexes[r][c].points.sc[5].x,  // close off the hex  
+                                                h.hexes[r][c].points.sc[5].y, 
+                                                h.hexes[r][c].points.sc[0].x, 
+                                                h.hexes[r][c].points.sc[0].y);
+        }
+    }
+
+    // Update screen
+    SDL_RenderPresent( g.sdl.renderer );
+}
 
 
-
-
+/+
     void drawHexBoard()
     {
         SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, SDL_ALPHA_OPAQUE );

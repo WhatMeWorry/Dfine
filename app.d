@@ -252,8 +252,10 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     h2.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);
     
     h.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
+    h2.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
 
     h.displayHexBoardScreenCoordinates();
+    h2.displayHexBoardScreenCoordinates();
 
     // https://github.com/BindBC/bindbc-sdl/issues/53   
 
@@ -266,6 +268,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     writeln("g = ", g);
     
     h.setRenderOfHexboard(g.sdl.renderer);
+    h2.setRenderOfHexboard(g.sdl.renderer);
 
     g.textures = load_textures(g);
 
@@ -276,10 +279,12 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     writeln(g.textures);
 
     h.drawHexBoard;
+    h2.drawHexBoard;
 
-    h.displayHexTextures();
+    //h.displayHexTextures();
+    h2.displayHexTextures();
 
-    writeln("after displayHexTextures");
+    writeAndPause("after displayHexTextures");
 
     // https://thenumb.at/cpp-course/sdl2/03/03.html
 
