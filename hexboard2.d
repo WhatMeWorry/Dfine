@@ -494,16 +494,39 @@ void convertNDClengthsToSClengths(HB, I)(HB h, I screenWidth, I screenHeight)
 +/
 
 
-    Point2D!(I) convertPointFromNDCtoSC(F, I)(F ndc, I screenWidth, I screenHeight)
-    {
-        Point2D!(I) sc;
-        //I sc;
-        
-        sc.x = roundTo!(I)((ndc.x + 1.0) * 0.5 * screenWidth);
-        sc.y = roundTo!(I)((1.0 - ndc.y) * 0.5 * screenHeight);
+Point2D!(I) convertPointFromNDCtoSC(F, I)(F ndc, I screenWidth, I screenHeight)
+{
+    Point2D!(I) sc;
+    //I sc;
 
-        return sc;
-    }
+    sc.x = roundTo!(I)((ndc.x + 1.0) * 0.5 * screenWidth);
+    sc.y = roundTo!(I)((1.0 - ndc.y) * 0.5 * screenHeight);
+
+    return sc;
+}
+
+
+
+// Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+
+// screenWidth and screeHeight are not know by struct HexBoard
+// this function can only be called from outside of this module
+
+void convertScreenCoordinatesToNormalizedDeviceCoordinates(HB, I)(HB h, I screenWidth, I screenHeight)
+{
+    h.mouseClick.ndc.x =   (h.mouseClick.sc.x / (screenWidth  / 2.0)) - 1.0;  // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
+                                                                              // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0     
+
+    h.mouseClick.ndc.y = -((h.mouseClick.sc.y / (screenHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
+                                                                          // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0
+                                                                              
+    // The minus sign at front of expression is needed because screen coordinates are flipped horizontally from NDC coordinates
+
+    // Take the bottom of the edge of the screen (ie -1.0)  Any screen click on the screen is going to be Bigger in value.
+    // So that the mouse click and subtract the edge.
+}
+
+
 
 
 /+

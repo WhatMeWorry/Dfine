@@ -236,8 +236,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     //HexBoard h = HexBoard(hexWidth, rows, cols);
     
-    auto h2 = HexBoard2!(float,uint)(hexWidth, rows, cols);
-    auto h3 = HexBoard2!(double,int)(hexWidth, rows, cols);
+    //auto h2 = HexBoard2!(float,uint)(hexWidth, rows, cols);
+    auto h2 = HexBoard2!(double,int)(hexWidth, rows, cols);
 
     //h.displayHexBoardData();  // hex board initially defined in NDC (Normalized Device Coordinates)
     
@@ -293,7 +293,6 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     while(running) 
     {
-        //writeln("in outer while");
         while(SDL_PollEvent(&event) != 0)
         {
             switch(event.type) 
@@ -381,7 +380,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                         //findShortestPath( h, g, begin, end );
 
-                  ///////findShortestPathRedBlack( h, g, begin, end );
+                        ////findShortestPathRedBlack( h2, g, begin, end );
 
                         writeln(watch.peek()); 
 
@@ -396,19 +395,22 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                 case SDL_MOUSEBUTTONDOWN:
                     if( event.button.button == SDL_BUTTON_LEFT )
                     {
-                    /+
-                        SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
+                        //SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
+                        SDL_GetMouseState(&h2.mouseClick.sc.x, &h2.mouseClick.sc.y);
 
-                        writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
+                        writeln(h2.mouseClick.sc.x, ", ", h2.mouseClick.sc.y);
                                 
                         // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
                                 
-                        h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
+                        //h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
+                        h2.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
 
-                        writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
-                                
+                        //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
+                        writeln(h2.mouseClick.ndc.x, ", ", h2.mouseClick.ndc.y);
+
+                        /+
                         if (getHexMouseClickedOn(h))
-                        {   
+                        {
                             int x = h.selectedHex.row;   int y = h.selectedHex.col;
  
                             Location start;  
@@ -454,11 +456,11 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
                             SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);
                         }
+                        +/
                          
                         SDL_RenderPresent( g.sdl.renderer );
-                    +/
                     }
-                    break;          
+                    break;
 
                 default: break;
             }
