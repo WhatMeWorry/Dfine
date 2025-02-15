@@ -234,7 +234,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Direction.horizontal);
 
-    HexBoard h = HexBoard(hexWidth, rows, cols);
+    //HexBoard h = HexBoard(hexWidth, rows, cols);
     
     auto h2 = HexBoard2!(float,uint)(hexWidth, rows, cols);
     auto h3 = HexBoard2!(double,int)(hexWidth, rows, cols);
@@ -248,13 +248,13 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     writeAndPause("==== After displayHexBoard");
 
-    h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight); 
+    //h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight); 
     h2.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);
     
-    h.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
+    //h.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
     h2.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
 
-    h.displayHexBoardScreenCoordinates();
+    //h.displayHexBoardScreenCoordinates();
     h2.displayHexBoardScreenCoordinates();
 
     // https://github.com/BindBC/bindbc-sdl/issues/53   
@@ -267,7 +267,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     createSDLwindow(g);
     writeln("g = ", g);
     
-    h.setRenderOfHexboard(g.sdl.renderer);
+    //h.setRenderOfHexboard(g.sdl.renderer);
     h2.setRenderOfHexboard(g.sdl.renderer);
 
     g.textures = load_textures(g);
@@ -278,7 +278,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     writeln(g.textures);
 
-    h.drawHexBoard;
+    //h.drawHexBoard;
     h2.drawHexBoard;
 
     //h.displayHexTextures();
@@ -293,6 +293,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     while(running) 
     {
+        //writeln("in outer while");
         while(SDL_PollEvent(&event) != 0)
         {
             switch(event.type) 
@@ -338,8 +339,10 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                     if( event.key.keysym.sym == SDLK_DELETE )
                     {
                         writeln("SDLK_DELETE used to just clear out all hex textures");
-                        h.clearHexBoard();
-                        h.drawHexBoard;
+                        //h.clearHexBoard();
+                        //h.drawHexBoard;
+                        h2.clearHexBoard();
+                        h2.drawHexBoard;
                     }
 
                     if( event.key.keysym.sym == SDLK_F3 )
@@ -347,11 +350,13 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         import std.process : executeShell;
                         //executeShell("cls");
 
-                        h.setHexboardTexturesAndTerrain(g);
+                        //h.setHexboardTexturesAndTerrain(g);
+                        h2.setHexboardTexturesAndTerrain(g);
 
                         writeln("after setHexboardTexturesAndTerrain");
 
-                        h.displayHexTextures();
+                        //h.displayHexTextures();
+                        h2.displayHexTextures();
 
                         writeln("after displayHexTextures");
 
@@ -362,22 +367,26 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
                         //                                                microsecond
 
-                        h.validateHexboard();
+                        //h.validateHexboard();
+                        h2.validateHexboard();
 
                         Location begin;
                         Location end;
                         begin.r = 0;
                         begin.c = 0;
-                        end.r = h.lastRow;
-                        end.c = h.lastColumn;  
+                        //end.r = h.lastRow;
+                        //end.c = h.lastColumn;
+                        end.r = h2.lastRow;
+                        end.c = h2.lastColumn;
 
                         //findShortestPath( h, g, begin, end );
 
-                        findShortestPathRedBlack( h, g, begin, end );
+                  ///////findShortestPathRedBlack( h, g, begin, end );
 
                         writeln(watch.peek()); 
 
-                        h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
+                        //h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
+                        h2.displayHexTextures();
                     }
 
                     SDL_RenderPresent( g.sdl.renderer );  // refresh screen for any keydown event
@@ -387,6 +396,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                 case SDL_MOUSEBUTTONDOWN:
                     if( event.button.button == SDL_BUTTON_LEFT )
                     {
+                    /+
                         SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
 
                         writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
@@ -446,6 +456,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         }
                          
                         SDL_RenderPresent( g.sdl.renderer );
+                    +/
                     }
                     break;          
 

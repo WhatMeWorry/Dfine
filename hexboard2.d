@@ -527,8 +527,54 @@ void convertNDClengthsToSClengths(HB, I)(HB h, I screenWidth, I screenHeight)
         // So that the mouse click and subtract the edge.
         
     }
++/
 
+void setHexboardTexturesAndTerrain(HB)(HB h, Globals g)
+{
+    import std.random : uniform;
+    auto rnd = Random(unpredictableSeed);    
 
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {    
+            // Generate an integer in 0,1,2,3,4,5
+            auto a = uniform(0, 10, rnd);
+            //hexes[r][c].texture.id = g.textures[a].id;
+            //hexes[r][c].texture.fileName = g.textures[a].fileName;
+            //hexes[r][c].texture.ptr = g.textures[a].ptr;
+
+            switch(a) 
+            {
+                case 0,1,2,3,4:
+                    {
+                        //writeln("solidGreen");
+                        h.hexes[r][c].textures ~= g.textures[Ids.solidGreen];
+                        h.spots[r][c].terrainCost = 1;
+                    }
+                    break;
+                    case 5,6,7:
+                    {
+                        //writeln("solidBrown");
+                        h.hexes[r][c].textures ~= g.textures[Ids.solidBrown];
+                        h.spots[r][c].terrainCost = 9; // 9
+                    }
+                    break;
+                case 8,9:
+                    {
+                        //writeln("solidBlue");
+                        h.hexes[r][c].textures ~= g.textures[Ids.solidBlue];
+                        h.spots[r][c].terrainCost = 999; // 999
+                    }
+                    break;          
+                default: break;                                         
+            }
+            //hexes[r][c].texture = g.textures[a];
+        }
+    }
+}
+
+/+
     void setHexboardTexturesAndTerrain(Globals g)
     {
         import std.random : uniform;
@@ -573,10 +619,32 @@ void convertNDClengthsToSClengths(HB, I)(HB h, I screenWidth, I screenHeight)
             }
         }
     }
++/
+
+
+void clearHexBoard(HB)(HB h)
+{
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {    
+            //hexes[r][c].textures = Texture(Ids.none, "", null); // when textures was just a single Texture
+            h.hexes[r][c].textures.length = 0;  // a=[]; a=null; change the pointer, so one cannot reuse the array
+            // spots[r][c].location = Location(-1,-1); // DO NOT CHANGE!!!
+            h.spots[r][c].neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), 
+                                       Location(-1,-1), Location(-1,-1), Location(-1,-1)]; 
+            h.spots[r][c].f = 0;
+            h.spots[r][c].g = 0;
+            h.spots[r][c].h = 0;
+            h.spots[r][c].previous = Location(-1,-1);
+            h.spots[r][c].terrainCost = 0;
+        }
+    }
+}
 
 
 
-
+/+
     void clearHexBoard()
     {
         foreach(r; 0..rows)
@@ -596,9 +664,9 @@ void convertNDClengthsToSClengths(HB, I)(HB h, I screenWidth, I screenHeight)
             }
         }
     }
++/
 
-
-
+/+
     void setHexTexture(Globals g, Location hex, Ids id)
     {
         hexes[hex.r][hex.c].textures ~= g.textures[id];
@@ -791,9 +859,28 @@ void drawHexBoard(HB)(HB h)
         // Update screen
         SDL_RenderPresent( g.sdl.renderer );
     }
- 
++/
 
 
+void validateHexboard(HB)(HB h)
+{
+    foreach(i; 0..(h.rows))
+    {
+        foreach(j; 0..(h.columns))
+        {
+            if ((h.spots[i][j].location.r < 0) ||
+                (h.spots[i][j].location.r > h.rows))
+            {
+                writeln("[i][j] = [", i, "][", j, "]");
+                writeln("Index out of bounds");
+                exit(0);
+            }
+        }
+    }
+}
+
+
+/+
 void validateHexboard()
 {
     foreach(i; 0..rows)
@@ -807,14 +894,12 @@ void validateHexboard()
                 writeln("Index out of bounds");
                 exit(0);
             }
-                 
         }
     }
-
 }
++/
 
-
-
+/+
 const uint N  = 0;  // North
 const uint NE = 1;  // North-East
 const uint SE = 2;  // South-East
