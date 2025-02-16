@@ -229,8 +229,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 500;
     g.sdl.screenHeight = 500;
 
-    uint rows = 3;
-    uint cols = 3;
+    uint rows = 2;
+    uint cols = 2;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Direction.horizontal);
 
@@ -240,22 +240,21 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     auto h2 = HexBoard2!(double,int)(hexWidth, rows, cols);
 
     h2.displayHexBoardDataNDC();
-    h2.displayHexBoardDataSC();
 
+    writeAndPause("==== HexBoard is only constructed with NDC values ====");
 
-    //writeAndPause("==== After displayHexBoard");
-
-    //h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight); 
-    
     h2.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);
     
     h2.displayHexBoardDataSC();
+
+    writeAndPause("==== NDC converted to SC values ====");
+
 
     h2.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
 
     //h2.displayHexBoardDataNDC();
     
-    h2.displayHexBoardDataNDCandSC();
+    //h2.displayHexBoardDataNDCandSC();
 
     // https://github.com/BindBC/bindbc-sdl/issues/53   
 

@@ -221,7 +221,7 @@ struct HexBoard2(F,I)
         }
 
         //this.initializeHexBoard();  // either one works
-        initializeHexBoard(this);     // either one works
+        initializeHexBoard(this);
         
         //addNeighbors();
         
@@ -364,31 +364,22 @@ void displayHexBoardDataNDCandSC(HB)(HB h)
 
 
 // DEFINE HEX BOARD
- 
-void initializeHexBoard(HB)(HB h)
-{    
-    // start at the bottom left corner of NDC window, drawing from left to right, bottom to top.
-        
-    auto x = h.edge.left;      // NDC (Normalized Device Coordinates) start at -1.0
-    auto y = h.edge.bottom; 
 
-    writeln("inside initializeHexBoard");
+void initializeHexBoard(HB)(HB h)
+{
+    // start at the bottom left corner of NDC window, drawing from left to right, bottom to top.
+
+    auto x = h.edge.left;      // NDC (Normalized Device Coordinates) start at -1.0
+    auto y = h.edge.bottom;
  
     foreach(row; 0..(h.rows))
     {
         foreach(col; 0..(h.columns))
-        { 
-            //h.hexes[row][col].points.ndc = defineHexVertices!(HB, typeof(HB.floatingType),typeof(HB.integerType) (h, x, y); /+, perpendicular, diameter, 
-            //                                                 apothem, halfRadius, radius+/
-
+        {
             h.defineHexVertices(x, y, row, col);
-
-            //h.hexes[row][col].center.ndc = defineHexCenter(x, y, apothem, radius);
 
             h.defineHexCenters(x, y, row, col);
 
-            //h.hexes[row][col].texturePoint.ndc = defineTextureStartingPoint(x, y, perpendicular);
-            
             h.defineTextureStartingPoints(x, y, row, col);
 
             if (col.isEven)
@@ -408,11 +399,10 @@ void initializeHexBoard(HB)(HB h)
         {
             y -= h.ndc.apothem;
         }
-            
+
         y += h.ndc.perpendicular;
-    }  
-} 
-   
+    }
+}
 
     // screenWidth and screeHeight are not know by struct HexBoard
     // this function can only be called from outside of this module
@@ -447,6 +437,10 @@ void convertNDCoordsToScreenCoords(HB, I)(HB h, I screenWidth, I screenHeight)
     {
         foreach(c; 0..(h.columns))
         {    
+            auto centerNDC = h.hexes[r][c].center.ndc;  // make func call easier to read
+                
+            h.hexes[r][c].center.sc = convertPointFromNDCtoSC(centerNDC, screenWidth, screenHeight);
+            
             foreach(v; 0..6)
             {
                 auto NDCx = h.hexes[r][c].points.ndc[v].x;  // makes following statements more legable
@@ -456,9 +450,9 @@ void convertNDCoordsToScreenCoords(HB, I)(HB h, I screenWidth, I screenHeight)
                 h.hexes[r][c].points.sc[v].y = roundTo!(I)((1.0 - NDCy) * 0.5 * screenHeight);
             }
                 
-            auto temp = h.hexes[r][c].texturePoint.ndc;  // make func call easier to read
+            auto texturePointNDC = h.hexes[r][c].texturePoint.ndc;  // make func call easier to read
                 
-            //h.hexes[r][c].texturePoint.sc = convertPointFromNDCtoSC(temp, screenWidth, screenHeight);
+            h.hexes[r][c].texturePoint.sc = convertPointFromNDCtoSC(texturePointNDC, screenWidth, screenHeight);
         }
     }
 }
