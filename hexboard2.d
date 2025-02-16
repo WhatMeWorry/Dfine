@@ -304,6 +304,7 @@ void displayHexBoardDataSC(HB)(HB h)
     }
 }
 
+
 void displayHexBoardDataNDC(HB)(HB h)
 {
     writeln("===== Values are in Normalized Screen Coordinates =====");
@@ -322,12 +323,9 @@ void displayHexBoardDataNDC(HB)(HB h)
 }
 
 
-void displayHexBoardDataSCandNDC(HB)(HB h)
+void displayHexBoardDataNDCandSC(HB)(HB h)
 {
-/+
-    writeln("typeof(h).stringof = ", typeof(h).stringof);     
-
-    writeln("===== Values are in Normalized Device Coordinates =====");
+    writeln("===== Values are in NDC and SC coordinates =====");
     foreach(r; 0..(h.rows))
     {
         foreach(c; 0..(h.columns))
@@ -335,12 +333,12 @@ void displayHexBoardDataSCandNDC(HB)(HB h)
             writeln("hexes[", r, "][", c, "].center ", h.hexes[r][c].center );
             foreach(p; 0..6)
             {
-                writeln("hexes(r,c) ", h.hexes[r][c].points.ndc[p] );
-                writeln("hexes(r,c) ", h.hexes[r][c].points.sc[p] );
+                writeln("hexes(", r, ",", c, ") = ", h.hexes[r][c].points.ndc[p],
+                                              "   ", h.hexes[r][c].points.sc[p]); 
             }
+            writeln("hexes texture Point = ", h.hexes[r][c].texturePoint);
         }
     }
-+/
 }
 
 
