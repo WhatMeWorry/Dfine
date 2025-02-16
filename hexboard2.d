@@ -111,18 +111,11 @@ Point2D!(float)[6] defineHexVertices(float x, float y, float perpendicular, floa
     points[5].y = y + apothem;
     
     return points;
-} 
-
-//void initializeHexBoard(HB)(HB h)
-//Point2D!(float)[6] defineHexVertices(HB h)(float x, float y, float perpendicular, float diameter, 
-//                            float apothem, float halfRadius, float radius)
+}
 
 
 void defineHexVertices(HB, F, I)(HB h, F x, F y, I r, I c)
 {   
-    writeln("======================================================================================");
-    writeln("x = ", x, " y = ", y);
-    
     h.hexes[r][c].points.ndc[0].x = x + h.ndc.halfRadius;
     h.hexes[r][c].points.ndc[0].y = y;    
 
@@ -140,18 +133,18 @@ void defineHexVertices(HB, F, I)(HB h, F x, F y, I r, I c)
     
     h.hexes[r][c].points.ndc[5].x = x;
     h.hexes[r][c].points.ndc[5].y = y + h.ndc.apothem;
-
-} 
-
+}
 
 
-void defineHexCenter(HB, F, I)(HB h, F x, F y, I r, I c)
+
+void defineHexCenters(HB, F, I)(HB h, F x, F y, I r, I c)
 {
     h.hexes[r][c].center.ndc.x = x + h.ndc.radius;
     h.hexes[r][c].center.ndc.y = y + h.ndc.apothem;
-} 
+}
 
 
+/+
 Point2D!(float) defineHexCenter(float x, float y, float apothem, float radius)
 {
     Point2D!(float) center;
@@ -160,10 +153,11 @@ Point2D!(float) defineHexCenter(float x, float y, float apothem, float radius)
     center.y = y + apothem;
     
     return center;
-} 
+}
++/
 
 
-void defineTextureStartingPoint(HB, F, I)(HB h, F x, F y, I r, I c)
+void defineTextureStartingPoints(HB, F, I)(HB h, F x, F y, I r, I c)
 {
     h.hexes[r][c].texturePoint.ndc.x = x;
     h.hexes[r][c].texturePoint.ndc.y = y + h.ndc.perpendicular;
@@ -269,25 +263,8 @@ struct HexBoard2(F,I)
 
 }
 
-    
-void displayHexBoardData(HB)(HB h)
-{
-    writeln("typeof(h).stringof = ", typeof(h).stringof);     
 
-    writeln("===== Values are in Normalized Device Coordinates =====");
-    foreach(r; 0..(h.rows))
-    {
-        foreach(c; 0..(h.columns))
-        {
-            writeln("hexes[", r, "][", c, "].center ", h.hexes[r][c].center );
-            foreach(p; 0..6)
-            {
-                writeln("hexes(r,c) ", h.hexes[r][c].points.ndc[p] );
-                writeln("hexes(r,c) ", h.hexes[r][c].points.sc[p] );
-            }
-        }
-    }
-}    
+
 
 
     
@@ -310,7 +287,7 @@ whether they're member functions or free functions.
 +/    
     
 
-void displayHexBoardScreenCoordinates(HB)(HB h)
+void displayHexBoardDataSC(HB)(HB h)
 {
     writeln("===== Values are in Screen Coordinates =====");
     foreach(r; 0..(h.rows))
@@ -327,9 +304,44 @@ void displayHexBoardScreenCoordinates(HB)(HB h)
     }
 }
 
+void displayHexBoardDataNDC(HB)(HB h)
+{
+    writeln("===== Values are in Normalized Screen Coordinates =====");
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {
+            writeln("hexes[", r, "][", c, "].center.ndc ", h.hexes[r][c].center.ndc );
+            foreach(p; 0..6)
+            {
+                writeln("hexes(", r, ",", c, ") = ", h.hexes[r][c].points.ndc[p] ); 
+            }
+            writeln("hexes texture Point = ", h.hexes[r][c].texturePoint.ndc);
+        }
+    }
+}
 
 
+void displayHexBoardDataSCandNDC(HB)(HB h)
+{
+/+
+    writeln("typeof(h).stringof = ", typeof(h).stringof);     
 
+    writeln("===== Values are in Normalized Device Coordinates =====");
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {
+            writeln("hexes[", r, "][", c, "].center ", h.hexes[r][c].center );
+            foreach(p; 0..6)
+            {
+                writeln("hexes(r,c) ", h.hexes[r][c].points.ndc[p] );
+                writeln("hexes(r,c) ", h.hexes[r][c].points.sc[p] );
+            }
+        }
+    }
++/
+}
 
 
 
@@ -371,15 +383,15 @@ void initializeHexBoard(HB)(HB h)
             //h.hexes[row][col].points.ndc = defineHexVertices!(HB, typeof(HB.floatingType),typeof(HB.integerType) (h, x, y); /+, perpendicular, diameter, 
             //                                                 apothem, halfRadius, radius+/
 
-            defineHexVertices(h, x, y, row, col);
+            h.defineHexVertices(x, y, row, col);
 
             //h.hexes[row][col].center.ndc = defineHexCenter(x, y, apothem, radius);
 
-            defineHexCenter(h, x, y, row, col);
+            h.defineHexCenters(x, y, row, col);
 
             //h.hexes[row][col].texturePoint.ndc = defineTextureStartingPoint(x, y, perpendicular);
             
-            defineTextureStartingPoint(h, x, y, row, col);
+            h.defineTextureStartingPoints(x, y, row, col);
 
             if (col.isEven)
             {
