@@ -460,8 +460,10 @@ void convertNDCoordsToScreenCoords(HB, I)(HB h, I screenWidth, I screenHeight)
 
 
 //Point2D!(I) convertPointFromNDCtoSC(HB,F, I)(HB h, F ndc, I screenWidth, I screenHeight)
+/+
 void convertNDClengthsToSClengths(HB, I)(HB h, I screenWidth, I screenHeight)
 {
+    writeln("****************************************************");
     auto screenCoordinatesLength = 2.0;  // from -1.0 to 1.0
 
     auto perCentOfEntireLength = h.ndc.diameter / screenCoordinatesLength;
@@ -472,9 +474,29 @@ void convertNDClengthsToSClengths(HB, I)(HB h, I screenWidth, I screenHeight)
     h.sc.halfRadius    = roundTo!(I)(h.sc.radius   * 0.5);
 
     h.sc.perpendicular = roundTo!(I)(h.sc.diameter * 0.866 );
+    h.sc.apothem       = roundTo!(I)(h.sc.perpendicular * 0.5;
+    writeln("h.sc = ", h.sc);
     
 }
++/
  
+
+
+void convertLengthsFromNDCtoSC(HB, I)(ref HB h, I screenWidth, I screenHeight)
+{
+    auto NDCfullWidth = 2.0;  // from -1.0 to 1.0
+
+    auto perCentOfEntireLength = h.ndc.diameter / NDCfullWidth;
+        
+    h.sc.diameter      = roundTo!(I)(perCentOfEntireLength * screenWidth);
+        
+    h.sc.radius        = roundTo!(I)(h.sc.diameter * 0.5);
+    h.sc.halfRadius    = roundTo!(I)(h.sc.radius   * 0.5);
+
+    h.sc.perpendicular = roundTo!(I)(h.sc.diameter * 0.866 );
+    h.sc.apothem       = roundTo!(I)(h.sc.perpendicular * 0.5);
+
+}
 
  
 /+
@@ -501,7 +523,6 @@ void convertNDClengthsToSClengths(HB, I)(HB h, I screenWidth, I screenHeight)
 Point2D!(I) convertPointFromNDCtoSC(F, I)(F ndc, I screenWidth, I screenHeight)
 {
     Point2D!(I) sc;
-    //I sc;
 
     sc.x = roundTo!(I)((ndc.x + 1.0) * 0.5 * screenWidth);
     sc.y = roundTo!(I)((1.0 - ndc.y) * 0.5 * screenHeight);
@@ -723,9 +744,9 @@ void displayHexTextures(HB)(HB h)
     {
         foreach(c; 0..(h.columns))
         {
-            foreach(tex; h.hexes[r][c].textures)
+            foreach(texture; h.hexes[r][c].textures)
             {
-                if (tex.ptr != null)
+                if (texture.ptr != null)
                 {
                     SDL_Rect dst;
                 
@@ -734,6 +755,8 @@ void displayHexTextures(HB)(HB h)
 
                     dst.w = h.sc.diameter;
                     dst.h = h.sc.perpendicular;
+                    
+                    writeln("dst = ", dst);
 
                     /+
                     SDL_RenderCopy(SDL_Renderer* renderer, DL_Texture* texture,
@@ -747,9 +770,9 @@ void displayHexTextures(HB)(HB h)
                                               itself, the texture will be stretched according to this SDL_Rect.
                     +/
                     
-                    SDL_RenderCopy( h.renderer, tex.ptr, null, &dst );
+                    SDL_RenderCopy( h.renderer, texture.ptr, null, &dst );
                                 // Update window
-                    // SDL_RenderPresent( renderer );  // DO OUTSIDE OF LOOP!!!
+                    SDL_RenderPresent( h.renderer );  // DO OUTSIDE OF LOOP!!!
                 }
             }
         }

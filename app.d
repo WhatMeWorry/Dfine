@@ -229,8 +229,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 500;
     g.sdl.screenHeight = 500;
 
-    uint rows = 2;
-    uint cols = 2;
+    uint rows = 7;
+    uint cols = 7;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Direction.horizontal);
 
@@ -249,8 +249,10 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     writeAndPause("==== NDC converted to SC values ====");
 
+    h2.convertLengthsFromNDCtoSC(g.sdl.screenWidth, g.sdl.screenHeight);
 
-    h2.convertNDClengthsToSClengths(g.sdl.screenWidth, g.sdl.screenHeight);
+    
+    writeln("h2.sc = ", h2.sc);
 
     //h2.displayHexBoardDataNDC();
     
@@ -279,11 +281,13 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     //h.drawHexBoard;
     h2.drawHexBoard;
+    
+    h2.setHexboardTexturesAndTerrain(g);
 
     //h.displayHexTextures();
     h2.displayHexTextures();
 
-    //writeAndPause("after displayHexTextures");
+    writeAndPause("after displayHexTextures");
 
     // https://thenumb.at/cpp-course/sdl2/03/03.html
 
