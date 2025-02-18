@@ -1,4 +1,24 @@
 
+module hexboard2;
+
+
+import std.conv: roundTo, to;
+import std.stdio: writeln, readf;
+import core.stdc.stdlib: exit;
+import std.range;
+import std.random;
+import bindbc.sdl;
+import std.math.rounding: floor;
+import std.math.algebraic: abs;
+import app;
+import std.string;
+import hex;
+import textures.texture;
+import a_star.spot;
+import hexmath;
+import redblacktree : Location;
+import windows.simple_directmedia_layer;
+
 
 /+
 import std.stdio;
@@ -39,30 +59,6 @@ int
 
 
 
-module hexboard2;
-
-
-import std.conv: roundTo, to;
-import std.stdio: writeln, readf;
-import core.stdc.stdlib: exit;
-import std.range;
-import std.random;
-
-import bindbc.sdl;
-
-import std.math.rounding: floor;
-import std.math.algebraic: abs;
-
-import app;
-import std.string;
-import hex;
-
-import textures.texture;
-import a_star.spot;
-import hexmath;
-import redblacktree : Location;
-
-import windows.simple_directmedia_layer;
 
 
 
@@ -74,43 +70,18 @@ struct Edges(F)
     F right;
 }
 
-struct MouseClick
-{
-    Point2D!(float) ndc;  // normalized device coordinates 
-    Point2D!(int)   sc;   // screen coordinates
-}
 
-struct SelectedHex
+struct MouseClick(F,I)
 {
-    int row;
-    int col;
+    Point2D!(F) ndc;  // normalized device coordinates 
+    Point2D!(I) sc;   // screen coordinates
 }
 
 
-Point2D!(float)[6] defineHexVertices(float x, float y, float perpendicular, float diameter, 
-                                     float apothem, float halfRadius, float radius)
+struct SelectedHex(I)
 {
-    Point2D!(float)[6] points;
-    
-    points[0].x = x + halfRadius;
-    points[0].y = y;    
-
-    points[1].x = x + halfRadius + radius;
-    points[1].y = y;    
-        
-    points[2].x = x + diameter;
-    points[2].y = y + apothem;    
-    
-    points[3].x = x + halfRadius + radius;
-    points[3].y = y + perpendicular;    
-    
-    points[4].x = x + halfRadius;
-    points[4].y = y + perpendicular;
-    
-    points[5].x = x;
-    points[5].y = y + apothem;
-    
-    return points;
+    I row;
+    I col;
 }
 
 
@@ -210,7 +181,7 @@ struct HexBoard2(F,I)
         //this.initializeHexBoard();  // either one works
         initializeHexBoard(this);
         
-        //addNeighbors();
+        this.addNeighbors();
         
         mouseClick.ndc.x = 0.0;
         mouseClick.ndc.y = 0.0;
@@ -239,9 +210,9 @@ struct HexBoard2(F,I)
     
     SDL_Renderer* renderer;
 
-    SelectedHex selectedHex; 
+    SelectedHex!(I) selectedHex; 
 
-    MouseClick mouseClick;
+    MouseClick!(F,I) mouseClick;
 
     void setRenderOfHexboard(SDL_Renderer *rend)
     {
@@ -697,7 +668,7 @@ void validateHexboard(HB)(HB h)
 
 
 
-/+
+/+     DELETE IF STARTS WORKING IN SPOT.D
 const uint N  = 0;  // North
 const uint NE = 1;  // North-East
 const uint SE = 2;  // South-East
@@ -706,11 +677,11 @@ const uint SW = 4;  // South-West
 const uint NW = 5;  // North-West
 
 
-void addNeighbors()
+void addNeighbors(HB)(HB h)
 {
-    foreach(int r; 0..rows)          // Note: rows and columns are defined as uint 
+    foreach(int r; 0..(h.rows))          // Note: rows and columns are defined as uint 
     {                                    // this caused problems with < 0 boundary checking
-        foreach(int c; 0..columns)   // causing -1 to be 4294967295
+        foreach(int c; 0..(h.columns))   // causing -1 to be 4294967295
         {                                // had to declare the local r and c as ints
             foreach(int i; 0..6)
             {

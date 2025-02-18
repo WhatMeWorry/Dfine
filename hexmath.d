@@ -16,12 +16,12 @@ dmd -main -unittest -cov hexmath.d
 creates a hexmath.lst file with code coverage statistics
 +/
 
-bool isOdd(uint value)
+bool isOdd(I)(I value)
 {
     return(!(value % 2) == 0); 
 }
 
-bool isEven(uint value)
+bool isEven(I)(I value)
 {
     return((value % 2) == 0);   
 }

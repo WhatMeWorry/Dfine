@@ -9,6 +9,7 @@ import std.string;
 import core.stdc.stdlib;  // for exit()
 
 import hexboard;
+import hexmath;
 import app;
 import textures.texture;
 import distance;
@@ -16,6 +17,7 @@ import redblacktree;
 import std.container : RedBlackTree;
 
 import windows.simple_directmedia_layer;
+
 
 void debugSpots( ref HexBoard hB )
 {
@@ -87,19 +89,6 @@ ulong c;
 
 
 
-/+
-bool isOdd(uint value)
-{
-    return(!(value % 2) == 0); 
-}
-
-bool isEven(uint value)
-{
-    return((value % 2) == 0);
-}
-+/
-
-
 
 /+
 enum Dir 
@@ -113,7 +102,7 @@ enum Dir
 } 
 +/
 
-/+
+
 
 const uint N  = 0;  // North
 const uint NE = 1;  // North-East
@@ -123,17 +112,18 @@ const uint SW = 4;  // South-West
 const uint NW = 5;  // North-West
 
 
-void addNeighbors(ref HexBoard h)
+void addNeighbors(HB)(ref HB h)
 {
-    foreach(int r; 0..(h.rows))          // Note: rows and columns are defined as uint 
-    {                                    // this caused problems with < 0 boundary checking
-        foreach(int c; 0..(h.columns))   // causing -1 to be 4294967295
-        {                                // had to declare the local r and c as ints
-            foreach(int i; 0..6)
+    foreach(r; 0..(h.rows))          // Note: rows and columns are defined as uint 
+    {                                // this caused problems with < 0 boundary checking
+        foreach(c; 0..(h.columns))   // causing -1 to be 4294967295
+        {                            // had to declare the local r and c as ints
+            foreach(i; 0..6)
             {
                 h.spots[r][c].neighbors[i].r = -1;
                 h.spots[r][c].neighbors[i].c = -1;
             }
+            
             if (c.isEven)
             {
                 if (r+1 <= h.lastRow)                     // north
@@ -207,7 +197,6 @@ void addNeighbors(ref HexBoard h)
     }
 }
 
-+/
 
 
 
