@@ -237,7 +237,11 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     //HexBoard h = HexBoard(hexWidth, rows, cols);
     
     //auto h2 = HexBoard2!(float,uint)(hexWidth, rows, cols);
-    auto h2 = HexBoard2!(double,int)(hexWidth, rows, cols);
+    
+    
+    //auto h2 = HexBoard2!(real,  int)(hexWidth, rows, cols);   // WORKS!
+    //auto h2 = HexBoard2!(double,int)(hexWidth, rows, cols); // WORKS!
+    auto h2 = HexBoard2!(float, int)(hexWidth, rows, cols);  // WORKS!
 
     h2.displayHexBoardDataNDC();
 
@@ -398,13 +402,12 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                 case SDL_MOUSEBUTTONDOWN:
                     if( event.button.button == SDL_BUTTON_LEFT )
                     {
-                        //SDL_GetMouseState(&h.mouseClick.sc.x, &h.mouseClick.sc.y);
-                        SDL_GetMouseState(&h2.mouseClick.sc.x, &h2.mouseClick.sc.y);
+                        SDL_GetMouseState(cast (int *) &h2.mouseClick.sc.x, cast (int *) &h2.mouseClick.sc.y);
 
                         writeln(h2.mouseClick.sc.x, ", ", h2.mouseClick.sc.y);
-                                
+
                         // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
-                                
+
                         //h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
                         h2.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
 
