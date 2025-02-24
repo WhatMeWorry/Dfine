@@ -73,3 +73,52 @@ void resizeRect(SDL_Rect &pos, int w, int h)
   pos.w = w;
   pos.h = h;
 }
+
+
+
+// typeof is a way to specify a type based on the type of an expression. For example:
+
+void func(int i)
+{
+    typeof(i) j;       // j is of type int
+    typeof(3 + 6.0) x; // x is of type double
+    typeof(1)* p;      // p is of type pointer to int
+    int[typeof(p)] a;  // a is of type int[int*]
+
+    writeln(typeof('c').sizeof); // prints 1
+    double c = cast(typeof(1.0))j; // cast j to double
+}
+
+
+//===========================================================
+
+import std.stdio;
+
+class D
+{
+    this() { }
+    ~this() { }
+    void foo() { }
+    int foo(int) { return 2; }
+}
+
+void main()
+{
+    D d = new D();
+
+    foreach (t; __traits(getVirtualMethods, D, "foo"))
+        writeln("1 ",typeid(typeof(t)));
+
+    alias b = typeof(__traits(getVirtualMethods, D, "foo"));
+    foreach (t; b)
+        writeln("2 ",typeid(t));
+
+    auto i = __traits(getVirtualMethods, d, "foo")[1](1);
+        writeln("3 ",i);
+}
+
+//===========================================================
+
+
+
+

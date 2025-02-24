@@ -208,6 +208,9 @@ struct HexBoard2(F,I)
     Spot[][] spots;  // each hex board has-a 2 dimensional array of path properties
                      // think of this a being superimposed over the hexes array.
     
+    F floatType;
+    I integerType;
+    
     SDL_Renderer* renderer;
 
     SelectedHex!(I) selectedHex; 
@@ -496,29 +499,30 @@ void clearHexBoard(HB)(HB h)
 
 
 
-/+
-    void setHexTexture(Globals g, Location hex, Ids id)
-    {
-        hexes[hex.r][hex.c].textures ~= g.textures[id];
-    }
+
+void setHexTexture(HB,T)(ref HB h, Globals g, T hex, Ids id)
+{
+    h.hexes[hex.r][hex.c].textures ~= g.textures[id];
+}
 
 
-    void setHexRowTexture(Globals g, int row, Ids id)  
+void setHexRowTexture(HB,I)(ref HB h, Globals g, I row, Ids id)  
+{
+    foreach(c; 0..(h.columns))
     {
-        foreach(c; 0..columns)
-        {
-            hexes[row][c].textures ~= g.textures[id]; 
-        }
+        h.hexes[row][c].textures ~= g.textures[id]; 
     }
+}
 
-    void setHexColTexture(Globals g, int col, Ids id)  
+
+void setHexColTexture(HB,I)(ref HB h, Globals g, I col, Ids id)  
+{
+    foreach(r; 0..(h.rows))
     {
-        foreach(r; 0..rows)
-        {
-            hexes[r][col].textures ~= g.textures[id]; 
-        }
+        h.hexes[r][col].textures ~= g.textures[id]; 
     }
-+/
+}
+
 
 void displayHexTextures(HB)(HB h)
 {
@@ -538,7 +542,7 @@ void displayHexTextures(HB)(HB h)
                     dst.w = h.sc.diameter;
                     dst.h = h.sc.perpendicular;
                     
-                    writeln("dst = ", dst);
+                    //writeln("dst = ", dst);
 
                     /+
                     SDL_RenderCopy(SDL_Renderer* renderer, DL_Texture* texture,

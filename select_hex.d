@@ -66,20 +66,21 @@ import hex;
 //            opposite         
 
 
-bool clickedInSmallTriangle(Point2D!(float) mouseClick, Point2D!(float) hexCenter, float radius)
+//bool clickedInSmallTriangle(Point2D!(float) mouseClick, Point2D!(float) hexCenter, float radius)
+bool clickedInSmallTriangle(F)(Point2D!(F) mouseClick, Point2D!(F) hexCenter, F radius)
 {
-    immutable float tanOf60  =  1.7320508;
-    immutable float tanOf300 = -1.7320508;
+    immutable F tanOf60  =  1.7320508;
+    immutable F tanOf300 = -1.7320508;
 
-    float leftPointX = hexCenter.x - radius;
-    float leftPointY = hexCenter.y;    
+    F leftPointX = hexCenter.x - radius;
+    F leftPointY = hexCenter.y;    
 
-    float adjacent = mouseClick.x - leftPointX;
-    float opposite = mouseClick.y - leftPointY;
+    F adjacent = mouseClick.x - leftPointX;
+    F opposite = mouseClick.y - leftPointY;
     
     // tan(theta) = opposite / adjacent     
     
-    float angle = opposite / adjacent;  // opposite is positive for hex sides /  (leaning Southwest to Northeast)
+    F angle = opposite / adjacent;  // opposite is positive for hex sides /  (leaning Southwest to Northeast)
                                         // opposite is negative for hex sides \  (leaning Northwest to Southeast)
     if (angle >= 0.0)            
         return (angle > tanOf60);       // angle is positive
@@ -94,7 +95,8 @@ bool clickedInSmallTriangle(Point2D!(float) mouseClick, Point2D!(float) hexCente
 // coordinate pair consisting of an x and y value of where the mouse was clicked  
 
 
-bool getHexMouseClickedOn( ref HexBoard h)
+//bool getHexMouseClickedOn( ref HexBoard h)
+bool getHexMouseClickedOn(HB)(ref HB h)
 {
     //writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
     //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
@@ -119,13 +121,16 @@ bool getHexMouseClickedOn( ref HexBoard h)
     //   |Lower Left |Lower Right| Lower Left|Lower Right| Lower Left| Lower Right
     //   |__\________|/__________|__\________|/__________|__\________|/__    
     
-    float offsetFromBottom = h.mouseClick.ndc.y - (-1.0);
+    alias F = typeof(h.floatType);
+    alias I = typeof(h.integerType);
     
-    uint gridRow = roundTo!uint(floor(offsetFromBottom / h.apothem));
+    F offsetFromBottom = h.mouseClick.ndc.y - (-1.0);
+    
+    I gridRow = roundTo!(I)(floor(offsetFromBottom / h.ndc.apothem));
 
-    float offsetFromLeft = h.mouseClick.ndc.x - (-1.0);
+    F offsetFromLeft = h.mouseClick.ndc.x - (-1.0);
 
-    uint gridCol = roundTo!uint(floor(offsetFromLeft / (h.radius + h.halfRadius)));
+    I gridCol = roundTo!(I)(floor(offsetFromLeft / (h.ndc.radius + h.ndc.halfRadius)));
 
 
     if (h.mouseClick.ndc.x > h.edge.right)  // clicked to the right of the hex board's right edge
@@ -179,7 +184,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
     int hexRow = h.invalid;
     int hexCol = h.invalid;
 
-    Point2D!(float) hexCenter;
+    Point2D!(F) hexCenter;
     
     //================================= UL ========================================= 
   
@@ -190,7 +195,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
 
         hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
-        if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
+        if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.ndc.radius))
         {
             if(hexCol == 0)  // corner case if select small triangle on far left of board  
             {  
@@ -220,7 +225,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
  
             hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
-            if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
+            if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.ndc.radius))
             {
                 hexRow += 1;
                 hexCol -= 1;
@@ -233,9 +238,9 @@ bool getHexMouseClickedOn( ref HexBoard h)
 
             hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
-            hexCenter.y = (hexCenter.y - h.perpendicular);
+            hexCenter.y = (hexCenter.y - h.ndc.perpendicular);
 
-            if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
+            if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.ndc.radius))
             {
                 hexCol -= 1;
             }
@@ -261,7 +266,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
  
         hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
-        if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
+        if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.ndc.radius))
         {
             hexCol -= 1;
         }
@@ -281,7 +286,7 @@ bool getHexMouseClickedOn( ref HexBoard h)
 
         hexCenter = h.hexes[hexRow][hexCol].center.ndc;
 
-        if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.radius))
+        if (clickedInSmallTriangle(h.mouseClick.ndc, hexCenter, h.ndc.radius))
         { 
             if (gridRow == 0 || gridCol == 0)  // degenerate case, clicked on left side or 
             {                                  // bottom of hexboard outside of any hex

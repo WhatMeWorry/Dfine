@@ -18,7 +18,6 @@ import std.container.rbtree;
 
 import std.stdio;
 
-
 struct Location   // holds a hex of a hexboard
 {
     int r;  // row of hexboard
