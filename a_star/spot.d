@@ -19,16 +19,16 @@ import std.container : RedBlackTree;
 import windows.simple_directmedia_layer;
 
 
-void debugSpots( ref HexBoard hB )
+void debugSpots(HB)(ref HB h)
 {
     //writeln("Spots = ");
-    foreach(i; 0..(hB.rows))
+    foreach(i; 0..(h.rows))
     {
-        foreach(j; 0..(hB.columns))
+        foreach(j; 0..(h.columns))
         {
         /+
-            writeln(hB.spots[i][j].location, "  f g h = ", hB.spots[i][j].f, " ", hB.spots[i][j].g, " ", 
-                    hB.spots[i][j].h, "  terrain = ", hB.spots[i][j].terrainCost, "  previous = ", hB.spots[i][j].previous);
+            writeln(h.spots[i][j].location, "  f g h = ", h.spots[i][j].f, " ", h.spots[i][j].g, " ", 
+                    h.spots[i][j].h, "  terrain = ", h.spots[i][j].terrainCost, "  previous = ", h.spots[i][j].previous);
         +/
         }
     }
@@ -326,11 +326,11 @@ bool isNotEmpty(uint[Location] associativeArray)
 }
 
 
-Location[] getNeighbors(Location loc, ref HexBoard hB)
+Location[] getNeighbors(HB)(Location loc, ref HB h)
 {
     Location[] locs;
 
-    Location[6] neighbors = hB.spots[loc.r][loc.c].neighbors;
+    Location[6] neighbors = h.spots[loc.r][loc.c].neighbors;
 
     foreach(n; neighbors)
     {
@@ -341,16 +341,16 @@ Location[] getNeighbors(Location loc, ref HexBoard hB)
 }
 
 
-Node[] getAdjNeighbors(Location home, ref HexBoard hB)
+Node[] getAdjNeighbors(HB)(Location home, ref HB h)
 {
     Node[] nodes;
     Node node;
 
-    writeln("hB.spots[home.r][home.c].neighbors = ", hB.spots[home.r][home.c].neighbors);
+    writeln("h.spots[home.r][home.c].neighbors = ", h.spots[home.r][home.c].neighbors);
 
-    //Node[6] neighbors = hB.spots[home.r][home.c].neighbors;
+    //Node[6] neighbors = h.spots[home.r][home.c].neighbors;
     
-    foreach(n; hB.spots[home.r][home.c].neighbors)
+    foreach(n; h.spots[home.r][home.c].neighbors)
     {
         if (n != invalidLoc)  // strip out invalid neighbors (edge of hexboard)
         {
@@ -366,7 +366,7 @@ Node[] getAdjNeighbors(Location home, ref HexBoard hB)
 
 
 
-Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
+Location lowestFscore(HB)(ref ulong c, Location[] set, ref HB h)
 {
     Location min;
 
@@ -380,13 +380,13 @@ Location lowestFscore(ref ulong c, Location[] set, ref HexBoard hB)
     foreach(int i, s; set)
     {
         //writeln(" (", s.r, ",", s.c, ")");
-        if (hB.spots[s.r][s.c].f < hB.spots[min.r][min.c].f)
+        if (h.spots[s.r][s.c].f < h.spots[min.r][min.c].f)
         {
             min = s;
             c = i;
         }
     }
-    //writeln("lowest f score is (", min.r, ",", min.c, ") f = ", hB.spots[min.r][min.c].f);
+    //writeln("lowest f score is (", min.r, ",", min.c, ") f = ", h.spots[min.r][min.c].f);
     //writeln();
     return min;
 }
@@ -428,7 +428,7 @@ struct Node
 
 
 
-void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
+void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
 {
     Location[] open;    // open set contains nodes that need to be evaluated
     Location[] closed;  // closed set stores all nodes that have finished being evaluated. Don't need to revisit
@@ -446,7 +446,7 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
 
     Spot start;  // start is a full node, not just a location
 
-    start = hB.spots[begin.r][begin.c];
+    start = h.spots[begin.r][begin.c];
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
     start.h = heuristic(start.location, end);  // heuristic
@@ -456,7 +456,7 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
     //writeln("start.h = ", start.h);
     //writeln("start.f = ", start.f);
 
-    hB.spots[begin.r][begin.c] = start;
+    h.spots[begin.r][begin.c] = start;
 
     open ~= start.location;  // put the start node on the openList (leave its f at zero)
 
@@ -468,24 +468,24 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
 
         ulong c;
         writeln("open.length ", open.length);
-        current = lowestFscore(c, open, hB);  // find the node with the smallest f value.
+        current = lowestFscore(c, open, h);  // find the node with the smallest f value.
         writeln("open.length ", open.length);
 
         //writeln("lowest F score in openset CURRENT = ", current);
 
         if (current == end)
         {
-            Location here = hB.spots[end.r][end.c].location;
+            Location here = h.spots[end.r][end.c].location;
             while (here != invalidLoc)
             {
                 path ~= here;
-                here = hB.spots[here.r][here.c].previous;
+                here = h.spots[here.r][here.c].previous;
             }
 
             foreach( p; path)
             {
                 //writeln("p = ", p);
-                hB.setHexTexture(g, p, Ids.blackDot);
+                h.setHexTexture(g, p, Ids.blackDot);
             }
 
             return;
@@ -494,7 +494,7 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
         open = open.remove(c);  // remove the currentNode from the open
         closed ~= current;      // add the currentNode to the closed
 
-        Location[] neighbors = getNeighbors(current, hB);   // get neighbors of current and cull out the (-1,-1)
+        Location[] neighbors = getNeighbors(current, h);   // get neighbors of current and cull out the (-1,-1)
 
         // Time 32:15 in Coding Train Youtube video  all neighbors will be added to open set, 
         // but before we put them in the open set, we need to evaluate them
@@ -502,15 +502,15 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
-            Spot neighborSpot = hB.spots[neighbor.r][neighbor.c];
+            Spot neighborSpot = h.spots[neighbor.r][neighbor.c];
             //writeln();
             //writeln("neighbor = ", neighbor);
             //writeAndPause();
 
             if (closed.excludes(neighbor))  // only proceed with unevaluated neighbors
             {
-                uint currentG = hB.spots[current.r][current.c].g;
-                uint neighborG = hB.spots[neighbor.r][neighbor.c].terrainCost;
+                uint currentG = h.spots[current.r][current.c].g;
+                uint neighborG = h.spots[neighbor.r][neighbor.c].terrainCost;
                 uint neighborH = heuristic(neighbor, end);
 
                 //writeln("currentG, neighborG, neighborH = ", currentG, " ", neighborG, " ", neighborH);
@@ -536,15 +536,15 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
                     }
                 } 
 
-                hB.spots[neighbor.r][neighbor.c].g = tempG;
+                h.spots[neighbor.r][neighbor.c].g = tempG;
 
-                hB.spots[neighbor.r][neighbor.c].h = neighborH;
+                h.spots[neighbor.r][neighbor.c].h = neighborH;
 
-                hB.spots[neighbor.r][neighbor.c].f = tempG + neighborH;
+                h.spots[neighbor.r][neighbor.c].f = tempG + neighborH;
 
-                hB.spots[neighbor.r][neighbor.c].previous = current;
+                h.spots[neighbor.r][neighbor.c].previous = current;
 
-                //debugSpots( hB );
+                //debugSpots( h );
             }
         }
         //writeln("finished with neighbors for current");
@@ -563,7 +563,7 @@ void findShortestPath( ref HexBoard hB, Globals g, Location begin, Location end)
     //minPriorityQueue closed;
     
 
-void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Location end)
+void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location end)
 {
     // open set contains nodes that need to be evaluated
     // closed set contains all nodes that have finished being evaluated. Don't need to revisit
@@ -582,13 +582,13 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
 
     Node current; // current is the node in open having the lowest f score 
 
-    Spot start = hB.spots[begin.r][begin.c];  // start is a full node, not just a location
+    Spot start = h.spots[begin.r][begin.c];  // start is a full node, not just a location
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
     start.h = heuristic(start.location, end);  // heuristic
     start.f = start.g + start.h;
 
-    hB.spots[begin.r][begin.c] = start;
+    h.spots[begin.r][begin.c] = start;
  
     Node s = Node(start.location, start.f);
 
@@ -621,17 +621,17 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
 
         if (current.location == end)
         {
-            Location here = hB.spots[end.r][end.c].location;
+            Location here = h.spots[end.r][end.c].location;
             while (here != invalidLoc)
             {
                 path ~= here;
-                here = hB.spots[here.r][here.c].previous;
+                here = h.spots[here.r][here.c].previous;
             }
 
             foreach( p; path)
             {
                 //writeln("p = ", p);
-                hB.setHexTexture(g, p, Ids.blackDot);
+                h.setHexTexture(g, p, Ids.blackDot);
             }
 
             return;
@@ -642,7 +642,7 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
         closed.insert(current);
         closedAA[current.location] = current.f;
 
-        Node[] neighbors = getAdjNeighbors(current.location, hB);   // get neighbors of current and cull out the (-1,-1)
+        Node[] neighbors = getAdjNeighbors(current.location, h);   // get neighbors of current and cull out the (-1,-1)
 
         writeln("neighbors = ", neighbors);
 
@@ -652,7 +652,7 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
-            Spot neighborSpot = hB.spots[neighbor.location.r][neighbor.location.c];
+            Spot neighborSpot = h.spots[neighbor.location.r][neighbor.location.c];
             
             writeln("lookin at neighbor ", neighbor);
 
@@ -660,8 +660,8 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
             {
                 writeln("neighbor is not in closed set");
             
-                uint currentG = hB.spots[current.location.r][current.location.c].g;
-                uint neighborG = hB.spots[neighbor.location.r][neighbor.location.c].terrainCost;
+                uint currentG = h.spots[current.location.r][current.location.c].g;
+                uint neighborG = h.spots[neighbor.location.r][neighbor.location.c].terrainCost;
                 uint neighborH = heuristic(neighbor.location, end);
 
                 tempG = currentG + neighborG;
@@ -686,15 +686,15 @@ void findShortestPathRedBlack( ref HexBoard hB, Globals g, Location begin, Locat
                     }
                 } 
 
-                hB.spots[neighbor.location.r][neighbor.location.c].g = tempG;
+                h.spots[neighbor.location.r][neighbor.location.c].g = tempG;
                 
-                hB.spots[neighbor.location.r][neighbor.location.c].h = neighborH;
+                h.spots[neighbor.location.r][neighbor.location.c].h = neighborH;
 
-                hB.spots[neighbor.location.r][neighbor.location.c].f = tempG + neighborH;
+                h.spots[neighbor.location.r][neighbor.location.c].f = tempG + neighborH;
 
-                hB.spots[neighbor.location.r][neighbor.location.c].previous = current.location;
+                h.spots[neighbor.location.r][neighbor.location.c].previous = current.location;
 
-                //debugSpots( hB );
+                //debugSpots( h );
             }
         }
         writeln("finished with neighbors for current");

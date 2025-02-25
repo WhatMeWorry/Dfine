@@ -37,7 +37,6 @@ Or will this cause problems further down the road?
 module app;
 
 import hexboard;
-import hexboard2;
 import select_hex;
 import hexmath;
 
@@ -233,34 +232,25 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     uint cols = 7;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Direction.horizontal);
+    
+    
+    auto h = HexBoard!(real,  int)(hexWidth, rows, cols);   // WORKS!
+    //auto h = HexBoard!(double,int)(hexWidth, rows, cols); // WORKS!
+    //auto h = HexBoard!(float, int)(hexWidth, rows, cols);  // WORKS!
 
-    //HexBoard h = HexBoard(hexWidth, rows, cols);
-    
-    //auto h2 = HexBoard2!(float,uint)(hexWidth, rows, cols);
-    
-    
-    //auto h2 = HexBoard2!(real,  int)(hexWidth, rows, cols);   // WORKS!
-    //auto h2 = HexBoard2!(double,int)(hexWidth, rows, cols); // WORKS!
-    auto h2 = HexBoard2!(float, int)(hexWidth, rows, cols);  // WORKS!
-
-    h2.displayHexBoardDataNDC();
+    h.displayHexBoardDataNDC();
 
     //writeAndPause("==== HexBoard is only constructed with NDC values ====");
 
-    h2.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);
+    h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);
     
-    h2.displayHexBoardDataSC();
+    h.displayHexBoardDataSC();
 
     //writeAndPause("==== NDC converted to SC values ====");
 
-    h2.convertLengthsFromNDCtoSC(g.sdl.screenWidth, g.sdl.screenHeight);
+    h.convertLengthsFromNDCtoSC(g.sdl.screenWidth, g.sdl.screenHeight);
 
-    
-    writeln("h2.sc = ", h2.sc);
-
-    //h2.displayHexBoardDataNDC();
-    
-    //h2.displayHexBoardDataNDCandSC();
+    writeln("h.sc = ", h.sc);
 
     // https://github.com/BindBC/bindbc-sdl/issues/53   
 
@@ -273,7 +263,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     writeln("g = ", g);
     
     //h.setRenderOfHexboard(g.sdl.renderer);
-    h2.setRenderOfHexboard(g.sdl.renderer);
+    h.setRenderOfHexboard(g.sdl.renderer);
 
     g.textures = load_textures(g);
 
@@ -283,13 +273,11 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     writeln(g.textures);
 
-    //h.drawHexBoard;
-    h2.drawHexBoard;
+    h.drawHexBoard;
     
-    h2.setHexboardTexturesAndTerrain(g);
+    h.setHexboardTexturesAndTerrain(g);
 
-    //h.displayHexTextures();
-    h2.displayHexTextures();
+    h.displayHexTextures();
 
     //writeAndPause("after displayHexTextures");
 
@@ -347,8 +335,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         writeln("SDLK_DELETE used to just clear out all hex textures");
                         //h.clearHexBoard();
                         //h.drawHexBoard;
-                        h2.clearHexBoard();
-                        h2.drawHexBoard;
+                        h.clearHexBoard();
+                        h.drawHexBoard;
                     }
 
                     if( event.key.keysym.sym == SDLK_F3 )
@@ -357,12 +345,12 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         //executeShell("cls");
 
                         //h.setHexboardTexturesAndTerrain(g);
-                        h2.setHexboardTexturesAndTerrain(g);
+                        h.setHexboardTexturesAndTerrain(g);
 
                         writeln("after setHexboardTexturesAndTerrain");
 
                         //h.displayHexTextures();
-                        h2.displayHexTextures();
+                        h.displayHexTextures();
 
                         writeln("after displayHexTextures");
 
@@ -374,7 +362,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         //                                                microsecond
 
                         //h.validateHexboard();
-                        h2.validateHexboard();
+                        h.validateHexboard();
 
                         Location begin;
                         Location end;
@@ -382,17 +370,17 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         begin.c = 0;
                         //end.r = h.lastRow;
                         //end.c = h.lastColumn;
-                        end.r = h2.lastRow;
-                        end.c = h2.lastColumn;
+                        end.r = h.lastRow;
+                        end.c = h.lastColumn;
 
                         //findShortestPath( h, g, begin, end );
 
-                        ////findShortestPathRedBlack( h2, g, begin, end );
+                        ////findShortestPathRedBlack( h, g, begin, end );
 
                         writeln(watch.peek()); 
 
                         //h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
-                        h2.displayHexTextures();
+                        h.displayHexTextures();
                     }
 
                     SDL_RenderPresent( g.sdl.renderer );  // refresh screen for any keydown event
@@ -402,22 +390,22 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                 case SDL_MOUSEBUTTONDOWN:
                     if( event.button.button == SDL_BUTTON_LEFT )
                     {
-                        SDL_GetMouseState(cast (int *) &h2.mouseClick.sc.x, cast (int *) &h2.mouseClick.sc.y);
+                        SDL_GetMouseState(cast (int *) &h.mouseClick.sc.x, cast (int *) &h.mouseClick.sc.y);
 
-                        writeln(h2.mouseClick.sc.x, ", ", h2.mouseClick.sc.y);
+                        writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
 
                         // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
 
                         //h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
-                        h2.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
+                        h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
 
                         //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
-                        writeln(h2.mouseClick.ndc.x, ", ", h2.mouseClick.ndc.y);
+                        writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
 
-                        if (h2.getHexMouseClickedOn())
+                        if (h.getHexMouseClickedOn())
                         {
-                            alias I = typeof(h2.integerType);
-                            I x = h2.selectedHex.row;   I y = h2.selectedHex.col;
+                            alias I = typeof(h.integerType);
+                            I x = h.selectedHex.row;   I y = h.selectedHex.col;
                             
                             struct LocationT(I)   // holds a hex of a hexboard
                             {
@@ -434,15 +422,15 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             end.r = x; 
                             end.c = y;
                                     
-                            h2.setHexRowTexture(g, end.r, Ids.solidRed);
+                            h.setHexRowTexture(g, end.r, Ids.solidRed);
                                     
-                            h2.setHexColTexture(g, end.c, Ids.solidGreen);                                    
+                            h.setHexColTexture(g, end.c, Ids.solidGreen);                                    
 
-                            h2.setHexTexture(g, end, Ids.solidBlack);
+                            h.setHexTexture(g, end, Ids.solidBlack);
                             // h.selectedHex has end point
                                     //findShortestPathRedBlack( h, g, start, end );
 
-                            h2.displayHexTextures();
+                            h.displayHexTextures();
                                     
                             //writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
                                     
@@ -452,14 +440,14 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
  
                             Point2D!(I)[4] t;
                                    
-                            t[0].x = h2.hexes[x][y].points.sc[0].x;
-                            t[0].y = h2.hexes[x][y].points.sc[0].y; 
-                            t[1].x = h2.hexes[x][y].points.sc[1].x;
-                            t[1].y = h2.hexes[x][y].points.sc[1].y;
-                            t[2].x = h2.hexes[x][y].points.sc[3].x;
-                            t[2].y = h2.hexes[x][y].points.sc[3].y; 
-                            t[3].x = h2.hexes[x][y].points.sc[4].x;
-                            t[3].y = h2.hexes[x][y].points.sc[4].y;
+                            t[0].x = h.hexes[x][y].points.sc[0].x;
+                            t[0].y = h.hexes[x][y].points.sc[0].y; 
+                            t[1].x = h.hexes[x][y].points.sc[1].x;
+                            t[1].y = h.hexes[x][y].points.sc[1].y;
+                            t[2].x = h.hexes[x][y].points.sc[3].x;
+                            t[2].y = h.hexes[x][y].points.sc[3].y; 
+                            t[3].x = h.hexes[x][y].points.sc[4].x;
+                            t[3].y = h.hexes[x][y].points.sc[4].y;
 
                             //writeln(t);
                                     

@@ -7,315 +7,154 @@ import std.stdio: writeln, readf;
 import core.stdc.stdlib: exit;
 import std.range;
 import std.random;
-
 import bindbc.sdl;
-
 import std.math.rounding: floor;
 import std.math.algebraic: abs;
-
 import app;
 import std.string;
 import hex;
-
 import textures.texture;
 import a_star.spot;
 import hexmath;
 import redblacktree : Location;
-
 import windows.simple_directmedia_layer;
 
 
 /+
-From:  https://wiki.dlang.org/Dense_multidimensional_arrays
+import std.stdio;
 
+void main()
+{
+    struct HexBoard(F, I)
+    {
+        this(F d, I r, I c) {}
+        F f;
+        I i;
+    }
 
-Jagged arrays
-The simplest way is to use an array of arrays:
+    void displayHexBoard(HB)(HB h) {}  // This is so elegant!
+    
+    auto h = HexBoard!(float,uint)(.25, 3, 7);
+    auto h2 = HexBoard!(double,int)(.43, 6, 6);
+    
+    displayHexBoard(h);
+    displayHexBoard(h2);   
+    writeln(typeof(h).stringof);  
+    writeln(typeof(h.f).stringof);
+    writeln(typeof(h.i).stringof); 
+    
+    writeln(typeof(h2).stringof);  
+    writeln(typeof(h2.f).stringof);
+    writeln(typeof(h2.i).stringof);  
+}
 
-int[][] matrix = [
-    [ 1, 2, 3 ],
-    [ 4, 5, 6 ],
-    [ 7, 8, 9 ]
-];
-assert(matrix[0][0] == 1);
-assert(matrix[1][1] == 5);
+HexBoard!(float, uint)
+float
+uint
+HexBoard!(double, int)
+double
+int
 
-However, this approach is not so memory-efficient, because the outer array is a separate block of memory 
-containing references to the inner arrays. Array lookups require multiple indirections, so there is a 
-slight performance hit.
-
-Note that with the "jagged" array scheme, the "2nd dimensions" arrays may either all be allocated individually, 
-or simply be slices of a single very big 1D array. Both schemes are valid.
-
-A dynamic rectangular jagged array may be dynamically allocated at once using the multi-dim allocation syntax:
-
-Allocate a dynamic array containing 2 dynamic arrays containing 5 ints
-
-int[][] matrix = new int[][](5, 2);
-
-Note that in this example, the dimensions don't need to be known at compile time. Also note that this works for 
-any amount of dimensions.
-
-Static arrays
-D recognizes the inefficiency of jagged arrays, so when all the dimensions of the array are known at compile-time, 
-the array is automatically implemented as a dense array: the elements are packed together into a single memory block, 
-and array access requires only a single indexed lookup:
-
-// This is a dense array
-int[3][3] matrix = [
-    [ 1, 2, 3 ],
-    [ 4, 5, 6 ],
-    [ 7, 8, 9 ]
-];
-
-Dense arrays are fast and memory-efficient. But it requires that all array dimensions be known at compile-time, that is, 
-it must be a static array.
-
-Dense dynamic arrays
-
-There is a way to make multidimensional dynamic arrays dense, if only the last dimension needs to be variable, or if the 
-array is just too big to fit on stack:
-
-enum columns = 100;
-int rows = 100;
-double[columns][] gridInfo = new double[columns][](rows);
-
-This creates a multidimensional dynamic array with dense storage: all the array elements are contiguous in memory.
-
-https://web.cse.ohio-state.edu/~shen.94/5542/4-coordinates.pdf
-
-What are the visible coordinates range?
-
-For 2D drawing, the visible range of the display window is from [-1,-1] to [1,1] (for 3D, the z is also
-from -1 to 1, but we will talk about it later)
-
-In other words, you need to transform your points to this range so that they will be visible. This is 
-called “Normalized Device Coordinate (NDC) system 
-
-But how to map the NDC to the display window?
-
-A pixel in a window is referenced as two integers (i,j)
-This is called the screen coordinate (SC) system.
-
-GLFW and SDL starts numbering the pixels from the left top corner of the window.
-
-From NDC to SC
-
-Just do a linear mapping from [-1,-1] x [1,1] to [0,0] x [Imax, Jmax]
-That is, assume (x,y) is in NDC, (i,j) is in SC, then
-i = (x – (-1))/2.0 * Imax
-j = (y – (-1))/2.0 * Jmax
-
-https://www.gamedev.net/forums/topic/685104-ndc-to-pixel-space/
-
-I used mathematics and my conclusion was:
-
-From SC to NDC
-
-float pixelX = (NDCx + 1.0f) * 0.5 * screenWidth;
-float pixelY = (1.0f - NDCy) * 0.5 * screenHeight;
-
-when NDCx is -1 we get 0 and when NDCx is  1 we get screenWidth
-
-when NDCy is  1 we get 0 and when NDCy is -1 we get screenHeight
-+/
-
-/+
-     CARTESIAN COORDINATES
-                                   
-     + (0.0, maxY)            
-     |
-     |
-     |
-     |
-     |
-     |
-     |
-     |
-     |              (maxX, 0.0)                  
-     +-------------------+ 
- (0.0,0.0)
-
-
-     NORMALIXED DEVICE COORDINATES (NDC)
-
-Normalized device coordinates (-1, -1) is at the lower-left corner 
-while (+1, +1) is at the top-right 
-
-                     (1.0,1.0)
-     +-------------------+
-     |         |         |
-     |                   |
-     |         |         |
-     |                   |
-     | - - - (0.0) - - - |
-     |                   |
-     |         |         |
-     |                   |
-     |         |         |
-     +-------------------+ 
-(-1.0,-1.0)
-
-
-     SCREEN COORDINATES (SC)
-
-SDL coordinates, like most graphic engine coordinates, start at the top left corner of 
-the screen/window. The more you go down the screen the more Y increases and as you go 
-across to the right the X increases.
-
-   (0,0)
-     +-------------------+
-     |                   |
-     |                   |
-     |                   |
-     |                   |
-     |                   |
-     |                   |
-     |                   |
-     |                   |
-     |                   | 
-     |                   |
-     +-------------------+ 
-                (maxWidth, maxHeight)
 +/
 
 
-/+
-struct D2_NDC  // normalized device coordinates 2d point
-{
-    float x;
-    float y; 
-}
-
-struct D2_SC   // screen cordinates 2d point
-{
-    int x;
-    int y;
-}
 
 
-struct D2_DUAL  // same point but in different units
-{
-    D2_NDC ndc; // normalized device coordinates
-    D2_SC  sc;  // screen coordinates
-}
-+/
 
-struct Edges
+
+struct Edges(F)
 {                // This is the hex board edges, not the window's and is in NDC units
-    float top;   // The hex board can be smaller, larger or identical to the window size
-    float bottom; 
-    float left;
-    float right;
-}
-
-struct MouseClick
-{
-    Point2D!(float) ndc;  // normalized device coordinates 
-    Point2D!(int)   sc;   // screen coordinates
-}
-
-struct SelectedHex
-{
-    int row;
-    int col;
+    F top;   // The hex board can be smaller, larger or identical to the window size
+    F bottom; 
+    F left;
+    F right;
 }
 
 
-// x, y is the lower left corner of the rectangle touching all vertices
-
-Point2D!(float)[6] defineHexVertices(float x, float y, float perpendicular, float diameter, 
-                            float apothem, float halfRadius, float radius)
+struct MouseClick(F,I)
 {
-    Point2D!(float)[6] points;
-    
-    points[0].x = x + halfRadius;
-    points[0].y = y;    
+    Point2D!(F) ndc;  // normalized device coordinates 
+    Point2D!(I) sc;   // screen coordinates
+}
 
-    points[1].x = x + halfRadius + radius;
-    points[1].y = y;    
+
+struct SelectedHex(I)
+{
+    I row;
+    I col;
+}
+
+
+void defineHexVertices(HB, F, I)(HB h, F x, F y, I r, I c)
+{   
+    h.hexes[r][c].points.ndc[0].x = x + h.ndc.halfRadius;
+    h.hexes[r][c].points.ndc[0].y = y;    
+
+    h.hexes[r][c].points.ndc[1].x = x + h.ndc.halfRadius + h.ndc.radius;
+    h.hexes[r][c].points.ndc[1].y = y;    
         
-    points[2].x = x + diameter;
-    points[2].y = y + apothem;    
+    h.hexes[r][c].points.ndc[2].x = x + h.ndc.diameter;
+    h.hexes[r][c].points.ndc[2].y = y + h.ndc.apothem;    
     
-    points[3].x = x + halfRadius + radius;
-    points[3].y = y + perpendicular;    
+    h.hexes[r][c].points.ndc[3].x = x + h.ndc.halfRadius + h.ndc.radius;
+    h.hexes[r][c].points.ndc[3].y = y + h.ndc.perpendicular;    
     
-    points[4].x = x + halfRadius;
-    points[4].y = y + perpendicular;
+    h.hexes[r][c].points.ndc[4].x = x + h.ndc.halfRadius;
+    h.hexes[r][c].points.ndc[4].y = y + h.ndc.perpendicular;
     
-    points[5].x = x;
-    points[5].y = y + apothem;
-    
-    return points;
-} 
+    h.hexes[r][c].points.ndc[5].x = x;
+    h.hexes[r][c].points.ndc[5].y = y + h.ndc.apothem;
+}
 
 
-Point2D!(float) defineHexCenter(float x, float y, float apothem, float radius)
+
+void defineHexCenters(HB, F, I)(HB h, F x, F y, I r, I c)
 {
-    Point2D!(float) center;
-    
-    center.x = x + radius;
-    center.y = y + apothem;
-    
-    return center;
-} 
+    h.hexes[r][c].center.ndc.x = x + h.ndc.radius;
+    h.hexes[r][c].center.ndc.y = y + h.ndc.apothem;
+}
 
-/+
-Point2D!(float) defineTextureStartingPoint(float x, float y, float perpendicular)
+
+
+void defineTextureStartingPoints(HB, F, I)(HB h, F x, F y, I r, I c)
 {
-    Point2D!(float) anchor;
-    
-    anchor.x = x;
-    anchor.y = y + perpendicular;
-    
-    return anchor;
-} 
-+/
+    h.hexes[r][c].texturePoint.ndc.x = x;
+    h.hexes[r][c].texturePoint.ndc.y = y + h.ndc.perpendicular;
+}
 
-struct HexBoard
+
+
+struct HexProperties(T)
+{
+    T diameter;
+    T radius;
+    T halfRadius;
+    T perpendicular;
+    T apothem;
+}
+
+
+struct HexBoard(F,I)
 {
     @disable this();   // disables default constructor HexBoard h;
     
-    this(float d, uint r, uint c) 
+    this(F d, I r, I c) 
     {
-        // These three parameters suffice to define the hexboard: the diameter size of each hex
-        // (in ndc units) and the number of rows and columns making up the board
-        diameter = d;
+        ndc.diameter = d;
         rows = r;
         columns = c;
-        
-        /+    _________           _________
-             /         \         /    |     \ 
-            /           \       /     |      \
-           /___diameter__\     /perpendicular \
-           \             /     \      |       /
-            \           /       \     |      /
-             \_________/         \____|____ / 
-        +/
 
-        radius        = diameter * 0.5;
-        halfRadius    = radius   * 0.5;
-        perpendicular = diameter * 0.866; 
-        apothem       = perpendicular * 0.5;
-        
-        /+ The bottom left corner (left edge and bottom edge) of the hexboard will always start at (-1.0,-1.0) 
-           Ideally, the upper right corner (upper edge and right edge) of the hexboard would end at (1.0,1.0) thus
-           perfectly fitting the NDC window. But since the hexboard is asymetric (1.0 in width to .866 in height) rarely 
-           is this the case. If the top edge or bottom edge is less than 1.0, there will simply be a gap between The
-           hexboard and the window. If the the top edge or bottom edge is greater than 1.0, then all geometry greater
-           than one, will simply not be rendered.
-           
-           The function hexWidthToFitWindow() was written to allow either the horizontal or vertical direction to be
-           fitted perfectly within the (-1.0, 1.0) window.  
-        +/
+        ndc.radius        = ndc.diameter * 0.5;
+        ndc.halfRadius    = ndc.radius   * 0.5;
+        ndc.perpendicular = ndc.diameter * 0.866; 
+        ndc.apothem       = ndc.perpendicular * 0.5;
         
         edge.bottom = -1.0;
-        edge.top    = edge.bottom + (rows * perpendicular);
+        edge.top    = edge.bottom + (rows * ndc.perpendicular);
         edge.left   = -1.0;
-        edge.right  = edge.left + (columns * (radius + halfRadius));
+        edge.right  = edge.left + (columns * (ndc.radius + ndc.halfRadius));
         
-        hexes = new Hex!(float,int)[][](rows, columns);  // dynamically allocate all the hexes
+        hexes = new Hex!(F,I)[][](rows, columns);  // dynamically allocate all the hexes
 
         spots = new Spot[][](rows, columns);
 
@@ -328,339 +167,371 @@ struct HexBoard
             }
         }
 
-        initializeHexBoard();
+        //this.initializeHexBoard();  // either one works
+        initializeHexBoard(this);
         
-        addNeighbors();
+        this.addNeighbors();
         
         mouseClick.ndc.x = 0.0;
         mouseClick.ndc.y = 0.0;
 
-        // can't call from here because we need the apps windows screen size which is 
-        // unknown to the hex board. 
-        //convertNDCoordsToScreenCoords(???);  // convert Normalized Device Coordinates to Screen Coordinates
-
         renderer = null;  // renderer for this hex board        
     }
-    
-    
-    
+
     enum invalid = -1;  // -1 means a row or column is invalid
 
-    uint rows;     // number of rows on the board [0..rows-1]
-    uint columns;  // number of columns on the bord [0..cols-1]
+    I rows;     // number of rows on the board [0..rows-1]
+    I columns;  // number of columns on the bord [0..cols-1]
 
     @property lastRow() { return rows-1; }
     @property lastColumn() { return columns-1; }
 
-    Edges edge;
+    Edges!(F) edge;
 
-    // diameter is a user defined constant in NDC units, so needs to be between [0.0, 2.0)
-    // which because of the hex board stagger makes a row of 5 (not 4) hexes.
-    // A diameter of 2.0, would display a single hex which would fill the full width 
-    // of the window and 0.866 of the window's height.
-
-    float diameter;  // diameter is used to define all the other hex parameters 
-    float radius;    
-    float halfRadius;    
-    float perpendicular;    
-    float apothem;
+    HexProperties!(F) ndc;
+    HexProperties!(I) sc;
     
-    struct SC
-    {    
-        int diameter;  // Same as above block but in Screen Coordinates (integers) 
-        int radius;    
-        int halfRadius;    
-        int perpendicular;    
-        int apothem;
-    }        
-
-    SC sc;
-                    // each hex board has-a 2 dimensional array of hex structures
-    Hex!(float,int)[][]  hexes;  // = new int[][](5, 2);    
+                           // each hex board has-a 2 dimensional array of hex structures
+    Hex!(F,I)[][]  hexes;  // = new int[][](5, 2);    
 
     Spot[][] spots;  // each hex board has-a 2 dimensional array of path properties
                      // think of this a being superimposed over the hexes array.
     
+    F floatType;
+    I integerType;
+    
     SDL_Renderer* renderer;
 
-    SelectedHex selectedHex; 
+    SelectedHex!(I) selectedHex; 
 
-    MouseClick mouseClick;
+    MouseClick!(F,I) mouseClick;
 
     void setRenderOfHexboard(SDL_Renderer *rend)
     {
         renderer = rend;
     }
+
+}
+
+
+
+
+
+
+/+   
+    2. You can use UFCS (Universal Function Call Syntax). Ali's book talks about
+it here:
+
+http://ddili.org/ders/d.en/ufcs.html
+
+but basically what it comes down to is that you call call a free function as if it were a member function of its first argument. e.g.
+
+auto foo(MyClass m, int i) {..}
+auto result = myClass.foo(42);
+
+This allows you to essentially add member functions without them having to be member functions. You don't 
+end up with prototypes or with them being listed as member functions in your struct or class, but the 
+functions are then separate from the struct or class, and you don't need their implementation inside the 
+struct or class. Where UFCS is truly useful though is it allows generic code to call functions without caring 
+whether they're member functions or free functions.
++/    
     
-    void displayHexBoardData()
+
+void displayHexBoardDataSC(HB)(HB h)
+{
+    writeln("===== Values are in Screen Coordinates =====");
+    foreach(r; 0..(h.rows))
     {
-        writeln("===== Values are in Normalized Device Coordinates =====");
-        foreach(r; 0..rows)
+        foreach(c; 0..(h.columns))
         {
-            foreach(c; 0..columns)
+            writeln("hexes[", r, "][", c, "].center.sc ", h.hexes[r][c].center.sc );
+            foreach(p; 0..6)
             {
-                writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );
-                foreach(p; 0..6)
-                {
-                    writeln("hexes(r,c) ", hexes[r][c].points.ndc[p] );
-                    writeln("hexes(r,c) ", hexes[r][c].points.sc[p] );
-                }
+                writeln("hexes(", r, ",", c, ") = ", h.hexes[r][c].points.sc[p] ); 
             }
+            writeln("hexes texture Point = ", h.hexes[r][c].texturePoint.sc);
         }
     }
+}
 
-    void displayHexBoardScreenCoordinates()
+
+
+void displayHexBoardDataNDC(HB)(HB h)
+{
+    writeln("===== Values are in Normalized Screen Coordinates =====");
+    foreach(r; 0..(h.rows))
     {
-        //writeln("===== Values are in Screen Coordinates =====");
-        foreach(r; 0..rows)
+        foreach(c; 0..(h.columns))
         {
-            foreach(c; 0..columns)
+            writeln("hexes[", r, "][", c, "].center.ndc ", h.hexes[r][c].center.ndc );
+            foreach(p; 0..6)
             {
-                //writeln("hexes[", r, "][", c, "].center ", hexes[r][c].center );
-                foreach(p; 0..6)
-                {
-                    if (p == 5)
-                    {
-                         //writeln("hexes(", r, ",", c, ") = ", hexes[r][c].sc[p] ); 
-                    }
-                }
-                //writeln("hexes texture Point = ", hexes[r][c].texturePoint);
+                writeln("hexes(", r, ",", c, ") = ", h.hexes[r][c].points.ndc[p] ); 
             }
+            writeln("hexes texture Point = ", h.hexes[r][c].texturePoint.ndc);
         }
     }
+}
 
-    
-    // DEFINE HEX BOARD
-    
-    void initializeHexBoard()
-    {    
-        // start at the bottom left corner of NDC window, drawing from left to right, bottom to top.
-        
-        float x = edge.left;      // NDC (Normalized Device Coordinates) start at -1.0
-        float y = edge.bottom; 
 
-        writeln("inside initializeHexBoard");
+
+void displayHexBoardDataNDCandSC(HB)(HB h)
+{
+    writeln("===== Values are in NDC and SC coordinates =====");
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {
+            writeln("hexes[", r, "][", c, "].center ", h.hexes[r][c].center );
+            foreach(p; 0..6)
+            {
+                writeln("hexes(", r, ",", c, ") = ", h.hexes[r][c].points.ndc[p],
+                                              "   ", h.hexes[r][c].points.sc[p]); 
+            }
+            writeln("hexes texture Point = ", h.hexes[r][c].texturePoint);
+        }
+    }
+}
+
+
+
+// DEFINE HEX BOARD
+
+void initializeHexBoard(HB)(HB h)
+{
+    // start at the bottom left corner of NDC window, drawing from left to right, bottom to top.
+
+    auto x = h.edge.left;      // NDC (Normalized Device Coordinates) start at -1.0
+    auto y = h.edge.bottom;
  
-        foreach(row; 0..rows)
-        {
-            // writeln("inside foreach row, row = ", row);
-            foreach(col; 0..columns)
-            {    
-                hexes[row][col].points.ndc = defineHexVertices(x, y, perpendicular, diameter, 
-                                                           apothem, halfRadius, radius);
-            
-                hexes[row][col].center.ndc = defineHexCenter(x, y, apothem, radius);
-                
-                //hexes[row][col].texturePoint.ndc = defineTextureStartingPoint(x, y, perpendicular);
-                
-                if (col.isEven)
-                {
-                    y += apothem;
-                }
-                else
-                {            
-                    y -= apothem;   
-                }
-                x += halfRadius + radius;
-            }
-        
-            x = edge.left;  // start a new row and column on the left
-        
-            if (columns.isOdd)
-            {
-                y -= apothem;
-            }
-            
-            y += perpendicular;
-        }  
-    }    
-    
-    // screenWidth and screeHeight are not know by struct HexBoard
-    // this function can only be called from outside of this module
-    
-    void convertNDCoordsToScreenCoords(int screenWidth, int screenHeight)
+    foreach(row; 0..(h.rows))
     {
-        foreach(r; 0..rows)
+        foreach(col; 0..(h.columns))
         {
-            foreach(c; 0..columns)
-            {    
-                foreach(v; 0..6)
-                {
-                    float NDCx = hexes[r][c].points.ndc[v].x;  // makes following statements more legable
-                    float NDCy = hexes[r][c].points.ndc[v].y;
-                    
-                    hexes[r][c].points.sc[v].x = roundTo!int((NDCx + 1.0) * 0.5 * screenWidth);
-                    hexes[r][c].points.sc[v].y = roundTo!int((1.0 - NDCy) * 0.5 * screenHeight);
-                }
-                
-                Point2D!(float) temp = hexes[r][c].texturePoint.ndc; // make func call easier to read
-                
-                hexes[r][c].texturePoint.sc = convertPointFromNDCtoSC(temp, screenWidth, screenHeight);
+            h.defineHexVertices(x, y, row, col);
+
+            h.defineHexCenters(x, y, row, col);
+
+            h.defineTextureStartingPoints(x, y, row, col);
+
+            if (col.isEven)
+            {
+                y += h.ndc.apothem;
             }
+            else
+            {            
+                y -= h.ndc.apothem;   
+            }
+            x += h.ndc.halfRadius + h.ndc.radius;
+        }
+        
+        x = h.edge.left;  // start a new row and column on the left
+        
+        if (h.columns.isOdd)
+        {
+            y -= h.ndc.apothem;
+        }
+
+        y += h.ndc.perpendicular;
+    }
+}
+
+
+
+void convertNDCoordsToScreenCoords(HB, I)(HB h, I screenWidth, I screenHeight)
+{
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {
+            auto centerNDC = h.hexes[r][c].center.ndc;  // make func call easier to read
+
+            h.hexes[r][c].center.sc = convertPointFromNDCtoSC(centerNDC, screenWidth, screenHeight);
+            
+            foreach(v; 0..6)
+            {
+                auto NDCx = h.hexes[r][c].points.ndc[v].x;  // makes following statements more legable
+                auto NDCy = h.hexes[r][c].points.ndc[v].y;
+
+                h.hexes[r][c].points.sc[v].x = roundTo!(I)((NDCx + 1.0) * 0.5 * screenWidth);
+                h.hexes[r][c].points.sc[v].y = roundTo!(I)((1.0 - NDCy) * 0.5 * screenHeight);
+            }
+
+            auto texturePointNDC = h.hexes[r][c].texturePoint.ndc;  // make func call easier to read
+
+            h.hexes[r][c].texturePoint.sc = convertPointFromNDCtoSC(texturePointNDC, screenWidth, screenHeight);
         }
     }
+}
 
-    // screenWidth and screenHeight are not know by struct HexBoard
-    // this function can only be called from outside of this module
 
-    void convertNDClengthsToSClengths(int screenWidth, int screenHeight)
-    {
-        float screenCoordinatesLength = 2.0;  // from -1.0 to 1.0
+
+
+void convertLengthsFromNDCtoSC(HB, I)(ref HB h, I screenWidth, I screenHeight)
+{
+    auto NDCfullWidth = 2.0;  // from -1.0 to 1.0
+
+    auto perCentOfEntireLength = h.ndc.diameter / NDCfullWidth;
         
-        float perCentOfEntireLength = diameter / screenCoordinatesLength;
+    h.sc.diameter      = roundTo!(I)(perCentOfEntireLength * screenWidth);
         
-        sc.diameter = roundTo!int(perCentOfEntireLength * screenWidth);
-        
-        //radius        = diameter * 0.5;
-        //halfRadius    = radius   * 0.5;
-        //perpendicular = diameter * 0.866;
-        
-        sc.perpendicular = roundTo!int( to!float(sc.diameter) * 0.866 );
-    }
+    h.sc.radius        = roundTo!(I)(h.sc.diameter * 0.5);
+    h.sc.halfRadius    = roundTo!(I)(h.sc.radius   * 0.5);
+
+    h.sc.perpendicular = roundTo!(I)(h.sc.diameter * 0.866 );
+    h.sc.apothem       = roundTo!(I)(h.sc.perpendicular * 0.5);
+}
 
 
-    Point2D!(int) convertPointFromNDCtoSC(Point2D!(float) ndc, int screenWidth, int screenHeight)
-    {
-        Point2D!(int) sc;
-        
-        sc.x = roundTo!int((ndc.x + 1.0) * 0.5 * screenWidth);
-        sc.y = roundTo!int((1.0 - ndc.y) * 0.5 * screenHeight);
 
-        return sc;
-    }
+Point2D!(I) convertPointFromNDCtoSC(F, I)(F ndc, I screenWidth, I screenHeight)
+{
+    Point2D!(I) sc;
+
+    sc.x = roundTo!(I)((ndc.x + 1.0) * 0.5 * screenWidth);
+    sc.y = roundTo!(I)((1.0 - ndc.y) * 0.5 * screenHeight);
+
+    return sc;
+}
 
 
-    // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
-    
-    // screenWidth and screeHeight are not know by struct HexBoard
-    // this function can only be called from outside of this module
-    
-    void convertScreenCoordinatesToNormalizedDeviceCoordinates(int screenWidth, int screenHeight)
-    {
-    
-        mouseClick.ndc.x =   (mouseClick.sc.x / (screenWidth  / 2.0)) - 1.0;  // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
+
+// Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+
+// screenWidth and screeHeight are not know by struct HexBoard
+// this function can only be called from outside of this module
+
+void convertScreenCoordinatesToNormalizedDeviceCoordinates(HB, I)(ref HB h, I screenWidth, I screenHeight)
+{
+    h.mouseClick.ndc.x =   (h.mouseClick.sc.x / (screenWidth  / 2.0)) - 1.0;  // xPos/(screenWidth/2.0) gives values from 0.0 to 2.0
                                                                               // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0     
-                                                                
-        mouseClick.ndc.y = -((mouseClick.sc.y / (screenHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
-                                                                              // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0
+
+    h.mouseClick.ndc.y = -((h.mouseClick.sc.y / (screenHeight / 2.0)) - 1.0); // yPos/(winHeight/2.0) gives values from 0.0 to 2.0
+                                                                          // - 1.0   maps 0.0 to 2.0 to -1.0 to 1.0
                                                                               
-        // The minus sign at front of expression is needed because screen coordinates are flipped horizontally from NDC coordinates
-                             
-        // Take the bottom of the edge of the screen (ie -1.0)  Any screen click on the screen is going to be Bigger in value.
-        // So that the mouse click and subtract the edge.
-        
-    }
+    // The minus sign at front of expression is needed because screen coordinates are flipped horizontally from NDC coordinates
+
+    // Take the bottom of the edge of the screen (ie -1.0)  Any screen click on the screen is going to be Bigger in value.
+    // So that the mouse click and subtract the edge.
+}
 
 
-    void setHexboardTexturesAndTerrain(Globals g)
+
+void setHexboardTexturesAndTerrain(HB)(HB h, Globals g)
+{
+    import std.random : uniform;
+    auto rnd = Random(unpredictableSeed);    
+
+    foreach(r; 0..(h.rows))
     {
-        import std.random : uniform;
-        auto rnd = Random(unpredictableSeed);    
- 
-        foreach(r; 0..rows)
+        foreach(c; 0..(h.columns))
         {
-            foreach(c; 0..columns)
-            {    
-                // Generate an integer in 0,1,2,3,4,5
-                auto a = uniform(0, 10, rnd);
-                //hexes[r][c].texture.id = g.textures[a].id;
-                //hexes[r][c].texture.fileName = g.textures[a].fileName;
-                //hexes[r][c].texture.ptr = g.textures[a].ptr;
+            // Generate an integer in 0,1,2,3,4,5
+            auto a = uniform(0, 10, rnd);
+            //hexes[r][c].texture.id = g.textures[a].id;
+            //hexes[r][c].texture.fileName = g.textures[a].fileName;
+            //hexes[r][c].texture.ptr = g.textures[a].ptr;
 
-                switch(a) 
-                {
-                    case 0,1,2,3,4:
-                        {
-                            //writeln("solidGreen");
-                            hexes[r][c].textures ~= g.textures[Ids.solidGreen];
-                            spots[r][c].terrainCost = 1;
-                        }
-                        break;
-                    case 5,6,7:
-                        {
-                            //writeln("solidBrown");
-                            hexes[r][c].textures ~= g.textures[Ids.solidBrown];
-                            spots[r][c].terrainCost = 9; // 9
-                        }
-                        break;
-                    case 8,9:
-                        {
-                            //writeln("solidBlue");
-                            hexes[r][c].textures ~= g.textures[Ids.solidBlue];
-                            spots[r][c].terrainCost = 999; // 999
-                        }
-                        break;          
-                    default: break;                                         
-                }
-                //hexes[r][c].texture = g.textures[a];
-            }
-        }
-    }
-
-
-
-
-    void clearHexBoard()
-    {
-        foreach(r; 0..rows)
-        {
-            foreach(c; 0..columns)
-            {    
-                //hexes[r][c].textures = Texture(Ids.none, "", null); // when textures was just a single Texture
-                hexes[r][c].textures.length = 0;  // a=[]; a=null; change the pointer, so one cannot reuse the array
-                // spots[r][c].location = Location(-1,-1); // DO NOT CHANGE!!!
-                spots[r][c].neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), 
-                                         Location(-1,-1), Location(-1,-1), Location(-1,-1)]; 
-                spots[r][c].f = 0;
-                spots[r][c].g = 0;
-                spots[r][c].h = 0;
-                spots[r][c].previous = Location(-1,-1);
-                spots[r][c].terrainCost = 0;
-            }
-        }
-    }
-
-
-
-    void setHexTexture(Globals g, Location hex, Ids id)
-    {
-        hexes[hex.r][hex.c].textures ~= g.textures[id];
-    }
-
-
-    void setHexRowTexture(Globals g, int row, Ids id)  
-    {
-        foreach(c; 0..columns)
-        {
-            hexes[row][c].textures ~= g.textures[id]; 
-        }
-    }
-
-    void setHexColTexture(Globals g, int col, Ids id)  
-    {
-        foreach(r; 0..rows)
-        {
-            hexes[r][col].textures ~= g.textures[id]; 
-        }            
-    }
-
-    void displayHexTextures()
-    {    
-        foreach(r; 0..rows)
-        {
-            foreach(c; 0..columns)
+            switch(a)
             {
-                foreach(tex; hexes[r][c].textures)
-                {
-                    if (tex.ptr != null)
+                case 0,1,2,3,4:
                     {
+                        //writeln("solidGreen");
+                        h.hexes[r][c].textures ~= g.textures[Ids.solidGreen];
+                        h.spots[r][c].terrainCost = 1;
+                    }
+                    break;
+                    case 5,6,7:
+                    {
+                        //writeln("solidBrown");
+                        h.hexes[r][c].textures ~= g.textures[Ids.solidBrown];
+                        h.spots[r][c].terrainCost = 9; // 9
+                    }
+                    break;
+                case 8,9:
+                    {
+                        //writeln("solidBlue");
+                        h.hexes[r][c].textures ~= g.textures[Ids.solidBlue];
+                        h.spots[r][c].terrainCost = 999; // 999
+                    }
+                    break;
+                default: break;
+            }
+            //hexes[r][c].texture = g.textures[a];
+        }
+    }
+}
+
+
+
+
+void clearHexBoard(HB)(HB h)
+{
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {
+            //hexes[r][c].textures = Texture(Ids.none, "", null); // when textures was just a single Texture
+            h.hexes[r][c].textures.length = 0;  // a=[]; a=null; change the pointer, so one cannot reuse the array
+            // spots[r][c].location = Location(-1,-1); // DO NOT CHANGE!!!
+            h.spots[r][c].neighbors = [Location(-1,-1), Location(-1,-1), Location(-1,-1), 
+                                       Location(-1,-1), Location(-1,-1), Location(-1,-1)]; 
+            h.spots[r][c].f = 0;
+            h.spots[r][c].g = 0;
+            h.spots[r][c].h = 0;
+            h.spots[r][c].previous = Location(-1,-1);
+            h.spots[r][c].terrainCost = 0;
+        }
+    }
+}
+
+
+
+
+
+void setHexTexture(HB,T)(ref HB h, Globals g, T hex, Ids id)
+{
+    h.hexes[hex.r][hex.c].textures ~= g.textures[id];
+}
+
+
+void setHexRowTexture(HB,I)(ref HB h, Globals g, I row, Ids id)  
+{
+    foreach(c; 0..(h.columns))
+    {
+        h.hexes[row][c].textures ~= g.textures[id]; 
+    }
+}
+
+
+void setHexColTexture(HB,I)(ref HB h, Globals g, I col, Ids id)  
+{
+    foreach(r; 0..(h.rows))
+    {
+        h.hexes[r][col].textures ~= g.textures[id]; 
+    }
+}
+
+
+void displayHexTextures(HB)(HB h)
+{
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {
+            foreach(texture; h.hexes[r][c].textures)
+            {
+                if (texture.ptr != null)
+                {
                     SDL_Rect dst;
                 
-                    dst.x = hexes[r][c].texturePoint.sc.x;
-                    dst.y = hexes[r][c].texturePoint.sc.y;
+                    dst.x = h.hexes[r][c].texturePoint.sc.x;
+                    dst.y = h.hexes[r][c].texturePoint.sc.y;
 
-                    dst.w = sc.diameter;
-                    dst.h = sc.perpendicular;
+                    dst.w = h.sc.diameter;
+                    dst.h = h.sc.perpendicular;
+                    
+                    //writeln("dst = ", dst);
 
                     /+
                     SDL_RenderCopy(SDL_Renderer* renderer, DL_Texture* texture,
@@ -674,19 +545,47 @@ struct HexBoard
                                               itself, the texture will be stretched according to this SDL_Rect.
                     +/
                     
-                    SDL_RenderCopy( renderer, tex.ptr, null, &dst );
+                    SDL_RenderCopy( h.renderer, texture.ptr, null, &dst );
                                 // Update window
-                    // SDL_RenderPresent( renderer );  // DO OUTSIDE OF LOOP!!!
-                    }
+                    SDL_RenderPresent( h.renderer );  // DO OUTSIDE OF LOOP!!!
                 }
             }
         }
-        SDL_RenderPresent( renderer );
+    }
+    SDL_RenderPresent( h.renderer );
+}
+
+
+
+void drawHexBoard(HB)(HB h)
+{
+    SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, SDL_ALPHA_OPAQUE );
+    //Clear screen
+    SDL_RenderClear( g.sdl.renderer );
+
+    SDL_SetRenderDrawColor( g.sdl.renderer, 0xFF, 0x00, 0x00, SDL_ALPHA_OPAQUE );        
+
+    foreach(r; 0..(h.rows))
+    {
+        foreach(c; 0..(h.columns))
+        {  
+            // writeln("r = ", r, " c = ", c);
+            //SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &hexes[r][c].points.sc[0], 6);
+            SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &h.hexes[r][c].points.sc[0], 6);
+            
+            SDL_RenderDrawLine( g.sdl.renderer, h.hexes[r][c].points.sc[5].x,  // close off the hex  
+                                                h.hexes[r][c].points.sc[5].y, 
+                                                h.hexes[r][c].points.sc[0].x, 
+                                                h.hexes[r][c].points.sc[0].y);
+        }
     }
 
+    // Update screen
+    SDL_RenderPresent( g.sdl.renderer );
+}
 
 
-
+/+
     void drawHexBoard()
     {
         SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, SDL_ALPHA_OPAQUE );
@@ -740,30 +639,29 @@ struct HexBoard
         // Update screen
         SDL_RenderPresent( g.sdl.renderer );
     }
- 
++/
 
 
-void validateHexboard()
+void validateHexboard(HB)(HB h)
 {
-    foreach(i; 0..rows)
+    foreach(i; 0..(h.rows))
     {
-        foreach(j; 0..columns)
+        foreach(j; 0..(h.columns))
         {
-            if ((spots[i][j].location.r < 0) ||
-                (spots[i][j].location.r > rows))
+            if ((h.spots[i][j].location.r < 0) ||
+                (h.spots[i][j].location.r > h.rows))
             {
                 writeln("[i][j] = [", i, "][", j, "]");
                 writeln("Index out of bounds");
                 exit(0);
             }
-                 
         }
     }
-
 }
 
 
 
+/+     DELETE IF STARTS WORKING IN SPOT.D
 const uint N  = 0;  // North
 const uint NE = 1;  // North-East
 const uint SE = 2;  // South-East
@@ -772,11 +670,11 @@ const uint SW = 4;  // South-West
 const uint NW = 5;  // North-West
 
 
-void addNeighbors()
+void addNeighbors(HB)(HB h)
 {
-    foreach(int r; 0..rows)          // Note: rows and columns are defined as uint 
+    foreach(int r; 0..(h.rows))          // Note: rows and columns are defined as uint 
     {                                    // this caused problems with < 0 boundary checking
-        foreach(int c; 0..columns)   // causing -1 to be 4294967295
+        foreach(int c; 0..(h.columns))   // causing -1 to be 4294967295
         {                                // had to declare the local r and c as ints
             foreach(int i; 0..6)
             {
@@ -855,8 +753,7 @@ void addNeighbors()
         }
     }
 }
-
++/
 
  
-}
-
+//}
