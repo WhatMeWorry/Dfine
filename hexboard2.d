@@ -123,17 +123,6 @@ void defineTextureStartingPoints(HB, F, I)(HB h, F x, F y, I r, I c)
 }
 
 
-Point2D!(float) defineTextureStartingPoint(float x, float y, float perpendicular)
-{
-    Point2D!(float) anchor;
-
-    anchor.x = x;
-    anchor.y = y + perpendicular;
-
-    return anchor;
-}
-
-
 
 struct HexProperties(T)
 {

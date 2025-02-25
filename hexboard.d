@@ -24,6 +24,7 @@ import redblacktree : Location;
 
 import windows.simple_directmedia_layer;
 
+
 /+
 From:  https://wiki.dlang.org/Dense_multidimensional_arrays
 
@@ -260,7 +261,7 @@ Point2D!(float) defineHexCenter(float x, float y, float apothem, float radius)
     return center;
 } 
 
-
+/+
 Point2D!(float) defineTextureStartingPoint(float x, float y, float perpendicular)
 {
     Point2D!(float) anchor;
@@ -270,7 +271,7 @@ Point2D!(float) defineTextureStartingPoint(float x, float y, float perpendicular
     
     return anchor;
 } 
-
++/
 
 struct HexBoard
 {
@@ -450,7 +451,7 @@ struct HexBoard
             
                 hexes[row][col].center.ndc = defineHexCenter(x, y, apothem, radius);
                 
-                hexes[row][col].texturePoint.ndc = defineTextureStartingPoint(x, y, perpendicular);
+                //hexes[row][col].texturePoint.ndc = defineTextureStartingPoint(x, y, perpendicular);
                 
                 if (col.isEven)
                 {
@@ -858,3 +859,4 @@ void addNeighbors()
 
  
 }
+
