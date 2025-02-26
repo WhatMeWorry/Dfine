@@ -238,13 +238,13 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     //auto h = HexBoard!(double,int)(hexWidth, rows, cols); // WORKS!
     //auto h = HexBoard!(float, int)(hexWidth, rows, cols);  // WORKS!
 
-    h.displayHexBoardDataNDC();
+    //h.displayHexBoardDataNDC();
 
     //writeAndPause("==== HexBoard is only constructed with NDC values ====");
 
     h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);
     
-    h.displayHexBoardDataSC();
+    //h.displayHexBoardDataSC();
 
     //writeAndPause("==== NDC converted to SC values ====");
 
@@ -257,21 +257,14 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
     // Initialize SDL
-    
-    writeln("g = ", g);
+
     createSDLwindow(g);
-    writeln("g = ", g);
-    
-    //h.setRenderOfHexboard(g.sdl.renderer);
+
     h.setRenderOfHexboard(g.sdl.renderer);
 
     g.textures = load_textures(g);
 
     writeln("g.textures = ", g.textures);
-
-    //h.initializeHexTextures(g);
-
-    writeln(g.textures);
 
     h.drawHexBoard;
     
@@ -333,8 +326,6 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                     if( event.key.keysym.sym == SDLK_DELETE )
                     {
                         writeln("SDLK_DELETE used to just clear out all hex textures");
-                        //h.clearHexBoard();
-                        //h.drawHexBoard;
                         h.clearHexBoard();
                         h.drawHexBoard;
                     }
@@ -344,15 +335,11 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         import std.process : executeShell;
                         //executeShell("cls");
 
-                        //h.setHexboardTexturesAndTerrain(g);
                         h.setHexboardTexturesAndTerrain(g);
 
                         writeln("after setHexboardTexturesAndTerrain");
 
-                        //h.displayHexTextures();
                         h.displayHexTextures();
-
-                        writeln("after displayHexTextures");
 
                         import std.datetime.stopwatch;
                         auto watch = StopWatch(AutoStart.no);
@@ -383,7 +370,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         h.displayHexTextures();
                     }
 
-                    SDL_RenderPresent( g.sdl.renderer );  // refresh screen for any keydown event
+                    SDL_RenderPresent(g.sdl.renderer);  // refresh screen for any keydown event
                     break;
 
 
@@ -396,10 +383,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                         // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
 
-                        //h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
                         h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
 
-                        //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
                         writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
 
                         if (h.getHexMouseClickedOn())
