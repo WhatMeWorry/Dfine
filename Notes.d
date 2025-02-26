@@ -1,29 +1,83 @@
+/+
 
+
+https://github.com/patrickodacre/odin-space-shooter
+
+https://www.youtube.com/watch?v=gtzIZZazuG0&list=PLuZ3rcIdDc9EA4YqLJSsrzYeUDv8Mucxz&index=2
+
+
+Why are you looping instate of using a Sleep function or even SDL_Delay()
+
+Good question. Delay or sleep means i have to wait for the operating system to restart the loop. 
+The OS may not check the delay timer as frequently as we need to maintain our target frame rate. 
+In other words, if we want a loop every 16 millisecond, but the OS only checks for delayed processes 
+every 30 milliseconds, we're going to miss some frames. 
+
+Here... In the SDL docs it mentions that delay can take longer because of os scheduling... 
+https://wiki.libsdl.org/SDL2/SDL_Delay.  We don't want that.
+
+Sleeping is never a wise move in any game loop, the granularity of a sleep call is not good for 
+anything accurate. It might be "good enough" for some small 2D game using a single fixed-step loop 
+and a simple "update game" function, but if falls apart when more complexity is added, such as 
+different systems updating at different rates.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//=============================================================================================
 
 SDL_Texture* rock_tex;
 SDL_Texture* paper_tex;
 SDL_Texture* scissors_tex;
 
-
-
-
-
 https://github.com/SpaghettiBorgar/rps-battle-sim/blob/master/source/app.d
 
 
 auto window = SDL_CreateWindow("SDL Application", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		                       windowW, windowH, SDL_WINDOW_SHOWN);
-							   
-							   
-							   
-							   
-							   
+                                windowW, windowH, SDL_WINDOW_SHOWN);
+
 SDL_Renderer* sdlr = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 
 SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
 // SDL_SetHint(SDL_HINT_RENDER_LINE_METHOD, "2");
-	
+
 SDL_SetRenderDrawBlendMode(sdlr, SDL_BLENDMODE_BLEND);
 
 rock_tex = SDL_CreateTextureFromSurface(sdlr, IMG_Load("./rock.png"));
@@ -42,37 +96,6 @@ if(rock_tex is null || paper_tex is null || scissors_tex is null)
 
 
 
-
-If you would like to scale an image while maintaining the same aspect ratio, then multiply the 
-rectangle w and h by any scalar value:
-
-// just don't let the scalar be a negative number
-// SDL_RenderCopy doesn't like it's rectangles to be size-negative.
-
-void scaleRect(SDL_Rect &pos, float scalar)
-{
-  pos.w = ((float) pos.w) * scalar;
-  pos.h = ((float) pos.h) * scalar;
-}
-
-Here’s some other “helpful hints”
-
-void setRectPosition(SDL_Rect &pos, int x, int y)
-{
-  pos.x = x;
-  pos.y = y;
-}
-void moveRect(SDL_Rect &pos, int x, int y)
-{
-  pos.x += x;
-  pos.y += y;
-}
-// again: error checking to avoid negative width and height could be used
-void resizeRect(SDL_Rect &pos, int w, int h)
-{
-  pos.w = w;
-  pos.h = h;
-}
 
 
 
@@ -118,6 +141,9 @@ void main()
 }
 
 //===========================================================
+
+
+
 
 
 
