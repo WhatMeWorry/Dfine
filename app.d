@@ -36,6 +36,7 @@ Or will this cause problems further down the road?
 
 module app;
 
+import utilities.sdl_timing;
 import hexboard;
 import select_hex;
 import hexmath;
@@ -108,6 +109,7 @@ Globals g;  // put all the global variables together in one place
 
 int main() 
 {
+
 
 /+ 
 
@@ -224,7 +226,12 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 +/
 
     load_sdl_libraries(); 
-
+    
+    //timeIntervalInTicks();
+    //timeIntervalInPerformanceMode();
+    //frameRate();
+    cappingFrameRate();
+    
     g.sdl.screenWidth  = 500;
     g.sdl.screenHeight = 500;
 
