@@ -25,10 +25,19 @@ different systems updating at different rates.
 
 
 
+bool SDL_RenderPresent(SDL_Renderer *renderer);
+
+SDL's rendering functions operate on a backbuffer; that is, calling a rendering function such as SDL_RenderLine() 
+does not directly put a line on the screen, but rather updates the backbuffer. As such, you compose your entire 
+scene and present the composed backbuffer to the screen as a complete picture.
+
+Therefore, when using SDL's rendering API, one does all drawing intended for the frame, and then calls this function,
+SDL_RenderPresent, once per frame to present the final drawing to the user.
 
 
-
-
+The backbuffer should be considered invalidated after each present; do not assume that previous contents will exist 
+between frames. You are strongly encouraged to call SDL_RenderClear() to initialize the backbuffer before starting 
+each new frame's drawing, even if you plan to overwrite every pixel.
 
 
 
