@@ -38,7 +38,8 @@ void createSDLwindow(ref Globals g)
     {
         //Create window
         g.sdl.window = SDL_CreateWindow( "SDL Tutorial",
-                                         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+                                         //SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                          g.sdl.screenWidth, g.sdl.screenHeight, 
                                          SDL_WINDOW_SHOWN );
         if( g.sdl.window == null )

@@ -544,15 +544,12 @@ void displayHexTextures(HB)(HB h)
                                               of this SDL_Rect is smaller or larger than the dimensions of the texture 
                                               itself, the texture will be stretched according to this SDL_Rect.
                     +/
-                    
-                    SDL_RenderCopy( h.renderer, texture.ptr, null, &dst );
-                                // Update window
-                    SDL_RenderPresent( h.renderer );  // DO OUTSIDE OF LOOP!!!
+
+                    SDL_RenderCopy(h.renderer, texture.ptr, null, &dst);
                 }
             }
         }
     }
-    SDL_RenderPresent( h.renderer );
 }
 
 
@@ -579,9 +576,6 @@ void drawHexBoard(HB)(HB h)
                                                 h.hexes[r][c].points.sc[0].y);
         }
     }
-
-    // Update screen
-    SDL_RenderPresent( g.sdl.renderer );
 }
 
 
@@ -635,29 +629,8 @@ void drawHexBoard(HB)(HB h)
                 +/
             }
         }
-
-        // Update screen
-        SDL_RenderPresent( g.sdl.renderer );
     }
 +/
-
-
-void validateHexboard(HB)(HB h)
-{
-    foreach(i; 0..(h.rows))
-    {
-        foreach(j; 0..(h.columns))
-        {
-            if ((h.spots[i][j].location.r < 0) ||
-                (h.spots[i][j].location.r > h.rows))
-            {
-                writeln("[i][j] = [", i, "][", j, "]");
-                writeln("Index out of bounds");
-                exit(0);
-            }
-        }
-    }
-}
 
 
 

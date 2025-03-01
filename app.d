@@ -227,16 +227,16 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     load_sdl_libraries(); 
     
-    //timeIntervalInTicks();
-    //timeIntervalInPerformanceMode();
-    //frameRate();
-    cappingFrameRate();
+    // timeIntervalInTicks();
+    // timeIntervalInPerformanceMode();
+    // frameRate();
+    // cappingFrameRate();
     
-    g.sdl.screenWidth  = 500;
-    g.sdl.screenHeight = 500;
+    g.sdl.screenWidth  = 900;
+    g.sdl.screenHeight = 900;
 
-    uint rows = 7;
-    uint cols = 7;
+    uint rows = 90;
+    uint cols = 90;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Direction.horizontal);
     
@@ -286,14 +286,14 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     SDL_Event event;
     bool running = true;
 
-    while(running) 
+    while(running)
     {
         while(SDL_PollEvent(&event) != 0)
         {
             switch(event.type) 
             {
                 case SDL_QUIT:
-
+                
                     writeln("user clicked on close button of windows");
                     running = false;
                     break;
@@ -355,9 +355,6 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
                         //                                                microsecond
 
-                        //h.validateHexboard();
-                        h.validateHexboard();
-
                         Location begin;
                         Location end;
                         begin.r = 0;
@@ -376,8 +373,6 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         //h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
                         h.displayHexTextures();
                     }
-
-                    SDL_RenderPresent(g.sdl.renderer);  // refresh screen for any keydown event
                     break;
 
 
@@ -448,15 +443,13 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
                             SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);
                         }
-                        
-                         
-                        SDL_RenderPresent( g.sdl.renderer );
                     }
                     break;
 
                 default: break;
             }
         }
+        SDL_RenderPresent(g.sdl.renderer);
     }
     return 0;
 }
