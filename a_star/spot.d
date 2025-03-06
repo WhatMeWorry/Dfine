@@ -102,6 +102,8 @@ enum Dir
 } 
 +/
 
+enum Direction { North = 1, NorthEast, SouthEast, South, SouthWest, NorthWest }
+
 
 
 const uint N  = 0;  // North

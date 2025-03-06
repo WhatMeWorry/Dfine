@@ -5,6 +5,10 @@ import std.stdio;
 import std.math.operations : isClose;
 
 
+enum Direction { North = 1, NorthEast, SouthEast, South, SouthWest, NorthWest }
+enum Orientation { horizontal, vertical } 
+
+
 /+ Unit tests can be run in this module with the following commands:
 rdmd -main -unittest hexmath.d
 or
@@ -36,7 +40,7 @@ unittest
 }
 
 
-enum Direction { horizontal, vertical } 
+
 
      /+   note: all vertical segments (1-16) are the same size. Some distortion is 
           caused the inherent limitation of the ascii font. 
@@ -62,12 +66,12 @@ enum Direction { horizontal, vertical }
      
      +/
 
-float hexWidthToFitWindow(uint rows, uint cols, Direction direction )
+float hexWidthToFitWindow(uint rows, uint cols, Orientation stance)
 {
     immutable float lengthNDC = 2.0;  // width and height of NDC system is always 2.0 units.  (-1.0 to 1.0)
     float hexWidth;
     
-    if (direction == Direction.horizontal)
+    if (stance == Orientation.horizontal)
     {
         float totalSegments = (cols * 3) + 1;
         float widthPerSegment = lengthNDC / totalSegments;

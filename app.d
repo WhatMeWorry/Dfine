@@ -235,10 +235,10 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 900;
     g.sdl.screenHeight = 900;
 
-    uint rows = 90;
-    uint cols = 90;
+    uint rows = 20;
+    uint cols = 20;
 
-    float hexWidth = hexWidthToFitWindow(rows, cols, Direction.horizontal);
+    float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
     
     
     auto h = HexBoard!(real,  int)(hexWidth, rows, cols);   // WORKS!
@@ -375,8 +375,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                     }
                     break;
 
-
                 case SDL_MOUSEBUTTONDOWN:
+                
                     if( event.button.button == SDL_BUTTON_LEFT )
                     {
                         SDL_GetMouseState(cast (int *) &h.mouseClick.sc.x, cast (int *) &h.mouseClick.sc.y);
@@ -391,6 +391,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                         if (h.getHexMouseClickedOn())
                         {
+                            writeln("h.selectedHex = ", h.selectedHex);
+                        
                             alias I = typeof(h.integerType);
                             I x = h.selectedHex.row;   I y = h.selectedHex.col;
                             
@@ -408,13 +410,16 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                                     
                             end.r = x; 
                             end.c = y;
-                                    
-                            h.setHexRowTexture(g, end.r, Ids.solidRed);
-                                    
-                            h.setHexColTexture(g, end.c, Ids.solidGreen);                                    
 
-                            h.setHexTexture(g, end, Ids.solidBlack);
-                            // h.selectedHex has end point
+                            //h.setHexsNorth(g, end, 7, Ids.solidRed);
+                            //h.setHexsSouth(g, end, 7, Ids.solidRed);
+                            
+                            h.setHexsNorthEast(g, end, 5, Ids.solidRed);
+                            
+                            //h.setHexColTexture(g, end.c, Ids.solidGreen);                                    
+
+                            //h.setHexTexture(g, end, Ids.solidBlack);
+
                                     //findShortestPathRedBlack( h, g, start, end );
 
                             h.displayHexTextures();

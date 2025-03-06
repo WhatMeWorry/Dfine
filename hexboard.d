@@ -18,7 +18,7 @@ import a_star.spot;
 import hexmath;
 import redblacktree : Location;
 import windows.simple_directmedia_layer;
-
+import std.algorithm : min;
 
 /+
 import std.stdio;
@@ -495,14 +495,72 @@ void setHexTexture(HB,T)(ref HB h, Globals g, T hex, Ids id)
 }
 
 
-void setHexRowTexture(HB,I)(ref HB h, Globals g, I row, Ids id)  
+
+void setHexsNorth(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
 {
-    foreach(c; 0..(h.columns))
+    I endRow;
+    endRow = clickedOn.r + count;
+    if (endRow > h.rows)
     {
-        h.hexes[row][c].textures ~= g.textures[id]; 
+        endRow = h.rows;
+    }
+
+    //writeln("clickedOn = ", clickedOn);
+    //writeln("count = ", count);
+    //writeln("endRow = ", endRow);
+    
+    foreach(row; (clickedOn.r)..endRow)
+    {
+        //writeln("row = ", row);
+        h.hexes[row][clickedOn.c].textures ~= g.textures[id]; 
     }
 }
 
+
+void setHexsNorthEast(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    I endRow;
+    I endCol;
+
+    writeln("clickedOn = ", clickedOn);
+
+    endCol = clickedOn.c + count;
+    if (endCol >= h.columns)
+    {
+        endCol = h.columns;
+    }
+
+    
+    writeln("count = ", count);
+    writeln("endCol = ", endCol);
+
+    I r = clickedOn.r;
+    foreach(c; (clickedOn.c)..endCol)
+    {
+        writeln("r,c = ", r, " ", c);
+        
+        h.hexes[r][c].textures ~= g.textures[id]; 
+        if (isOdd(c)) { r++; }
+    }
+}
+
+
+
+
+void setHexsSouth(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    I endRow;
+    endRow = clickedOn.r - count;
+    if (endRow < 0)
+    {
+        endRow = 0;
+    }
+
+    foreach(row; endRow..(clickedOn.r))
+    {
+        h.hexes[row][clickedOn.c].textures ~= g.textures[id]; 
+    }
+}
 
 void setHexColTexture(HB,I)(ref HB h, Globals g, I col, Ids id)  
 {
