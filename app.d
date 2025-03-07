@@ -404,17 +404,26 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             
                             LocationT!(I) start;  
                             LocationT!(I) end; 
-                                    
+
                             start.r = 0;
                             start.c = 0;
-                                    
+
                             end.r = x; 
                             end.c = y;
 
-                            //h.setHexsNorth(g, end, 7, Ids.solidRed);
-                            //h.setHexsSouth(g, end, 7, Ids.solidRed);
+                            h.setHexesNorth(g, end, 7, Ids.solidRed);
                             
-                            h.setHexsNorthEast(g, end, 5, Ids.solidRed);
+                            h.setHexesNorthEast(g, end, 7, Ids.solidBlue);
+
+                            h.setHexesSouthEast(g, end, 7, Ids.solidGreen);
+                            
+                            h.setHexesSouth(g, end, 7, Ids.solidBrown);
+                            
+                            h.setHexesNorthWest(g, end, 7, Ids.solidBlack);
+                            
+                            h.setHexesSouthWest(g, end, 7, Ids.solidWhite);
+                            
+                            
                             
                             //h.setHexColTexture(g, end.c, Ids.solidGreen);                                    
 

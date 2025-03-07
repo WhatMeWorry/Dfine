@@ -486,9 +486,6 @@ void clearHexBoard(HB)(HB h)
 }
 
 
-
-
-
 void setHexTexture(HB,T)(ref HB h, Globals g, T hex, Ids id)
 {
     h.hexes[hex.r][hex.c].textures ~= g.textures[id];
@@ -496,71 +493,218 @@ void setHexTexture(HB,T)(ref HB h, Globals g, T hex, Ids id)
 
 
 
-void setHexsNorth(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+//////////////////////////////////////////////////////
+//                   NORTH
+//////////////////////////////////////////////////////
+
+void setHexesNorth(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
 {
-    I endRow;
-    endRow = clickedOn.r + count;
-    if (endRow > h.rows)
+    I topRow;
+    topRow = clickedOn.r + count;
+
+    if (topRow >= h.rows)
     {
-        endRow = h.rows;
+        topRow = h.rows;
     }
 
-    //writeln("clickedOn = ", clickedOn);
-    //writeln("count = ", count);
-    //writeln("endRow = ", endRow);
-    
-    foreach(row; (clickedOn.r)..endRow)
+    foreach(row; (clickedOn.r+1)..topRow)
     {
-        //writeln("row = ", row);
         h.hexes[row][clickedOn.c].textures ~= g.textures[id]; 
     }
 }
 
 
-void setHexsNorthEast(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+
+//////////////////////////////////////////////////////
+//                   SOUTH
+//////////////////////////////////////////////////////
+
+void setHexesSouth(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
 {
-    I endRow;
-    I endCol;
-
-    writeln("clickedOn = ", clickedOn);
-
-    endCol = clickedOn.c + count;
-    if (endCol >= h.columns)
+    I bottomRow;
+    bottomRow = clickedOn.r - count;
+    if (bottomRow <= 0)
     {
-        endCol = h.columns;
+        bottomRow = 0;
     }
-
     
-    writeln("count = ", count);
-    writeln("endCol = ", endCol);
-
-    I r = clickedOn.r;
-    foreach(c; (clickedOn.c)..endCol)
+    foreach_reverse(row; bottomRow..(clickedOn.r))
     {
-        writeln("r,c = ", r, " ", c);
+        writeln("row = ", row);
+        h.hexes[row][clickedOn.c].textures ~= g.textures[id]; 
+    }
+}
+
+
+
+//////////////////////////////////////////////////////
+//                   NORTH-EAST
+//////////////////////////////////////////////////////
+
+S getNextNorthEastHex(S)(S hex)
+{
+    S nextHex;
+    if (isEven(hex.c))
+        nextHex.r = hex.r;
+    else
+        nextHex.r = hex.r + 1;
+
+    nextHex.c = hex.c + 1;
+
+    return nextHex; 
+}
+
+void setHexesNorthEast(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    I rightCol;
+
+    rightCol = clickedOn.c + count;  // the dst will always be higher
+    if (rightCol > h.columns)
+        rightCol = h.columns;
+    
+    S next = getNextNorthEastHex(clickedOn);
+    if ((next.r >= h.rows) || (next.c >= h.columns) )
+        return;
+
+    h.hexes[next.r][next.c].textures ~= g.textures[id];
+
+    foreach(c; (clickedOn.c)..rightCol)
+    {
+        next = getNextNorthEastHex(next);
+        if ((next.r >= h.rows) || (next.c >= h.columns))
+            break;
+        h.hexes[next.r][next.c].textures ~= g.textures[id]; 
+    }
+}
+
+//////////////////////////////////////////////////////
+//                   SOUTH-EAST
+//////////////////////////////////////////////////////
+
+S getNextSouthEastHex(S)(S hex)
+{
+    S nextHex;
+    if (isEven(hex.c))
+        nextHex.r = hex.r - 1;
+    else
+        nextHex.r = hex.r;
+
+    nextHex.c = hex.c + 1;
+
+    return nextHex; 
+}
+
+void setHexesSouthEast(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    I rightCol;
+
+    rightCol = clickedOn.c + count;  // the dst will always be higher
+    if (rightCol > h.columns)
+        rightCol = h.columns;
+    
+    S next = getNextSouthEastHex(clickedOn);
+    if ((next.r < 0) || (next.c >= h.columns) )
+        return;
+
+    h.hexes[next.r][next.c].textures ~= g.textures[id];
+
+    foreach(c; (clickedOn.c)..rightCol)
+    {
+        next = getNextSouthEastHex(next);
+        if ((next.r < 0) || (next.c >= h.columns))
+            break;
+        h.hexes[next.r][next.c].textures ~= g.textures[id]; 
+    }
+}
+
+
+//////////////////////////////////////////////////////
+//                   NORTH-WEST
+//////////////////////////////////////////////////////
+
+S getNextNorthWestHex(S)(S hex)
+{
+    S nextHex;
+    if (isEven(hex.c))
+        nextHex.r = hex.r;
+    else
+        nextHex.r = hex.r + 1;
+
+    nextHex.c = hex.c - 1;
+
+    return nextHex; 
+}
+
+void setHexesNorthWest(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    I leftCol;
+
+    leftCol = clickedOn.c - count;  // the dst will always be lower 
+    if (leftCol < 0)
+        leftCol = 0;
+
+    S next = getNextNorthWestHex(clickedOn);
+    if ((next.r >= h.rows) || (next.c < 0) )
+        return;
+
+    h.hexes[next.r][next.c].textures ~= g.textures[id];
+
+    foreach_reverse(c; (leftCol)..(clickedOn.c))
+    {
+        next = getNextNorthWestHex(next);
+        if ((next.r >= h.rows) || (next.c < 0))
+            break;
+        h.hexes[next.r][next.c].textures ~= g.textures[id]; 
+    }
+}
+
+
+
+//////////////////////////////////////////////////////
+//                   SOUTH-WEST
+//////////////////////////////////////////////////////
+
+S getNextSouthWestHex(S)(S hex)
+{
+    S nextHex;
+    if (isEven(hex.c))
+        nextHex.r = hex.r - 1;
+    else
+        nextHex.r = hex.r;
+
+    nextHex.c = hex.c - 1;
+
+    return nextHex; 
+}
+
+
+void setHexesSouthWest(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    I leftCol;
+
+    leftCol = clickedOn.c - count;  // the dst will always be lower 
+    if (leftCol < 0)
+        leftCol = 0;
+
+    S next = getNextSouthWestHex(clickedOn);
+    if ((next.r < 0) || (next.c < 0) )
+        return;
         
-        h.hexes[r][c].textures ~= g.textures[id]; 
-        if (isOdd(c)) { r++; }
+    h.hexes[next.r][next.c].textures ~= g.textures[id];
+
+    foreach_reverse(c; (leftCol)..(clickedOn.c))
+    {
+        next = getNextSouthWestHex(next);
+        if ((next.r < 0) || (next.c < 0) )
+            break;
+
+        h.hexes[next.r][next.c].textures ~= g.textures[id]; 
     }
 }
 
 
 
 
-void setHexsSouth(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
-{
-    I endRow;
-    endRow = clickedOn.r - count;
-    if (endRow < 0)
-    {
-        endRow = 0;
-    }
-
-    foreach(row; endRow..(clickedOn.r))
-    {
-        h.hexes[row][clickedOn.c].textures ~= g.textures[id]; 
-    }
-}
 
 void setHexColTexture(HB,I)(ref HB h, Globals g, I col, Ids id)  
 {
