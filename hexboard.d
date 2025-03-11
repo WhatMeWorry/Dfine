@@ -492,6 +492,22 @@ void setHexTexture(HB,T)(ref HB h, Globals g, T hex, Ids id)
 }
 
 
+/+
+In D language, an open interval for the upper limit is indicated by using a parenthesis ")" at 
+the end of the range expression, meaning the upper bound value itself is not included in the interval. 
+
+To include the upper bound value, use a square bracket "]" at the end of the range. 
+
+foreach (element; range)
+{
+    // Loop body...
+}
++/
+
+
+
+
+
 
 //////////////////////////////////////////////////////
 //                   NORTH
@@ -504,10 +520,10 @@ void setHexesNorth(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)
 
     if (topRow >= h.rows)
     {
-        topRow = h.rows;
+        topRow = h.rows-1;
     }
 
-    foreach(row; (clickedOn.r+1)..topRow)
+    foreach(row; (clickedOn.r+1)..topRow+1)
     {
         h.hexes[row][clickedOn.c].textures ~= g.textures[id]; 
     }
@@ -532,6 +548,54 @@ void setHexesSouth(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)
     {
         writeln("row = ", row);
         h.hexes[row][clickedOn.c].textures ~= g.textures[id]; 
+    }
+}
+
+
+
+//////////////////////////////////////////////////////
+//                   EAST
+//////////////////////////////////////////////////////
+
+void setHexesEast(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    I rightCol;
+
+    rightCol = clickedOn.c + count;
+
+    //if (clickedOn.c == h.columns)
+    //    return;
+
+    if (rightCol >= h.columns)
+    {
+        rightCol = h.columns - 1;
+    }
+
+    
+    foreach(c; (clickedOn.c)+1..rightCol+1)
+    {
+        h.hexes[clickedOn.r][c].textures ~= g.textures[id]; 
+    }
+}
+
+
+//////////////////////////////////////////////////////
+//                   WEST
+//////////////////////////////////////////////////////
+
+void setHexesWest(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    I leftCol;
+    leftCol = clickedOn.c - count;
+
+    if (leftCol < 0)
+    {
+        leftCol = 0;
+    }
+    
+    foreach_reverse(c; leftCol..(clickedOn.c))
+    {
+        h.hexes[clickedOn.r][c].textures ~= g.textures[id]; 
     }
 }
 
@@ -703,7 +767,29 @@ void setHexesSouthWest(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id
 }
 
 
+void setHexesHorizontally(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    h.setHexesEast(g, clickedOn, count, id);                       
+    h.setHexesWest(g, clickedOn, count, id);
+}
 
+void setHexesVertically(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)  
+{
+    h.setHexesNorth(g, clickedOn, count, id);                       
+    h.setHexesSouth(g, clickedOn, count, id);
+}
+
+void setHexesSouthWestByNorthEast(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)
+{
+    h.setHexesSouthWest(g, clickedOn, count, id);                       
+    h.setHexesNorthEast(g, clickedOn, count, id);
+}
+
+void setHexesNorthWestBySouthEast(HB,S,I)(ref HB h, Globals g, S clickedOn, I count, Ids id)
+{
+    h.setHexesNorthWest(g, clickedOn, count, id);                       
+    h.setHexesSouthEast(g, clickedOn, count, id);
+}
 
 
 void setHexColTexture(HB,I)(ref HB h, Globals g, I col, Ids id)  

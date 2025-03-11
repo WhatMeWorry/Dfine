@@ -410,6 +410,19 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                             end.r = x; 
                             end.c = y;
+                            
+                            
+                            h.setHexesHorizontally(g, end, 7, Ids.solidRed);
+                            
+                            h.setHexesVertically(g, end, 5, Ids.solidBlue);
+                            
+                            h.setHexesSouthWestByNorthEast(g, end, 7, Ids.solidWhite);
+                            
+                            h.setHexesNorthWestBySouthEast(g, end, 7, Ids.solidGreen);
+/+
+                            h.setHexesEast(g, end, 7, Ids.solidRed);
+                            
+                            h.setHexesWest(g, end, 7, Ids.solidRed);
 
                             h.setHexesNorth(g, end, 7, Ids.solidRed);
                             
@@ -422,7 +435,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             h.setHexesNorthWest(g, end, 7, Ids.solidBlack);
                             
                             h.setHexesSouthWest(g, end, 7, Ids.solidWhite);
-                            
++/                            
                             
                             
                             //h.setHexColTexture(g, end.c, Ids.solidGreen);                                    
