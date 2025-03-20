@@ -434,17 +434,18 @@ void setHexboardTexturesAndTerrain(HB)(HB h, Globals g)
 
             switch(a)
             {
-                case 0,1,2,3,4:
+                  //case 0,1,2,3,4:
+                    case 0,1,2,3,4,5,6,7,8,9:
                     {
-                        //writeln("solidGreen");
                         h.hexes[r][c].textures ~= g.textures[Ids.solidGreen];
+                        //h.hexes[r][c].textures ~= g.textures[Ids.greenTriangle];
                         h.spots[r][c].terrainCost = 1;
                     }
-                    break;
+               /+     break;
                     case 5,6,7:
                     {
-                        //writeln("solidBrown");
                         h.hexes[r][c].textures ~= g.textures[Ids.solidBrown];
+                        //h.hexes[r][c].textures ~= g.textures[Ids.redTriangle];
                         h.spots[r][c].terrainCost = 9; // 9
                     }
                     break;
@@ -454,7 +455,7 @@ void setHexboardTexturesAndTerrain(HB)(HB h, Globals g)
                         h.hexes[r][c].textures ~= g.textures[Ids.solidBlue];
                         h.spots[r][c].terrainCost = 999; // 999
                     }
-                    break;
+                    break; +/
                 default: break;
             }
             //hexes[r][c].texture = g.textures[a];
@@ -820,6 +821,11 @@ void displayHexTextures(HB)(HB h)
                     dst.h = h.sc.perpendicular;
                     
                     //writeln("dst = ", dst);
+                    
+                    dst.x--;  // create a tiny offset of testure destination rectangle
+                    dst.y--;  // so as to get rid of hex edge bleed through 
+                    dst.w++;
+                    dst.h++;
 
                     /+
                     SDL_RenderCopy(SDL_Renderer* renderer, DL_Texture* texture,

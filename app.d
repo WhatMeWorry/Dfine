@@ -34,7 +34,7 @@ Should each hex board have an associated windows/screen???  It would simply para
 Or will this cause problems further down the road?
 +/
 
-module app;
+//module app;
 
 import utilities.sdl_timing;
 import hexboard;
@@ -105,6 +105,7 @@ within that SDL_Window. It also keeps track the settings related to the renderin
 
  
 Globals g;  // put all the global variables together in one place
+
 
 
 int main() 
@@ -235,8 +236,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 900;
     g.sdl.screenHeight = 900;
 
-    uint rows = 20;
-    uint cols = 20;
+    uint rows = 15;
+    uint cols = 15;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
     
@@ -337,7 +338,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         h.drawHexBoard;
                     }
 
-                    if( event.key.keysym.sym == SDLK_F3 )
+                    if( event.key.keysym.sym == SDLK_F1 )
                     {
                         import std.process : executeShell;
                         //executeShell("cls");
@@ -361,12 +362,16 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         begin.c = 0;
                         //end.r = h.lastRow;
                         //end.c = h.lastColumn;
-                        end.r = h.lastRow;
-                        end.c = h.lastColumn;
+                        
+                        //end.r = h.lastRow;
+                        //end.c = h.lastColumn;
+                        
+                        end.r = h.selectedHex.row;
+                        end.c = h.selectedHex.col;
 
                         //findShortestPath( h, g, begin, end );
 
-                        ////findShortestPathRedBlack( h, g, begin, end );
+                        findShortestPathRedBlack( h, g, begin, end );
 
                         writeln(watch.peek()); 
 
@@ -480,3 +485,9 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     }
     return 0;
 }
+
+
+
+
+
+

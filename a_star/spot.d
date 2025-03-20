@@ -18,6 +18,27 @@ import std.container : RedBlackTree;
 
 import windows.simple_directmedia_layer;
 
+import bindbc.sdl;  // SDL_* all remaining declarations
+
+struct Spot
+{
+    //@disable this();   // disables default constructor
+
+    Location location = Location(-1,-1);   // each spot needs to know where it is on the hexboard
+
+    Location[6] neighbors = [Location(-1,-1), Location(-1,-1), 
+                             Location(-1,-1), Location(-1,-1), 
+                             Location(-1,-1), Location(-1,-1)];  // ignoring edges, each hex has 6 adjoining neighbors
+    uint f;
+    uint g;
+    uint h;
+    Location previous = Location(-1,-1);
+    uint terrainCost;
+}
+
+uint tempG;
+ulong c;
+
 
 void debugSpots(HB)(ref HB h)
 {
@@ -26,10 +47,15 @@ void debugSpots(HB)(ref HB h)
     {
         foreach(j; 0..(h.columns))
         {
-        /+
-            writeln(h.spots[i][j].location, "  f g h = ", h.spots[i][j].f, " ", h.spots[i][j].g, " ", 
-                    h.spots[i][j].h, "  terrain = ", h.spots[i][j].terrainCost, "  previous = ", h.spots[i][j].previous);
-        +/
+            writeln("i,j = ", i, ",", j);
+            writeln("location = ", h.spots[i][j].location);
+            foreach(n; h.spots[i][j].neighbors)
+            {
+                writeln("n = ", n);
+            }
+            writeln("f g h = ", h.spots[i][j].f, " ", h.spots[i][j].g, " ", h.spots[i][j].h);
+            writeln("terrain = ", h.spots[i][j].terrainCost);
+            //writeln("previous = ", h.spots[i][j].previous);
         }
     }
 }
@@ -68,24 +94,6 @@ void writeAndPause(string s)
 }
 
 
-struct Spot
-{
-    //@disable this();   // disables default constructor
-
-    Location location = Location(-1,-1);   // each spot needs to know where it is on the hexboard
-
-    Location[6] neighbors = [Location(-1,-1), Location(-1,-1), 
-                             Location(-1,-1), Location(-1,-1), 
-                             Location(-1,-1), Location(-1,-1)];  // ignoring edges, each hex has 6 adjoining neighbors
-    uint f;
-    uint g;
-    uint h;
-    Location previous = Location(-1,-1);
-    uint terrainCost;
-}
-
-uint tempG;
-ulong c;
 
 
 
@@ -428,7 +436,7 @@ struct Node
 
 
 
-
+/+
 
 void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
 {
@@ -553,7 +561,7 @@ void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
     }
     //writeln("open is empty");
 }
-
++/
 
 
 
@@ -573,6 +581,8 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
     // value_type[key_type] associative_array_name;
 
     // int[string] dayNumbers;	
+    
+    h.debugSpots;
 
     uint[Location] openAA;  // open set associative array
     uint[Location] closedAA;  // closed set associative array
@@ -700,8 +710,24 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
             }
         }
         writeln("finished with neighbors for current");
+        writeln("Contents of openAA ==================================================");
+        displayContentsOfSet(openAA, h, g, Ids.greenTriangle);
+        writeln("Contents of closedAA ==================================================");
+        displayContentsOfSet(closedAA, h, g, Ids.redTriangle);
+        h.displayHexTextures;
+        SDL_RenderPresent(g.sdl.renderer);
+        writeAndPause("PAUSED");
+        
     }
     //writeln("open is empty");
 
 }
 
+void displayContentsOfSet(HB)(uint[Location] set, ref HB h, Globals g, Ids id)
+{
+    foreach (elem; set.byKeyValue())   // the set is implemented with an associative array 
+    {
+        writeln("Key:", elem.key, ", Value:", elem.value);
+        h.hexes[elem.key.r][elem.key.c].textures ~= g.textures[/+Ids.greenTriangle+/id];
+    }
+}
