@@ -182,7 +182,7 @@ struct AStar
             if( neighbor == end ) 
                 return true;
 
-            if( neighbor.isValid(m) && m.m[neighbor.y][neighbor.x] != 1 )
+            if( neighbor.isValid(m) && m.m[neighbor.y][neighbor.x] != 1 )  // on map not a wall
             {
                 nc = stepCost + n.cost;
                 dist = calcDist( neighbor );

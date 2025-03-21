@@ -573,6 +573,8 @@ void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
     //minPriorityQueue closed;
     
 
+
+/+
 void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location end)
 {
     // open set contains nodes that need to be evaluated
@@ -722,6 +724,8 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
     //writeln("open is empty");
 
 }
++/
+
 
 void displayContentsOfSet(HB)(uint[Location] set, ref HB h, Globals g, Ids id)
 {
@@ -730,4 +734,156 @@ void displayContentsOfSet(HB)(uint[Location] set, ref HB h, Globals g, Ids id)
         writeln("Key:", elem.key, ", Value:", elem.value);
         h.hexes[elem.key.r][elem.key.c].textures ~= g.textures[/+Ids.greenTriangle+/id];
     }
+}
+
+
+
+void findShortestPathRB(HB)(ref HB h, Globals g, Location begin, Location end)
+{
+    // open set contains nodes that need to be evaluated
+    // closed set contains all nodes that have finished being evaluated. Don't need to revisit
+	
+    // value_type[key_type] associative_array_name;
+
+    // int[string] dayNumbers;	
+    
+    h.debugSpots;
+
+    uint[Location] openAA;  // open set associative array
+    uint[Location] closedAA;  // closed set associative array
+
+    auto open = new RedBlackTree!(Node, "a.f < b.f", true);    // true: allowDuplicates
+    auto closed = new RedBlackTree!(Node, "a.f < b.f", true);
+
+    Location[] path;
+
+    Node current; // current is the node in open having the lowest f score 
+
+    Spot start = h.spots[begin.r][begin.c];  // start is a full node, not just a location
+
+    start.g = 0;  // the beginning of the path as no history (of walked spots)
+    start.h = heuristic(start.location, end);  // heuristic
+    start.f = start.g + start.h;
+
+    h.spots[begin.r][begin.c] = start;
+ 
+    Node s = Node(start.location, start.f);
+
+    open.insert(s);  // put the start node on the open set (leave its f at zero)
+    openAA[s.location] = s.f;
+
+/+
+    if (s.location in openAA)
+    {
+        writeln("s.location is in openAA");
+    }
+
+    openAA.remove(s.location);
+
+    if (s.location !in openAA)
+    {
+        writeln("s.location is not in openAA");
+    }
++/
+    writeln("open = ", open);
+
+    //while (open.isNotEmpty)     // while there are spots that still need evaluating
+    while (openAA.isNotEmpty)
+    {
+        current = open.front;  // GETS the the node with the SMALLEST f value to current
+        open.removeFront;      // and remove it from the open min priority queue
+        openAA.remove(current.location);
+        
+        writeln("current = ", current);
+
+        if (current.location == end)
+        {
+            Location here = h.spots[end.r][end.c].location;
+            while (here != invalidLoc)
+            {
+                path ~= here;
+                here = h.spots[here.r][here.c].previous;
+            }
+
+            foreach( p; path)
+            {
+                //writeln("p = ", p);
+                h.setHexTexture(g, p, Ids.blackDot);
+            }
+
+            return;
+        }
+
+        writeln("insert current");
+
+        closed.insert(current);
+        closedAA[current.location] = current.f;
+
+        Node[] neighbors = getAdjNeighbors(current.location, h);   // get neighbors of current and cull out the (-1,-1)
+
+        writeln("neighbors = ", neighbors);
+
+        // Time 32:15 in Coding Train Youtube video  all neighbors will be added to open set, 
+        // but before we put them in the open set, we need to evaluate them
+        // What if neighbor is in the closed set?
+
+        foreach(neighbor; neighbors)   // for each neighbor of current
+        {
+            Spot neighborSpot = h.spots[neighbor.location.r][neighbor.location.c];
+            
+            writeln("lookin at neighbor ", neighbor);
+
+            if (neighbor.location !in closedAA)
+            {
+                writeln("neighbor is not in closed set");
+            
+                uint currentG = h.spots[current.location.r][current.location.c].g;
+                uint neighborG = h.spots[neighbor.location.r][neighbor.location.c].terrainCost;
+                uint neighborH = heuristic(neighbor.location, end);
+
+                tempG = currentG + neighborG;
+
+                // is this a better path than before?
+
+                //if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
+                if (neighbor.location !in openAA)
+                {
+                    //open ~= neighbor;
+                    openAA[neighbor.location] = neighbor.f;  // Add to Associative Array
+                    open.insert(neighbor);                   // Add to Red Black Tree
+                    
+                }
+                else
+                {
+                    writeln("neighbor was in open");
+                    if (tempG >= neighborSpot.g)
+                    {
+                        //writeln("No, it is not a better path");
+                        continue;
+                    }
+                } 
+
+                h.spots[neighbor.location.r][neighbor.location.c].g = tempG;
+                
+                h.spots[neighbor.location.r][neighbor.location.c].h = neighborH;
+
+                h.spots[neighbor.location.r][neighbor.location.c].f = tempG + neighborH;
+
+                h.spots[neighbor.location.r][neighbor.location.c].previous = current.location;
+
+                //debugSpots( h );
+            }
+        }
+        writeln("finished with neighbors for current");
+        writeln("Contents of openAA ==================================================");
+        displayContentsOfSet(openAA, h, g, Ids.greenTriangle);
+        writeln("Contents of closedAA ==================================================");
+        displayContentsOfSet(closedAA, h, g, Ids.redTriangle);
+        h.displayHexTextures;
+        SDL_RenderPresent(g.sdl.renderer);
+        writeAndPause("PAUSED");
+        
+    }
+    //writeln("open is empty");
+
 }

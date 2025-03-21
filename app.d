@@ -34,8 +34,10 @@ Should each hex board have an associated windows/screen???  It would simply para
 Or will this cause problems further down the road?
 +/
 
-//module app;
+module app;
 
+
+import set;
 import utilities.sdl_timing;
 import hexboard;
 import select_hex;
@@ -111,6 +113,51 @@ Globals g;  // put all the global variables together in one place
 int main() 
 {
 
+Set s;
+writeln("set = ", s);
+
+
+NodeX n1 = NodeX( Locale(1,2), 33);
+NodeX n2 = NodeX( Locale(3,4), 12);
+NodeX n3 = NodeX( Locale(5,6), 77);
+NodeX n4 = NodeX( Locale(7,8), 5);
+
+s.put(n1);
+s.put(n2);
+s.put(n3);
+s.put(n4);
+
+s.display;
+
+NodeX tmp;
+tmp = s.getMin;
+writeln("getMin returned ", tmp);
+s.display;
+tmp = s.getMin;
+writeln("getMin returned ", tmp);
+s.display;
+tmp = s.getMin;
+writeln("getMin returned ", tmp);
+s.display;
+tmp = s.getMin;
+writeln("getMin returned ", tmp);
+s.display;
+tmp = s.getMin;
+writeln("getMin returned ", tmp);
+s.display;
+tmp = s.getMin;
+writeln("getMin returned ", tmp);
+s.display;
+
+/+
+s.display;
+tmp = s.getMin;
+s.display;
+tmp = s.getMin;;
+s.display;
+tmp = s.getMin;
+writeAndPause("HEY");
++/
 
 /+ 
 
@@ -369,9 +416,9 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         end.r = h.selectedHex.row;
                         end.c = h.selectedHex.col;
 
-                        //findShortestPath( h, g, begin, end );
+                        findShortestPathRB( h, g, begin, end );
 
-                        findShortestPathRedBlack( h, g, begin, end );
+                        //findShortestPathRedBlack( h, g, begin, end );
 
                         writeln(watch.peek()); 
 
