@@ -112,10 +112,8 @@ Globals g;  // put all the global variables together in one place
 
 int main() 
 {
-
+/+
 Set s;
-writeln("set = ", s);
-
 
 NodeX n1 = NodeX( Locale(1,2), 33);
 NodeX n2 = NodeX( Locale(3,4), 12);
@@ -130,34 +128,20 @@ s.put(n4);
 s.display;
 
 NodeX tmp;
-tmp = s.getMin;
-writeln("getMin returned ", tmp);
+tmp = s.removeMin;
+writeln("removeMin returned ", tmp);
 s.display;
-tmp = s.getMin;
-writeln("getMin returned ", tmp);
+tmp = s.removeMin;
+writeln("removeMin returned ", tmp);
 s.display;
-tmp = s.getMin;
-writeln("getMin returned ", tmp);
+tmp = s.removeMin;
+writeln("removeMin returned ", tmp);
 s.display;
-tmp = s.getMin;
-writeln("getMin returned ", tmp);
+tmp = s.removeMin;
+writeln("removeMin returned ", tmp);
 s.display;
-tmp = s.getMin;
-writeln("getMin returned ", tmp);
-s.display;
-tmp = s.getMin;
-writeln("getMin returned ", tmp);
-s.display;
-
-/+
-s.display;
-tmp = s.getMin;
-s.display;
-tmp = s.getMin;;
-s.display;
-tmp = s.getMin;
-writeAndPause("HEY");
 +/
+
 
 /+ 
 
