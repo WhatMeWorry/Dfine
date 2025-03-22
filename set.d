@@ -1,20 +1,12 @@
 
-
-/+ Unit tests can be run in this module with the following commands:
-rdmd -main -unittest set.d
-or
-dmd -main -unittest set.d
-.\set.exe
-or with coverage
-dmd -main -unittest -cov set.d
-.\set.exe
-creates a set.lst file with code coverage statistics
-+/
-
+// Set is a user created data type which acts as a A* set container. This set holds 
+// A* nodes which consist of a location and its cost.  The set provides four functions:
+// add(node), node = removeMin(), empty() or notEmpty().  Retrieving nodes always results
+// in the node being removed from the set  will always result in the smallest cost node being
+//  returned. In cases of ties, order is considered random.
 
 module set;
 
-//import std.container : RedBlackTree;
 import std.container.rbtree;
 import std.stdio;
 import std.range : empty;  // for aa 
@@ -45,11 +37,7 @@ struct Node
 }
 
 
-// Set is a user created data type which acts as a container. This set holds 
-// A* nodes which consist of a location and its cost.  The set provides four functions:
-// put(i), i = removeMin(), empty() or notEmpty().  Retrieving nodes will always
-// result in the minimal cost node beign returned. In cases of ties, no order is 
-// guaranteed.
+
 
 struct Set
 {
@@ -59,10 +47,7 @@ struct Set
         rbt.insert(node);
     }
     
-    bool isNotEmpty()
-    {
-        return (!isEmpty);
-    }
+    bool isNotEmpty() { return (!isEmpty); }
     
     bool isEmpty()
     {
@@ -103,14 +88,6 @@ struct Set
         {
             writeln("Key: ", keyValuePair.key, ", Value: ", keyValuePair.value);
         }
-        /+
-        while(!rbt.empty)   // destructive step through
-        {
-            NodeX e = rbt.front;
-            writeln("e = ", e);
-            rbt.removeFront;
-        }
-        +/
         writeln("red black tree of set has");
         foreach(node; rbt) 
         {
@@ -125,6 +102,16 @@ struct Set
 
 
 
+/+ Unit tests can be run in this module with the following commands:
+rdmd -main -unittest set.d
+or
+dmd -main -unittest set.d
+.\set.exe
+or with coverage
+dmd -main -unittest -cov set.d
+.\set.exe
+creates a set.lst file with code coverage statistics
++/
 
 
 unittest
