@@ -66,7 +66,7 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 
 import bindbc.loader;
 
-import redblacktree : Location;
+import datatypes : Location;
 
 /+
 SDL coordinates, like most graphic engine coordinates, start at the top left corner of 
@@ -267,8 +267,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 900;
     g.sdl.screenHeight = 900;
 
-    uint rows = 15;
-    uint cols = 15;
+    uint rows = 5;
+    uint cols = 5;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
     
@@ -389,18 +389,17 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                         Location begin;
                         Location end;
-                        begin.r = 0;
-                        begin.c = 0;
-                        //end.r = h.lastRow;
-                        //end.c = h.lastColumn;
                         
-                        //end.r = h.lastRow;
-                        //end.c = h.lastColumn;
+                        begin.r = 2;
+                        begin.c = 2;
                         
-                        end.r = h.selectedHex.row;
-                        end.c = h.selectedHex.col;
+                        end.r = h.lastRow;
+                        end.c = h.lastColumn;
 
-                        findShortestPathRB( h, g, begin, end );
+                        //end.r = h.selectedHex.row;
+                        //end.c = h.selectedHex.col;
+
+                        findShortestPathNEW( h, g, begin, end );
 
                         //findShortestPathRedBlack( h, g, begin, end );
 

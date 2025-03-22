@@ -10,9 +10,7 @@ import std.stdio;
 import std.math;
 import std.conv : to;
 import hexmath : isEven, isOdd;
-
-//import honeycomb;
-import redblacktree : Location;
+import datatypes : Location;
 
 struct Slope
 {

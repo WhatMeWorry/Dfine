@@ -1,9 +1,9 @@
 
 // Set is a user created data type which acts as a A* set container. This set holds 
-// A* nodes which consist of a location and its cost.  The set provides four functions:
-// add(node), node = removeMin(), empty() or notEmpty().  Retrieving nodes always results
-// in the node being removed from the set  will always result in the smallest cost node being
-//  returned. In cases of ties, order is considered random.
+// A* nodes which consist of a Location and its cost.  The set provides four functions:
+// addTo(node), node = removeMin(), empty() or notEmpty().  Retrieving nodes always result
+// in the node being removed from the set and will always result in the smallest cost
+// node being returned. In cases of ties, order should be considered random.
 
 module set;
 
@@ -11,27 +11,23 @@ import std.container.rbtree;
 import std.stdio;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
+import datatypes : Location;
 
-struct Locale   // holds a hex of a hexboard
-{
-    int r;  // row of hexboard
-    int c;  // column of hexboard
-}
 
-struct Node
+struct SetNode
 {
-    this(Locale location, uint f) 
+    this(Location locale, uint f) 
     {
-        this.location = location;
+        this.locale = locale;
         this.f = f;
     }
-    Locale location;  
+    Location locale;  
     uint f;
     
-    bool opEquals(Node other) const 
+    bool opEquals(SetNode other) const 
     {
-        return (this.location.r == other.location.r) && 
-               (this.location.c == other.location.c) &&
+        return (this.locale.r == other.locale.r) && 
+               (this.locale.c == other.locale.c) &&
                (this.f == other.f);
     }
 }
@@ -41,10 +37,25 @@ struct Node
 
 struct Set
 {
-    void add(Node node)   // add node in both associative array and red black tree
+    void addTo(SetNode node)  // add element to set
     {
-        aa[node.location] = node.f;
-        rbt.insert(node);
+        rbt.insert(node);          // add to red black tree, rbt
+        aa[node.locale] = node.f;  // add to associative array, aa
+        writeln("rbt.length = ", rbt.length);
+    }
+    
+    bool isIn(SetNode node)
+    {
+        //return (node.locale in aa);  // "key1" in arr)
+        if (node.locale in aa)
+            return true;
+        else
+            return false;
+    }
+    
+    bool isNotIn(SetNode node)
+    {
+        return (node.locale !in aa);
     }
     
     bool isNotEmpty() { return (!isEmpty); }
@@ -73,11 +84,11 @@ struct Set
         }
     }
 
-    Node removeMin()
+    SetNode removeMin()
     {
-        Node min = rbt.front;   // get the front of the rbt which holds smallest f value
+        SetNode min = rbt.front; // get the front of the rbt which holds smallest f value
         rbt.removeFront;         // and remove it from the rbt
-        aa.remove(min.location); // also remove the node from the associative array
+        aa.remove(min.locale);   // also remove the node from the associative array
         return min;
     }
 
@@ -89,15 +100,17 @@ struct Set
             writeln("Key: ", keyValuePair.key, ", Value: ", keyValuePair.value);
         }
         writeln("red black tree of set has");
+        writeln("-------------------------------");
         foreach(node; rbt) 
         {
             writeln("node: ", node);
         }
+        writeln("-------------------------------");
     }
+    //  value[key] aa
+    uint[Location] aa;  // associative array will hold the Location portion of the node
 
-    uint[Locale] aa;  // associative array will hold the Locale portion of the node
-
-    auto rbt = new RedBlackTree!(Node, "a.f < b.f", true);    // true: allowDuplicates
+    auto rbt = new RedBlackTree!(SetNode, "a.f < b.f", true);    // true: allowDuplicates
 }
 
 
@@ -118,34 +131,60 @@ unittest
 {
 Set s;
 
-Node n1 = Node( Locale(1,2),   33);  
-Node n2 = Node( Locale(3,4),   20);  // duplicate
-Node n3 = Node( Locale(5,6),    7);
-Node n4 = Node( Locale(7,8),   11);
-Node n5 = Node( Locale(9,10),  20);  // duplicate
-Node n6 = Node( Locale(11,12), 97);
-Node n7 = Node( Locale(13,14), 20);  // duplicate
-Node n8 = Node( Locale(13,14),  1);
+SetNode n1 = SetNode( Location(1,2),   33);  
+SetNode n2 = SetNode( Location(3,4),   20);  // duplicate
+SetNode n3 = SetNode( Location(5,6),    7);
+SetNode n4 = SetNode( Location(7,8),   11);
+SetNode n5 = SetNode( Location(9,10),  20);  // duplicate
+SetNode n6 = SetNode( Location(11,12), 97);
+SetNode n7 = SetNode( Location(13,14), 20);  // duplicate
+SetNode n8 = SetNode( Location(13,14),  1);
 
-s.add(n1);
-s.add(n2);
-s.add(n3);
-s.add(n4);
-s.add(n5);
-s.add(n6);
-s.add(n7);
-s.add(n8);
+s.addTo(n1);
+s.display;
+s.addTo(n2);
+s.display;
+s.addTo(n3);
+s.display;
+s.addTo(n4);
+s.display;
+s.addTo(n5);
+s.display;
+s.addTo(n6);
+s.display;
+s.addTo(n7);
+s.display;
+s.addTo(n8);
 
 
 s.display;
 
 
-Node n;
+SetNode n;
 while( s.isNotEmpty() ) 
 {
     n = s.removeMin();
     writeln("removeMin returned ", n);
+    writeln("s.isEmpty() = ", s.isEmpty());
 }
+writeln("s.isEmpty() = ", s.isEmpty());
+
+SetNode n9a = SetNode( Location(15,16), 25);  // duplicate
+SetNode n9b = SetNode( Location(15,16), 25);
+
+assert(n9a == n9b);   // test opEquals
+
+
+s.addTo(n1);
+s.addTo(n2);
+s.addTo(n3);
+s.addTo(n4);
+s.addTo(n5);
+s.addTo(n6);
+s.addTo(n7);
+s.addTo(n8);
+
+
 
 }
 

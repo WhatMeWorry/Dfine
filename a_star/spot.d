@@ -7,6 +7,7 @@ import std.algorithm.mutation : remove;
 import std.math : ceil, floor;
 import std.string;
 import core.stdc.stdlib;  // for exit()
+import set;
 
 import hexboard;
 import hexmath;
@@ -15,6 +16,7 @@ import textures.texture;
 import distance;
 import redblacktree;
 import std.container : RedBlackTree;
+import datatypes : Location;
 
 import windows.simple_directmedia_layer;
 
@@ -24,7 +26,7 @@ struct Spot
 {
     //@disable this();   // disables default constructor
 
-    Location location = Location(-1,-1);   // each spot needs to know where it is on the hexboard
+    Location locale = Location(-1,-1);   // each spot needs to know where it is on the hexboard
 
     Location[6] neighbors = [Location(-1,-1), Location(-1,-1), 
                              Location(-1,-1), Location(-1,-1), 
@@ -48,7 +50,7 @@ void debugSpots(HB)(ref HB h)
         foreach(j; 0..(h.columns))
         {
             writeln("i,j = ", i, ",", j);
-            writeln("location = ", h.spots[i][j].location);
+            writeln("locale = ", h.spots[i][j].locale);
             foreach(n; h.spots[i][j].neighbors)
             {
                 writeln("n = ", n);
@@ -239,7 +241,7 @@ bool includes(Spot[] set, Location element)
 {
     foreach(e; set)
     {
-        if (e.location == element)
+        if (e.locale == element)
             return true;
     }
     return false;
@@ -351,20 +353,20 @@ Location[] getNeighbors(HB)(Location loc, ref HB h)
 }
 
 
-Node[] getAdjNeighbors(HB)(Location home, ref HB h)
+SetNode[] getAdjNeighbors(HB)(Location home, ref HB h)
 {
-    Node[] nodes;
-    Node node;
+    SetNode node;       // a neighbor
+    SetNode[] nodes;    // all neighbors
 
     writeln("h.spots[home.r][home.c].neighbors = ", h.spots[home.r][home.c].neighbors);
 
     //Node[6] neighbors = h.spots[home.r][home.c].neighbors;
     
-    foreach(n; h.spots[home.r][home.c].neighbors)
+    foreach(neighbor; h.spots[home.r][home.c].neighbors)
     {
-        if (n != invalidLoc)  // strip out invalid neighbors (edge of hexboard)
+        if (neighbor != invalidLoc)  // strip out invalid neighbors (edge of hexboard)
         {
-            node.location = n;
+            node.locale = neighbor;
             node.f = 0;
             nodes ~= node;
         }
@@ -423,12 +425,12 @@ Location invalidLoc = { -1, -1 };
 /+
 struct Node
 {
-    this(Location location, uint f) 
+    this(Location locale, uint f) 
     {
-        this.location = location;
+        this.locale = locale;
         this.f = f;
     }
-    Location location;  
+    Location locale;  
     uint f;
 }
 +/
@@ -454,12 +456,12 @@ void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
     //  Path finding starts here
     //===========================================================================
 
-    Spot start;  // start is a full node, not just a location
+    Spot start;  // start is a full node, not just a locale
 
     start = h.spots[begin.r][begin.c];
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
-    start.h = heuristic(start.location, end);  // heuristic
+    start.h = heuristic(start.locale, end);  // heuristic
     start.f = start.g + start.h;
 
     //writeln("start.g = ", start.g);
@@ -468,7 +470,7 @@ void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
 
     h.spots[begin.r][begin.c] = start;
 
-    open ~= start.location;  // put the start node on the openList (leave its f at zero)
+    open ~= start.locale;  // put the start node on the openList (leave its f at zero)
 
     while (open.isNotEmpty)     // while there are spots that still need evaluating
     {
@@ -485,7 +487,7 @@ void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
 
         if (current == end)
         {
-            Location here = h.spots[end.r][end.c].location;
+            Location here = h.spots[end.r][end.c].locale;
             while (here != invalidLoc)
             {
                 path ~= here;
@@ -596,30 +598,30 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
 
     Node current; // current is the node in open having the lowest f score 
 
-    Spot start = h.spots[begin.r][begin.c];  // start is a full node, not just a location
+    Spot start = h.spots[begin.r][begin.c];  // start is a full node, not just a locale
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
-    start.h = heuristic(start.location, end);  // heuristic
+    start.h = heuristic(start.locale, end);  // heuristic
     start.f = start.g + start.h;
 
     h.spots[begin.r][begin.c] = start;
  
-    Node s = Node(start.location, start.f);
+    Node s = Node(start.locale, start.f);
 
     open.insert(s);  // put the start node on the open set (leave its f at zero)
-    openAA[s.location] = s.f;
+    openAA[s.locale] = s.f;
 
 /+
-    if (s.location in openAA)
+    if (s.locale in openAA)
     {
-        writeln("s.location is in openAA");
+        writeln("s.locale is in openAA");
     }
 
-    openAA.remove(s.location);
+    openAA.remove(s.locale);
 
-    if (s.location !in openAA)
+    if (s.locale !in openAA)
     {
-        writeln("s.location is not in openAA");
+        writeln("s.locale is not in openAA");
     }
 +/
     writeln("open = ", open);
@@ -629,13 +631,13 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
     {
         current = open.front;  // GETS the the node with the SMALLEST f value to current
         open.removeFront;      // and remove it from the open min priority queue
-        openAA.remove(current.location);
+        openAA.remove(current.locale);
         
         writeln("current = ", current);
 
-        if (current.location == end)
+        if (current.locale == end)
         {
-            Location here = h.spots[end.r][end.c].location;
+            Location here = h.spots[end.r][end.c].locale;
             while (here != invalidLoc)
             {
                 path ~= here;
@@ -654,9 +656,9 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
         writeln("insert current");
 
         closed.insert(current);
-        closedAA[current.location] = current.f;
+        closedAA[current.locale] = current.f;
 
-        Node[] neighbors = getAdjNeighbors(current.location, h);   // get neighbors of current and cull out the (-1,-1)
+        Node[] neighbors = getAdjNeighbors(current.locale, h);   // get neighbors of current and cull out the (-1,-1)
 
         writeln("neighbors = ", neighbors);
 
@@ -666,27 +668,27 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
-            Spot neighborSpot = h.spots[neighbor.location.r][neighbor.location.c];
+            Spot neighborSpot = h.spots[neighbor.locale.r][neighbor.locale.c];
             
             writeln("lookin at neighbor ", neighbor);
 
-            if (neighbor.location !in closedAA)
+            if (neighbor.locale !in closedAA)
             {
                 writeln("neighbor is not in closed set");
             
-                uint currentG = h.spots[current.location.r][current.location.c].g;
-                uint neighborG = h.spots[neighbor.location.r][neighbor.location.c].terrainCost;
-                uint neighborH = heuristic(neighbor.location, end);
+                uint currentG = h.spots[current.locale.r][current.locale.c].g;
+                uint neighborG = h.spots[neighbor.locale.r][neighbor.locale.c].terrainCost;
+                uint neighborH = heuristic(neighbor.locale, end);
 
                 tempG = currentG + neighborG;
 
                 // is this a better path than before?
 
                 //if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
-                if (neighbor.location !in openAA)
+                if (neighbor.locale !in openAA)
                 {
                     //open ~= neighbor;
-                    openAA[neighbor.location] = neighbor.f;  // Add to Associative Array
+                    openAA[neighbor.locale] = neighbor.f;  // Add to Associative Array
                     open.insert(neighbor);                   // Add to Red Black Tree
                     
                 }
@@ -700,13 +702,13 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
                     }
                 } 
 
-                h.spots[neighbor.location.r][neighbor.location.c].g = tempG;
+                h.spots[neighbor.locale.r][neighbor.locale.c].g = tempG;
                 
-                h.spots[neighbor.location.r][neighbor.location.c].h = neighborH;
+                h.spots[neighbor.locale.r][neighbor.locale.c].h = neighborH;
 
-                h.spots[neighbor.location.r][neighbor.location.c].f = tempG + neighborH;
+                h.spots[neighbor.locale.r][neighbor.locale.c].f = tempG + neighborH;
 
-                h.spots[neighbor.location.r][neighbor.location.c].previous = current.location;
+                h.spots[neighbor.locale.r][neighbor.locale.c].previous = current.locale;
 
                 //debugSpots( h );
             }
@@ -738,150 +740,80 @@ void displayContentsOfSet(HB)(uint[Location] set, ref HB h, Globals g, Ids id)
 
 
 
-void findShortestPathRB(HB)(ref HB h, Globals g, Location begin, Location end)
+void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
 {
-    // open set contains nodes that need to be evaluated
-    // closed set contains all nodes that have finished being evaluated. Don't need to revisit
-	
-    // value_type[key_type] associative_array_name;
-
-    // int[string] dayNumbers;	
     
-    h.debugSpots;
+    writeln("begin and end = ", begin, " and ", end);
 
-    uint[Location] openAA;  // open set associative array
-    uint[Location] closedAA;  // closed set associative array
-
-    auto open = new RedBlackTree!(Node, "a.f < b.f", true);    // true: allowDuplicates
-    auto closed = new RedBlackTree!(Node, "a.f < b.f", true);
+    Set open;
+    Set closed;
 
     Location[] path;
 
-    Node current; // current is the node in open having the lowest f score 
+    SetNode current; // current is the node in open set having the lowest f score 
 
-    Spot start = h.spots[begin.r][begin.c];  // start is a full node, not just a location
+    Spot start = h.spots[begin.r][begin.c];  // start is a full node, not just a locale
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
-    start.h = heuristic(start.location, end);  // heuristic
+    start.h = heuristic(start.locale, end);  // heuristic
     start.f = start.g + start.h;
 
     h.spots[begin.r][begin.c] = start;
  
-    Node s = Node(start.location, start.f);
+    SetNode s;
+    s.locale = start.locale;
+    s.f = start.f;
 
-    open.insert(s);  // put the start node on the open set (leave its f at zero)
-    openAA[s.location] = s.f;
+    open.addTo(s);  // put the start node on the open set (leave its f at zero)
 
-/+
-    if (s.location in openAA)
+    while (open.isNotEmpty)
     {
-        writeln("s.location is in openAA");
-    }
+        current = open.removeMin();  // get the node with the smallest f value
 
-    openAA.remove(s.location);
-
-    if (s.location !in openAA)
-    {
-        writeln("s.location is not in openAA");
-    }
-+/
-    writeln("open = ", open);
-
-    //while (open.isNotEmpty)     // while there are spots that still need evaluating
-    while (openAA.isNotEmpty)
-    {
-        current = open.front;  // GETS the the node with the SMALLEST f value to current
-        open.removeFront;      // and remove it from the open min priority queue
-        openAA.remove(current.location);
-        
         writeln("current = ", current);
 
-        if (current.location == end)
+        writeln("begin and end = ", begin, " and ", end);
+
+        if (current.locale == end)
         {
-            Location here = h.spots[end.r][end.c].location;
+            Location here = h.spots[end.r][end.c].locale;
             while (here != invalidLoc)
             {
                 path ~= here;
                 here = h.spots[here.r][here.c].previous;
             }
-
             foreach( p; path)
             {
-                //writeln("p = ", p);
                 h.setHexTexture(g, p, Ids.blackDot);
             }
-
             return;
         }
 
         writeln("insert current");
 
-        closed.insert(current);
-        closedAA[current.location] = current.f;
+        closed.addTo(current);
+        
+        closed.display();
 
-        Node[] neighbors = getAdjNeighbors(current.location, h);   // get neighbors of current and cull out the (-1,-1)
-
-        writeln("neighbors = ", neighbors);
-
-        // Time 32:15 in Coding Train Youtube video  all neighbors will be added to open set, 
-        // but before we put them in the open set, we need to evaluate them
-        // What if neighbor is in the closed set?
+        SetNode[] neighbors = getAdjNeighbors(current.locale, h);   // get neighbors of current and cull out the (-1,-1)
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
-            Spot neighborSpot = h.spots[neighbor.location.r][neighbor.location.c];
-            
-            writeln("lookin at neighbor ", neighbor);
-
-            if (neighbor.location !in closedAA)
+            closed.display();
+            if (closed.isIn(neighbor))
             {
-                writeln("neighbor is not in closed set");
-            
-                uint currentG = h.spots[current.location.r][current.location.c].g;
-                uint neighborG = h.spots[neighbor.location.r][neighbor.location.c].terrainCost;
-                uint neighborH = heuristic(neighbor.location, end);
-
-                tempG = currentG + neighborG;
-
-                // is this a better path than before?
-
-                //if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
-                if (neighbor.location !in openAA)
-                {
-                    //open ~= neighbor;
-                    openAA[neighbor.location] = neighbor.f;  // Add to Associative Array
-                    open.insert(neighbor);                   // Add to Red Black Tree
-                    
-                }
-                else
-                {
-                    writeln("neighbor was in open");
-                    if (tempG >= neighborSpot.g)
-                    {
-                        //writeln("No, it is not a better path");
-                        continue;
-                    }
-                } 
-
-                h.spots[neighbor.location.r][neighbor.location.c].g = tempG;
-                
-                h.spots[neighbor.location.r][neighbor.location.c].h = neighborH;
-
-                h.spots[neighbor.location.r][neighbor.location.c].f = tempG + neighborH;
-
-                h.spots[neighbor.location.r][neighbor.location.c].previous = current.location;
-
-                //debugSpots( h );
-            }
+                break;
+            } 
+            writeln("neighbor = ", neighbor);
         }
-        writeln("finished with neighbors for current");
-        writeln("Contents of openAA ==================================================");
-        displayContentsOfSet(openAA, h, g, Ids.greenTriangle);
-        writeln("Contents of closedAA ==================================================");
-        displayContentsOfSet(closedAA, h, g, Ids.redTriangle);
-        h.displayHexTextures;
-        SDL_RenderPresent(g.sdl.renderer);
-        writeAndPause("PAUSED");
+
+        //displayContentsOfSet(openAA, h, g, Ids.greenTriangle);
+
+        //displayContentsOfSet(closedAA, h, g, Ids.redTriangle);
+        
+        //h.displayHexTextures;
+        //SDL_RenderPresent(g.sdl.renderer);
+        //writeAndPause("PAUSED");
         
     }
     //writeln("open is empty");

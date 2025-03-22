@@ -15,14 +15,10 @@ module redblacktree;
 
 //import std.container : RedBlackTree;
 import std.container.rbtree;
+import datatypes;
 
 import std.stdio;
 
-struct Location   // holds a hex of a hexboard
-{
-    int r;  // row of hexboard
-    int c;  // column of hexboard
-}
 
 struct Node
 {
@@ -59,9 +55,18 @@ unittest
     priorQ.insert(n2);
     priorQ.insert(n1);    
     priorQ.insert(n4);
+        foreach( i; priorQ )
+    {
+        writeln("i = ", i);
+    }
     priorQ.insert(n5);
     priorQ.insert(n7);
     priorQ.insert(n6);
+    
+    foreach( i; priorQ )
+    {
+        writeln("i = ", i);
+    }
 
     assert(n1 in priorQ);
     assert(n2 in priorQ,);

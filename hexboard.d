@@ -16,7 +16,7 @@ import hex;
 import textures.texture;
 import a_star.spot;
 import hexmath;
-import redblacktree : Location;
+import datatypes : Location;
 import windows.simple_directmedia_layer;
 import std.algorithm : min;
 
@@ -162,8 +162,8 @@ struct HexBoard(F,I)
         {
             foreach(j; 0..columns)
             {
-                spots[i][j].location.r = i;
-                spots[i][j].location.c = j;
+                spots[i][j].locale.r = i;
+                spots[i][j].locale.c = j;
             }
         }
 
