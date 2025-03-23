@@ -742,6 +742,56 @@ void displayContentsOfSet(HB)(uint[Location] set, ref HB h, Globals g, Ids id)
 
 void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
 {
+
+Set s1;
+
+s1.display();
+
+s1.setName("OPEN");
+
+Set s2;
+
+SetNode n1 = SetNode( Location(1,2),   33);  
+SetNode n2 = SetNode( Location(3,4),   20);  // duplicate
+SetNode n3 = SetNode( Location(3,6),    7);
+SetNode n4 = SetNode( Location(3,8),   11);
+SetNode n5 = SetNode( Location(9,10),  20);  // duplicate
+SetNode n6 = SetNode( Location(11,12), 97);
+SetNode n7 = SetNode( Location(13,14), 20);  // duplicate
+SetNode n8 = SetNode( Location(15,16),  1);
+SetNode n0;
+/+
+s1.addTo(n1);
+s1.addTo(n2);
+s1.addTo(n3);
+s1.addTo(n4);
+
+s2.addTo(n5);
+s2.addTo(n6);
+s2.addTo(n7);
+s2.addTo(n8);
++/
+
+n1.addTo(s1);
+n2.addTo(s1);
+n3.addTo(s1);
+n4.addTo(s1);
+
+n5.addTo(s2);
+n6.addTo(s2);
+n7.addTo(s2);
+n8.addTo(s2);
+
+s1.display;
+s2.display;
+
+
+
+
+
+
+
+
     
     writeln("begin and end = ", begin, " and ", end);
 
@@ -764,7 +814,7 @@ void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
     s.locale = start.locale;
     s.f = start.f;
 
-    open.addTo(s);  // put the start node on the open set (leave its f at zero)
+    s.addTo(open);  // put the start node on the open set (leave its f at zero)
 
     while (open.isNotEmpty)
     {
@@ -791,7 +841,7 @@ void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
 
         writeln("insert current");
 
-        closed.addTo(current);
+        current.addTo(closed);
         
         closed.display();
 

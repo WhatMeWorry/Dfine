@@ -32,6 +32,30 @@ struct SetNode
     }
 }
 
+void setName(Set s, string n)
+{ s.name = n; 
+  writeln("SETTING NAME"); }
+
+void addTo(SetNode node, Set s)  // add element to set
+{
+    writeln("s = ",s);
+    
+    s.aa[node.locale] = node.f;  // add to associative array, aa
+    s.rbt.insert(node);          // add to red black tree, rbt
+    writeln("s.aa.length = ", s.aa.length);
+} 
+
+void display(Set s)
+{
+    writeln("===========================================");
+    writeln("Associative Array of set has length ", s.aa.length);
+    foreach(keyValuePair; s.aa.byKeyValue()) 
+        { writeln("Key: ", keyValuePair.key, ", Value: ", keyValuePair.value); }
+    writeln("red black tree of set has length ", s.rbt.length);
+    foreach(node; s.rbt) 
+    { writeln("node: ", node); }
+    writeln("===========================================");
+}
 
 // can be called with: if (element.isIn(set)) 
 
@@ -45,12 +69,12 @@ bool isIn(SetNode node, Set s)  // is node in set?
 bool isNotIn(SetNode node, Set s) { return (node.locale !in s.aa); }  // !in returns a bool
 
 struct Set
-{
+{   /+
     void addTo(SetNode node)  // add element to set
     {
         rbt.insert(node);          // add to red black tree, rbt
         aa[node.locale] = node.f;  // add to associative array, aa
-    }
+    } +/
     
     bool isIn(SetNode node)
     {
@@ -65,21 +89,15 @@ struct Set
         if (aa.empty)
         {
             if (rbt.empty)
-            {
-                return true;   // both are empty
-            }
-            writeln("set's associative array is empty but not it's red black tree");
-            writeln("they should both be empty. Why are they out of sync?");
+                { return true; }  // both are empty
+            writeln("aa is empty; red black tree is not empty: out of sync");
             exit(-1);
         }
-        else  // aa is not empty
+        else
         {
             if (!rbt.empty)
-            {
-                return false;   // both are not empty
-            }
-            writeln("set's associative array is not empty but it's red black tree is");
-            writeln("they should both be empty. Why are they out of sync?");
+                { return false; } // both are not empty
+            writeln("aa is not empty; red black tree is empty: out of sync");
             exit(-1);
         }
     }
@@ -93,7 +111,8 @@ struct Set
         aa.remove(min.locale);   // also remove the node from the associative array
         return min;
     }
-
+     
+    /+
     void display()
     {
         writeln("----------snapshot start ----------------");
@@ -109,10 +128,13 @@ struct Set
         }
         writeln("----------snapshot end   ----------------");
     }
+    +/
     //  value[key] aa
     uint[Location] aa;  // associative array will hold the Location portion of the node
 
     auto rbt = new RedBlackTree!(SetNode, "a.f < b.f", true);    // true: allowDuplicates
+    
+    string name;
 }
 
 
