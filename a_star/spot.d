@@ -800,7 +800,9 @@ void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
             closed.display();
-            if (closed.isIn(neighbor))
+            //bool b = isInUFCS(neighbor, closed);
+            if (neighbor.isIn(closed))
+            //if (closed.isIn(neighbor))
             {
                 break;
             } 

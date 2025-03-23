@@ -2,8 +2,8 @@
 // Set is a user created data type which acts as a A* set container. This set holds 
 // A* nodes which consist of a Location and its cost.  The set provides four functions:
 // addTo(node), node = removeMin(), empty() or notEmpty().  Retrieving nodes always result
-// in the node being removed from the set and will always result in the smallest cost
-// node being returned. In cases of ties, order should be considered random.
+// in the node being removed from the set and will always return the smallest cost node.
+// In cases of ties, order should be considered random.
 
 module set;
 
@@ -33,7 +33,16 @@ struct SetNode
 }
 
 
+// can be called with: if (element.isIn(set)) 
 
+bool isIn(SetNode node, Set s)  // is node in set?
+{
+    // condition ? value_if_true : value_if_false
+    // return (a > b) ? a : b;
+    return ((node.locale in s.aa) ? true : false);  // in returns a uint* so needs ternary opertor
+}
+
+bool isNotIn(SetNode node, Set s) { return (node.locale !in s.aa); }  // !in returns a bool
 
 struct Set
 {
@@ -41,25 +50,16 @@ struct Set
     {
         rbt.insert(node);          // add to red black tree, rbt
         aa[node.locale] = node.f;  // add to associative array, aa
-        writeln("rbt.length = ", rbt.length);
     }
     
     bool isIn(SetNode node)
     {
-        //return (node.locale in aa);  // "key1" in arr)
-        if (node.locale in aa)
-            return true;
-        else
-            return false;
+        return ((node.locale in aa) ? true : false);   // "key" in associative array
     }
+
+    bool isNotIn(SetNode node) { return (node.locale !in aa); }
     
-    bool isNotIn(SetNode node)
-    {
-        return (node.locale !in aa);
-    }
-    
-    bool isNotEmpty() { return (!isEmpty); }
-    
+
     bool isEmpty()
     {
         if (aa.empty)
@@ -83,6 +83,8 @@ struct Set
             exit(-1);
         }
     }
+    
+    bool isNotEmpty() { return (!isEmpty); }
 
     SetNode removeMin()
     {
@@ -94,18 +96,18 @@ struct Set
 
     void display()
     {
+        writeln("----------snapshot start ----------------");
         writeln("Associative Array of set has");
         foreach(keyValuePair; aa.byKeyValue()) 
         {
             writeln("Key: ", keyValuePair.key, ", Value: ", keyValuePair.value);
         }
         writeln("red black tree of set has");
-        writeln("-------------------------------");
         foreach(node; rbt) 
         {
             writeln("node: ", node);
         }
-        writeln("-------------------------------");
+        writeln("----------snapshot end   ----------------");
     }
     //  value[key] aa
     uint[Location] aa;  // associative array will hold the Location portion of the node
@@ -131,59 +133,73 @@ unittest
 {
 Set s;
 
+// Note: node make sure the key, "Location", is unique in all nodes below. This constraint
+// will always exist in the A* algorithm
+
+
 SetNode n1 = SetNode( Location(1,2),   33);  
 SetNode n2 = SetNode( Location(3,4),   20);  // duplicate
-SetNode n3 = SetNode( Location(5,6),    7);
-SetNode n4 = SetNode( Location(7,8),   11);
+SetNode n3 = SetNode( Location(3,6),    7);
+SetNode n4 = SetNode( Location(3,8),   11);
 SetNode n5 = SetNode( Location(9,10),  20);  // duplicate
 SetNode n6 = SetNode( Location(11,12), 97);
 SetNode n7 = SetNode( Location(13,14), 20);  // duplicate
-SetNode n8 = SetNode( Location(13,14),  1);
+SetNode n8 = SetNode( Location(15,16),  1);
+SetNode n0;
 
 s.addTo(n1);
-s.display;
 s.addTo(n2);
-s.display;
 s.addTo(n3);
-s.display;
 s.addTo(n4);
-s.display;
 s.addTo(n5);
-s.display;
 s.addTo(n6);
-s.display;
 s.addTo(n7);
-s.display;
 s.addTo(n8);
 
 
 s.display;
 
+// UFCS calls
+if (n1.isIn(s))
+    writeln("n1 node is in set s");
+    
+if (n8.isIn(s))
+    writeln("n8 node is in set s");
+    
+if (n0.isIn(s))
+    writeln("n0 node is in set s"); 
+else
+    writeln("n0 node is NoT in set s"); 
+
+// non UFCS calls
+
+if (s.isIn(n1))
+    writeln("n1 node is in set s");
+    
+if (s.isIn(n0))
+    writeln("n0 node is in set s"); 
+else
+    writeln("n0 node is NoT in set s"); 
+    
+
 
 SetNode n;
-while( s.isNotEmpty() ) 
+while ( s.isNotEmpty() ) 
 {
     n = s.removeMin();
     writeln("removeMin returned ", n);
-    writeln("s.isEmpty() = ", s.isEmpty());
 }
+
+writeln("Set should now be empty");
+s.display;
+
 writeln("s.isEmpty() = ", s.isEmpty());
+
 
 SetNode n9a = SetNode( Location(15,16), 25);  // duplicate
 SetNode n9b = SetNode( Location(15,16), 25);
 
 assert(n9a == n9b);   // test opEquals
-
-
-s.addTo(n1);
-s.addTo(n2);
-s.addTo(n3);
-s.addTo(n4);
-s.addTo(n5);
-s.addTo(n6);
-s.addTo(n7);
-s.addTo(n8);
-
 
 
 }
