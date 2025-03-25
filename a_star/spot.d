@@ -810,6 +810,8 @@ void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
             neigh.h = heuristic(neighbor.locale, end);
             neigh.f = neigh.g + neigh.h;
             
+            h.spots[neighbor.locale.r][neighbor.locale.c] = neigh;
+            
             if (open.includes(neighbor))
             {
                 //if (neigh.g > neighbor.g)  // skip if previous evaluation was better 
