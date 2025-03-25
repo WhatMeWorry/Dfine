@@ -309,7 +309,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     
     h.setHexboardTexturesAndTerrain(g);
 
-    h.displayHexTextures();
+    //h.displayHexTextures();
+
 
     //writeAndPause("after displayHexTextures");
 
@@ -378,7 +379,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                         writeln("after setHexboardTexturesAndTerrain");
 
-                        h.displayHexTextures();
+                        //h.displayHexTextures();
 
                         import std.datetime.stopwatch;
                         auto watch = StopWatch(AutoStart.no);
@@ -405,8 +406,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                         writeln(watch.peek()); 
 
-                        //h.displayHexTextures();  // AGAIN ????  FIXES PROBLEM THOUGH
-                        h.displayHexTextures();
+                        //h.displayHexTextures();
                     }
                     break;
 
@@ -457,7 +457,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             h.setHexesSouthWest(g, end, 7, Ids.solidWhite);
                             +/
 
-                            h.displayHexTextures();
+                            //h.displayHexTextures();
  
                             Point2D!(I)[4] t;
                                    

@@ -31,7 +31,7 @@ ulong c;
 
 void debugSpots(HB)(ref HB h)
 {
-    //writeln("Spots = ");
+    writeln("Spots =============================================== ");
     foreach(i; 0..(h.rows))
     {
         foreach(j; 0..(h.columns))
@@ -40,11 +40,12 @@ void debugSpots(HB)(ref HB h)
             writeln("locale = ", h.spots[i][j].locale);
             foreach(n; h.spots[i][j].neighbors)
             {
-                writeln("n = ", n);
+                //writeln("n = ", n);
             }
             writeln("f g h = ", h.spots[i][j].f, " ", h.spots[i][j].g, " ", h.spots[i][j].h);
             writeln("terrain = ", h.spots[i][j].terrainCost);
-            //writeln("previous = ", h.spots[i][j].previous);
+            writeln("previous = ", h.spots[i][j].previous);
+            writeln();
         }
     }
 }
@@ -345,7 +346,7 @@ BagNode[] getAdjNeighbors(HB)(Location home, ref HB h)
     BagNode node;       // a neighbor
     BagNode[] nodes;    // all neighbors
 
-    writeln("h.spots[home.r][home.c].neighbors = ", h.spots[home.r][home.c].neighbors);
+    //writeln("h.spots[home.r][home.c].neighbors = ", h.spots[home.r][home.c].neighbors);
 
     //Node[6] neighbors = h.spots[home.r][home.c].neighbors;
     
@@ -374,6 +375,17 @@ void displayNeighbors(BagNode[] bag)
     writeln("********************************************");
 }
 
+
+void displayNeighborsTiny(BagNode[] bag)
+{
+    write("Neighbors: ");
+    foreach(b; bag)
+    {
+        write("(", b.locale.r, ",", b.locale.c, ") ");
+        //writeln("b.locale = ", b.f);
+    }
+    writeln();
+}
 
 Location lowestFscore(HB)(ref ulong c, Location[] set, ref HB h)
 {
@@ -762,31 +774,27 @@ void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
 
     while (open.isNotEmpty)
     {
+    
+        //writeAndPause("Starting in main while");
         current = open.removeMin();  // get the node with the smallest f value
 
         closed.add(current);         // add the current to the open bag
 
         if (current.locale == end)
         {
+            writeln("current == end"); exit(-1);
             Location here = h.spots[end.r][end.c].locale;
-            while (here != invalidLoc)
-            {
-                path ~= here;
-                here = h.spots[here.r][here.c].previous;
-            }
-            foreach( p; path)
-            {
-                h.setHexTexture(g, p, Ids.blackDot);
-            }
+            while (here != invalidLoc) { path ~= here; here = h.spots[here.r][here.c].previous; }
+            foreach( p; path) { h.setHexTexture(g, p, Ids.blackDot); }
             return;
         }
 
-        open.display();
-        closed.display();
+        open.displayTiny();
+        closed.displayTiny();
 
         BagNode[] neighbors = getAdjNeighbors(current.locale, h);   // get neighbors of current and cull out the (-1,-1)
         
-        displayNeighbors(neighbors);
+        displayNeighborsTiny(neighbors);
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
@@ -795,25 +803,31 @@ void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
                 break;  // ignore this neighbor. skip to new one.
             } 
             
-            //h.spot
+            Spot neigh = h.spots[neighbor.locale.r][neighbor.locale.c];
+            Spot curr  = h.spots[current.locale.r][current.locale.c];
             
+            neigh.g = curr.g + neigh.terrainCost;
+            neigh.h = heuristic(neighbor.locale, end);
+            neigh.f = neigh.g + neigh.h;
             
+            if (open.includes(neighbor))
+            {
+                //if (neigh.g > neighbor.g)  // skip if previous evaluation was better 
+                    break;
+                writeln("neighbor has been previously evaluated");
+            }
             
+            open.add(neighbor);
             
             
         }
         
+        h.debugSpots;
         
-
-        //displayContentsOfSet(openAA, h, g, Ids.greenTriangle);
-
-        //displayContentsOfSet(closedAA, h, g, Ids.redTriangle);
-        
-        //h.displayHexTextures;
         //SDL_RenderPresent(g.sdl.renderer);
         //writeAndPause("PAUSED");
         
     }
-    //writeln("open is empty");
+
 
 }

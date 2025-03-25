@@ -8,7 +8,7 @@
 module bag;
 
 import std.container.rbtree : RedBlackTree;  // template
-import std.stdio : writeln;
+import std.stdio : writeln, write;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
 import datatypes : Location;
@@ -104,6 +104,20 @@ class Bag
             writeln("node: ", node);
         }
         writeln("------------------------------");
+    }
+    
+    void displayTiny()
+    {
+        if ( this.aa.length != this.rbt.length )
+            { writeln("Bag ", this.name, " is out of sync");  exit(-1); }
+
+        
+        write("Bag ", this.name, " = ");
+        foreach(node; rbt) 
+        {   
+            write("(", node.locale.r, ",", node.locale.c, ")", node.f, "  ");
+        }
+        writeln();
     }
 
     string name;
