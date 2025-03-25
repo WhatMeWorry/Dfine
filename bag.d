@@ -1,71 +1,55 @@
 
-
-
 module bag;
 
-import std.container.rbtree;
-import std.stdio;
+import std.container.rbtree : RedBlackTree;  // template
+import std.stdio : writeln;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
 import datatypes : Location;
 
-
 struct BagNode
 {
-    this(Location locale, uint f) 
+    this(Location locale, uint f)
     {
         this.locale = locale;
         this.f = f;
     }
-    Location locale;  
+    Location locale;
     uint f;
 }
 
-void setName(Bag s, string n)  // DOES NOT WORK
-{ s.name = n; 
-  writeln("Setting name with s.name"); 
-}
-/+
-void addTo(BagNode node, Bag s)  // add element to set
+
+class Bag
 {
-    writeln("s = ",s);
-    
-    s.aa[node.locale] = node.f;  // add to associative array, aa
-    s.rbt.insert(node);          // add to red black tree, rbt
-    writeln("s.aa.length = ", s.aa.length);
-} 
-+/
+    enum allowDuplicates = true;
 
-/+
-void display(Bag s)
-{
-    writeln("===========================================");
-    writeln("Associative Array of set has length ", s.aa.length);
-    foreach(keyValuePair; s.aa.byKeyValue()) 
-        { writeln("Key: ", keyValuePair.key, ", Value: ", keyValuePair.value); }
-    writeln("red black tree of set has length ", s.rbt.length);
-    foreach(node; s.rbt) 
-    { writeln("node: ", node); }
-    writeln("===========================================");
-}
-+/
-
-// can be called with: if (element.isIn(set)) 
-
-bool isIn(BagNode node, Bag s)  // is node in set?
-{
-    return ((node.locale in s.aa) ? true : false);  // in returns a uint* so needs ternary opertor
-}
-
-bool isNotIn(BagNode node, Bag s) { return (node.locale !in s.aa); }  // !in returns a bool
-
-struct Bag
-{   
-    void addTo(BagNode node)  // add element to set
+    this(string n)
     {
+        name = n;             
+        rbt = new RedBlackTree!(BagNode, "a.f < b.f", allowDuplicates); 
+    }
+
+    void addTo(BagNode node)
+    {
+        // in operator determines whether a given key exists in the associative array
+
+        if (node.locale in aa) {
+            writeln("This node: ", node, " is already in the associative array");
+            exit(-1);
+        }
+    
         this.rbt.insert(node);          // add to red black tree, rbt
         this.aa[node.locale] = node.f;  // add to associative array, aa
     }
+
+    BagNode removeMin()
+    {
+        BagNode min = rbt.front; // get the front of the rbt which holds smallest f value
+        rbt.removeFront;         // and remove it from the rbt
+        aa.remove(min.locale);   // also remove the node from the associative array
+        return min;
+    }
+    
     /+
     bool isIn(BagNode node)
     {
@@ -73,7 +57,8 @@ struct Bag
     }
 
     bool isNotIn(BagNode node) { return (node.locale !in aa); }
-
+    +/
+    
     bool isEmpty()
     {
         if (aa.empty)
@@ -94,183 +79,174 @@ struct Bag
     
     bool isNotEmpty() { return (!isEmpty); }
 
-    BagNode removeMin()
-    {
-        BagNode min = rbt.front; // get the front of the rbt which holds smallest f value
-        rbt.removeFront;         // and remove it from the rbt
-        aa.remove(min.locale);   // also remove the node from the associative array
-        return min;
-    }
-     +/
+    
+    
     
     void display()
     {
-        writeln("---------- Bag ", this.name, " ----------");
-        writeln("Associative Array of bag has length ", this.aa.length);
-        foreach(keyValuePair; this.aa.byKeyValue()) 
+        writeln("======= Bag: ", name, " =======");
+        writeln("associative array of ", this.name, " has length ", aa.length);
+        foreach(keyValuePair; aa.byKeyValue()) 
         {
             writeln("Key: ", keyValuePair.key, ", Value: ", keyValuePair.value);
         }
-        writeln("red black tree of bag has length ", this.rbt.length);
-        foreach(node; this.rbt) 
-        {
-            writeln("node: ", node);
-        }
-        writeln("-----------------------------------------");
-    }
-    
-    
-    void setName(string n)  // WORKS
-    { this.name = n; 
-      writeln("Setting name with this.name"); 
-    }
-    
-    //  value[key] aa
-    uint[Location] aa;  // associative array will hold the Location portion of the node
-
-    auto rbt = new RedBlackTree!(BagNode, "a.f < b.f", true);    // true: allowDuplicates
-    
-    string name;
-}
-
-
-struct Sack
-{   
-    void addTo(BagNode node)  // add element to set
-    {
-        this.rbt.insert(node);          // add to red black tree, rbt
-        this.aa[node.locale] = node.f;  // add to associative array, aa
-    }
-    /+
-
-     +/
-    
-    void display()
-    {
-        writeln("Associative Array of bag has length ", this.aa.length);
-        foreach(keyValuePair; this.aa.byKeyValue()) 
-        {
-            writeln("Key: ", keyValuePair.key, ", Value: ", keyValuePair.value);
-        }
-        writeln("red black tree of bag has length ", this.rbt.length);
-        foreach(node; this.rbt) 
+        writeln("red black tree of ", this.name, " has length ", this.rbt.length);
+        foreach(node; rbt) 
         {
             writeln("node: ", node);
         }
     }
-    
-    
-    void setName(string n)  // WORKS
-    { this.name = n; 
-      writeln("Setting name with this.name"); 
-    }
-    
-    //  value[key] aa
-    uint[Location] aa;  // associative array will hold the Location portion of the node
 
-    auto rbt = new RedBlackTree!(BagNode, "a.f < b.f", true);    // true: allowDuplicates
-    
     string name;
+
+    uint[Location] aa;  // associative array
+
+    // https://forum.dlang.org/post/qajaymhfxjlmwmdnbktm@forum.dlang.org
+
+    // "You would think that this would create a new instance every time that the 
+    // struct is instantiated.
+    // Unfortunately what it does in fact do, is create a RedBlackTree instance at 
+    // compiletime, emit it into the binary, and assign its reference as the default 
+    // initializer of the rbt field."
+
+    // auto rbt = new RedBlackTree!(Node, "a.f < b.f", allowDuplicates);
+
+    RedBlackTree!(BagNode, "a.f < b.f", allowDuplicates) rbt;
 }
-
-
 
 
 /+
 rdmd -main -unittest bag.d
 +/
 
-
 unittest
 {
-
-Bag open;
-Sack closed;
-
-open.setName("open");
-closed.setName("closed");
-
-writeln("open bag = ", open);
-writeln("closed bag = ", closed);
-
-open.display();
-closed.display;
-
-
-// Note: node make sure the key, "Location", is unique in all nodes below. This constraint
-// will always exist in the A* algorithm
-
-
-
-BagNode n1 = BagNode( Location(1,2),   33);  
-BagNode n2 = BagNode( Location(3,4),   20);  // duplicate
-BagNode n3 = BagNode( Location(3,6),    7);
-BagNode n4 = BagNode( Location(3,8),   11);
-BagNode n5 = BagNode( Location(9,10),  20);  // duplicate
-BagNode n6 = BagNode( Location(11,12), 97);
-BagNode n7 = BagNode( Location(13,14), 20);  // duplicate
-BagNode n8 = BagNode( Location(15,16),  1);
-
-
-open.addTo(n1);
-open.addTo(n2);
-open.addTo(n3);
-open.addTo(n4);
-closed.addTo(n5);
-closed.addTo(n6);
-closed.addTo(n7);
-closed.addTo(n8);
-
-
-open.display();
-closed.display;
-
-writeln("open bag = ", open);
-writeln("closed bag = ", closed);
 /+
-
-// UFCS calls
-if (n1.isIn(s))
-    writeln("n1 node is in set s");
-    
-if (n8.isIn(s))
-    writeln("n8 node is in set s");
-    
-if (n0.isIn(s))
-    writeln("n0 node is in set s"); 
-else
-    writeln("n0 node is NoT in set s"); 
-
-// non UFCS calls
-
-if (s.isIn(n1))
-    writeln("n1 node is in set s");
-    
-if (s.isIn(n0))
-    writeln("n0 node is in set s"); 
-else
-    writeln("n0 node is NoT in set s"); 
-    
+Bag paper = new Bag("Brown");
+Bag cloth = new Bag("Green");
 
 
-BagNode n;
-while ( s.isNotEmpty() ) 
-{
-    n = s.removeMin();
-    writeln("removeMin returned ", n);
-}
+paper.addTo( BagNode(Location(1,2),   33) );
+paper.addTo( BagNode(Location(3,4),   20) );  // duplicate
+paper.addTo( BagNode(Location(3,6),    7) );
+paper.addTo( BagNode(Location(3,8),   11) );
 
-writeln("Bag should now be empty");
-s.display;
+cloth.addTo( BagNode(Location(9,10),  20) );  // duplicate
+cloth.addTo( BagNode(Location(11,12), 97) );
+cloth.addTo( BagNode(Location(13,14), 20) );  // duplicate
+cloth.addTo( BagNode(Location(16,15),  1) );
+cloth.addTo( BagNode(Location(16,16), 85) );
 
-writeln("s.isEmpty() = ", s.isEmpty());
 
-
-BagNode n9a = BagNode( Location(15,16), 25);  // duplicate
-BagNode n9b = BagNode( Location(15,16), 25);
-
-assert(n9a == n9b);   // test opEquals
+paper.display;
+cloth.display;
 +/
 
+
+/+
+Bag identical = new Bag("Entire_Node_Identical");
+
+identical.addTo( BagNode(Location(1,2),   33) );
+identical.addTo( BagNode(Location(1,2),   33) );
+identical.addTo( BagNode(Location(1,2),   33) );
+
+identical.display;
++/
+
+/+                         INVALID!
+using duplicates = true
+======= Bag: Entire_Node_Identical =======
+associative array of Entire_Node_Identical has length 1
+Key: Location(1, 2), Value: 33
+red black tree of Entire_Node_Identical has length 3
+node: BagNode(Location(1, 2), 33)
+node: BagNode(Location(1, 2), 33)
+node: BagNode(Location(1, 2), 33)
+
+                           MIGHT WORK?
+using duplicates = false
+======= Bag: Entire_Node_Identical =======
+associative array of Investigate has length 1
+Key: Location(1, 2), Value: 33
+red black tree of Investigate has length 1
+node: BagNode(Location(1, 2), 33)
++/
+
+
+
+/+
+Bag justf = new Bag("JustFCost");
+
+justf.addTo( BagNode(Location(1,2),   33) );
+justf.addTo( BagNode(Location(11,23), 33) );
+justf.addTo( BagNode(Location(23,11), 33) );
+
+justf.display;
++/
+
+/+
+using duplicates = true          WORKS
+======= Bag: JustFCost =======
+associative array of JustFCost has length 3
+Key: Location(1, 2), Value: 33
+Key: Location(11, 23), Value: 33
+Key: Location(23, 11), Value: 33
+red black tree of JustFCost has length 3
+node: BagNode(Location(1, 2), 33)
+node: BagNode(Location(11, 23), 33)
+node: BagNode(Location(23, 11), 33)
+
+using duplicates = false         INVALID  red black tree should have 
+======= Bag: JustFCost =======            had all 3 nodes in container.
+associative array of JustFCost has length 3
+Key: Location(1, 2), Value: 33
+Key: Location(11, 23), Value: 33
+Key: Location(23, 11), Value: 33
+red black tree of JustFCost has length 1
+node: BagNode(Location(1, 2), 33)
++/
+
+Bag open = new Bag("Open");
+Bag close = new Bag("Closed");
+
+
+open.addTo( BagNode(Location(1,2),   33) );
+open.addTo( BagNode(Location(3,4),   20) );  // duplicate
+open.addTo( BagNode(Location(3,6),    7) );
+open.addTo( BagNode(Location(3,8),   11) );
+open.addTo( BagNode(Location(9,10),  20) );  // duplicate
+open.addTo( BagNode(Location(11,12), 97) );
+open.addTo( BagNode(Location(13,14), 20) );  // duplicate
+open.addTo( BagNode(Location(16,15),  1) );
+open.addTo( BagNode(Location(16,16), 85) );
+// open.addTo( BagNode(Location(16,16), 85) );  // should fails which it does
+
+
+open.display;
+
+while (open.isNotEmpty)
+{
+    BagNode min = open.removeMin();
+    writeln("min = ", min);
 }
+
+if (open.isEmpty)
+    writeln("open is empty");
+
+
+close.display;
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
 
