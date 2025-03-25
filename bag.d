@@ -1,4 +1,10 @@
 
+// Bag is a user created data type used by the A* algorithm. This set holds 
+// A* nodes which consist of a Location and its cost.  The set provides four functions:
+// add(node), node = removeMin(), empty() or notEmpty(). Retrieving nodes will
+// return the smallest cost node and remove it from the bag. In cases of ties, order 
+// should be considered random.
+
 module bag;
 
 import std.container.rbtree : RedBlackTree;  // template
@@ -18,6 +24,10 @@ struct BagNode
     uint f;
 }
 
+bool isIn(BagNode node, Bag b)
+{
+    return ((node.locale in b.aa) ? true : false);
+}
 
 class Bag
 {
@@ -29,15 +39,15 @@ class Bag
         rbt = new RedBlackTree!(BagNode, "a.f < b.f", allowDuplicates); 
     }
 
-    void addTo(BagNode node)
+    void add(BagNode node)
     {
         // in operator determines whether a given key exists in the associative array
 
-        if (node.locale in aa) {
+        if (node.locale in aa)  // Is this really a problem?
+        {
             writeln("This node: ", node, " is already in the associative array");
             exit(-1);
         }
-    
         this.rbt.insert(node);          // add to red black tree, rbt
         this.aa[node.locale] = node.f;  // add to associative array, aa
     }
@@ -49,16 +59,17 @@ class Bag
         aa.remove(min.locale);   // also remove the node from the associative array
         return min;
     }
-    
-    /+
-    bool isIn(BagNode node)
+
+    bool includes(BagNode node)
     {
         return ((node.locale in aa) ? true : false);
     }
 
-    bool isNotIn(BagNode node) { return (node.locale !in aa); }
-    +/
-    
+    bool excludes(BagNode node) 
+    {
+        return (node.locale !in aa);
+    }
+
     bool isEmpty()
     {
         if (aa.empty)
@@ -76,15 +87,12 @@ class Bag
             exit(-1);
         }
     }
-    
+
     bool isNotEmpty() { return (!isEmpty); }
 
-    
-    
-    
     void display()
     {
-        writeln("======= Bag: ", name, " =======");
+        writeln("------- Bag: ", name, " -------");
         writeln("associative array of ", this.name, " has length ", aa.length);
         foreach(keyValuePair; aa.byKeyValue()) 
         {
@@ -95,6 +103,7 @@ class Bag
         {
             writeln("node: ", node);
         }
+        writeln("------------------------------");
     }
 
     string name;
@@ -126,16 +135,16 @@ Bag paper = new Bag("Brown");
 Bag cloth = new Bag("Green");
 
 
-paper.addTo( BagNode(Location(1,2),   33) );
-paper.addTo( BagNode(Location(3,4),   20) );  // duplicate
-paper.addTo( BagNode(Location(3,6),    7) );
-paper.addTo( BagNode(Location(3,8),   11) );
+paper.add( BagNode(Location(1,2),   33) );
+paper.add( BagNode(Location(3,4),   20) );  // duplicate
+paper.add( BagNode(Location(3,6),    7) );
+paper.add( BagNode(Location(3,8),   11) );
 
-cloth.addTo( BagNode(Location(9,10),  20) );  // duplicate
-cloth.addTo( BagNode(Location(11,12), 97) );
-cloth.addTo( BagNode(Location(13,14), 20) );  // duplicate
-cloth.addTo( BagNode(Location(16,15),  1) );
-cloth.addTo( BagNode(Location(16,16), 85) );
+cloth.add( BagNode(Location(9,10),  20) );  // duplicate
+cloth.add( BagNode(Location(11,12), 97) );
+cloth.add( BagNode(Location(13,14), 20) );  // duplicate
+cloth.add( BagNode(Location(16,15),  1) );
+cloth.add( BagNode(Location(16,16), 85) );
 
 
 paper.display;
@@ -146,9 +155,9 @@ cloth.display;
 /+
 Bag identical = new Bag("Entire_Node_Identical");
 
-identical.addTo( BagNode(Location(1,2),   33) );
-identical.addTo( BagNode(Location(1,2),   33) );
-identical.addTo( BagNode(Location(1,2),   33) );
+identical.add( BagNode(Location(1,2),   33) );
+identical.add( BagNode(Location(1,2),   33) );
+identical.add( BagNode(Location(1,2),   33) );
 
 identical.display;
 +/
@@ -177,9 +186,9 @@ node: BagNode(Location(1, 2), 33)
 /+
 Bag justf = new Bag("JustFCost");
 
-justf.addTo( BagNode(Location(1,2),   33) );
-justf.addTo( BagNode(Location(11,23), 33) );
-justf.addTo( BagNode(Location(23,11), 33) );
+justf.add( BagNode(Location(1,2),   33) );
+justf.add( BagNode(Location(11,23), 33) );
+justf.add( BagNode(Location(23,11), 33) );
 
 justf.display;
 +/
@@ -210,16 +219,16 @@ Bag open = new Bag("Open");
 Bag close = new Bag("Closed");
 
 
-open.addTo( BagNode(Location(1,2),   33) );
-open.addTo( BagNode(Location(3,4),   20) );  // duplicate
-open.addTo( BagNode(Location(3,6),    7) );
-open.addTo( BagNode(Location(3,8),   11) );
-open.addTo( BagNode(Location(9,10),  20) );  // duplicate
-open.addTo( BagNode(Location(11,12), 97) );
-open.addTo( BagNode(Location(13,14), 20) );  // duplicate
-open.addTo( BagNode(Location(16,15),  1) );
-open.addTo( BagNode(Location(16,16), 85) );
-// open.addTo( BagNode(Location(16,16), 85) );  // should fails which it does
+open.add( BagNode(Location(1,2),   33) );
+open.add( BagNode(Location(3,4),   20) );  // duplicate
+open.add( BagNode(Location(3,6),    7) );
+open.add( BagNode(Location(3,8),   11) );
+open.add( BagNode(Location(9,10),  20) );  // duplicate
+open.add( BagNode(Location(11,12), 97) );
+open.add( BagNode(Location(13,14), 20) );  // duplicate
+open.add( BagNode(Location(16,15),  1) );
+open.add( BagNode(Location(16,16), 85) );
+// open.add( BagNode(Location(16,16), 85) );  // should fails which it does
 
 
 open.display;
@@ -233,19 +242,7 @@ while (open.isNotEmpty)
 if (open.isEmpty)
     writeln("open is empty");
 
-
 close.display;
-
-
-
-
-
-
-
-
-
-
-
 
 }
 

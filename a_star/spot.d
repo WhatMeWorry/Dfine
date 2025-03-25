@@ -7,7 +7,8 @@ import std.algorithm.mutation : remove;
 import std.math : ceil, floor;
 import std.string;
 import core.stdc.stdlib;  // for exit()
-import set;
+import bag;
+import datatypes;
 
 import hexboard;
 import hexmath;
@@ -16,27 +17,13 @@ import textures.texture;
 import distance;
 import redblacktree;
 import std.container : RedBlackTree;
-import datatypes : Location;
+import datatypes : Spot;
 
 import windows.simple_directmedia_layer;
 
 import bindbc.sdl;  // SDL_* all remaining declarations
 
-struct Spot
-{
-    //@disable this();   // disables default constructor
 
-    Location locale = Location(-1,-1);   // each spot needs to know where it is on the hexboard
-
-    Location[6] neighbors = [Location(-1,-1), Location(-1,-1), 
-                             Location(-1,-1), Location(-1,-1), 
-                             Location(-1,-1), Location(-1,-1)];  // ignoring edges, each hex has 6 adjoining neighbors
-    uint f;
-    uint g;
-    uint h;
-    Location previous = Location(-1,-1);
-    uint terrainCost;
-}
 
 uint tempG;
 ulong c;
@@ -353,10 +340,10 @@ Location[] getNeighbors(HB)(Location loc, ref HB h)
 }
 
 
-SetNode[] getAdjNeighbors(HB)(Location home, ref HB h)
+BagNode[] getAdjNeighbors(HB)(Location home, ref HB h)
 {
-    SetNode node;       // a neighbor
-    SetNode[] nodes;    // all neighbors
+    BagNode node;       // a neighbor
+    BagNode[] nodes;    // all neighbors
 
     writeln("h.spots[home.r][home.c].neighbors = ", h.spots[home.r][home.c].neighbors);
 
@@ -376,6 +363,16 @@ SetNode[] getAdjNeighbors(HB)(Location home, ref HB h)
 }
 
 
+void displayNeighbors(BagNode[] bag)
+{
+    writeln("Inside display Neighbors *******************");
+    foreach(b; bag)
+    {
+        writeln("b.locale = ", b.locale);
+        writeln("b.locale = ", b.f);
+    }
+    writeln("********************************************");
+}
 
 
 Location lowestFscore(HB)(ref ulong c, Location[] set, ref HB h)
@@ -742,67 +739,14 @@ void displayContentsOfSet(HB)(uint[Location] set, ref HB h, Globals g, Ids id)
 
 void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
 {
-
-Set s1;
-
-s1.display();
-
-s1.setName("OPEN");
-
-Set s2;
-
-SetNode n1 = SetNode( Location(1,2),   33);  
-SetNode n2 = SetNode( Location(3,4),   20);  // duplicate
-SetNode n3 = SetNode( Location(3,6),    7);
-SetNode n4 = SetNode( Location(3,8),   11);
-SetNode n5 = SetNode( Location(9,10),  20);  // duplicate
-SetNode n6 = SetNode( Location(11,12), 97);
-SetNode n7 = SetNode( Location(13,14), 20);  // duplicate
-SetNode n8 = SetNode( Location(15,16),  1);
-SetNode n0;
-/+
-s1.addTo(n1);
-s1.addTo(n2);
-s1.addTo(n3);
-s1.addTo(n4);
-
-s2.addTo(n5);
-s2.addTo(n6);
-s2.addTo(n7);
-s2.addTo(n8);
-+/
-
-n1.addTo(s1);
-n2.addTo(s1);
-n3.addTo(s1);
-n4.addTo(s1);
-
-n5.addTo(s2);
-n6.addTo(s2);
-n7.addTo(s2);
-n8.addTo(s2);
-
-s1.display;
-s2.display;
-
-
-
-
-
-
-
-
-    
-    writeln("begin and end = ", begin, " and ", end);
-
-    Set open;
-    Set closed;
+    Bag open = new Bag("Open");
+    Bag closed = new Bag("Closed");
 
     Location[] path;
 
-    SetNode current; // current is the node in open set having the lowest f score 
+    BagNode current; // current is the node in open set having the lowest f score 
 
-    Spot start = h.spots[begin.r][begin.c];  // start is a full node, not just a locale
+    Spot start = h.spots[begin.r][begin.c];  // start is a full spot, not just a locale
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
     start.h = heuristic(start.locale, end);  // heuristic
@@ -810,19 +754,17 @@ s2.display;
 
     h.spots[begin.r][begin.c] = start;
  
-    SetNode s;
-    s.locale = start.locale;
-    s.f = start.f;
+    BagNode b;
+    b.locale = start.locale;
+    b.f = start.f;
 
-    s.addTo(open);  // put the start node on the open set (leave its f at zero)
+    open.add(b);  // put the start node on the open set (leave its f at zero)
 
     while (open.isNotEmpty)
     {
         current = open.removeMin();  // get the node with the smallest f value
 
-        writeln("current = ", current);
-
-        writeln("begin and end = ", begin, " and ", end);
+        closed.add(current);         // add the current to the open bag
 
         if (current.locale == end)
         {
@@ -839,25 +781,29 @@ s2.display;
             return;
         }
 
-        writeln("insert current");
-
-        current.addTo(closed);
-        
+        open.display();
         closed.display();
 
-        SetNode[] neighbors = getAdjNeighbors(current.locale, h);   // get neighbors of current and cull out the (-1,-1)
+        BagNode[] neighbors = getAdjNeighbors(current.locale, h);   // get neighbors of current and cull out the (-1,-1)
+        
+        displayNeighbors(neighbors);
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
-            closed.display();
-            //bool b = isInUFCS(neighbor, closed);
-            if (neighbor.isIn(closed))
-            //if (closed.isIn(neighbor))
+            if (closed.includes(neighbor))  // if neighbor is in the closed bag?
             {
-                break;
+                break;  // ignore this neighbor. skip to new one.
             } 
-            writeln("neighbor = ", neighbor);
+            
+            //h.spot
+            
+            
+            
+            
+            
         }
+        
+        
 
         //displayContentsOfSet(openAA, h, g, Ids.greenTriangle);
 

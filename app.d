@@ -390,8 +390,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         Location begin;
                         Location end;
                         
-                        begin.r = 2;
-                        begin.c = 2;
+                        begin.r = 0;
+                        begin.c = 0;
                         
                         end.r = h.lastRow;
                         end.c = h.lastColumn;
@@ -416,13 +416,13 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                     {
                         SDL_GetMouseState(cast (int *) &h.mouseClick.sc.x, cast (int *) &h.mouseClick.sc.y);
 
-                        writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
+                        //writeln(h.mouseClick.sc.x, ", ", h.mouseClick.sc.y);
 
                         // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
 
                         h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
 
-                        writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
+                        //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
 
                         if (h.getHexMouseClickedOn())
                         {
@@ -431,61 +431,33 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             alias I = typeof(h.integerType);
                             I x = h.selectedHex.row;   I y = h.selectedHex.col;
                             
-                            struct LocationT(I)   // holds a hex of a hexboard
-                            {
-                                I r;  // row of hexboard
-                                I c;  // column of hexboard
-                            }
-                            
-                            LocationT!(I) start;  
-                            LocationT!(I) end; 
+                            Location first;  
+                            Location last; 
 
-                            start.r = 0;
-                            start.c = 0;
+                            first.r = 0;
+                            first.c = 0;
 
-                            end.r = x; 
-                            end.c = y;
+                            last.r = x; 
+                            last.c = y;
                             
+                            findShortestPathNEW( h, g, first, last );
                             
+                            /+
                             h.setHexesHorizontally(g, end, 7, Ids.solidRed);
-                            
                             h.setHexesVertically(g, end, 5, Ids.solidBlue);
-                            
                             h.setHexesSouthWestByNorthEast(g, end, 7, Ids.solidWhite);
-                            
                             h.setHexesNorthWestBySouthEast(g, end, 7, Ids.solidGreen);
-/+
                             h.setHexesEast(g, end, 7, Ids.solidRed);
-                            
                             h.setHexesWest(g, end, 7, Ids.solidRed);
-
                             h.setHexesNorth(g, end, 7, Ids.solidRed);
-                            
                             h.setHexesNorthEast(g, end, 7, Ids.solidBlue);
-
                             h.setHexesSouthEast(g, end, 7, Ids.solidGreen);
-                            
                             h.setHexesSouth(g, end, 7, Ids.solidBrown);
-                            
                             h.setHexesNorthWest(g, end, 7, Ids.solidBlack);
-                            
                             h.setHexesSouthWest(g, end, 7, Ids.solidWhite);
-+/                            
-                            
-                            
-                            //h.setHexColTexture(g, end.c, Ids.solidGreen);                                    
-
-                            //h.setHexTexture(g, end, Ids.solidBlack);
-
-                                    //findShortestPathRedBlack( h, g, start, end );
+                            +/
 
                             h.displayHexTextures();
-                                    
-                            //writeln("start (", start.row, ", ", start.column, ")   end (", end.row, ",", end.column, ")" );
-                                    
-                            //int distance = heuristic(start, end);
-                                    
-                            //writeln("DISTANCE = ", distance);
  
                             Point2D!(I)[4] t;
                                    

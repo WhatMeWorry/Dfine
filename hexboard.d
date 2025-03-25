@@ -16,7 +16,7 @@ import hex;
 import textures.texture;
 import a_star.spot;
 import hexmath;
-import datatypes : Location;
+import datatypes : Spot, Location;
 import windows.simple_directmedia_layer;
 import std.algorithm : min;
 

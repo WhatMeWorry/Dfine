@@ -11,5 +11,23 @@ struct Location   // holds a hex's location on a hexboard
 }
 
 
+struct Spot
+{
+    //@disable this();   // disables default constructor
+
+    Location locale = Location(-1,-1);   // each spot needs to know where it is on the hexboard
+
+    Location[6] neighbors = [Location(-1,-1), Location(-1,-1), 
+                             Location(-1,-1), Location(-1,-1), 
+                             Location(-1,-1), Location(-1,-1)];  // ignoring edges, each hex has 6 adjoining neighbors
+    uint f;
+    uint g;
+    uint h;
+    Location previous = Location(-1,-1);
+    uint terrainCost;
+}
+
+
+
 
 
