@@ -25,27 +25,33 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 
 
 
-uint tempG;
-ulong c;
+//uint tempG;
+//ulong c;
 
 
 void debugSpots(HB)(ref HB h)
 {
-    writeln("Spots =============================================== ");
+    //writeln("Spots =============================================== ");
     foreach(i; 0..(h.rows))
     {
         foreach(j; 0..(h.columns))
         {
-            writeln("i,j = ", i, ",", j);
-            writeln("locale = ", h.spots[i][j].locale);
-            foreach(n; h.spots[i][j].neighbors)
+            if ( (h.spots[i][j].g != 0) ||
+                 (h.spots[i][j].h != 0) ||
+                 (h.spots[i][j].f != 0) )
             {
-                //writeln("n = ", n);
+                //writeln("i,j = ", i, ",", j);
+                writeln(/+"locale = ",+/ h.spots[i][j].locale);
+                foreach(n; h.spots[i][j].neighbors)
+                {
+                    //writeln("n = ", n);
+                }
+                writeln("g h = ", h.spots[i][j].g, " ", h.spots[i][j].h, "   f = ", h.spots[i][j].f);
+                //writeln("f (g+h) = ", h.spots[i][j].f);
+                //writeln("terrain = ", h.spots[i][j].terrainCost);
+                //writeln("previous = ", h.spots[i][j].previous);
+                //writeln();
             }
-            writeln("f g h = ", h.spots[i][j].f, " ", h.spots[i][j].g, " ", h.spots[i][j].h);
-            writeln("terrain = ", h.spots[i][j].terrainCost);
-            writeln("previous = ", h.spots[i][j].previous);
-            writeln();
         }
     }
 }
@@ -585,27 +591,15 @@ void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
     
 
 
-/+
-void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location end)
+
+void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Location end)
 {
-    // open set contains nodes that need to be evaluated
-    // closed set contains all nodes that have finished being evaluated. Don't need to revisit
-	
-    // value_type[key_type] associative_array_name;
-
-    // int[string] dayNumbers;	
+    Bag open = new Bag("Open");      // open container
+    Bag closed = new Bag("Closed");  // closed container
     
-    h.debugSpots;
-
-    uint[Location] openAA;  // open set associative array
-    uint[Location] closedAA;  // closed set associative array
-
-    auto open = new RedBlackTree!(Node, "a.f < b.f", true);    // true: allowDuplicates
-    auto closed = new RedBlackTree!(Node, "a.f < b.f", true);
-
     Location[] path;
 
-    Node current; // current is the node in open having the lowest f score 
+    BagNode current; // current is the node in open having the lowest f score 
 
     Spot start = h.spots[begin.r][begin.c];  // start is a full node, not just a locale
 
@@ -614,35 +608,21 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
     start.f = start.g + start.h;
 
     h.spots[begin.r][begin.c] = start;
- 
-    Node s = Node(start.locale, start.f);
 
-    open.insert(s);  // put the start node on the open set (leave its f at zero)
-    openAA[s.locale] = s.f;
+    BagNode s = BagNode(start.locale, start.f);
 
-/+
-    if (s.locale in openAA)
+    open.add(s);   // prime the open set with the beginning node
+
+    while (open.isNotEmpty)
     {
-        writeln("s.locale is in openAA");
-    }
-
-    openAA.remove(s.locale);
-
-    if (s.locale !in openAA)
-    {
-        writeln("s.locale is not in openAA");
-    }
-+/
-    writeln("open = ", open);
-
-    //while (open.isNotEmpty)     // while there are spots that still need evaluating
-    while (openAA.isNotEmpty)
-    {
-        current = open.front;  // GETS the the node with the SMALLEST f value to current
-        open.removeFront;      // and remove it from the open min priority queue
-        openAA.remove(current.locale);
+        open.displayTiny;
+        closed.displayTiny;
         
+        current = open.removeMin();  // GETS the the node with the SMALLEST f value to current
+        
+        writeln(" ");
         writeln("current = ", current);
+        writeln(" ");
 
         if (current.locale == end)
         {
@@ -652,25 +632,20 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
                 path ~= here;
                 here = h.spots[here.r][here.c].previous;
             }
-
             foreach( p; path)
             {
                 //writeln("p = ", p);
                 h.setHexTexture(g, p, Ids.blackDot);
             }
-
             return;
         }
 
-        writeln("insert current");
+        closed.add(current);
 
-        closed.insert(current);
-        closedAA[current.locale] = current.f;
+        BagNode[] neighbors = getAdjNeighbors(current.locale, h);
 
-        Node[] neighbors = getAdjNeighbors(current.locale, h);   // get neighbors of current and cull out the (-1,-1)
-
-        writeln("neighbors = ", neighbors);
-
+        //https://www.youtube.com/watch?v=aKYlikFAV4k
+        
         // Time 32:15 in Coding Train Youtube video  all neighbors will be added to open set, 
         // but before we put them in the open set, we need to evaluate them
         // What if neighbor is in the closed set?
@@ -678,64 +653,47 @@ void findShortestPathRedBlack(HB)(ref HB h, Globals g, Location begin, Location 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
             Spot neighborSpot = h.spots[neighbor.locale.r][neighbor.locale.c];
-            
-            writeln("lookin at neighbor ", neighbor);
 
-            if (neighbor.locale !in closedAA)
+            /+
+            if (closed.includes(neighbor))
             {
-                writeln("neighbor is not in closed set");
+                 writeln("neighbor ", neighbor, " is in the closed set");
+                 break;   // skip since already completely evaluated
+            }
+            +/
+            // current is guaranteed to be previously evaluated (green).
             
-                uint currentG = h.spots[current.locale.r][current.locale.c].g;
-                uint neighborG = h.spots[neighbor.locale.r][neighbor.locale.c].terrainCost;
-                uint neighborH = heuristic(neighbor.locale, end);
+            if (!closed.includes(neighbor))
+            {
+                Spot currentSpot = h.spots[current.locale.r][current.locale.c];
 
-                tempG = currentG + neighborG;
+                uint tempG = currentSpot.g + neighborSpot.terrainCost;  // terrainCost 1 if smooth
 
-                // is this a better path than before?
-
-                //if (neighbor.isNotInSet(open))     // if neighbor is not in open set, then add it
-                if (neighbor.locale !in openAA)
+                if (open.includes(neighbor))
                 {
-                    //open ~= neighbor;
-                    openAA[neighbor.locale] = neighbor.f;  // Add to Associative Array
-                    open.insert(neighbor);                   // Add to Red Black Tree
-                    
-                }
-                else
-                {
-                    writeln("neighbor was in open");
-                    if (tempG >= neighborSpot.g)
+                    if (tempG < neighborSpot.g)
                     {
-                        //writeln("No, it is not a better path");
-                        continue;
+                        neighborSpot.g = tempG;
                     }
-                } 
+                }
+                else   // not in the open list   37:36 Code Train Youtube
+                {
+                    neighborSpot.g = tempG;
 
-                h.spots[neighbor.locale.r][neighbor.locale.c].g = tempG;
-                
-                h.spots[neighbor.locale.r][neighbor.locale.c].h = neighborH;
+                    // the bag just stores the location and F cost of each hex
+                    writeln("Before add() neighborSpot.f = ", neighborSpot.f);
+                    
+                    open.add( BagNode(neighbor.locale, neighborSpot.f) );
+                }
 
-                h.spots[neighbor.locale.r][neighbor.locale.c].f = tempG + neighborH;
-
-                h.spots[neighbor.locale.r][neighbor.locale.c].previous = current.locale;
-
-                //debugSpots( h );
+                neighborSpot.h = heuristic(neighbor.locale, end); 
+                neighborSpot.f = currentSpot.g + neighborSpot.h;
             }
         }
-        writeln("finished with neighbors for current");
-        writeln("Contents of openAA ==================================================");
-        displayContentsOfSet(openAA, h, g, Ids.greenTriangle);
-        writeln("Contents of closedAA ==================================================");
-        displayContentsOfSet(closedAA, h, g, Ids.redTriangle);
-        h.displayHexTextures;
-        SDL_RenderPresent(g.sdl.renderer);
-        writeAndPause("PAUSED");
-        
     }
-    //writeln("open is empty");
 
 }
-+/
+
 
 
 void displayContentsOfSet(HB)(uint[Location] set, ref HB h, Globals g, Ids id)
@@ -748,10 +706,21 @@ void displayContentsOfSet(HB)(uint[Location] set, ref HB h, Globals g, Ids id)
 }
 
 
+void snapShot(HB)(ref HB h, BagNode curr, BagNode neigh, Bag o, Bag c)
+{
+    writeln("current = ", curr);
+    writeln("neighbor = ", neigh);
+    h.debugSpots;
+    o.displayTiny;
+    c.displayTiny;
+    writeAndPause("in snapShot");
+}
+
 
 void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
 {
     Bag open = new Bag("Open");
+
     Bag closed = new Bag("Closed");
 
     Location[] path;
@@ -759,77 +728,199 @@ void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
     BagNode current; // current is the node in open set having the lowest f score 
 
     Spot start = h.spots[begin.r][begin.c];  // start is a full spot, not just a locale
+    // 2.
+    start.g = 0;  // the beginning of the path as no history (of walked spots)
+    start.h = heuristic(start.locale, end);  // heuristic
+    start.f = start.g + start.h;
+
+    h.spots[begin.r][begin.c] = start;
+
+    //BagNode b = BagNode((start.locale),start.f);
+    // 2.
+    open.add(BagNode((start.locale),start.f));
+
+    //open.add(b);  // put the start node on the open set (leave its f at zero)
+    
+    open.displayTiny;
+    
+    //open.add(BagNode(start.locale),start.f));
+
+    while (open.isNotEmpty)  // 3.
+    {                                // 3. a)
+        current = open.removeMin();  // get the node with the smallest f value
+                                     // 3. b) pop q off the open bag  (done in removeMin)
+                                     
+        writeln("BEGINNING OF WHILE current = ", current);
+        writeln("   ");
+
+        //closed.add(current);         // add the current to the open bag
+
+        if (current.locale == end)
+        {
+            h.debugSpots; 
+            writeln("current == end");
+            exit(-1);
+            //Location here = h.spots[end.r][end.c].locale;
+            //foreach( p; path) { writeln("p = ", p); }
+            //foreach( p; path) { h.setHexTexture(g, p, Ids.blackDot); }
+            return;
+        }
+
+        BagNode[] neighbors = getAdjNeighbors(current.locale, h);   // get neighbors of current and cull out the (-1,-1)
+
+        displayNeighborsTiny(neighbors);
+
+        foreach(neighbor; neighbors)   // for each neighbor of current // 3. c) 
+        {
+            //writeln("after foreach");
+            //h.snapShot(current, neighbor, open, closed);
+
+            //if (closed.includes(neighbor))  // if neighbor is in the closed bag?
+            //{
+            //    break;  // ignore this neighbor. skip to new one.
+            //} 
+            
+            Spot neigh = h.spots[neighbor.locale.r][neighbor.locale.c];
+            Spot curr  = h.spots[current.locale.r][current.locale.c];
+            
+            neigh.g = curr.g + neigh.terrainCost;
+            neigh.h = heuristic(neighbor.locale, end);   // 3. d. ii)
+            neigh.f = neigh.g + neigh.h;
+            
+            neighbor.f = neigh.f;
+            
+            h.spots[neighbor.locale.r][neighbor.locale.c] = neigh;
+            
+            // iii) if a node with the same position as neighbor is in the open Bag
+            //      which has a lower f than neighbor, skip this neighbor
+            
+            // has this (neighbor/node/spot) been previously looked at?
+            
+            BagNode n;
+            n.locale = neigh.locale;
+            
+            if (open.includes(n))
+            {
+                writeln("3. d) iii) bag open contains neighbor ", n);
+                BagNode existNodeOpen = open.getExistingFcost(n);
+                uint oldOpenF = existNodeOpen.f;
+
+                if (oldOpenF < neigh.f)  // neighbor has been previously looked at and its
+                    break;               // old path cost is cheaper (better); so skip this neighbor 
+            }
+            
+            // iv) if a node with the same position as neighbor is in the closed bag
+            // which has a lower f than neighbor, skip this neighbor. Otherwise, add
+            // the node to the open bag.
+            
+            if (closed.includes(n))
+            {
+                writeln("3. d) iv) bag closed contains neighbor ", n);
+                BagNode existNodeClosed = closed.getExistingFcost(n);
+                uint oldClosedF = existNodeClosed.f;
+                
+                if (oldClosedF < neigh.f)  // neighbor has been previously looked at and its
+                    break;                 // old path cost is cheaper (better); so skip this neighbor 
+            }
+            else   // Otherwise, add the node (neighbor) to the open bag
+            {
+                open.add(neighbor); 
+            }
+        
+        }  // end foreach neighbor loop        
+
+        
+        open.displayTiny;
+        closed.displayTiny;
+
+        closed.add(current); 
+        
+        //path = path ~ current.locale;
+        writeln("*****************************************************");
+        writeln("add current ", current, " to closed bag");
+        writeln("*****************************************************");
+    }
+    
+    h.debugSpots;
+
+}
+
+
+
+
+void findShortestPathWikipedia(HB)(ref HB h, Globals g, Location begin, Location end)
+{
+    Bag open = new Bag("Open");      // open container
+    
+    Location[] path;
+
+    BagNode current; // current is the node in open having the lowest f score 
+
+    Spot start = h.spots[begin.r][begin.c];  // start is a full node, not just a locale
 
     start.g = 0;  // the beginning of the path as no history (of walked spots)
     start.h = heuristic(start.locale, end);  // heuristic
     start.f = start.g + start.h;
 
     h.spots[begin.r][begin.c] = start;
- 
-    BagNode b;
-    b.locale = start.locale;
-    b.f = start.f;
 
-    open.add(b);  // put the start node on the open set (leave its f at zero)
+    BagNode s = BagNode(start.locale, start.f);
+
+    open.add(s);   // prime the open set with the beginning node
 
     while (open.isNotEmpty)
     {
-    
-        //writeAndPause("Starting in main while");
-        current = open.removeMin();  // get the node with the smallest f value
-
-        closed.add(current);         // add the current to the open bag
+        
+        current = open.removeMin();  // GETS the the node with the SMALLEST f value to current
 
         if (current.locale == end)
         {
-            writeln("current == end"); exit(-1);
             Location here = h.spots[end.r][end.c].locale;
-            while (here != invalidLoc) { path ~= here; here = h.spots[here.r][here.c].previous; }
-            foreach( p; path) { h.setHexTexture(g, p, Ids.blackDot); }
+            while (here != invalidLoc)
+            {
+                path ~= here;
+                here = h.spots[here.r][here.c].previous;
+            }
+            foreach( p; path)
+            {
+                //writeln("p = ", p);
+                h.setHexTexture(g, p, Ids.blackDot);
+            }
             return;
         }
 
-        open.displayTiny();
-        closed.displayTiny();
-
-        BagNode[] neighbors = getAdjNeighbors(current.locale, h);   // get neighbors of current and cull out the (-1,-1)
-        
-        displayNeighborsTiny(neighbors);
+        BagNode[] neighbors = getAdjNeighbors(current.locale, h);
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
-            if (closed.includes(neighbor))  // if neighbor is in the closed bag?
+            writeln("neighbor = ", neighbor);
+        
+            Spot neighborSpot = h.spots[neighbor.locale.r][neighbor.locale.c];
+            Spot currentSpot = h.spots[current.locale.r][current.locale.c];
+            
+            //tentative_gScore := gScore[current] + d(current, neighbor)
+            
+            uint tentativeG = currentSpot.g + neighborSpot.terrainCost;
+             
+            writeln("tentativeG = ", tentativeG);
+            writeln("currentSpot.g = ", currentSpot.g);
+            writeln("neighborSpot.terrainCost = ", neighborSpot.terrainCost);
+            
+            if (tentativeG < neighborSpot.g)
             {
-                break;  // ignore this neighbor. skip to new one.
-            } 
+                // This path to neighbor is better than any previous one. Record it!
+                path ~= currentSpot.locale;
+                
+                neighborSpot.g = tentativeG;
+                
+                neighborSpot.f = tentativeG + heuristic(neighbor.locale, end); 
             
-            Spot neigh = h.spots[neighbor.locale.r][neighbor.locale.c];
-            Spot curr  = h.spots[current.locale.r][current.locale.c];
-            
-            neigh.g = curr.g + neigh.terrainCost;
-            neigh.h = heuristic(neighbor.locale, end);
-            neigh.f = neigh.g + neigh.h;
-            
-            h.spots[neighbor.locale.r][neighbor.locale.c] = neigh;
-            
-            if (open.includes(neighbor))
-            {
-                //if (neigh.g > neighbor.g)  // skip if previous evaluation was better 
-                    break;
-                writeln("neighbor has been previously evaluated");
+                if (!open.includes(neighbor))
+                {
+                    open.add( BagNode(neighbor.locale, neighborSpot.f) );
+                }
             }
-            
-            open.add(neighbor);
-            
-            
         }
-        
-        h.debugSpots;
-        
-        //SDL_RenderPresent(g.sdl.renderer);
-        //writeAndPause("PAUSED");
-        
     }
-
 
 }

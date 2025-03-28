@@ -267,8 +267,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 900;
     g.sdl.screenHeight = 900;
 
-    uint rows = 5;
-    uint cols = 5;
+    uint rows = 9;
+    uint cols = 9;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
     
@@ -391,8 +391,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         Location begin;
                         Location end;
                         
-                        begin.r = 0;
-                        begin.c = 0;
+                        begin.r = 1;
+                        begin.c = 1;
                         
                         end.r = h.lastRow;
                         end.c = h.lastColumn;
@@ -434,14 +434,14 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             Location first;  
                             Location last; 
 
-                            first.r = 0;
-                            first.c = 0;
+                            first.r = 1;
+                            first.c = 1;
 
                             last.r = x; 
                             last.c = y;
                             
-                            findShortestPathNEW( h, g, first, last );
-                            
+                            //findShortestPathCodingTrain( h, g, first, last );
+                            findShortestPathWikipedia( h, g, first, last );
                             /+
                             h.setHexesHorizontally(g, end, 7, Ids.solidRed);
                             h.setHexesVertically(g, end, 5, Ids.solidBlue);

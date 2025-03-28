@@ -45,7 +45,8 @@ class Bag
 
         if (node.locale in aa)  // Is this really a problem?
         {
-            writeln("This node: ", node, " is already in the associative array");
+            writeln("This node: ", node, " is already in the ");
+            writeln("associative array of bag ", this.name);
             exit(-1);
         }
         this.rbt.insert(node);          // add to red black tree, rbt
@@ -60,15 +61,25 @@ class Bag
         return min;
     }
 
+
+    BagNode getExistingFcost(BagNode bean)
+    {
+        bean.f = aa[bean.locale];
+        return bean;
+    }
+
+
     bool includes(BagNode node)
     {
         return ((node.locale in aa) ? true : false);
     }
 
+
     bool excludes(BagNode node) 
     {
         return (node.locale !in aa);
     }
+
 
     bool isEmpty()
     {
@@ -88,7 +99,12 @@ class Bag
         }
     }
 
-    bool isNotEmpty() { return (!isEmpty); }
+
+    bool isNotEmpty() 
+    {
+        return (!isEmpty);
+    }
+
 
     void display()
     {
@@ -105,9 +121,11 @@ class Bag
         }
         writeln("------------------------------");
     }
-    
+
+
     void displayTiny()
     {
+        writeln("In displayTiny: Current State of Bag", this.name);
         if ( this.aa.length != this.rbt.length )
             { writeln("Bag ", this.name, " is out of sync");  exit(-1); }
 
@@ -117,7 +135,7 @@ class Bag
         {   
             write("(", node.locale.r, ",", node.locale.c, ")", node.f, "  ");
         }
-        writeln();
+        writeln("");
     }
 
     string name;
@@ -246,6 +264,7 @@ open.add( BagNode(Location(16,16), 85) );
 
 
 open.display;
+open.displayTiny;
 
 while (open.isNotEmpty)
 {
