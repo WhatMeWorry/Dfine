@@ -23,9 +23,9 @@ function removeFromArray(arr, elt)
 // An educated guess of how far it is between two points
 function heuristic(a, b) 
 {
-  var d = dist(a.i, a.j, b.i, b.j);
-  // var d = abs(a.i - b.i) + abs(a.j - b.j);
-  return d;
+    var d = dist(a.i, a.j, b.i, b.j);
+    // var d = abs(a.i - b.i) + abs(a.j - b.j);
+    return d;
 }
 
 // How many columns and rows?
@@ -48,6 +48,8 @@ var w, h;
 
 // The road taken
 var path = [];
+
+
 
 function setup()
 {
@@ -94,10 +96,14 @@ function setup()
 }
 
 
-function draw() 
+
+// draw(). A function that's called repeatedly while the sketch runs. Declaring the 
+// function draw() sets a code block to run repeatedly once the sketch starts.
+
+function draw()
 {
     // Am I still searching?
-    if (openSet.length > 0) 
+    if (openSet.length > 0)
     {
         // Best next option
         var winner = 0;
@@ -111,7 +117,7 @@ function draw()
         var current = openSet[winner];
 
         // Did I finish?
-        if (current === end) 
+        if (current === end)
         {
             noLoop();
             console.log("DONE!");
@@ -132,10 +138,11 @@ function draw()
             {
                 var tempG = current.g + heuristic(neighbor, current);
 
+//=========================================================================
                 // Is this a better path than before?
                 var newPath = false;
                 
-                if (openSet.includes(neighbor)) 
+                if (open.includes(neighbor)) 
                 {
                     if (tempG < neighbor.g) 
                     {
@@ -157,6 +164,47 @@ function draw()
                     neighbor.f = neighbor.g + neighbor.h;
                     neighbor.previous = current;
                 }
+//=========================================================================
+
+             REWORK This
+             
+                // Is this a better path than before?
+                var newPath = false;
+                
+                if (open.includes(neighbor)) 
+                {
+                    if (tempG < neighbor.g) 
+                    {
+                        neighbor.g = tempG;
+                        // newPath is true
+                        neighbor.h = heuristic(neighbor, end);
+                        neighbor.f = neighbor.g + neighbor.h;
+                        neighbor.previous = current;
+                    }
+                } 
+                else 
+                {
+                    neighbor.g = tempG;
+                    // newPath is true;
+                    neighbor.h = heuristic(neighbor, end);
+                    neighbor.f = neighbor.g + neighbor.h;
+                    neighbor.previous = current;
+                    
+                    openSet.push(neighbor);
+                }
+
+                // Yes, it's a better path
+                if (newPath) 
+                {
+ 
+                }
+             
+
+//=========================================================================
+
+
+                
+                
             }
         }
     } 

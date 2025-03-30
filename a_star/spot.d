@@ -41,16 +41,16 @@ void debugSpots(HB)(ref HB h)
                  (h.spots[i][j].f != 0) )
             {
                 //writeln("i,j = ", i, ",", j);
-                writeln(/+"locale = ",+/ h.spots[i][j].locale);
+                write(/+"locale = ",+/ h.spots[i][j].locale);
                 foreach(n; h.spots[i][j].neighbors)
                 {
                     //writeln("n = ", n);
                 }
-                writeln("g h = ", h.spots[i][j].g, " ", h.spots[i][j].h, "   f = ", h.spots[i][j].f);
+                writeln("  g h = ", h.spots[i][j].g, " ", h.spots[i][j].h, "   f = ", h.spots[i][j].f);
                 //writeln("f (g+h) = ", h.spots[i][j].f);
                 //writeln("terrain = ", h.spots[i][j].terrainCost);
-                //writeln("previous = ", h.spots[i][j].previous);
-                //writeln();
+                writeln("  previous = ", h.spots[i][j].previous);
+                writeln();
             }
         }
     }
@@ -588,12 +588,22 @@ void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
 
     //minPriorityQueue open;
     //minPriorityQueue closed;
-    
 
 
+
+
+
+
+
+
+
+
+// https://editor.p5js.org/codingtrain/sketches/ehLjdFpat
 
 void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Location end)
 {
+    writeln("begin = ", begin, "   end = ", end);
+    
     Bag open = new Bag("Open");      // open container
     Bag closed = new Bag("Closed");  // closed container
     
@@ -618,6 +628,8 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
         open.displayTiny;
         closed.displayTiny;
         
+        h.debugSpots();
+        
         current = open.removeMin();  // GETS the the node with the SMALLEST f value to current
         
         writeln(" ");
@@ -626,6 +638,9 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
 
         if (current.locale == end)
         {
+            writeln("current.locale = ", current.locale );
+            writeln("end = ", end );
+            
             Location here = h.spots[end.r][end.c].locale;
             while (here != invalidLoc)
             {
@@ -639,6 +654,11 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
             }
             return;
         }
+        
+        writeln(" ");
+        writeln("Best option current ", current.locale, " moves from open to closed bag");
+        writeln(" ");
+        
 
         closed.add(current);
 
@@ -653,46 +673,65 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
             Spot neighborSpot = h.spots[neighbor.locale.r][neighbor.locale.c];
+            Spot currentSpot = h.spots[current.locale.r][current.locale.c];
 
-            /+
-            if (closed.includes(neighbor))
+            if (!closed.includes(neighbor) /+ && !neighbor.wall +/)  // if neighbor is green or clear
             {
-                 writeln("neighbor ", neighbor, " is in the closed set");
-                 break;   // skip since already completely evaluated
-            }
-            +/
-            // current is guaranteed to be previously evaluated (green).
-            
-            if (!closed.includes(neighbor))
-            {
-                Spot currentSpot = h.spots[current.locale.r][current.locale.c];
+                uint tempG = currentSpot.g + heuristic(neighbor.locale, current.locale);
 
-                uint tempG = currentSpot.g + neighborSpot.terrainCost;  // terrainCost 1 if smooth
-
-                if (open.includes(neighbor))
+                //bool betterPath = false;   // Is this a better path than before?
+                
+                if (open.includes(neighbor)) 
                 {
-                    if (tempG < neighborSpot.g)
+                    if (tempG < neighborSpot.g) 
                     {
                         neighborSpot.g = tempG;
+                        
+                        //betterPath = true;
+                        
+                        neighborSpot.h = heuristic(neighbor.locale, end);
+                        neighborSpot.f = neighborSpot.g + neighborSpot.h;
+                        neighborSpot.previous = current.locale;
+                        
+                        writeln("IF neighborSpot = ", neighborSpot);
                     }
                 }
-                else   // not in the open list   37:36 Code Train Youtube
+                else
                 {
                     neighborSpot.g = tempG;
-
-                    // the bag just stores the location and F cost of each hex
-                    writeln("Before add() neighborSpot.f = ", neighborSpot.f);
                     
-                    open.add( BagNode(neighbor.locale, neighborSpot.f) );
+                    //betterPath = true;
+                    
+                    neighborSpot.h = heuristic(neighbor.locale, end);
+                    neighborSpot.f = neighborSpot.g + neighborSpot.h;
+                    neighborSpot.previous = current.locale;
+                    
+                    writeln("ELSE neighborSpot = ", neighborSpot);
+                    
+                    //open.add(neighbor);    BagNode(start.locale, start.f)
+                    
+                    h.spots[neighborSpot.locale.r][neighborSpot.locale.c] = neighborSpot;
+                    
+                    open.add(BagNode(neighbor.locale, neighborSpot.f));
                 }
-
-                neighborSpot.h = heuristic(neighbor.locale, end); 
-                neighborSpot.f = currentSpot.g + neighborSpot.h;
+                //if (betterPath) 
+                //{
+                //    neighborSpot.h = heuristic(neighbor.locale, end);
+                //    neighborSpot.f = neighborSpot.g + neighborSpot.h;
+                //    neighborSpot.previous = current.locale;
+                //}
             }
         }
     }
 
+    writeln("The open bag (which has nodes to evaulate) is empty");
+    writeln("Haven't found a path so no route is possible");
+    //return;
 }
+
+
+
+
 
 
 

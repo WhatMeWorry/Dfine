@@ -435,13 +435,15 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             Location last; 
 
                             first.r = 1;
-                            first.c = 1;
+                            first.c = 2;
 
                             last.r = x; 
                             last.c = y;
                             
-                            //findShortestPathCodingTrain( h, g, first, last );
-                            findShortestPathWikipedia( h, g, first, last );
+                            findShortestPathCodingTrain( h, g, first, last );
+                            
+                            //findShortestPathWikipedia( h, g, first, last );
+                            
                             /+
                             h.setHexesHorizontally(g, end, 7, Ids.solidRed);
                             h.setHexesVertically(g, end, 5, Ids.solidBlue);
