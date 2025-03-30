@@ -267,8 +267,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 900;
     g.sdl.screenHeight = 900;
 
-    uint rows = 9;
-    uint cols = 9;
+    uint rows = 50;
+    uint cols = 50;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
     
@@ -435,7 +435,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             Location last; 
 
                             first.r = 1;
-                            first.c = 2;
+                            first.c = 1;
 
                             last.r = x; 
                             last.c = y;
@@ -459,7 +459,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             h.setHexesSouthWest(g, end, 7, Ids.solidWhite);
                             +/
 
-                            //h.displayHexTextures();
+                            h.displayHexTextures();
  
                             Point2D!(I)[4] t;
                                    

@@ -625,28 +625,28 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
 
     while (open.isNotEmpty)
     {
-        open.displayTiny;
-        closed.displayTiny;
+        //open.displayTiny;
+        //closed.displayTiny;
         
-        h.debugSpots();
+        //h.debugSpots();
         
         current = open.removeMin();  // GETS the the node with the SMALLEST f value to current
         
-        writeln(" ");
-        writeln("current = ", current);
-        writeln(" ");
+        //writeln("current = ", current);
 
         if (current.locale == end)
         {
-            writeln("current.locale = ", current.locale );
-            writeln("end = ", end );
             
             Location here = h.spots[end.r][end.c].locale;
+            
+            path ~= h.spots[end.r][end.c].locale;  // always put the end
+            
             while (here != invalidLoc)
             {
                 path ~= here;
                 here = h.spots[here.r][here.c].previous;
             }
+            
             foreach( p; path)
             {
                 //writeln("p = ", p);
@@ -654,11 +654,8 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
             }
             return;
         }
-        
-        writeln(" ");
-        writeln("Best option current ", current.locale, " moves from open to closed bag");
-        writeln(" ");
-        
+
+        //writeln("Best option current ", current.locale, " moves from open to closed bag");
 
         closed.add(current);
 
@@ -672,6 +669,7 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
+            writeln("neighbor.locale = ", neighbor.locale);
             Spot neighborSpot = h.spots[neighbor.locale.r][neighbor.locale.c];
             Spot currentSpot = h.spots[current.locale.r][current.locale.c];
 
@@ -693,7 +691,7 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
                         neighborSpot.f = neighborSpot.g + neighborSpot.h;
                         neighborSpot.previous = current.locale;
                         
-                        writeln("IF neighborSpot = ", neighborSpot);
+                        //writeln("IF neighborSpot = ", neighborSpot);
                     }
                 }
                 else
@@ -706,20 +704,17 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
                     neighborSpot.f = neighborSpot.g + neighborSpot.h;
                     neighborSpot.previous = current.locale;
                     
-                    writeln("ELSE neighborSpot = ", neighborSpot);
+                    //writeln("ELSE neighborSpot = ", neighborSpot);
                     
                     //open.add(neighbor);    BagNode(start.locale, start.f)
+                    
+                    writeln("neighborSpot.locale = ", neighborSpot.locale);
                     
                     h.spots[neighborSpot.locale.r][neighborSpot.locale.c] = neighborSpot;
                     
                     open.add(BagNode(neighbor.locale, neighborSpot.f));
                 }
-                //if (betterPath) 
-                //{
-                //    neighborSpot.h = heuristic(neighbor.locale, end);
-                //    neighborSpot.f = neighborSpot.g + neighborSpot.h;
-                //    neighborSpot.previous = current.locale;
-                //}
+
             }
         }
     }
