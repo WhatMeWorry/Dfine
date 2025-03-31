@@ -29,6 +29,28 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 //ulong c;
 
 
+void initSpots(HB)(ref HB h)
+{
+    foreach(i; 0..(h.rows))
+    {
+        foreach(j; 0..(h.columns))
+        {
+            h.spots[i][j].locale = Location(-1,-1);
+            
+            h.spots[i][j].neighbors = [Location(-1,-1), Location(-1,-1), 
+                                       Location(-1,-1), Location(-1,-1), 
+                                       Location(-1,-1), Location(-1,-1)]; 
+            h.spots[i][j].g = 0;
+            h.spots[i][j].h = 0;
+            h.spots[i][j].f = 0;
+            //h.spots[i][j].previous = terrainCost = 
+            h.spots[i][j].previous = Location(-1,-1);
+        }
+    }
+}
+
+
+
 void debugSpots(HB)(ref HB h)
 {
     //writeln("Spots =============================================== ");
@@ -342,7 +364,7 @@ Location[] getNeighbors(HB)(Location loc, ref HB h)
     {
         if (n != invalidLoc)  // strip out invalid neighbors (edge of hexboard)
             locs ~= n;
-    } 
+    }
     return locs;
 }
 
@@ -355,7 +377,7 @@ BagNode[] getAdjNeighbors(HB)(Location home, ref HB h)
     //writeln("h.spots[home.r][home.c].neighbors = ", h.spots[home.r][home.c].neighbors);
 
     //Node[6] neighbors = h.spots[home.r][home.c].neighbors;
-    
+
     foreach(neighbor; h.spots[home.r][home.c].neighbors)
     {
         if (neighbor != invalidLoc)  // strip out invalid neighbors (edge of hexboard)
@@ -364,8 +386,8 @@ BagNode[] getAdjNeighbors(HB)(Location home, ref HB h)
             node.f = 0;
             nodes ~= node;
         }
-    }    
-    
+    }
+
     return nodes;
 }
 
@@ -602,6 +624,9 @@ void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
 
 void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Location end)
 {
+
+    //h.initSpots;
+
     writeln("begin = ", begin, "   end = ", end);
     
     Bag open = new Bag("Open");      // open container

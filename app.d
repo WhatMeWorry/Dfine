@@ -230,7 +230,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     // timeIntervalInPerformanceMode();
     // frameRate();
     // cappingFrameRate();
-    
+
     g.sdl.screenWidth  = 900;
     g.sdl.screenHeight = 900;
 
@@ -238,8 +238,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     uint cols = 50;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
-    
-    
+
+
     auto h = HexBoard!(real,  int)(hexWidth, rows, cols);   // WORKS!
     //auto h = HexBoard!(double,int)(hexWidth, rows, cols); // WORKS!
     //auto h = HexBoard!(float, int)(hexWidth, rows, cols);  // WORKS!
@@ -249,7 +249,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     //writeAndPause("==== HexBoard is only constructed with NDC values ====");
 
     h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);
-    
+
     //h.displayHexBoardDataSC();
 
     //writeAndPause("==== NDC converted to SC values ====");
@@ -273,7 +273,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     writeln("g.textures = ", g.textures);
 
     h.drawHexBoard;
-    
+
     h.setHexboardTexturesAndTerrain(g);
 
     //h.displayHexTextures();
@@ -290,10 +290,10 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     {
         while(SDL_PollEvent(&event) != 0)
         {
-            switch(event.type) 
+            switch(event.type)
             {
                 case SDL_QUIT:
-                
+
                     writeln("user clicked on close button of windows");
                     running = false;
                     break;
@@ -309,7 +309,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                     if( event.key.keysym.sym == SDLK_F1 )
                     {
                         writeln("user pressed the Function Key F1");
-                        SDL_Surface *screenshot; 
+                        SDL_Surface *screenshot;
 
                         screenshot = SDL_CreateRGBSurface(SDL_SWSURFACE,
                                                           g.sdl.screenWidth, 
@@ -328,7 +328,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         //SDL_SavePNG(screenshot, "screenshot.png"); 
                         IMG_SavePNG(screenshot, "screenshot.png"); 
                         SDL_FreeSurface(screenshot); 
-                    }                           
+                    }
 
                     if( event.key.keysym.sym == SDLK_DELETE )
                     {
@@ -357,10 +357,10 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                         Location begin;
                         Location end;
-                        
+
                         begin.r = 1;
                         begin.c = 1;
-                        
+
                         end.r = h.lastRow;
                         end.c = h.lastColumn;
 
@@ -378,7 +378,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                     break;
 
                 case SDL_MOUSEBUTTONDOWN:
-                
+
                     if( event.button.button == SDL_BUTTON_LEFT )
                     {
                         SDL_GetMouseState(cast (int *) &h.mouseClick.sc.x, cast (int *) &h.mouseClick.sc.y);
@@ -394,10 +394,10 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         if (h.getHexMouseClickedOn())
                         {
                             writeln("h.selectedHex = ", h.selectedHex);
-                        
+
                             alias I = typeof(h.integerType);
                             I x = h.selectedHex.row;   I y = h.selectedHex.col;
-                            
+
                             Location first;  
                             Location last; 
 
@@ -406,11 +406,11 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
                             last.r = x; 
                             last.c = y;
-                            
+
                             findShortestPathCodingTrain( h, g, first, last );
-                            
+
                             //findShortestPathWikipedia( h, g, first, last );
-                            
+
                             /+
                             h.setHexesHorizontally(g, end, 7, Ids.solidRed);
                             h.setHexesVertically(g, end, 5, Ids.solidBlue);
@@ -427,9 +427,9 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             +/
 
                             h.displayHexTextures();
- 
+
                             Point2D!(I)[4] t;
-                                   
+
                             t[0].x = h.hexes[x][y].points.sc[0].x;
                             t[0].y = h.hexes[x][y].points.sc[0].y; 
                             t[1].x = h.hexes[x][y].points.sc[1].x;
@@ -440,7 +440,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             t[3].y = h.hexes[x][y].points.sc[4].y;
 
                             //writeln(t);
-                                    
+
                             SDL_RenderDrawLine( g.sdl.renderer, t[0].x, t[0].y, t[1].x, t[1].y);
                             SDL_RenderDrawLine( g.sdl.renderer, t[1].x, t[1].y, t[2].x, t[2].y);
                             SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
