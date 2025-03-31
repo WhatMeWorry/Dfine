@@ -63,7 +63,7 @@ void debugSpots(HB)(ref HB h)
                  (h.spots[i][j].f != 0) )
             {
                 //writeln("i,j = ", i, ",", j);
-                write(/+"locale = ",+/ h.spots[i][j].locale);
+                //write(/+"locale = ",+/ h.spots[i][j].locale);
                 foreach(n; h.spots[i][j].neighbors)
                 {
                     //writeln("n = ", n);
@@ -397,8 +397,8 @@ void displayNeighbors(BagNode[] bag)
     writeln("Inside display Neighbors *******************");
     foreach(b; bag)
     {
-        writeln("b.locale = ", b.locale);
-        writeln("b.locale = ", b.f);
+        //writeln("b.locale = ", b.locale);
+        //writeln("b.locale = ", b.f);
     }
     writeln("********************************************");
 }
@@ -406,13 +406,13 @@ void displayNeighbors(BagNode[] bag)
 
 void displayNeighborsTiny(BagNode[] bag)
 {
-    write("Neighbors: ");
+    //write("Neighbors: ");
     foreach(b; bag)
     {
-        write("(", b.locale.r, ",", b.locale.c, ") ");
+        //write("(", b.locale.r, ",", b.locale.c, ") ");
         //writeln("b.locale = ", b.f);
     }
-    writeln();
+    //writeln();
 }
 
 Location lowestFscore(HB)(ref ulong c, Location[] set, ref HB h)
@@ -675,7 +675,7 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
             foreach( p; path)
             {
                 //writeln("p = ", p);
-                h.setHexTexture(g, p, Ids.blackDot);
+                h.setHexTexture(g, p, Ids.whiteDot);
             }
             return;
         }
@@ -694,7 +694,7 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
 
         foreach(neighbor; neighbors)   // for each neighbor of current
         {
-            writeln("neighbor.locale = ", neighbor.locale);
+            //writeln("neighbor.locale = ", neighbor.locale);
             Spot neighborSpot = h.spots[neighbor.locale.r][neighbor.locale.c];
             Spot currentSpot = h.spots[current.locale.r][current.locale.c];
 
@@ -733,7 +733,7 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
                     
                     //open.add(neighbor);    BagNode(start.locale, start.f)
                     
-                    writeln("neighborSpot.locale = ", neighborSpot.locale);
+                    //writeln("neighborSpot.locale = ", neighborSpot.locale);
                     
                     h.spots[neighborSpot.locale.r][neighborSpot.locale.c] = neighborSpot;
                     
@@ -775,7 +775,7 @@ void snapShot(HB)(ref HB h, BagNode curr, BagNode neigh, Bag o, Bag c)
     writeAndPause("in snapShot");
 }
 
-
+/+
 void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
 {
     Bag open = new Bag("Open");
@@ -903,10 +903,10 @@ void findShortestPathNEW(HB)(ref HB h, Globals g, Location begin, Location end)
     h.debugSpots;
 
 }
++/
 
 
-
-
+/+
 void findShortestPathWikipedia(HB)(ref HB h, Globals g, Location begin, Location end)
 {
     Bag open = new Bag("Open");      // open container
@@ -983,3 +983,4 @@ void findShortestPathWikipedia(HB)(ref HB h, Globals g, Location begin, Location
     }
 
 }
++/

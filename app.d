@@ -367,7 +367,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         //end.r = h.selectedHex.row;
                         //end.c = h.selectedHex.col;
 
-                        findShortestPathNEW( h, g, begin, end );
+                        //findShortestPathNEW( h, g, begin, end );
 
                         //findShortestPathRedBlack( h, g, begin, end );
 

@@ -22,6 +22,7 @@ enum Ids
     solidBlack,
     solidWhite,
     blackDot,
+    whiteDot,
     greenTriangle,
     redTriangle,
     //bricks,
@@ -94,6 +95,12 @@ Texture[] load_textures(Globals g)
 
     t.id = Ids.blackDot; 
     t.fileName = "blackDot.png";
+    t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));
+    if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
+    textures ~= t;
+    
+    t.id = Ids.whiteDot; 
+    t.fileName = "whiteDot.png";
     t.ptr = IMG_LoadTexture(g.sdl.renderer, toStringz(complete ~ t.fileName));
     if(t.ptr == null ) { writeln( "Unable to load image ", complete ~ t.fileName); exit(1); }
     textures ~= t;
