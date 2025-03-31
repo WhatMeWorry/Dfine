@@ -37,7 +37,6 @@ Or will this cause problems further down the road?
 module app;
 
 
-import set;
 import utilities.sdl_timing;
 import hexboard;
 import select_hex;
@@ -112,39 +111,8 @@ Globals g;  // put all the global variables together in one place
 
 int main() 
 {
+
 /+
-Set s;
-
-NodeX n1 = NodeX( Locale(1,2), 33);
-NodeX n2 = NodeX( Locale(3,4), 12);
-NodeX n3 = NodeX( Locale(5,6), 77);
-NodeX n4 = NodeX( Locale(7,8), 5);
-
-s.put(n1);
-s.put(n2);
-s.put(n3);
-s.put(n4);
-
-s.display;
-
-NodeX tmp;
-tmp = s.removeMin;
-writeln("removeMin returned ", tmp);
-s.display;
-tmp = s.removeMin;
-writeln("removeMin returned ", tmp);
-s.display;
-tmp = s.removeMin;
-writeln("removeMin returned ", tmp);
-s.display;
-tmp = s.removeMin;
-writeln("removeMin returned ", tmp);
-s.display;
-+/
-
-
-/+ 
-
 Lenovo AMD Ryzen 7 PRO 7840U
 AMD Radeon 780M
 16 GB
@@ -155,7 +123,6 @@ DMD64 D Compiler v2.108.0
 core.exception.ArrayIndexError@a_star\spot.d(349): index [155] is out of bounds for array of length 100
 core.exception.ArrayIndexError@a_star\spot.d(349): index [168] is out of bounds for array of length 100
 core.exception.ArrayIndexError@a_star\spot.d(349): index [147] is out of bounds for array of length 100
-
 
 ===================================================
 
