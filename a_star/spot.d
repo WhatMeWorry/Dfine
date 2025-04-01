@@ -393,8 +393,6 @@ Location invalidLoc = { -1, -1 };
 
 void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Location end)
 {
-    writeln("begin = ", begin, "   end = ", end);
-    
     Bag open = new Bag("Open");      // open container
     Bag closed = new Bag("Closed");  // closed container
     
@@ -450,11 +448,13 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
             Spot neighborSpot = h.spots[neighbor.locale.r][neighbor.locale.c];
             Spot currentSpot = h.spots[current.locale.r][current.locale.c];
 
-            if (!closed.includes(neighbor) /+ && !neighbor.wall +/)  // if neighbor is green or clear
+            //if (!closed.includes(neighbor) /+ && !neighbor.wall +/)  // if neighbor is green or clear
+            
+            if (neighbor.isNotIn(closed))  // ignore all neighbors in the closed (evaluation finished) bag.
             {
                 uint tempG = currentSpot.g + neighborSpot.terrainCost;
 
-                if (open.includes(neighbor)) 
+                if (neighbor.isIn(open))  // have we seen (evaluated) this spot before?
                 {
                     if (tempG < neighborSpot.g) 
                     {
@@ -465,7 +465,7 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
                         neighborSpot.previous = current.locale;
                     }
                 }
-                else
+                else  // This is a new (never before looked at) spot
                 {
                     neighborSpot.g = tempG;
 
@@ -474,7 +474,7 @@ void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Locati
                     neighborSpot.previous = current.locale;
 
                     h.spots[neighborSpot.locale.r][neighborSpot.locale.c] = neighborSpot;
-                    
+
                     open.add(BagNode(neighbor.locale, neighborSpot.f));
                 }
             }

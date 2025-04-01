@@ -24,19 +24,28 @@ struct BagNode
     uint f;
 }
 
+// in returns uint* use ternary operator to return bool
+
 bool isIn(BagNode node, Bag b)
 {
     return ((node.locale in b.aa) ? true : false);
 }
 
+
+bool isNotIn(BagNode node, Bag b)
+{
+    return ((node.locale !in b.aa) ? true : false);
+}
+
+
 class Bag
 {
-    enum allowDuplicates = true;
+    enum duplicatesAllowed = true;
 
     this(string n)
     {
         name = n;             
-        rbt = new RedBlackTree!(BagNode, "a.f < b.f", allowDuplicates); 
+        rbt = new RedBlackTree!(BagNode, "a.f < b.f", duplicatesAllowed); 
     }
 
     void add(BagNode node)
@@ -61,25 +70,15 @@ class Bag
         return min;
     }
 
-
-    BagNode getExistingFcost(BagNode bean)
+    bool isIn(BagNode node)
     {
-        bean.f = aa[bean.locale];
-        return bean;
-    }
-
-
-    bool includes(BagNode node)
+        return ((node.locale in aa) ? true : false); // in returns uint*
+    }                                                // use ternary operator
+                                                     // to return bool
+    bool isNotIn(BagNode node) 
     {
-        return ((node.locale in aa) ? true : false);
+        return (node.locale !in aa);  // !in returns bool
     }
-
-
-    bool excludes(BagNode node) 
-    {
-        return (node.locale !in aa);
-    }
-
 
     bool isEmpty()
     {
@@ -99,12 +98,10 @@ class Bag
         }
     }
 
-
     bool isNotEmpty() 
     {
         return (!isEmpty);
     }
-
 
     void display()
     {
@@ -122,14 +119,11 @@ class Bag
         writeln("------------------------------");
     }
 
-
     void displayTiny()
     {
         writeln("In displayTiny: Current State of Bag", this.name);
         if ( this.aa.length != this.rbt.length )
             { writeln("Bag ", this.name, " is out of sync");  exit(-1); }
-
-        
         write("Bag ", this.name, " = ");
         foreach(node; rbt) 
         {   
@@ -150,9 +144,9 @@ class Bag
     // compiletime, emit it into the binary, and assign its reference as the default 
     // initializer of the rbt field."
 
-    // auto rbt = new RedBlackTree!(Node, "a.f < b.f", allowDuplicates);
+    // auto rbt = new RedBlackTree!(Node, "a.f < b.f", duplicatesAllowed);  // struct Bag
 
-    RedBlackTree!(BagNode, "a.f < b.f", allowDuplicates) rbt;
+    RedBlackTree!(BagNode, "a.f < b.f", duplicatesAllowed) rbt;      // Class Bag pointer
 }
 
 
