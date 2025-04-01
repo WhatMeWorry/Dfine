@@ -435,14 +435,14 @@ void setHexboardTexturesAndTerrain(HB)(HB h, Globals g)
             switch(a)
             {
                   //case 0,1,2,3,4:
-                    case 0,1,2,3,4,5,6:
+                    case 0,1,2,3,4:
                     {
                         h.hexes[r][c].textures ~= g.textures[Ids.solidGreen];
                         //h.hexes[r][c].textures ~= g.textures[Ids.greenTriangle];
                         h.spots[r][c].terrainCost = 1;
                     }
                     break;
-                    case 7,8,9:
+                    case 5,6,7,8,9:
                     {
                         h.hexes[r][c].textures ~= g.textures[Ids.solidBlack];
                         //h.hexes[r][c].textures ~= g.textures[Ids.redTriangle];

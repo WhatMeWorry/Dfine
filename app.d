@@ -234,8 +234,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 900;
     g.sdl.screenHeight = 900;
 
-    uint rows = 50;
-    uint cols = 50;
+    uint rows = 150;
+    uint cols = 150;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
 
@@ -358,8 +358,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         Location begin;
                         Location end;
 
-                        begin.r = 1;
-                        begin.c = 1;
+                        begin.r = 0;
+                        begin.c = 0;
 
                         end.r = h.lastRow;
                         end.c = h.lastColumn;
@@ -401,8 +401,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             Location first;  
                             Location last; 
 
-                            first.r = 1;
-                            first.c = 1;
+                            first.r = 0;
+                            first.c = 0;
 
                             last.r = x; 
                             last.c = y;
