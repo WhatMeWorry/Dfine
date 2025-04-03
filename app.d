@@ -234,8 +234,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 900;
     g.sdl.screenHeight = 900;
 
-    uint rows = 150;
-    uint cols = 150;
+    uint rows = 1000;
+    uint cols = 1000;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
 
@@ -364,12 +364,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                         end.r = h.lastRow;
                         end.c = h.lastColumn;
 
-                        //end.r = h.selectedHex.row;
-                        //end.c = h.selectedHex.col;
-
-                        //findShortestPathNEW( h, g, begin, end );
-
-                        //findShortestPathRedBlack( h, g, begin, end );
+                        findShortestPathCodingTrain( h, g, begin, end );
 
                         writeln(watch.peek()); 
 
@@ -407,9 +402,16 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
                             last.r = x; 
                             last.c = y;
 
+                            import std.datetime.stopwatch;
+                            auto watch = StopWatch(AutoStart.no);
+                            watch.start();
+                            //                                          millisecond  hecto-nanosecond
+                            // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
+                            //                                                microsecond  nanosecond
+
                             findShortestPathCodingTrain( h, g, first, last );
 
-                            //findShortestPathWikipedia( h, g, first, last );
+                            writeln(watch.peek());
 
                             /+
                             h.setHexesHorizontally(g, end, 7, Ids.solidRed);

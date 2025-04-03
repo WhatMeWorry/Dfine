@@ -37,6 +37,27 @@ bool isNotIn(BagNode node, Bag b)
     return ((node.locale !in b.aa) ? true : false);
 }
 
+ SHOWS THE DATA BEFORE THE METHODS
+struct Tracker {
+    static uint globalCounter;
+    uint localCounter;
+    bool isLocal;
+
+    @disable this(this);
+
+    this(bool local) {
+        isLocal = local;
+        localCounter = 0;
+    }
+
+    void increment() {
+        if( isLocal )
+            localCounter++;
+        else
+            globalCounter++;
+    }
+}
+
 
 class Bag
 {
