@@ -17,8 +17,9 @@
 *.a
 *.lib
 
-# Executables
+# ignore all .exe (executable) files except app.exe
 *.exe
+!app.exe
 
 # DUB
 .dub

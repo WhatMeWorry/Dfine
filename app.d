@@ -234,8 +234,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
     g.sdl.screenWidth  = 900;
     g.sdl.screenHeight = 900;
 
-    uint rows = 1000;
-    uint cols = 1000;
+    uint rows = 200;
+    uint cols = 200;
 
     float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
 

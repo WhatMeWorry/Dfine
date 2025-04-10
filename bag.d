@@ -13,6 +13,9 @@ import std.range : empty;  // for aa
 import core.stdc.stdlib : exit;
 import datatypes : Location;
 
+
+enum duplicatesAllowed = true;
+
 struct BagNode
 {
     this(Location locale, uint f)
@@ -37,35 +40,28 @@ bool isNotIn(BagNode node, Bag b)
     return ((node.locale !in b.aa) ? true : false);
 }
 
- SHOWS THE DATA BEFORE THE METHODS
-struct Tracker {
-    static uint globalCounter;
-    uint localCounter;
-    bool isLocal;
-
-    @disable this(this);
-
-    this(bool local) {
-        isLocal = local;
-        localCounter = 0;
-    }
-
-    void increment() {
-        if( isLocal )
-            localCounter++;
-        else
-            globalCounter++;
-    }
-}
-
 
 class Bag
 {
-    enum duplicatesAllowed = true;
+    string name;
+
+    uint[Location] aa;  // associative array
+
+    // https://forum.dlang.org/post/qajaymhfxjlmwmdnbktm@forum.dlang.org
+
+    // "You would think that this would create a new instance every time that the 
+    // struct is instantiated.
+    // Unfortunately what it does in fact do, is create a RedBlackTree instance at 
+    // compiletime, emit it into the binary, and assign its reference as the default 
+    // initializer of the rbt field."
+
+    // auto rbt = new RedBlackTree!(Node, "a.f < b.f", duplicatesAllowed);  // struct Bag
+
+    RedBlackTree!(BagNode, "a.f < b.f", duplicatesAllowed) rbt;      // Class Bag pointer
 
     this(string n)
     {
-        name = n;             
+        name = n;
         rbt = new RedBlackTree!(BagNode, "a.f < b.f", duplicatesAllowed); 
     }
 
@@ -153,21 +149,6 @@ class Bag
         writeln("");
     }
 
-    string name;
-
-    uint[Location] aa;  // associative array
-
-    // https://forum.dlang.org/post/qajaymhfxjlmwmdnbktm@forum.dlang.org
-
-    // "You would think that this would create a new instance every time that the 
-    // struct is instantiated.
-    // Unfortunately what it does in fact do, is create a RedBlackTree instance at 
-    // compiletime, emit it into the binary, and assign its reference as the default 
-    // initializer of the rbt field."
-
-    // auto rbt = new RedBlackTree!(Node, "a.f < b.f", duplicatesAllowed);  // struct Bag
-
-    RedBlackTree!(BagNode, "a.f < b.f", duplicatesAllowed) rbt;      // Class Bag pointer
 }
 
 
