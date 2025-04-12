@@ -38,6 +38,7 @@ module app;
 
 
 import utilities.sdl_timing;
+import utilities.displayinfo : display_info;
 import hexboard;
 import select_hex;
 import hexmath;
@@ -109,8 +110,10 @@ Globals g;  // put all the global variables together in one place
 
 
 
-int main() 
+int main()
 {
+
+
 
 /+
 Lenovo AMD Ryzen 7 PRO 7840U
@@ -226,6 +229,8 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
     load_sdl_libraries(); 
     
+    display_info();
+    
     // timeIntervalInTicks();
     // timeIntervalInPerformanceMode();
     // frameRate();
@@ -280,6 +285,7 @@ Below 6 seconds, black dots are displayed, Above 6 seconids, black dots disappea
 
 
     //writeAndPause("after displayHexTextures");
+
 
     // https://thenumb.at/cpp-course/sdl2/03/03.html
 
