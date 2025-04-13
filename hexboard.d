@@ -848,7 +848,7 @@ void displayHexTextures(HB)(HB h)
 
 
 
-void drawHexBoard(HB)(HB h)
+void drawHexBoard(HB, G)(HB h, G g)
 {
     SDL_SetRenderDrawColor( g.sdl.renderer, 128, 128, 128, SDL_ALPHA_OPAQUE );
     //Clear screen
