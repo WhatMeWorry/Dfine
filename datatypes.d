@@ -10,6 +10,17 @@ struct Location   // holds a hex's location on a hexboard
     int c;  // column of hexboard
 }
 
+struct HexBoardSize(I)
+{
+    I rows;
+    I cols;
+}
+
+struct ScreenSize(I)
+{
+    I width;
+    I height;
+}
 
 struct Spot
 {

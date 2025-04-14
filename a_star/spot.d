@@ -391,7 +391,7 @@ Location invalidLoc = { -1, -1 };
 
 
 
-void findShortestPathCodingTrain(HB)(ref HB h, Globals g, Location begin, Location end)
+void findShortestPathCodingTrain(HB, G)(ref HB h, G g, Location begin, Location end)
 {
     Bag open = new Bag("Open");      // open container
     Bag closed = new Bag("Closed");  // closed container

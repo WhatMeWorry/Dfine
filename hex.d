@@ -21,13 +21,13 @@ struct MyStruct(T)
 }
 +/
 
-struct Point2D(T) 
+struct Point2D(T)
 {
     T x;
     T y;
 }
 
-struct HexPoints(U, V)
+struct HexPoints(U, V)   // these points are the same. just expressed in different coordinate systems
 {
     Point2D!(U)[6] ndc;  // normalized device coordinates
     Point2D!(V)[6] sc;   // screen coordinates
@@ -36,7 +36,7 @@ struct HexPoints(U, V)
 struct Point(U, V)
 {
     Point2D!(U) ndc;
-    Point2D!(V) sc;            
+    Point2D!(V) sc;
 }
 
 

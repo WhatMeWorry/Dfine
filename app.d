@@ -1,6 +1,6 @@
 
 
-/// Simple example of a SDL/GLFW application that creates multiple windows
+/// Simple example of a SDL application that creates multiple windows
 
 /+
 https://wiki.libsdl.org/SDL2/MigrationGuide#Overview_of_new_features
@@ -13,11 +13,6 @@ There are very few reasons for using SDL_Surfaces for rendering these days.
 SDL_Renderer and its SDL_Texture is a much better performing choice if you don't need CPU side 
 access to individual pixels.
 
-
-
-+/
-
-/+
 What’s the difference between Texture and Surface?
 
 Surface is stored in RAM and drawing is performed on the CPU. Texture is stored in Video RAM (GPU RAM) and drawing is 
@@ -27,11 +22,9 @@ faster than the CPU.
 you don’t need to use surfaces at all. You can create texture using the SDL_CreateTexture 17 function and render anything 
 on it. If you need to load image e.g. from file and store it in the form of texture, you can do it via IMG_LoadTexture. 
 SDL will do everything for you internally.
-+/
 
-/+
-Should each hex board have an associated windows/screen???  It would simply parameter passing.
-Or will this cause problems further down the road?
+
+Should each hex board have an associated windows/screen???  YES. That's what we will do.
 +/
 
 module app;
@@ -42,31 +35,23 @@ import utilities.displayinfo : display_info;
 import hexboard;
 import select_hex;
 import hexmath;
-
 import hex;
-
+import windows.simple_directmedia_layer;
 import libraries.load_sdl_libraries;
 import textures.texture;
 import a_star.spot;
-
-import windows.simple_directmedia_layer;
-
-
-import core.stdc.stdio;
+import datatypes : Location;
 
 import std.conv : roundTo;
-
 import std.stdio : writeln;
-import std.string;
 
 // SDL = Simple Directmedia Layer
 import bindbc.sdl : SDL_Window, SDL_Renderer;
 import bindbc.sdl : IMG_SavePNG;
 import bindbc.sdl;  // SDL_* all remaining declarations
-
 import bindbc.loader;
 
-import datatypes : Location;
+
 
 /+
 SDL coordinates, like most graphic engine coordinates, start at the top left corner of 
@@ -91,9 +76,8 @@ Screen coordinates
   |                                 |
   +---------------------------------+ 
                           (maxWidth, maxHeight)
-+/
 
-/+
+
 In SDL, SDL_window is used to create a window, while SDL_surface is used to draw to the window
 SDL_window is used to create a window and set flags such as fullscreen, OpenGL, hidden, or obscured.
 SDL_window is a struct that holds all info about the itself: size, position, borders etc.
@@ -106,13 +90,12 @@ within that SDL_Window. It also keeps track the settings related to the renderin
 +/
 
  
-Globals g;  // put all the global variables together in one place
+Globals!(int) mini;  // put all the global variables together in one place
 
-Globals mainMap;
+Globals!(int) big;
 
 int main()
 {
-
     load_sdl_libraries(); 
     
     SDL_Initialize();
@@ -124,65 +107,70 @@ int main()
     // frameRate();
     // cappingFrameRate();
 
-    g.sdl.screenWidth  = 900;
-    g.sdl.screenHeight = 900;
+    big.sdl.screen.width  = 900;
+    big.sdl.screen.height = 900;
+    big.sdl.board.rows = 15;
+    big.sdl.board.cols = 15;
 
-    uint rows = 200;
-    uint cols = 200;
+    mini.sdl.screen.width  = 400;
+    mini.sdl.screen.height = 400;
+    mini.sdl.board.rows = 200;
+    mini.sdl.board.cols = 200;
 
-    mainMap.sdl.screenWidth  = 900;
-    mainMap.sdl.screenHeight = 900;
+    float bigHexWidth = hexWidthToFitNDCwindow(big.sdl.board.rows, 
+                                               big.sdl.board.cols, 
+                                               Orientation.horizontal);
 
-    uint mainMapRows = 15;
-    uint mainMapCols = 15;
+    float miniHexWidth = hexWidthToFitNDCwindow(mini.sdl.board.rows,
+                                                mini.sdl.board.cols,
+                                                Orientation.horizontal);
 
+    auto h = HexBoard!(real, int)(miniHexWidth,
+                                  mini.sdl.board.rows,
+                                  mini.sdl.board.cols);
 
-    float hexWidth = hexWidthToFitWindow(rows, cols, Orientation.horizontal);
+    auto h2 = HexBoard!(real,  int)(bigHexWidth,
+                                    big.sdl.board.rows,
+                                    big.sdl.board.cols);
 
-    float mainMapHexWidth = hexWidthToFitWindow(mainMapRows, mainMapRows, Orientation.horizontal);
-
-    auto h = HexBoard!(real,  int)(hexWidth, rows, cols);   // WORKS!
-    
-    auto h2 = HexBoard!(real,  int)(mainMapHexWidth, mainMapRows, mainMapRows);   // WORKS!
-    
     //auto h = HexBoard!(double,int)(hexWidth, rows, cols); // WORKS!
     //auto h = HexBoard!(float, int)(hexWidth, rows, cols);  // WORKS!
 
-    h.convertNDCoordsToScreenCoords(g.sdl.screenWidth, g.sdl.screenHeight);
-    
-    h2.convertNDCoordsToScreenCoords(mainMap.sdl.screenWidth, mainMap.sdl.screenHeight);
+    h.convertNDCoordsToScreenCoords(mini.sdl.screen.width, mini.sdl.screen.height);
 
-    h.convertLengthsFromNDCtoSC(g.sdl.screenWidth, g.sdl.screenHeight);
-    
-    h2.convertLengthsFromNDCtoSC(mainMap.sdl.screenWidth, mainMap.sdl.screenHeight);
+    h2.convertNDCoordsToScreenCoords(big.sdl.screen.width, big.sdl.screen.height);
+
+    h.convertLengthsFromNDCtoSC(mini.sdl.screen.width, mini.sdl.screen.height);
+
+    h2.convertLengthsFromNDCtoSC(big.sdl.screen.width, big.sdl.screen.height);
     
 
     // https://github.com/BindBC/bindbc-sdl/issues/53   
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
-    // createSDLwindow(g); OLD
+    // createSDLwindow(mini); OLD
     
-    g.sdl = createSDLwindow("Mini Map", 400, 400);  // screen or pixel width x height
+    mini.sdl = createSDLwindow("Mini Map", 400, 400);  // screen or pixel width x height
     
-    mainMap.sdl = createSDLwindow("Main Map", mainMap.sdl.screenWidth, mainMap.sdl.screenHeight);  // screen or pixel width x height
+    big.sdl = createSDLwindow("Main Map", big.sdl.screen.width, big.sdl.screen.height);  // screen or pixel width x height
 
-    h.setRenderOfHexboard(g.sdl.renderer);
+    h.setRenderOfHexboard(mini.sdl.renderer);
     
-    h2.setRenderOfHexboard(mainMap.sdl.renderer); 
+    h2.setRenderOfHexboard(big.sdl.renderer); 
 
-    g.textures = load_textures(g);
+    mini.textures = load_textures(mini);
     
-    mainMap.textures = load_textures(mainMap);
+    big.textures = load_textures(big);
 
-    writeln("g.textures = ", g.textures);
+    writeln("mini.textures = ", mini.textures);
 
-    h.drawHexBoard(g);
+    h.drawHexBoard(mini);
     
-    h2.drawHexBoard(mainMap);
+    h2.drawHexBoard(big);
 
-    h.setHexboardTexturesAndTerrain(g);
+    h.setHexboardTexturesAndTerrain(mini);
     
-    h2.setHexboardTexturesAndTerrain(mainMap);
+    h2.setHexboardTexturesAndTerrain(big);
 
     //h.displayHexTextures();
 
@@ -221,15 +209,15 @@ int main()
                         SDL_Surface *screenshot;
 
                         screenshot = SDL_CreateRGBSurface(SDL_SWSURFACE,
-                                                          g.sdl.screenWidth, 
-                                                          g.sdl.screenHeight, 
+                                                          mini.sdl.screen.width, 
+                                                          mini.sdl.screen.height, 
                                                           32, 
                                                           0x00FF0000, 
                                                           0X0000FF00, 
                                                           0X000000FF, 
                                                           0XFF000000); 
 
-                        SDL_RenderReadPixels(g.sdl.renderer, 
+                        SDL_RenderReadPixels(mini.sdl.renderer, 
                                              null, 
                                              SDL_PIXELFORMAT_ARGB8888, 
                                              screenshot.pixels, 
@@ -243,7 +231,7 @@ int main()
                     {
                         writeln("SDLK_DELETE used to just clear out all hex textures");
                         h.clearHexBoard();
-                        h.drawHexBoard(g);
+                        h.drawHexBoard(mini);
                     }
 
                     if( event.key.keysym.sym == SDLK_F1 )
@@ -251,7 +239,7 @@ int main()
                         import std.process : executeShell;
                         //executeShell("cls");
 
-                        h.setHexboardTexturesAndTerrain(g);
+                        h.setHexboardTexturesAndTerrain(mini);
 
                         writeln("after setHexboardTexturesAndTerrain");
 
@@ -273,7 +261,7 @@ int main()
                         end.r = h.lastRow;
                         end.c = h.lastColumn;
 
-                        findShortestPathCodingTrain( h, g, begin, end );
+                        findShortestPathCodingTrain( h, mini, begin, end );
 
                         writeln(watch.peek()); 
 
@@ -291,7 +279,7 @@ int main()
 
                         // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
 
-                        h.convertScreenCoordinatesToNormalizedDeviceCoordinates(g.sdl.screenWidth, g.sdl.screenHeight);
+                        h.convertScreenCoordinatesToNormalizedDeviceCoordinates(mini.sdl.screen.width, mini.sdl.screen.height);
 
                         //writeln(h.mouseClick.ndc.x, ", ", h.mouseClick.ndc.y);
 
@@ -318,7 +306,7 @@ int main()
                             // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
                             //                                                microsecond  nanosecond
 
-                            findShortestPathCodingTrain( h, g, first, last );
+                            findShortestPathCodingTrain( h, mini, first, last );
 
                             writeln(watch.peek());
 
@@ -352,10 +340,10 @@ int main()
 
                             //writeln(t);
 
-                            SDL_RenderDrawLine( g.sdl.renderer, t[0].x, t[0].y, t[1].x, t[1].y);
-                            SDL_RenderDrawLine( g.sdl.renderer, t[1].x, t[1].y, t[2].x, t[2].y);
-                            SDL_RenderDrawLine( g.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
-                            SDL_RenderDrawLine( g.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);
+                            SDL_RenderDrawLine( mini.sdl.renderer, t[0].x, t[0].y, t[1].x, t[1].y);
+                            SDL_RenderDrawLine( mini.sdl.renderer, t[1].x, t[1].y, t[2].x, t[2].y);
+                            SDL_RenderDrawLine( mini.sdl.renderer, t[2].x, t[2].y, t[3].x, t[3].y);
+                            SDL_RenderDrawLine( mini.sdl.renderer, t[3].x, t[3].y, t[0].x, t[0].y);
                         }
                     }
                     break;
@@ -363,8 +351,8 @@ int main()
                 default: break;
             }
         }
-        SDL_RenderPresent(g.sdl.renderer);
-        SDL_RenderPresent(mainMap.sdl.renderer);
+        SDL_RenderPresent(mini.sdl.renderer);
+        SDL_RenderPresent(big.sdl.renderer);
     }
     return 0;
 }

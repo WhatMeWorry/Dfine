@@ -40,7 +40,7 @@ struct Texture
 
 
 
-Texture[] load_textures(Globals g)
+Texture[] load_textures(G)(G g)    // Texture[] load_textures(Globals g)
 {
     if (g.sdl.renderer == null)
     {

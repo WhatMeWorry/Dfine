@@ -66,7 +66,7 @@ unittest
      
      +/
 
-float hexWidthToFitWindow(uint rows, uint cols, Orientation stance)
+float hexWidthToFitNDCwindow(uint rows, uint cols, Orientation stance)
 {
     immutable float lengthNDC = 2.0;  // width and height of NDC system is always 2.0 units.  (-1.0 to 1.0)
     float hexWidth;

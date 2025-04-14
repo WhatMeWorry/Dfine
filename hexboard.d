@@ -417,7 +417,7 @@ void convertScreenCoordinatesToNormalizedDeviceCoordinates(HB, I)(ref HB h, I sc
 
 
 
-void setHexboardTexturesAndTerrain(HB)(HB h, Globals g)
+void setHexboardTexturesAndTerrain(HB, G)(HB h, G g)
 {
     import std.random : uniform;
     auto rnd = Random(unpredictableSeed);    
@@ -487,7 +487,7 @@ void clearHexBoard(HB)(HB h)
 }
 
 
-void setHexTexture(HB,T)(ref HB h, Globals g, T hex, Ids id)
+void setHexTexture(HB,G,T)(ref HB h, G g, T hex, Ids id)
 {
     h.hexes[hex.r][hex.c].textures ~= g.textures[id];
 }

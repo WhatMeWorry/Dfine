@@ -11,21 +11,23 @@ import textures.texture : Texture;
 import std.stdio;
 import core.stdc.stdlib : exit;
 import std.string : toStringz;
+import datatypes;
 
-
-struct SDL_STRUCT
+struct SDL_STRUCT(I)
 {
     string name;
-    int screenWidth;
-    int screenHeight;
+    HexBoardSize!(I) board;
+    ScreenSize!(I) screen;
+    //int screenWidth;
+    //int screenHeight;
     SDL_Window*    window = null;      // The window we'll be rendering to
     SDL_Renderer*  renderer = null;
 }
 
 
-struct Globals
+struct Globals(I)
 {
-    SDL_STRUCT sdl;
+    SDL_STRUCT!(I) sdl;
     Texture[] textures;
 }
 
@@ -41,13 +43,13 @@ void SDL_Initialize()
 
 
 
-SDL_STRUCT createSDLwindow(string name, int width, int height)
+SDL_STRUCT!(I) createSDLwindow(I)(string name, I width, I height)
 {
-    SDL_STRUCT temp;
+    SDL_STRUCT!(I) temp;
    
     temp.name = name;
-    temp.screenWidth = width;
-    temp.screenHeight = height;
+    temp.screen.width = width;
+    temp.screen.height = height;
    
     temp.window = SDL_CreateWindow(toStringz(name),
                                    //SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -74,7 +76,7 @@ SDL_STRUCT createSDLwindow(string name, int width, int height)
     return temp;
 }
 
-
+/+
 void createSDLwindow(ref Globals g)   // ABSOLETE
 {
     if( SDL_Init( SDL_INIT_EVERYTHING ) < 0 )  // SDL_INIT_VIDEO
@@ -109,3 +111,4 @@ void createSDLwindow(ref Globals g)   // ABSOLETE
         }
     }
 }
++/
