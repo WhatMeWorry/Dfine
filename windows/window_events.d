@@ -54,7 +54,7 @@ typedef enum SDL_WindowEventID
 } SDL_WindowEventID;
 +/
 
-void handleWindowEvent(SDL_WindowEvent window, ref CurrentStatus status)
+void handleWindowEvent(SDL_WindowEvent window, ref Status status)
 {
     //writeln("Window ID: ", window.windowID);
     
@@ -96,8 +96,8 @@ void handleWindowEvent(SDL_WindowEvent window, ref CurrentStatus status)
     }
     if(window.event == SDL_WINDOWEVENT_ENTER)
     {
-        writeln("window.event was ENTER with Window ID: ", window.windowID);
-        status.windowID = window.windowID;
+        //writeln("window.event was ENTER with Window ID: ", window.windowID);
+        status.active.windowID = window.windowID;
     }
 
     if(window.event == SDL_WINDOWEVENT_LEAVE)
@@ -112,9 +112,10 @@ void handleWindowEvent(SDL_WindowEvent window, ref CurrentStatus status)
     {
         //writeln("window.event was FOCUS_LOST");
     }
-    if(window.event == SDL_WINDOWEVENT_CLOSE)
-    {
-        //writeln("window.event was CLOSE");
+    if(window.event == SDL_WINDOWEVENT_CLOSE)  // clicked on the window close icon X
+    {                                          // Not ideal since closing one window
+        writeln("window.event was CLOSE");     // should not exit the entire application
+        status.running = false;
     }
 
  

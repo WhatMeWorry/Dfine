@@ -32,6 +32,7 @@ module app;
 
 import utilities.sdl_timing;
 import utilities.displayinfo : display_info;
+import utilities.save_window_to_file;
 import hexboard;
 import select_hex;
 import hexmath;
@@ -40,7 +41,7 @@ import windows.simple_directmedia_layer;
 import libraries.load_sdl_libraries;
 import textures.texture;
 import a_star.spot;
-import datatypes : Location, CurrentStatus;
+import datatypes : Location, Status;
 import windows.events : handleEvents;
 
 import std.conv : roundTo;
@@ -95,8 +96,48 @@ Globals!(int) mini;  // put all the global variables together in one place
 
 Globals!(int) big;
 
+Globals!(int)*[int] holder; // hold pointers to the Globals instances indexed by windowID
+                       // Since this is only a pointer, changes to the Globals can be made
+                       // without updating the entries in this associated array
+
 int main()
 {
+
+
+// int[string] aa;
+// aa["key1"] = 10;
+/+
+struct S {
+    char  c;
+    float f;
+}
+
+S*[int] aa;  // hold pointers to the struct S instances
+S *d;
+
+S u;
+S v;
+
+u.c = 'a';  u.f = 1.33;
+aa[0] = &u;
+
+v.c = 'z'; v.f = 3.14;
+aa[1] = &v;
+
+
+d = aa[0];
+
+writeln("d.c = ", d.c, "  d.f = ", d.f);
+
+d = null;
+
+u.c = 'A';  u.f = 9.9;
+
+d = aa[0];
+
+writeln("d.c = ", d.c, "  d.f = ", d.f);
++/
+
     load_sdl_libraries(); 
     
     SDL_Initialize();
@@ -110,13 +151,13 @@ int main()
 
     big.sdl.screen.width  = 900;
     big.sdl.screen.height = 900;
-    big.sdl.board.rows = 15;
-    big.sdl.board.cols = 15;
+    big.sdl.board.rows = 10;
+    big.sdl.board.cols = 10;
 
     mini.sdl.screen.width  = 400;
     mini.sdl.screen.height = 400;
-    mini.sdl.board.rows = 200;
-    mini.sdl.board.cols = 200;
+    mini.sdl.board.rows = 50;
+    mini.sdl.board.cols = 50;
 
     float bigHexWidth = hexWidthToFitNDCwindow(big.sdl.board.rows, 
                                                big.sdl.board.cols, 
@@ -153,10 +194,14 @@ int main()
     mini.sdl = createSDLwindow("Mini Map", mini.sdl.screen.width,
                                            mini.sdl.screen.height);  // screen or pixel width x height
 
+    holder[mini.sdl.windowID] = &mini;
+
     writeln("mini.sdl = ", mini.sdl);
 
     big.sdl = createSDLwindow("Main Map", big.sdl.screen.width,
                                           big.sdl.screen.height);  // screen or pixel width x height
+
+    holder[big.sdl.windowID] = &big;
 
     writeln("big.sdl = ", big.sdl);
 
@@ -190,16 +235,28 @@ int main()
     SDL_Event event;
     //bool running = true;
     
-    CurrentStatus status;
+    Status status;
     status.running = true;
+    status.saveWindowToFile = false;
 
     while(status.running)
     {
         while(SDL_PollEvent(&event) != 0)
         {
+            
             handleEvents(event, status);
             
-            writeln("Current window ID: ", status.windowID);
+            if (status.saveWindowToFile)  // SDLK_F1 was pressed
+            {
+                // what is the currently active window?
+                Globals!(int)* currentWindow = holder[status.active.windowID];
+        
+                //writeln("currentWindow.sdl.windowID = ", currentWindow.sdl.windowID);
+                saveWindowToFile(currentWindow);
+                status.saveWindowToFile = false;
+            }
+            
+            //writeln("Current window ID: ", status.windowID);
             
             switch(event.type)
             {
@@ -215,30 +272,6 @@ int main()
                     {
                         writeln("user pressed the Escape Key");
                         status.running = false;
-                    }
-
-                    if( event.key.keysym.sym == SDLK_F1 )
-                    {
-                        writeln("user pressed the Function Key F1");
-                        SDL_Surface *screenshot;
-
-                        screenshot = SDL_CreateRGBSurface(SDL_SWSURFACE,
-                                                          mini.sdl.screen.width, 
-                                                          mini.sdl.screen.height, 
-                                                          32, 
-                                                          0x00FF0000, 
-                                                          0X0000FF00, 
-                                                          0X000000FF, 
-                                                          0XFF000000); 
-
-                        SDL_RenderReadPixels(mini.sdl.renderer, 
-                                             null, 
-                                             SDL_PIXELFORMAT_ARGB8888, 
-                                             screenshot.pixels, 
-                                             screenshot.pitch);
-                        //SDL_SavePNG(screenshot, "screenshot.png"); 
-                        IMG_SavePNG(screenshot, "screenshot.png"); 
-                        SDL_FreeSurface(screenshot); 
                     }
 
                     if( event.key.keysym.sym == SDLK_DELETE )

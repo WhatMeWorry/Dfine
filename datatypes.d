@@ -1,6 +1,8 @@
 
 module datatypes;
 
+import bindbc.sdl;
+
 //import textures.texture : Texture;
 
 
@@ -10,10 +12,17 @@ struct Location   // holds a hex's location on a hexboard
     int c;  // column of hexboard
 }
 
-struct CurrentStatus
+struct Active
 {
-    int windowID;
+    SDL_Window* window;
+    int  windowID;
+}
+
+struct Status
+{
+    Active active;
     bool running;
+    bool saveWindowToFile;
 }
 
 struct HexBoardSize(I)
