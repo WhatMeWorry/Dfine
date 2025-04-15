@@ -10,6 +10,12 @@ struct Location   // holds a hex's location on a hexboard
     int c;  // column of hexboard
 }
 
+struct CurrentStatus
+{
+    int windowID;
+    bool running;
+}
+
 struct HexBoardSize(I)
 {
     I rows;

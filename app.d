@@ -40,7 +40,8 @@ import windows.simple_directmedia_layer;
 import libraries.load_sdl_libraries;
 import textures.texture;
 import a_star.spot;
-import datatypes : Location;
+import datatypes : Location, CurrentStatus;
+import windows.events : handleEvents;
 
 import std.conv : roundTo;
 import std.stdio : writeln;
@@ -100,7 +101,7 @@ int main()
     
     SDL_Initialize();
     
-    display_info();
+    //display_info();
     
     // timeIntervalInTicks();
     // timeIntervalInPerformanceMode();
@@ -143,16 +144,21 @@ int main()
     h.convertLengthsFromNDCtoSC(mini.sdl.screen.width, mini.sdl.screen.height);
 
     h2.convertLengthsFromNDCtoSC(big.sdl.screen.width, big.sdl.screen.height);
-    
 
     // https://github.com/BindBC/bindbc-sdl/issues/53   
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
     // createSDLwindow(mini); OLD
-    
-    mini.sdl = createSDLwindow("Mini Map", 400, 400);  // screen or pixel width x height
-    
-    big.sdl = createSDLwindow("Main Map", big.sdl.screen.width, big.sdl.screen.height);  // screen or pixel width x height
+
+    mini.sdl = createSDLwindow("Mini Map", mini.sdl.screen.width,
+                                           mini.sdl.screen.height);  // screen or pixel width x height
+
+    writeln("mini.sdl = ", mini.sdl);
+
+    big.sdl = createSDLwindow("Main Map", big.sdl.screen.width,
+                                          big.sdl.screen.height);  // screen or pixel width x height
+
+    writeln("big.sdl = ", big.sdl);
 
     h.setRenderOfHexboard(mini.sdl.renderer);
     
@@ -163,7 +169,8 @@ int main()
     big.textures = load_textures(big);
 
     writeln("mini.textures = ", mini.textures);
-
+    writeln("big.textures = ", big.textures);
+    
     h.drawHexBoard(mini);
     
     h2.drawHexBoard(big);
@@ -181,18 +188,25 @@ int main()
     // https://thenumb.at/cpp-course/sdl2/03/03.html
 
     SDL_Event event;
-    bool running = true;
+    //bool running = true;
+    
+    CurrentStatus status;
+    status.running = true;
 
-    while(running)
+    while(status.running)
     {
         while(SDL_PollEvent(&event) != 0)
         {
+            handleEvents(event, status);
+            
+            writeln("Current window ID: ", status.windowID);
+            
             switch(event.type)
             {
                 case SDL_QUIT:
 
                     writeln("user clicked on close button of windows");
-                    running = false;
+                    status.running = false;
                     break;
 
                 case SDL_KEYDOWN:
@@ -200,7 +214,7 @@ int main()
                     if( event.key.keysym.sym == SDLK_ESCAPE )
                     {
                         writeln("user pressed the Escape Key");
-                        running = false;
+                        status.running = false;
                     }
 
                     if( event.key.keysym.sym == SDLK_F1 )
@@ -261,7 +275,7 @@ int main()
                         end.r = h.lastRow;
                         end.c = h.lastColumn;
 
-                        findShortestPathCodingTrain( h, mini, begin, end );
+                        //findShortestPathCodingTrain( h, mini, begin, end );
 
                         writeln(watch.peek()); 
 
@@ -306,7 +320,7 @@ int main()
                             // units = weeks days hours minutes seconds msecs usecs hnsecs nsecs
                             //                                                microsecond  nanosecond
 
-                            findShortestPathCodingTrain( h, mini, first, last );
+                            //findShortestPathCodingTrain( h, mini, first, last );
 
                             writeln(watch.peek());
 
@@ -325,7 +339,7 @@ int main()
                             h.setHexesSouthWest(g, end, 7, Ids.solidWhite);
                             +/
 
-                            h.displayHexTextures();
+                            //h.displayHexTextures();
 
                             Point2D!(I)[4] t;
 

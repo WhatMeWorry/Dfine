@@ -21,6 +21,9 @@ struct SDL_STRUCT(I)
     //int screenWidth;
     //int screenHeight;
     SDL_Window*    window = null;      // The window we'll be rendering to
+    
+    uint windowID;
+    
     SDL_Renderer*  renderer = null;
 }
 
@@ -73,6 +76,9 @@ SDL_STRUCT!(I) createSDLwindow(I)(string name, I width, I height)
             exit(-1);
         }
     }
+    
+    temp.windowID = SDL_GetWindowID(temp.window);
+    
     return temp;
 }
 
