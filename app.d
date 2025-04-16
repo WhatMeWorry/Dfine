@@ -46,6 +46,8 @@ import windows.events : handleEvents;
 
 import std.conv : roundTo;
 import std.stdio : writeln;
+import core.stdc.stdlib : exit;
+import a_star.spot : writeAndPause;
 
 // SDL = Simple Directmedia Layer
 import bindbc.sdl : SDL_Window, SDL_Renderer;
@@ -192,8 +194,10 @@ int main()
     
     h2.setHexboardTexturesAndTerrain(big);
 
-    //h.displayHexTextures();
+    h.displayHexTextures();
+    h2.displayHexTextures();
 
+    // writeAndPause("hit any key to contiue");
 
     //writeAndPause("after displayHexTextures");
 
