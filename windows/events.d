@@ -10,8 +10,10 @@ import bindbc.sdl : SDL_Event, SDL_WINDOWEVENT, SDL_QUIT;
 import bindbc.sdl;  // all the others
 import windows.window_events : handleWindowEvent;
 import windows.key_events : handleKeyEvent;
+import windows.mouse_events : handleMouseEvent;
 
 /+
+
 typedef union SDL_Event
 {
     Uint32 type;                            // Event type, shared with all events
@@ -64,13 +66,12 @@ typedef enum SDL_EventType
         (Sensor events)
         (Render events)
         (Internal events)
-    //  This last event is only for bounding internal arrays
     SDL_LASTEVENT    = 0xFFFF
 } SDL_EventType;
 
 +/
 
-void handleEvents(ref SDL_Event event, ref Status status)
+void handleEvents(SDL_Event event, ref Status status)
 {
 
     if (event.type == SDL_WINDOWEVENT)
@@ -82,10 +83,18 @@ void handleEvents(ref SDL_Event event, ref Status status)
     
     if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
     {
-        //writeln("event = ", event.type, " is SDL_WINDOWEVENT");
+        //writeln("event = ", event.type, " is SDL_KeyboardEvent");
         handleKeyEvent(event.key, status);
         return;
     }
+
+    if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN ||
+        event.type == SDL_MOUSEBUTTONUP)
+    {
+        handleMouseEvent(event, status);
+        return;
+    }
+    
 
     if (event.type == SDL_QUIT)
     {

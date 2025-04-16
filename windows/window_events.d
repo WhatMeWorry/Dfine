@@ -96,8 +96,12 @@ void handleWindowEvent(SDL_WindowEvent window, ref Status status)
     }
     if(window.event == SDL_WINDOWEVENT_ENTER)
     {
-        //writeln("window.event was ENTER with Window ID: ", window.windowID);
+        writeln("window.event was ENTER with Window ID: ", window.windowID);
         status.active.windowID = window.windowID;
+        
+        // Raise the window and give it focus
+        SDL_RaiseWindow(SDL_GetWindowFromID(window.windowID));
+        SDL_SetWindowInputFocus(SDL_GetWindowFromID(window.windowID));
     }
 
     if(window.event == SDL_WINDOWEVENT_LEAVE)

@@ -120,22 +120,14 @@ S v;
 
 u.c = 'a';  u.f = 1.33;
 aa[0] = &u;
-
 v.c = 'z'; v.f = 3.14;
 aa[1] = &v;
-
-
 d = aa[0];
-
-writeln("d.c = ", d.c, "  d.f = ", d.f);
 
 d = null;
-
 u.c = 'A';  u.f = 9.9;
-
 d = aa[0];
 
-writeln("d.c = ", d.c, "  d.f = ", d.f);
 +/
 
     load_sdl_libraries(); 
@@ -243,21 +235,20 @@ writeln("d.c = ", d.c, "  d.f = ", d.f);
     {
         while(SDL_PollEvent(&event) != 0)
         {
-            
             handleEvents(event, status);
-            
+
             if (status.saveWindowToFile)  // SDLK_F1 was pressed
             {
                 // what is the currently active window?
                 Globals!(int)* currentWindow = holder[status.active.windowID];
-        
+
                 //writeln("currentWindow.sdl.windowID = ", currentWindow.sdl.windowID);
                 saveWindowToFile(currentWindow);
                 status.saveWindowToFile = false;
             }
-            
+
             //writeln("Current window ID: ", status.windowID);
-            
+
             switch(event.type)
             {
                 case SDL_QUIT:
