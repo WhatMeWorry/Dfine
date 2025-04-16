@@ -100,36 +100,12 @@ Globals!(int)*[int] holder; // hold pointers to the Globals instances indexed by
                        // Since this is only a pointer, changes to the Globals can be made
                        // without updating the entries in this associated array
 
+HexBoard!(real, int)[int] boards; // hold pointers to the HexBoard instances indexed by windowID
+                            // Since this is only a pointer, changes to the HexBoard can be made
+                            // without updating the entries in this associated array
+
 int main()
 {
-
-
-// int[string] aa;
-// aa["key1"] = 10;
-/+
-struct S {
-    char  c;
-    float f;
-}
-
-S*[int] aa;  // hold pointers to the struct S instances
-S *d;
-
-S u;
-S v;
-
-u.c = 'a';  u.f = 1.33;
-aa[0] = &u;
-v.c = 'z'; v.f = 3.14;
-aa[1] = &v;
-d = aa[0];
-
-d = null;
-u.c = 'A';  u.f = 9.9;
-d = aa[0];
-
-+/
-
     load_sdl_libraries(); 
     
     SDL_Initialize();
@@ -246,9 +222,24 @@ d = aa[0];
                 saveWindowToFile(currentWindow);
                 status.saveWindowToFile = false;
             }
+            
+            if (status.leftMouseButton)
+            {
+                // what window are we curretly in
 
-            //writeln("Current window ID: ", status.windowID);
+                //Globals!(int)* currentWindow = holder[status.active.windowID];
 
+                //writeln("boards = ", boards);
+
+                //HexBoard!(real, int) currentBoard = boards[status.active.windowID];
+                
+                //currentBoard.setHexboardTexturesAndTerrain(currentWindow);
+                
+                //currentBoard.displayHexTextures();
+
+                //status.leftMouseButton = false;
+            }
+            /+
             switch(event.type)
             {
                 case SDL_QUIT:
@@ -387,7 +378,7 @@ d = aa[0];
                     break;
 
                 default: break;
-            }
+            } +/
         }
         SDL_RenderPresent(mini.sdl.renderer);
         SDL_RenderPresent(big.sdl.renderer);

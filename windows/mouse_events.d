@@ -39,8 +39,13 @@ typedef struct SDL_MouseButtonEvent
     Sint32 x;           // X coordinate, relative to window
     Sint32 y;           // Y coordinate, relative to window
 } SDL_MouseButtonEvent;
-+/
 
+for button, value are:
+
+SDL_BUTTON_LEFT    Left mouse button.
+SDL_BUTTON_MIDDLE  Middle mouse button.
+SDL_BUTTON_RIGHT   Right mouse button.
++/
 
 void handleMouseEvent(SDL_Event event, ref Status status)
 {
@@ -51,9 +56,12 @@ void handleMouseEvent(SDL_Event event, ref Status status)
     }
     if (event.type == SDL_MOUSEBUTTONDOWN)
     {
-        // status???
-        writeln("Mouse button down");
-        return;
+        if(event.button.button == SDL_BUTTON_LEFT)
+        {        
+            status.leftMouseButton = true;
+            writeln("clicked Mouse with left button");
+            return;
+        }
     }
     if (event.type == SDL_MOUSEBUTTONUP)
     {

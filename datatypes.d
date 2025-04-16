@@ -23,6 +23,7 @@ struct Status
     Active active;
     bool running;
     bool saveWindowToFile;
+    bool leftMouseButton;
 }
 
 struct HexBoardSize(I)

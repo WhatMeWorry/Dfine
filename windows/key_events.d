@@ -94,70 +94,15 @@ typedef enum SDL_KeyCode
 
 void handleKeyEvent(SDL_KeyboardEvent keyEvent, ref Status status)
 {
-    //writeln("Window ID: ", window.windowID);
-    
     if(keyEvent.keysym.sym == SDLK_F1)
     {
         status.saveWindowToFile = true;
         return;
     }
-    
-    /+
-    if(window.event == SDL_WINDOWEVENT_HIDDEN)
+    if(keyEvent.keysym.sym == SDLK_ESCAPE )
     {
-        //writeln("window.event was HIDDEN");
-    }
-    if(window.event == SDL_WINDOWEVENT_EXPOSED)
-    {
-        //writeln("window.event was EXPOSED");
-    }
-    if(window.event == SDL_WINDOWEVENT_MOVED)
-    {
-        //writeln("window.event was MOVED");
-    }
-    if(window.event == SDL_WINDOWEVENT_RESIZED)
-    {
-        //writeln("window.event was RESIZED");
-    }
-    if(window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-    {
-        //writeln("window.event was SIZE_CHANGED");
-    }
-    if(window.event == SDL_WINDOWEVENT_MINIMIZED)
-    {
-        //writeln("window.event was MINIMIZED");
-    }
-    if(window.event == SDL_WINDOWEVENT_MAXIMIZED)
-    {
-        //writeln("window.event was MAXIMIZED");
-    }
-    if(window.event == SDL_WINDOWEVENT_RESTORED)
-    {
-        //writeln("window.event was RESTORED");
-    }
-    if(window.event == SDL_WINDOWEVENT_ENTER)
-    {
-        writeln("window.event was ENTER with Window ID: ", window.windowID);
-        status.active.windowID = window.windowID;
-    }
-
-    if(window.event == SDL_WINDOWEVENT_LEAVE)
-    {
-        //writeln("window.event was LEAVE");
-    }
-    if(window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
-    {
-        //writeln("window.event was FOCUS_GAINED");
-    }
-    if(window.event == SDL_WINDOWEVENT_FOCUS_LOST)
-    {
-        //writeln("window.event was FOCUS_LOST");
-    }
-    if(window.event == SDL_WINDOWEVENT_CLOSE)  // clicked on the window close icon X
-    {
-        writeln("window.event was CLOSE");
+        //writeln("user pressed the Escape Key");
         status.running = false;
     }
-     +/
  
 }
