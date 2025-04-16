@@ -808,6 +808,7 @@ void displayHexTextures(HB)(HB h)
     {
         foreach(c; 0..(h.columns))
         {
+            writeln("h.hexes[r][c].textures.len = ", h.hexes[r][c].textures.length);
             foreach(texture; h.hexes[r][c].textures)
             {
                 if (texture.ptr != null)

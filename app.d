@@ -129,13 +129,14 @@ int main()
     mini.sdl.board.rows = 50;
     mini.sdl.board.cols = 50;
 
-    float bigHexWidth = hexWidthToFitNDCwindow(big.sdl.board.rows, 
-                                               big.sdl.board.cols, 
-                                               Orientation.horizontal);
 
     float miniHexWidth = hexWidthToFitNDCwindow(mini.sdl.board.rows,
                                                 mini.sdl.board.cols,
                                                 Orientation.horizontal);
+
+    float bigHexWidth = hexWidthToFitNDCwindow(big.sdl.board.rows, 
+                                               big.sdl.board.cols, 
+                                               Orientation.horizontal);
 
     auto h = HexBoard!(real, int)(miniHexWidth,
                                   mini.sdl.board.rows,
@@ -164,16 +165,15 @@ int main()
     mini.sdl = createSDLwindow("Mini Map", mini.sdl.screen.width,
                                            mini.sdl.screen.height);  // screen or pixel width x height
 
-    holder[mini.sdl.windowID] = &mini;
-
-    writeln("mini.sdl = ", mini.sdl);
-
     big.sdl = createSDLwindow("Main Map", big.sdl.screen.width,
                                           big.sdl.screen.height);  // screen or pixel width x height
 
+    holder[mini.sdl.windowID] = &mini;
     holder[big.sdl.windowID] = &big;
 
-    writeln("big.sdl = ", big.sdl);
+    //HexBoard!(real, int)[int] boards;
+    boards[mini.sdl.windowID] = h;
+    boards[big.sdl.windowID] = h2;
 
     h.setRenderOfHexboard(mini.sdl.renderer);
     
@@ -230,35 +230,56 @@ int main()
             if (status.leftMouseButton)
             {
                 // what window are we curretly in
-
-                //Globals!(int)* currentWindow = holder[status.active.windowID];
-
-                //writeln("boards = ", boards);
-
-                //HexBoard!(real, int) currentBoard = boards[status.active.windowID];
                 
-                //currentBoard.setHexboardTexturesAndTerrain(currentWindow);
-                
-                //currentBoard.displayHexTextures();
+                Globals!(int)* currentWindow = holder[status.active.windowID];
 
-                //status.leftMouseButton = false;
+                HexBoard!(real, int) currentBoard = boards[status.active.windowID];
+                
+                //currentBoard.setHexboardTexturesAndTerrain(currentWindow); ONLY DO ONCE AT BEGINNING
+                
+                currentBoard.displayHexTextures();
+                
+                SDL_GetMouseState(cast (int *) &currentBoard.mouseClick.sc.x, 
+                                  cast (int *) &currentBoard.mouseClick.sc.y);
+
+                writeln(currentBoard.mouseClick.sc.x, ", ", currentBoard.mouseClick.sc.y);
+                
+                // Convert a mouse click screen coordinates (integer numbers) to normalized device coordinates (float)
+
+                currentBoard.convertScreenCoordinatesToNormalizedDeviceCoordinates(currentWindow.sdl.screen.width, 
+                                                                                   currentWindow.sdl.screen.height);
+
+                writeln(currentBoard.mouseClick.ndc.x, ", ", currentBoard.mouseClick.ndc.y);
+                
+                if (currentBoard.getHexMouseClickedOn())
+                {
+                    writeln("currentBoard.selectedHex = ", currentBoard.selectedHex);
+
+                    alias I = typeof(currentBoard.integerType);
+                    I x = currentBoard.selectedHex.row;   I y = currentBoard.selectedHex.col;
+
+                    Location first;  
+                    Location last; 
+
+                    first.r = 0;
+                    first.c = 0;
+
+                    last.r = x; 
+                    last.c = y;
+
+                    findShortestPathCodingTrain( currentBoard, currentWindow, first, last );
+
+                    currentBoard.displayHexTextures();
+                    
+                    SDL_RenderPresent(currentWindow.sdl.renderer);
+                }
+
+                status.leftMouseButton = false;
             }
             /+
             switch(event.type)
             {
-                case SDL_QUIT:
-
-                    writeln("user clicked on close button of windows");
-                    status.running = false;
-                    break;
-
                 case SDL_KEYDOWN:
-
-                    if( event.key.keysym.sym == SDLK_ESCAPE )
-                    {
-                        writeln("user pressed the Escape Key");
-                        status.running = false;
-                    }
 
                     if( event.key.keysym.sym == SDLK_DELETE )
                     {
