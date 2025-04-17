@@ -121,13 +121,13 @@ int main()
 
     big.sdl.screen.width  = 900;
     big.sdl.screen.height = 900;
-    big.sdl.board.rows = 10;
-    big.sdl.board.cols = 10;
+    big.sdl.board.rows = 3;  // 10
+    big.sdl.board.cols = 3;  // 10
 
     mini.sdl.screen.width  = 400;
     mini.sdl.screen.height = 400;
-    mini.sdl.board.rows = 50;
-    mini.sdl.board.cols = 50;
+    mini.sdl.board.rows = 3;  // 50
+    mini.sdl.board.cols = 3;  // 50
 
 
     float miniHexWidth = hexWidthToFitNDCwindow(mini.sdl.board.rows,
@@ -197,7 +197,7 @@ int main()
     h.displayHexTextures();
     h2.displayHexTextures();
 
-    // writeAndPause("hit any key to contiue");
+    writeAndPause("hit any key to contiue");
 
     //writeAndPause("after displayHexTextures");
 
@@ -405,8 +405,8 @@ int main()
                 default: break;
             } +/
         }
-        SDL_RenderPresent(mini.sdl.renderer);
-        SDL_RenderPresent(big.sdl.renderer);
+        //SDL_RenderPresent(mini.sdl.renderer);
+        //SDL_RenderPresent(big.sdl.renderer);
     }
     return 0;
 }

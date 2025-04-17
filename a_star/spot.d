@@ -420,8 +420,6 @@ void findShortestPathCodingTrain(HB, G)(ref HB h, G g, Location begin, Location 
         {
             Location here = h.spots[end.r][end.c].locale;
 
-            path ~= h.spots[end.r][end.c].locale;  // put the end
-
             while (here != invalidLoc)
             {
                 path ~= here;

@@ -804,11 +804,13 @@ void setHexColTexture(HB,I)(ref HB h, Globals g, I col, Ids id)
 
 void displayHexTextures(HB)(HB h)
 {
+    writeln("New Hex Board");
     foreach(r; 0..(h.rows))
     {
         foreach(c; 0..(h.columns))
         {
-            writeln("h.hexes[r][c].textures.len = ", h.hexes[r][c].textures.length);
+            writeln("h.hexes[", r, "][", c, "].textures.length = ", h.hexes[r][c].textures.length);
+            writeln("h.hexes[r][c].textures = ", h.hexes[r][c].textures);
             foreach(texture; h.hexes[r][c].textures)
             {
                 if (texture.ptr != null)
