@@ -428,7 +428,7 @@ void findShortestPathCodingTrain(HB, G)(ref HB h, G g, Location begin, Location 
 
             foreach( p; path)
             {
-                writeln("p = ", p);
+                //writeln("p = ", p);
                 h.setHexTexture(g, p, Ids.whiteDot);
             }
             return;

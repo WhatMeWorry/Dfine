@@ -121,13 +121,13 @@ int main()
 
     big.sdl.screen.width  = 900;
     big.sdl.screen.height = 900;
-    big.sdl.board.rows = 3;  // 10
-    big.sdl.board.cols = 3;  // 10
+    big.sdl.board.rows = 25;  // 10
+    big.sdl.board.cols = 25;  // 10
 
     mini.sdl.screen.width  = 400;
     mini.sdl.screen.height = 400;
-    mini.sdl.board.rows = 3;  // 50
-    mini.sdl.board.cols = 3;  // 50
+    mini.sdl.board.rows = 100;  // 50
+    mini.sdl.board.cols = 100;  // 50
 
 
     float miniHexWidth = hexWidthToFitNDCwindow(mini.sdl.board.rows,
@@ -160,46 +160,37 @@ int main()
     // https://github.com/BindBC/bindbc-sdl/issues/53   
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
 
-    // createSDLwindow(mini); OLD
-
     mini.sdl = createSDLwindow("Mini Map", mini.sdl.screen.width,
                                            mini.sdl.screen.height);  // screen or pixel width x height
 
     big.sdl = createSDLwindow("Main Map", big.sdl.screen.width,
                                           big.sdl.screen.height);  // screen or pixel width x height
 
+    writeln("big.sdl.renderer = ", big.sdl.renderer);
+
     holder[mini.sdl.windowID] = &mini;
     holder[big.sdl.windowID] = &big;
 
-    //HexBoard!(real, int)[int] boards;
+    h.setRenderOfHexboard(mini.sdl.renderer);  // MUST BE DONE BEFORE PUTTING IN AA (associative array)
+    h2.setRenderOfHexboard(big.sdl.renderer); 
+
     boards[mini.sdl.windowID] = h;
     boards[big.sdl.windowID] = h2;
 
-    h.setRenderOfHexboard(mini.sdl.renderer);
-    
-    h2.setRenderOfHexboard(big.sdl.renderer); 
 
     mini.textures = load_textures(mini);
-    
     big.textures = load_textures(big);
 
-    writeln("mini.textures = ", mini.textures);
-    writeln("big.textures = ", big.textures);
-    
     h.drawHexBoard(mini);
-    
     h2.drawHexBoard(big);
 
     h.setHexboardTexturesAndTerrain(mini);
-    
     h2.setHexboardTexturesAndTerrain(big);
 
     h.displayHexTextures();
     h2.displayHexTextures();
 
-    writeAndPause("hit any key to contiue");
-
-    //writeAndPause("after displayHexTextures");
+    //writeAndPause("hit any key to contiue");
 
 
     // https://thenumb.at/cpp-course/sdl2/03/03.html
@@ -231,13 +222,21 @@ int main()
             {
                 // what window are we curretly in
                 
+                writeln("status.active.windowID = ", status.active.windowID);
+                
                 Globals!(int)* currentWindow = holder[status.active.windowID];
 
+                writeln("currentWindow.sdl.renderer = ", currentWindow.sdl.renderer);
+                writeln("C h2.renderer = ", h2.renderer);
+
                 HexBoard!(real, int) currentBoard = boards[status.active.windowID];
-                
-                //currentBoard.setHexboardTexturesAndTerrain(currentWindow); ONLY DO ONCE AT BEGINNING
+
+                writeln("currentBoard.renderer = ", currentBoard.renderer);
+                writeln("D h2.renderer = ", h2.renderer);
                 
                 currentBoard.displayHexTextures();
+                
+ 
                 
                 SDL_GetMouseState(cast (int *) &currentBoard.mouseClick.sc.x, 
                                   cast (int *) &currentBoard.mouseClick.sc.y);

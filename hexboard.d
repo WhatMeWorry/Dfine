@@ -438,14 +438,14 @@ void setHexboardTexturesAndTerrain(HB, G)(HB h, G g)
                     case 0,1,2,3,4:
                     {
                         h.hexes[r][c].textures ~= g.textures[Ids.solidGreen];
-                        //h.hexes[r][c].textures ~= g.textures[Ids.greenTriangle];
+                        //h.hexes[r][c].textures ~= g.textures[Ids.whiteDot];
                         h.spots[r][c].terrainCost = 1;
                     }
                     break;
                     case 5,6,7,8,9:
                     {
                         h.hexes[r][c].textures ~= g.textures[Ids.solidBlack];
-                        //h.hexes[r][c].textures ~= g.textures[Ids.redTriangle];
+                        //h.hexes[r][c].textures ~= g.textures[Ids.whiteDot];
                         h.spots[r][c].terrainCost = 999; // 9
                     }
               /+    break;
@@ -804,14 +804,14 @@ void setHexColTexture(HB,I)(ref HB h, Globals g, I col, Ids id)
 
 void displayHexTextures(HB)(HB h)
 {
-    writeln("New Hex Board");
     foreach(r; 0..(h.rows))
     {
         foreach(c; 0..(h.columns))
         {
-            writeln("h.hexes[", r, "][", c, "].textures.length = ", h.hexes[r][c].textures.length);
-            writeln("h.hexes[r][c].textures = ", h.hexes[r][c].textures);
-            foreach(texture; h.hexes[r][c].textures)
+            //writeln("h.hexes[", r, "][", c, "].textures.length = ", h.hexes[r][c].textures.length);
+            //writeln("length and h.hexes[", r, "][", c, "].textures.textures = ",
+            //         h.hexes[r][c].textures.length, ": ", h.hexes[r][c].textures);
+            foreach(i, texture; h.hexes[r][c].textures)
             {
                 if (texture.ptr != null)
                 {
@@ -841,7 +841,7 @@ void displayHexTextures(HB)(HB h)
                                               of this SDL_Rect is smaller or larger than the dimensions of the texture 
                                               itself, the texture will be stretched according to this SDL_Rect.
                     +/
-
+                    assert(h.renderer != null, "renderer is null!");
                     SDL_RenderCopy(h.renderer, texture.ptr, null, &dst);
                 }
             }
