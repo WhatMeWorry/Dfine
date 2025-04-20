@@ -165,6 +165,32 @@ int main()
 
     big.sdl = createSDLwindow("Main Map", big.sdl.screen.width,
                                           big.sdl.screen.height);  // screen or pixel width x height
+                                         
+                                         
+                                         
+                                         
+                                         
+                                         
+    int top;  int left;  int bottom; int right;                                   
+    int ret = SDL_GetWindowBordersSize(mini.sdl.window, &top, &left, &bottom, &right);
+                                         
+    writeln("top = ", top, "  left = ", left, "  bottom = ", bottom, "  right = ", right);
+                                         
+    SDL_Rect displayBounds;
+    SDL_GetDisplayBounds(0, &displayBounds); // 0 is the primary display
+
+    writeln("displayBounds = ", displayBounds);
+
+    SDL_Rect displayUsableBounds;
+    SDL_GetDisplayUsableBounds(0, &displayUsableBounds); // 0 is the primary display
+
+    writeln("displayUsableBounds = ", displayUsableBounds);
+    
+    SDL_SetWindowPosition(mini.sdl.window, 0, top);  // Adjust window so its border is on screen
+                                         
+                                         
+    SDL_SetWindowPosition(big.sdl.window, mini.sdl.screen.width, top);  // position big window to right of mini
+
 
     writeln("big.sdl.renderer = ", big.sdl.renderer);
 

@@ -448,8 +448,8 @@ void setHexboardTexturesAndTerrain(HB, G)(HB h, G g)
                         //h.hexes[r][c].textures ~= g.textures[Ids.whiteDot];
                         h.spots[r][c].terrainCost = 999; // 9
                     }
-              /+    break;
-                case 8,9:
+                    break;
+                 /+ case 8,9:
                     {
                         //writeln("solidBlue");
                         h.hexes[r][c].textures ~= g.textures[Ids.solidBlue];

@@ -55,8 +55,8 @@ SDL_STRUCT!(I) createSDLwindow(I)(string name, I width, I height)
     temp.screen.height = height;
    
     temp.window = SDL_CreateWindow(toStringz(name),
-                                   //SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                   SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                   SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                   //SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                    width, height, 
                                    SDL_WINDOW_SHOWN );
     if( temp.window == null )
