@@ -55,6 +55,8 @@ import bindbc.sdl : IMG_SavePNG;
 import bindbc.sdl;  // SDL_* all remaining declarations
 import bindbc.loader;
 
+import breakup;
+
 
 
 /+
@@ -111,6 +113,9 @@ int main()
     load_sdl_libraries(); 
     
     SDL_Initialize();
+    
+    breakup1();
+    exit(-1);
     
     //display_info();
     
