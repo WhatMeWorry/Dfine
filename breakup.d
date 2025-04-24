@@ -10,6 +10,9 @@ import core.stdc.stdlib : exit;
 import datatypes : Location;
 import a_star.spot : writeAndPause;
 
+import std.string : toStringz;  // converts D string to C string
+import std.conv : to;           // to!string(c_string)  converts C string to D string 
+
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 struct D2 { int w; int h; }
@@ -25,7 +28,43 @@ struct Graphic
     D2           sur;
 }
 
+/+
+IMG_LoadTexture requires a renderer because it creates a GPU texture, which needs a rendering 
+context to be uploaded to and managed by the graphics card. The renderer provides the interface
+between the application and the graphics hardware, ensuring the texture data is correctly stored 
+and used for rendering. 
 
+IMG_LoadTexture doesn't just load a simple image; it creates a GPU texture, which is a special
+type of memory managed by the graphics card.
+Renderer as Context: The renderer provides the necessary context for interacting with the graphics 
+card, including the creation and management of textures.
+
+There isn't a hard limit to the number of SDL surfaces you can create
++/
+
+SDL_Surface* LoadImageToSurface(string fileName)
+{
+    SDL_Surface *surface = IMG_Load(toStringz(fileName));
+    if (surface == null) 
+    {
+        writeln("IMG_Load failed with file: ", fileName);
+        exit(-1);
+    }
+    return surface;
+}
+
+SDL_Texture* LoadImageToTexture(SDL_Renderer *renderer, string fileName)
+{
+    SDL_Texture *texture = IMG_LoadTexture(renderer, toStringz(fileName));
+    if (texture == null) 
+    {
+        writeln("IMG_LoadTexture failed with file: ", fileName);
+        exit(-1);
+    }
+    return texture;
+}
+
+    
 void breakup1()
 {
     Graphic mini;
@@ -56,67 +95,23 @@ void breakup1()
 
     main.renderer = SDL_CreateRenderer(main.window, -1, SDL_RENDERER_ACCELERATED);
 
-    mini.surface = IMG_Load("./images/1.png");
-    if (mini.surface == null) 
-    {
-        writeln("IMG_Load failed");
-        exit(-1);
-    }
+    mini.surface = LoadImageToSurface("./images/1.png");
 
-    mini.texture = IMG_LoadTexture(mini.renderer, "./images/1.png");
-    if (mini.texture == null)
-    {
-        writeln("IMG_LoadTexture failed");
-        exit(-1);
-    }
+    mini.texture = LoadImageToTexture(mini.renderer, "./images/1.png");
     
-    
-    main.texture = IMG_LoadTexture(main.renderer, "./images/1.png");
-    if (main.texture == null)
-    {
-        writeln("IMG_LoadTexture failed");
-        exit(-1);
-    }
-    
-    
+    main.texture = LoadImageToTexture(main.renderer, "./images/1.png");
+
     uint format;
     SDL_QueryTexture(mini.texture, &format, null, &mini.tex.w, &mini.tex.h);
     writeln("mini.tex.w X mini.tex.h = ", mini.tex.w, " X ", mini.tex.h);
-
-    import std.conv : to;
     
     string pixelFormat = to!string(SDL_GetPixelFormatName(format));
     writeln("pixelFormat = ", pixelFormat);
-    
-    //SDL_Rect rect = {10, 10, mainSurface.w, mainSurface.h}; // Position and size of the blitted image
-    //SDL_BlitSurface(surface, NULL, screen, &rect); // Blit the image to the screen
 
     mini.sur.w = mini.surface.w;
     mini.sur.h = mini.surface.h;    
     writeln("mini.sur.(w,h) = ", mini.sur.w, " X ", mini.sur.h);
-    
-    //writeln("mainSurface.(w,h) = ", mainSurface.w, " X ", mainSurface.h);
-  
-    //SDL_Rect zoomRect = { imageSurface.w/2, imageSurface.h/2, mainWinWidth, mainWinHeight };
-  
-    //SDL_BlitSurface( imageSurface, /+null+/ &zoomRect, mainSurface, null );
 
-    //SDL_UpdateWindowSurface( mainWindow );
-
-    /+
-    IMG_LoadTexture requires a renderer because it creates a GPU texture, which needs a rendering 
-    context to be uploaded to and managed by the graphics card. The renderer provides the interface
-    between the application and the graphics hardware, ensuring the texture data is correctly stored 
-    and used for rendering. 
-
-    IMG_LoadTexture doesn't just load a simple image; it creates a GPU texture, which is a special
-    type of memory managed by the graphics card.
-    Renderer as Context: The renderer provides the necessary context for interacting with the graphics 
-    card, including the creation and management of textures.
-    
-    There isn't a hard limit to the number of SDL surfaces you can create
-    +/
-    
     //writeAndPause("breakup.d line 84");
 
     bool running = true;
@@ -181,7 +176,7 @@ void breakup1()
     }
 }
 
-
+/+
 1. Create the destination texture:
 
 Create a new texture with the SDL_TEXTUREACCESS_TARGET access flag to allow it to be used as a render target.
@@ -203,3 +198,27 @@ Use SDL_SetRenderTarget(renderer, NULL) to set the render target back to the scr
 5. Draw the target texture:
 
 You can now draw the target_texture onto the screen or another texture as needed. 
++/
+
+/+
+
+// Create a render target texture
+SDL_Texture *target_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
+
+// Set the target texture as the render target
+SDL_SetRenderTarget(renderer, target_texture);
+
+// Render your content to the texture
+SDL_SetDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF); // Green
+SDL_RenderClear(renderer);
+// ... (draw your shapes/images) ...
+
+// Reset the target to the screen
+SDL_SetRenderTarget(renderer, NULL);
+
+// Now you can render the target texture onto the screen or other places
+SDL_RenderCopy(renderer, target_texture, NULL, NULL);
+
+// ... (SDL cleanup) ...
+
++/
