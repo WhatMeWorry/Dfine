@@ -332,6 +332,102 @@ while (running)
 
 +/
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <stdio.h>
 
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <input_png>\n", argv[0]);
+        return 1;
+    }
+
+    // Initialize SDL and SDL_image
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
+        return 1;
+    }
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+        fprintf(stderr, "IMG_Init failed: %s\n", IMG_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    // Load the input PNG
+    SDL_Surface *image = IMG_Load(argv[1]);
+    if (!image) {
+        fprintf(stderr, "IMG_Load failed: %s\n", IMG_GetError());
+        IMG_Quit();
+        SDL_Quit();
+        return 1;
+    }
+
+    int width = image->w;
+    int height = image->h;
+    int half_width = width / 2;
+    int half_height = height / 2;
+
+    if (width % 2 != 0 || height % 2 != 0) {
+        fprintf(stderr, "Image dimensions must be divisible by 2\n");
+        SDL_FreeSurface(image);
+        IMG_Quit();
+        SDL_Quit();
+        return 1;
+    }
+
+    // Define the four quadrants
+    SDL_Rect quadrants[4] = {
+        {0, 0, half_width, half_height},                  // Top-left
+        {half_width, 0, half_width, half_height},         // Top-right
+        {0, half_height, half_width, half_height},        // Bottom-left
+        {half_width, half_height, half_width, half_height} // Bottom-right
+    };
+
+    // Create and save each quadrant
+    for (int i = 0; i < 4; i++) {
+        // Create a new surface for the quadrant
+        SDL_Surface *quad_surface = SDL_CreateRGBSurfaceWithFormat(0, half_width, half_height, 32, image->format->format);
+        if (!quad_surface) {
+            fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
+            SDL_FreeSurface(image);
+            IMG_Quit();
+            SDL_Quit();
+            return 1;
+        }
+
+        // Copy the quadrant to the new surface
+        if (SDL_BlitSurface(image, &quadrants[i], quad_surface, NULL) < 0) {
+            fprintf(stderr, "SDL_BlitSurface failed: %s\n", SDL_GetError());
+            SDL_FreeSurface(quad_surface);
+            SDL_FreeSurface(image);
+            IMG_Quit();
+            SDL_Quit();
+            return 1;
+        }
+
+        // Generate output filename
+        char filename[32];
+        snprintf(filename, sizeof(filename), "quadrant_%d.png", i + 1);
+
+        // Save the quadrant as a PNG
+        if (IMG_SavePNG(quad_surface, filename) < 0) {
+            fprintf(stderr, "IMG_SavePNG failed: %s\n", IMG_GetError());
+            SDL_FreeSurface(quad_surface);
+            SDL_FreeSurface(image);
+            IMG_Quit();
+            SDL_Quit();
+            return 1;
+        }
+
+        SDL_FreeSurface(quad_surface);
+    }
+
+    // Clean up
+    SDL_FreeSurface(image);
+    IMG_Quit();
+    SDL_Quit();
+    printf("Successfully split %s into 4 quadrants\n", argv[1]);
+    return 0;
+}
 
 
