@@ -114,7 +114,8 @@ int main()
     
     SDL_Initialize();
     
-    breakup1();
+    //breakup1();
+    twoTexturesOneScreen();
     exit(-1);
     
     //display_info();
@@ -147,9 +148,9 @@ int main()
                                   mini.sdl.board.rows,
                                   mini.sdl.board.cols);
 
-    auto h2 = HexBoard!(real,  int)(bigHexWidth,
-                                    big.sdl.board.rows,
-                                    big.sdl.board.cols);
+    auto h2 = HexBoard!(real, int)(bigHexWidth,
+                                   big.sdl.board.rows,
+                                   big.sdl.board.cols);
 
     //auto h = HexBoard!(double,int)(hexWidth, rows, cols); // WORKS!
     //auto h = HexBoard!(float, int)(hexWidth, rows, cols);  // WORKS!

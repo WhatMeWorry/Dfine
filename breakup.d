@@ -4,7 +4,7 @@
 module breakup;
 
 import std.container.rbtree : RedBlackTree;  // template
-import std.stdio : writeln, write;
+import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
 import datatypes : Location;
@@ -87,6 +87,89 @@ D2 getTextureSize(SDL_Texture *texture)
     return dims;
 }
 
+void twoTexturesOneScreen()
+{
+    SDL_Surface *bigImage = LoadImageToSurface("./images/1.png");
+
+    string pixelFormat = to!string(SDL_GetPixelFormatName(bigImage.format.format));
+    writeln("pixelFormat = ", pixelFormat);
+    writeln("bigImage.w x h = ", bigImage.w, " x ", bigImage.h);
+
+    int width = bigImage.w;
+    int height = bigImage.h;
+    int halfWidth = width / 2;
+    int halfHeight = height / 2;
+
+    if (width % 2 != 0 || height % 2 != 0) 
+    {
+        writeln("Image dimensions must be divisible by 2");
+    }
+
+    // Define the four quadrants
+    SDL_Rect[4] quads = 
+    [
+        SDL_Rect(0, 0, halfWidth, halfHeight),                  // top left
+        SDL_Rect(halfWidth, 0, halfWidth, halfHeight),          // top right
+        SDL_Rect(0, halfHeight, halfWidth, halfHeight),         // bottom left
+        SDL_Rect(halfWidth, halfHeight, halfWidth, halfHeight)  // bottom right
+    ];
+
+    // Create and save each quadrant foreach (int i; 0 .. 10) {
+    foreach (int i; 0..4)
+    {
+    
+        SDL_Surface *quadSurface = SDL_CreateRGBSurfaceWithFormat(0, halfWidth, halfHeight, 32, bigImage.format.format);
+        if (!quadSurface) {
+            writefln("SDL_CreateRGBSurface failed: %s", SDL_GetError());
+            exit(-1);
+        }
+
+        // Copy the quadrant to the new surface
+                       //   source    srcRect    destination  dstRect
+        if (SDL_BlitSurface(bigImage, &quads[i], quadSurface, null) < 0) {
+            writefln("SDL_BlitSurface failed: %s", SDL_GetError());
+        }
+
+        string fileName = "./images/" ~ "quad" ~ to!string(i) ~ ".png";
+
+        writeln("fileName = ", fileName);
+        
+        // Save the quadrant as a PNG
+        
+        if (IMG_SavePNG(quadSurface, toStringz(fileName)) < 0) {
+            writefln("IMG_SavePNG failed: %s", IMG_GetError());
+        }
+    }
+/+
+SDL_Texture * SDL_CreateTexture(SDL_Renderer * renderer,
+                                Uint32 format,
+                                int access, int w,
+                                int h);
+
+// Assuming you have initialized SDL, created a window, and a renderer
+SDL_Texture* texture1 = IMG_LoadTexture(renderer, "image1.png"); 
+SDL_Texture* texture2 = IMG_LoadTexture(renderer, "image2.png");
+
+// In your rendering loop:
+SDL_RenderClear(renderer);
+
+// Define destination rectangles (where to draw each texture)
+SDL_Rect dstRect1 = { 100, 50, 200, 150 };  // Example position and size
+SDL_Rect dstRect2 = { 300, 200, 100, 100 };
+
+SDL_RenderCopy(renderer, texture1, NULL, &dstRect1); 
+SDL_RenderCopy(renderer, texture2, NULL, &dstRect2);
+
+SDL_RenderPresent(renderer);
++/
+}
+
+
+
+
+
+
+
 void breakup1()
 {
     Graphic m1;
@@ -161,6 +244,7 @@ void breakup1()
     SDL_Rect destRect1 = {0, 0, 500, 500 /+main.win.w/2, main.win.h+/}; // Example destination rectangle
     
     writeln("destRect1 = ", destRect1);
+    
     
     SDL_RenderCopy(m1.renderer, m1.texture, null, null);
 
@@ -332,34 +416,17 @@ while (running)
 
 +/
 
+/+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <input_png>\n", argv[0]);
-        return 1;
-    }
-
-    // Initialize SDL and SDL_image
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
-        return 1;
-    }
-    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
-        fprintf(stderr, "IMG_Init failed: %s\n", IMG_GetError());
-        SDL_Quit();
-        return 1;
-    }
 
     // Load the input PNG
     SDL_Surface *image = IMG_Load(argv[1]);
     if (!image) {
         fprintf(stderr, "IMG_Load failed: %s\n", IMG_GetError());
-        IMG_Quit();
-        SDL_Quit();
-        return 1;
     }
 
     int width = image->w;
@@ -370,9 +437,6 @@ int main(int argc, char *argv[]) {
     if (width % 2 != 0 || height % 2 != 0) {
         fprintf(stderr, "Image dimensions must be divisible by 2\n");
         SDL_FreeSurface(image);
-        IMG_Quit();
-        SDL_Quit();
-        return 1;
     }
 
     // Define the four quadrants
@@ -389,20 +453,11 @@ int main(int argc, char *argv[]) {
         SDL_Surface *quad_surface = SDL_CreateRGBSurfaceWithFormat(0, half_width, half_height, 32, image->format->format);
         if (!quad_surface) {
             fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
-            SDL_FreeSurface(image);
-            IMG_Quit();
-            SDL_Quit();
-            return 1;
         }
 
         // Copy the quadrant to the new surface
         if (SDL_BlitSurface(image, &quadrants[i], quad_surface, NULL) < 0) {
             fprintf(stderr, "SDL_BlitSurface failed: %s\n", SDL_GetError());
-            SDL_FreeSurface(quad_surface);
-            SDL_FreeSurface(image);
-            IMG_Quit();
-            SDL_Quit();
-            return 1;
         }
 
         // Generate output filename
@@ -412,22 +467,29 @@ int main(int argc, char *argv[]) {
         // Save the quadrant as a PNG
         if (IMG_SavePNG(quad_surface, filename) < 0) {
             fprintf(stderr, "IMG_SavePNG failed: %s\n", IMG_GetError());
-            SDL_FreeSurface(quad_surface);
-            SDL_FreeSurface(image);
-            IMG_Quit();
-            SDL_Quit();
-            return 1;
         }
 
         SDL_FreeSurface(quad_surface);
     }
-
-    // Clean up
-    SDL_FreeSurface(image);
-    IMG_Quit();
-    SDL_Quit();
-    printf("Successfully split %s into 4 quadrants\n", argv[1]);
-    return 0;
 }
++/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
