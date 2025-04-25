@@ -90,7 +90,7 @@ D2 getTextureSize(SDL_Texture *texture)
 
 void trimFileIfPixelsAreNotEven()
 {
-    SDL_Surface *image = LoadImageToSurface("./images/3.png");
+    SDL_Surface *image = LoadImageToSurface("./images/5.png");
 
     string pixelFormat = to!string(SDL_GetPixelFormatName(image.format.format));
     writeln("pixelFormat = ", pixelFormat);
@@ -120,7 +120,7 @@ void trimFileIfPixelsAreNotEven()
         writefln("SDL_BlitSurface failed: %s", SDL_GetError());
     }
 
-    string fileName = "./images/" ~ "even3" ~ ".png";
+    string fileName = "./images/" ~ "even5" ~ ".png";
 
     writeln("fileName = ", fileName);
         
@@ -133,7 +133,7 @@ void trimFileIfPixelsAreNotEven()
 
 void hugePNGfileIntoQuadPNGfiles()
 {
-    SDL_Surface *bigImage = LoadImageToSurface("./images/4.png");
+    SDL_Surface *bigImage = LoadImageToSurface("./images/5.png");
 
     string pixelFormat = to!string(SDL_GetPixelFormatName(bigImage.format.format));
     writeln("pixelFormat = ", pixelFormat);
@@ -173,7 +173,7 @@ void hugePNGfileIntoQuadPNGfiles()
             writefln("SDL_BlitSurface failed: %s", SDL_GetError());
         }
 
-        string fileName = "./images/" ~ "quadD" ~ to!string(i) ~ ".png";
+        string fileName = "./images/" ~ "quadE" ~ to!string(i) ~ ".png";
 
         writeln("fileName = ", fileName);
         
