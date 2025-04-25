@@ -10,6 +10,7 @@ import core.stdc.stdlib : exit;
 import datatypes : Location;
 import a_star.spot : writeAndPause;
 import core.stdc.stdio : printf;
+import hexmath : isOdd;
 
 import std.string : toStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
@@ -87,9 +88,52 @@ D2 getTextureSize(SDL_Texture *texture)
     return dims;
 }
 
-void twoTexturesOneScreen()
+void trimFileIfPixelsAreNotEven()
 {
-    SDL_Surface *bigImage = LoadImageToSurface("./images/1.png");
+    SDL_Surface *image = LoadImageToSurface("./images/2.png");
+
+    string pixelFormat = to!string(SDL_GetPixelFormatName(image.format.format));
+    writeln("pixelFormat = ", pixelFormat);
+    writeln("image.w x h = ", image.w, " x ", image.h);
+
+    SDL_Rect evenRect;
+    evenRect.x = 0;
+    evenRect.y = 0;
+    evenRect.w = image.w;
+    evenRect.h = image.h;
+
+    if (image.w.isOdd)
+    {
+        evenRect.w--;   // make width even
+    }
+    if (image.h.isOdd)
+    {
+        evenRect.h--;   // make height even
+    }
+
+    writeln("evenRect = ", evenRect);
+
+    SDL_Surface *evenSurface = SDL_CreateRGBSurfaceWithFormat(0, evenRect.w, evenRect.h, 32, image.format.format);
+    
+                   //   source srcRect    destination  dstRect
+    if (SDL_BlitSurface(image, &evenRect, evenSurface, &evenRect) < 0) {
+        writefln("SDL_BlitSurface failed: %s", SDL_GetError());
+    }
+
+    string fileName = "./images/" ~ "even2" ~ ".png";
+
+    writeln("fileName = ", fileName);
+        
+    if (IMG_SavePNG(evenSurface, toStringz(fileName)) < 0) {
+        writefln("IMG_SavePNG failed: %s", IMG_GetError());
+    }
+
+}
+
+
+void hugePNGfileIntoQuadPNGfiles()
+{
+    SDL_Surface *bigImage = LoadImageToSurface("./images/2.png");
 
     string pixelFormat = to!string(SDL_GetPixelFormatName(bigImage.format.format));
     writeln("pixelFormat = ", pixelFormat);
@@ -105,7 +149,6 @@ void twoTexturesOneScreen()
         writeln("Image dimensions must be divisible by 2");
     }
 
-    // Define the four quadrants
     SDL_Rect[4] quads = 
     [
         SDL_Rect(0, 0, halfWidth, halfHeight),                  // top left
@@ -130,7 +173,7 @@ void twoTexturesOneScreen()
             writefln("SDL_BlitSurface failed: %s", SDL_GetError());
         }
 
-        string fileName = "./images/" ~ "quad" ~ to!string(i) ~ ".png";
+        string fileName = "./images/" ~ "quadB" ~ to!string(i) ~ ".png";
 
         writeln("fileName = ", fileName);
         
@@ -140,28 +183,7 @@ void twoTexturesOneScreen()
             writefln("IMG_SavePNG failed: %s", IMG_GetError());
         }
     }
-/+
-SDL_Texture * SDL_CreateTexture(SDL_Renderer * renderer,
-                                Uint32 format,
-                                int access, int w,
-                                int h);
 
-// Assuming you have initialized SDL, created a window, and a renderer
-SDL_Texture* texture1 = IMG_LoadTexture(renderer, "image1.png"); 
-SDL_Texture* texture2 = IMG_LoadTexture(renderer, "image2.png");
-
-// In your rendering loop:
-SDL_RenderClear(renderer);
-
-// Define destination rectangles (where to draw each texture)
-SDL_Rect dstRect1 = { 100, 50, 200, 150 };  // Example position and size
-SDL_Rect dstRect2 = { 300, 200, 100, 100 };
-
-SDL_RenderCopy(renderer, texture1, NULL, &dstRect1); 
-SDL_RenderCopy(renderer, texture2, NULL, &dstRect2);
-
-SDL_RenderPresent(renderer);
-+/
 }
 
 

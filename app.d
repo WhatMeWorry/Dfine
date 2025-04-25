@@ -115,7 +115,8 @@ int main()
     SDL_Initialize();
     
     //breakup1();
-    twoTexturesOneScreen();
+    //trimFileIfPixelsAreNotEven();
+    hugePNGfileIntoQuadPNGfiles();
     exit(-1);
     
     //display_info();
