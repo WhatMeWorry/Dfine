@@ -58,67 +58,66 @@ void handleWindowEvent(SDL_WindowEvent window, ref Status status)
 {
     //writeln("Window ID: ", window.windowID);
     
-    if(window.event == SDL_WINDOWEVENT_SHOWN)
+    if(window.type == SDL_EVENT_WINDOW_SHOWN)
     {
-        //writeln("window.event was SHOWN");
+        //writeln("window.type was SHOWN");
     }
-    if(window.event == SDL_WINDOWEVENT_HIDDEN)
+    if(window.type == SDL_EVENT_WINDOW_HIDDEN)
     {
-        //writeln("window.event was HIDDEN");
+        //writeln("window.type was HIDDEN");
     }
-    if(window.event == SDL_WINDOWEVENT_EXPOSED)
+    if(window.type == SDL_EVENT_WINDOW_EXPOSED)
     {
-        //writeln("window.event was EXPOSED");
+        //writeln("window.type was EXPOSED");
     }
-    if(window.event == SDL_WINDOWEVENT_MOVED)
+    if(window.type == SDL_EVENT_WINDOW_MOVED)
     {
-        //writeln("window.event was MOVED");
+        //writeln("window.type was MOVED");
     }
-    if(window.event == SDL_WINDOWEVENT_RESIZED)
+    if(window.type == SDL_EVENT_WINDOW_RESIZED)
     {
-        //writeln("window.event was RESIZED");
+        //writeln("window.type was RESIZED");
     }
-    if(window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+    if(window.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
     {
-        //writeln("window.event was SIZE_CHANGED");
+        //writeln("window.type was SIZE_CHANGED");
     }
-    if(window.event == SDL_WINDOWEVENT_MINIMIZED)
+    if(window.type == SDL_EVENT_WINDOW_MINIMIZED)
     {
-        //writeln("window.event was MINIMIZED");
+        //writeln("window.type was MINIMIZED");
     }
-    if(window.event == SDL_WINDOWEVENT_MAXIMIZED)
+    if(window.type == SDL_EVENT_WINDOW_MAXIMIZED)
     {
-        //writeln("window.event was MAXIMIZED");
+        //writeln("window.type was MAXIMIZED");
     }
-    if(window.event == SDL_WINDOWEVENT_RESTORED)
+    if(window.type == SDL_EVENT_WINDOW_RESTORED)
     {
-        //writeln("window.event was RESTORED");
+        //writeln("window.type was RESTORED");
     }
-    if(window.event == SDL_WINDOWEVENT_ENTER)
+    if(window.type == SDL_EVENT_WINDOW_MOUSE_ENTER)
     {
-        writeln("window.event was ENTER with Window ID: ", window.windowID);
+        writeln("window.type was ENTER with Window ID: ", window.windowID);
         status.active.windowID = window.windowID;
         
         // Raise the window and give it focus
         SDL_RaiseWindow(SDL_GetWindowFromID(window.windowID));
-        SDL_SetWindowInputFocus(SDL_GetWindowFromID(window.windowID));
     }
 
-    if(window.event == SDL_WINDOWEVENT_LEAVE)
+    if(window.type == SDL_EVENT_WINDOW_MOUSE_LEAVE)
     {
-        //writeln("window.event was LEAVE");
+        //writeln("window.type was LEAVE");
     }
-    if(window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+    if(window.type == SDL_EVENT_WINDOW_FOCUS_GAINED)
     {
-        //writeln("window.event was FOCUS_GAINED");
+        //writeln("window.type was FOCUS_GAINED");
     }
-    if(window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+    if(window.type == SDL_EVENT_WINDOW_FOCUS_LOST)
     {
-        //writeln("window.event was FOCUS_LOST");
+        //writeln("window.type was FOCUS_LOST");
     }
-    if(window.event == SDL_WINDOWEVENT_CLOSE)  // clicked on the window close icon X
-    {                                          // Not ideal since closing one window
-        writeln("window.event was CLOSE");     // should not exit the entire application
+    if(window.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)  // clicked on the window close icon X
+    {                                                     // Not ideal since closing one window
+        writeln("window.type was CLOSE");                // should not exit the entire application
         status.running = false;
     }
 

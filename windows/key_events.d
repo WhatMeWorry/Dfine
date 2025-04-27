@@ -94,12 +94,12 @@ typedef enum SDL_KeyCode
 
 void handleKeyEvent(SDL_KeyboardEvent keyEvent, ref Status status)
 {
-    if(keyEvent.keysym.sym == SDLK_F1)
+    if(keyEvent.key == SDLK_F1)
     {
         status.saveWindowToFile = true;
         return;
     }
-    if(keyEvent.keysym.sym == SDLK_ESCAPE )
+    if(keyEvent.key == SDLK_ESCAPE )
     {
         //writeln("user pressed the Escape Key");
         status.running = false;

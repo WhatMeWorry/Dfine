@@ -110,13 +110,14 @@ HexBoard!(real, int)[int] boards; // hold pointers to the HexBoard instances ind
 
 int main()
 {
+    writeln("Hello main");
     load_sdl_libraries(); 
     
     SDL_Initialize();
     
-    //breakup1();
+    breakup1();
     //trimFileIfPixelsAreNotEven();
-    hugePNGfileIntoQuadPNGfiles();
+    //hugePNGfileIntoQuadPNGfiles();
     exit(-1);
     
     //display_info();
@@ -166,6 +167,8 @@ int main()
 
     // https://github.com/BindBC/bindbc-sdl/issues/53   
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
+    
+    SDL_Window * SDL_CreateWindow(const char *title, int w, int h, SDL_WindowFlags flags);
 
     mini.sdl = createSDLwindow("Mini Map", mini.sdl.screen.width,
                                            mini.sdl.screen.height);  // screen or pixel width x height
@@ -269,10 +272,16 @@ int main()
                 
                 currentBoard.displayHexTextures();
                 
- 
                 
-                SDL_GetMouseState(cast (int *) &currentBoard.mouseClick.sc.x, 
-                                  cast (int *) &currentBoard.mouseClick.sc.y);
+                float mx;  // in SDL2 mouse click returned ints.  SDL3 returns floats 
+                float my;
+                SDL_GetMouseState(&mx,&my);
+                
+                currentBoard.mouseClick.sc.x = cast (int) mx;
+                currentBoard.mouseClick.sc.y = cast (int) my;
+                
+                //SDL_GetMouseState(cast (int *) &currentBoard.mouseClick.sc.x, 
+                //                  cast (int *) &currentBoard.mouseClick.sc.y);
 
                 writeln(currentBoard.mouseClick.sc.x, ", ", currentBoard.mouseClick.sc.y);
                 

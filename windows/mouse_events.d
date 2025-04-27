@@ -49,12 +49,12 @@ SDL_BUTTON_RIGHT   Right mouse button.
 
 void handleMouseEvent(SDL_Event event, ref Status status)
 {
-    if (event.type == SDL_MOUSEMOTION)
+    if (event.type == SDL_EVENT_MOUSE_MOTION)
     {
         //writeln("Mouse moved");
         return;
     }
-    if (event.type == SDL_MOUSEBUTTONDOWN)
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
     {
         if(event.button.button == SDL_BUTTON_LEFT)
         {        
@@ -63,7 +63,7 @@ void handleMouseEvent(SDL_Event event, ref Status status)
             return;
         }
     }
-    if (event.type == SDL_MOUSEBUTTONUP)
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_UP)
     {
         // status???
         writeln("Mouse button up");

@@ -815,7 +815,7 @@ void displayHexTextures(HB)(HB h)
             {
                 if (texture.ptr != null)
                 {
-                    SDL_Rect dst;
+                    SDL_FRect dst;
                 
                     dst.x = h.hexes[r][c].texturePoint.sc.x;
                     dst.y = h.hexes[r][c].texturePoint.sc.y;
@@ -842,7 +842,7 @@ void displayHexTextures(HB)(HB h)
                                               itself, the texture will be stretched according to this SDL_Rect.
                     +/
                     assert(h.renderer != null, "renderer is null!");
-                    SDL_RenderCopy(h.renderer, texture.ptr, null, &dst);
+                    SDL_RenderTexture(h.renderer, texture.ptr, null, &dst);
                 }
             }
         }
@@ -864,13 +864,13 @@ void drawHexBoard(HB, G)(HB h, G g)
         foreach(c; 0..(h.columns))
         {  
             // writeln("r = ", r, " c = ", c);
-            //SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &hexes[r][c].points.sc[0], 6);
-            SDL_RenderDrawLines(g.sdl.renderer, cast (SDL_Point *) &h.hexes[r][c].points.sc[0], 6);
             
-            SDL_RenderDrawLine( g.sdl.renderer, h.hexes[r][c].points.sc[5].x,  // close off the hex  
-                                                h.hexes[r][c].points.sc[5].y, 
-                                                h.hexes[r][c].points.sc[0].x, 
-                                                h.hexes[r][c].points.sc[0].y);
+            //SDL_RenderLines(g.sdl.renderer, cast (SDL_Point *) &h.hexes[r][c].points.sc[0], 6);
+            
+            SDL_RenderLine( g.sdl.renderer, h.hexes[r][c].points.sc[5].x,  // close off the hex  
+                                            h.hexes[r][c].points.sc[5].y, 
+                                            h.hexes[r][c].points.sc[0].x, 
+                                            h.hexes[r][c].points.sc[0].y);
         }
     }
 }

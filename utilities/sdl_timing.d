@@ -25,12 +25,12 @@ For example, to time an interval in ticks, simply request the time at the start 
 
 void timeIntervalInTicks()
 {
-    uint start = SDL_GetTicks();  //SDL defines one tick as one millisecond
+    ulong start = SDL_GetTicks();  //SDL defines one tick as one millisecond
 
     // Do long operation
     SDL_Delay(2_115);             // the number of milliseconds to delay.
     
-    uint end = SDL_GetTicks();    // A thousand ticks is one second
+    ulong end = SDL_GetTicks();    // A thousand ticks is one second
 
     float secondsElapsed = (end - start) / 1000.0f;
     

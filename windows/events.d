@@ -6,7 +6,7 @@ import core.stdc.stdlib : exit;
 import std.string : toStringz;
 import datatypes;
 
-import bindbc.sdl : SDL_Event, SDL_WINDOWEVENT, SDL_QUIT;
+//import bindbc.sdl : SDL_Event, SDL_WINDOWEVENT, SDL_QUIT;
 import bindbc.sdl;  // all the others
 import windows.window_events : handleWindowEvent;
 import windows.key_events : handleKeyEvent;
@@ -73,37 +73,45 @@ typedef enum SDL_EventType
 
 void handleEvents(SDL_Event event, ref Status status)
 {
-
-    if (event.type == SDL_WINDOWEVENT)
+    if ( (SDL_EVENT_WINDOW_FIRST <= event.type)  && (event.type <= SDL_EVENT_WINDOW_LAST) )
+    //if (event.type == SDL_EVENT_WINDOW)
     {
-        //writeln("event = ", event.type, " is SDL_WINDOWEVENT");
+        //writeln("event = ", event.type, " is SDL_EVENT_WINDOWEVENT");
         handleWindowEvent(event.window, status);
         return;
     }
     
-    if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
+    auto sdlEventKeyFirst = SDL_EVENT_KEY_DOWN;  // define a range of all possible key events
+    auto sdlEventKeyLast = SDL_EVENT_TEXT_EDITING_CANDIDATES;
+    
+    if ( (sdlEventKeyFirst <= event.type)  && (event.type <= sdlEventKeyLast) )
+    //if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
     {
-        //writeln("event = ", event.type, " is SDL_KeyboardEvent");
+        //writeln("event = ", event.type, " is one of the key events");
         handleKeyEvent(event.key, status);
         return;
     }
 
-    if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN ||
-        event.type == SDL_MOUSEBUTTONUP)
+    auto sdlEventMouseFirst = SDL_EVENT_MOUSE_MOTION;  // define a range of all possible mouse events
+    auto sdlEventMouseLast = SDL_EVENT_MOUSE_REMOVED;
+
+    if ( (sdlEventMouseFirst <= event.type)  && (event.type <= sdlEventMouseLast) )
+    //if (event.type == SDL_EVENT_MOUSE_MOTION || event.type == SDL_EVENT_MOUSE_BUTTON_DOWN ||
+    //    event.type == SDL_EVENT_MOUSE_BUTTON_UP)  // for future - SDL_EVENT_MOUSE_WHEEL
     {
         handleMouseEvent(event, status);
         return;
     }
     
 
-    if (event.type == SDL_QUIT)
+    if (event.type == SDL_EVENT_QUIT)
     {
-        // The SDL_QUIT event is activated when a user attempts to close the application window. 
+        // The SDL_EVENT_QUIT event is activated when a user attempts to close the application window. 
         // this can occur through various actions, such as clicking the window's close button (X), 
         // pressing Alt+F4, or any other method the operating system uses to signal application 
         // termination. In Microsoft Windows, pressing Alt + F4 is a keyboard shortcut that closes 
         // the currently active application
-        writeln("event = ", event.type, " is SDL_QUIT");
+        writeln("event = ", event.type, " is SDL_EVENT_QUIT");
         status.running = false;
         return;
     }

@@ -3,7 +3,8 @@ description "A minimal D application."
 authors "Kyle Heaser"
 copyright "Copyright © 2024, Kyle Heaser"
 license "Zlib"
-dependency "bindbc-sdl" version="~>1.4.7"
+//dependency "bindbc-sdl" version="~>1.4.7"
+dependency "bindbc-sdl" version="~>2.0"  // SDL3
 targetType "executable"
 buildRequirements "silenceDeprecations"
 
@@ -15,7 +16,9 @@ sourcePaths "libraries"
 sourcePaths "textures"
 sourcePaths "windows"
 
-versions "SDL_2_30" "SDL_TTF_2012" "SDL_Image_200" "SDL_Mixer_200" "SDL_Net_200"
+//versions "SDL_2_30" "SDL_TTF_2012" "SDL_Image_200" "SDL_Mixer_200" "SDL_Net_200"
+versions "SDL_3_4" "SDL_Image_3_2" "SDL_Mixer_200" "SDL_TTF_2012" "SDL_Net_200"
+//libs "SDL3" "SDL3_net"
 
 importPaths "."
 importPaths "a_star"

@@ -18,6 +18,7 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 struct D2 { int w; int h; }
+struct F2 { float w; float h; }
 
 struct Graphic
 {
@@ -68,31 +69,77 @@ SDL_Texture* LoadImageToTexture(SDL_Renderer *renderer, string fileName)
 
 void textureProperties(SDL_Texture *texture)
 {
-    uint format;
+    //uint format;
     string pixelFormat;
-    int w; int h;
-    
-    SDL_QueryTexture(texture, &format, null, &w, &h);
-    writeln("texture width, height = ", w, " X ", h);
+    float w; float h;
 
-    pixelFormat = to!string(SDL_GetPixelFormatName(format));
-    writeln("main pixelFormat = ", pixelFormat);
+    if (SDL_GetTextureSize(texture, &w, &h) == false)
+    {
+        writeln("SDL_GetTextureSize failed");
+        exit(-1);
+    }
+
+    writeln("texture width, height = ", w, " X ", h);
+    
+    // This SDL_PropertiesID represents a container of properties associated with that texture. 
+    
+    SDL_PropertiesID texProps = SDL_GetTextureProperties(texture);
+    if (texProps == 0) 
+    {
+        writeln("SDL_GetTextureProperties failed");
+        exit(-1);
+    }
+
+    // Use SDL_GetNumberProperty, SDL_GetStringProperty, etc., to retrieve specific 
+    // properties from the returned SDL_PropertiesID
+        
+    // Get the texture's pixel format
+    
+    long format = SDL_GetNumberProperty(texProps, SDL_PROP_TEXTURE_FORMAT_NUMBER, -1);
+    if (format == -1) 
+    {
+        writeln("SDL_GetNumberProperty failed");  exit(-1);
+    } 
+    
+    writefln("Texture format: %d", format);
+
+    // Optional: Convert format to a human-readable string
+    
+    const char *formatName = SDL_GetPixelFormatName(cast (SDL_PixelFormat) format);
+    if (formatName) 
+    {
+        writefln("Texture format name: %s", formatName);
+    } 
+    else 
+    {
+        writefln("Unknown pixel format\n");  exit(-1);
+    }
+
+
 }
 
-D2 getTextureSize(SDL_Texture *texture)
+
+F2 getTextureSize(SDL_Texture *texture)
 {
-    uint format;
-    D2 dims;
+    //uint format;
+    F2 dims;
     
-    SDL_QueryTexture(texture, &format, null, &dims.w, &dims.h);
+    //SDL_QueryTexture(texture, &format, null, &dims.w, &dims.h);
+    
+    if (SDL_GetTextureSize(texture, &dims.w, &dims.h) == false)
+    {
+        writeln("SDL_GetTextureSize failed");
+        exit(-1);
+    }
+
     return dims;
 }
 
 void trimFileIfPixelsAreNotEven()
 {
-    SDL_Surface *image = LoadImageToSurface("./images/5.png");
+    SDL_Surface *image = LoadImageToSurface("./images/quadA0.png");
 
-    string pixelFormat = to!string(SDL_GetPixelFormatName(image.format.format));
+    string pixelFormat = to!string(SDL_GetPixelFormatName(image.format));
     writeln("pixelFormat = ", pixelFormat);
     writeln("image.w x h = ", image.w, " x ", image.h);
 
@@ -113,7 +160,7 @@ void trimFileIfPixelsAreNotEven()
 
     writeln("evenRect = ", evenRect);
 
-    SDL_Surface *evenSurface = SDL_CreateRGBSurfaceWithFormat(0, evenRect.w, evenRect.h, 32, image.format.format);
+    SDL_Surface *evenSurface = SDL_CreateSurface(evenRect.w, evenRect.h, image.format);
     
                    //   source srcRect    destination  dstRect
     if (SDL_BlitSurface(image, &evenRect, evenSurface, &evenRect) < 0) {
@@ -125,7 +172,7 @@ void trimFileIfPixelsAreNotEven()
     writeln("fileName = ", fileName);
         
     if (IMG_SavePNG(evenSurface, toStringz(fileName)) < 0) {
-        writefln("IMG_SavePNG failed: %s", IMG_GetError());
+        writefln("IMG_SavePNG failed: %s", SDL_GetError());
     }
 
 }
@@ -133,9 +180,9 @@ void trimFileIfPixelsAreNotEven()
 
 void hugePNGfileIntoQuadPNGfiles()
 {
-    SDL_Surface *bigImage = LoadImageToSurface("./images/5.png");
+    SDL_Surface *bigImage = LoadImageToSurface("./images/quadA0.png");
 
-    string pixelFormat = to!string(SDL_GetPixelFormatName(bigImage.format.format));
+    string pixelFormat = to!string(SDL_GetPixelFormatName(bigImage.format));
     writeln("pixelFormat = ", pixelFormat);
     writeln("bigImage.w x h = ", bigImage.w, " x ", bigImage.h);
 
@@ -161,7 +208,7 @@ void hugePNGfileIntoQuadPNGfiles()
     foreach (int i; 0..4)
     {
     
-        SDL_Surface *quadSurface = SDL_CreateRGBSurfaceWithFormat(0, halfWidth, halfHeight, 32, bigImage.format.format);
+        SDL_Surface *quadSurface = SDL_CreateSurface(halfWidth, halfHeight, bigImage.format);
         if (!quadSurface) {
             writefln("SDL_CreateRGBSurface failed: %s", SDL_GetError());
             exit(-1);
@@ -180,7 +227,7 @@ void hugePNGfileIntoQuadPNGfiles()
         // Save the quadrant as a PNG
         
         if (IMG_SavePNG(quadSurface, toStringz(fileName)) < 0) {
-            writefln("IMG_SavePNG failed: %s", IMG_GetError());
+            writefln("IMG_SavePNG failed: %s", SDL_GetError());
         }
     }
 
@@ -202,26 +249,22 @@ void breakup1()
     m1.win.w = cast (int)(cast(double) m1.win.h * 0.6294);
 
     m1.window = SDL_CreateWindow("IGNORE", 
-                                 SDL_WINDOWPOS_CENTERED, 
-                                 SDL_WINDOWPOS_CENTERED,
                                  m1.win.w, 
                                  m1.win.h, 
-                                 SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+                                 SDL_WINDOW_RESIZABLE);
 
-    m1.renderer = SDL_CreateRenderer(m1.window, -1, SDL_RENDERER_ACCELERATED);
+    m1.renderer = SDL_CreateRenderer(m1.window, "Renderer 1");
 
     m1.texture = LoadImageToTexture(m1.renderer, "./images/1.png");  // file to texture
 
     m2 = m1;
 
     m2.window = SDL_CreateWindow("IGNORE", 
-                                 SDL_WINDOWPOS_CENTERED, 
-                                 SDL_WINDOWPOS_CENTERED,
                                  m2.win.w, 
                                  m2.win.h, 
-                                 SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+                                 SDL_WINDOW_RESIZABLE);
 
-    m2.renderer = SDL_CreateRenderer(m2.window, -1, SDL_RENDERER_ACCELERATED);
+    m2.renderer = SDL_CreateRenderer(m2.window, "Renderer 2");
 
     m2.texture = LoadImageToTexture(m2.renderer, "./images/2.png");  // file to texture
 
@@ -229,13 +272,11 @@ void breakup1()
     main.win.h = 1000;
 
     main.window = SDL_CreateWindow("MAIN PNG Viewer", 
-                                   SDL_WINDOWPOS_CENTERED, 
-                                   SDL_WINDOWPOS_CENTERED,
                                    main.win.w, 
                                    main.win.h, 
-                                   SDL_WINDOW_SHOWN);
+                                   SDL_WINDOW_RESIZABLE);
 
-    main.renderer = SDL_CreateRenderer(main.window, -1, SDL_RENDERER_ACCELERATED);
+    main.renderer = SDL_CreateRenderer(main.window, "Renderer 3");
 
     main.texture = LoadImageToTexture(main.renderer, "./images/2.png");
     
@@ -243,7 +284,8 @@ void breakup1()
     main.texture = SDL_CreateTexture(main.renderer,
                                      SDL_PIXELFORMAT_ARGB8888,
                                      SDL_TEXTUREACCESS_STATIC, 
-                                     main.win.w, main.win.h); +/
+                                     main.win.w, main.win.h); 
++/
 
     //SDL_SetRenderTarget(main.renderer, largeTexture);  // specify that you want to draw to the target texture instead of the screen.
 
@@ -268,22 +310,14 @@ void breakup1()
     writeln("destRect1 = ", destRect1);
     
     
-    SDL_RenderCopy(m1.renderer, m1.texture, null, null);
+    SDL_RenderTexture(m1.renderer, m1.texture, null, null);
 
     SDL_Rect destRect2 = {main.win.w/2, 0, main.win.w, main.win.h}; // Example destination rectangle
-    
-    //writeln("destRec2 = ", destRect2);
-    
-    //SDL_RenderCopy(main.renderer, m2.texture, null, &destRect2);
 
-    //SDL_RenderPresent(main.renderer);
 
     SDL_RenderPresent(main.renderer);
     SDL_RenderPresent(m1.renderer);
-    
-    //SDL_SetRenderTarget(main.renderer, null); // set the render target back to the screen 
-    
-    //SDL_RenderCopy(main.renderer, largeTexture, null, null);
+
 
     //writeAndPause("breakup.d line 84");
 
@@ -292,7 +326,7 @@ void breakup1()
     while (running) 
     {
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
+            if (e.type == SDL_EVENT_QUIT || (e.type == SDL_EVENT_KEY_DOWN && e.key.key == SDLK_ESCAPE)) {
                 running = false;
             }
         }
@@ -496,17 +530,89 @@ int main(int argc, char *argv[]) {
 }
 +/
 
+/+
+    // Create a properties group
+    SDL_PropertiesID props = SDL_CreateProperties();
+    if (props == 0) {
 
+    }
 
+    // Set window properties
+    SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "My SDL3 Window");
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, 800);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, 600);
 
+    // Create window with properties
+    SDL_Window* window = SDL_CreateWindowWithProperties(props);
+    if (!window) {
+ 
+    }
 
++/
 
+/+
+    SDL_PropertiesID props = SDL_CreateProperties();
+    if (props == 0) {
 
+    }
 
+    // Set a string property for the window title
+    SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "My SDL Window");
 
+    // Create a window with the properties
+    SDL_Window *window = SDL_CreateWindowWithProperties(props);
+    if (!window) {
 
+    }
 
+    // Retrieve the window title using SDL_GetStringProperty
+    const char *title = SDL_GetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "Default Title");
+    SDL_Log("Window title: %s", title);
 
++/
+
+/+
+    // Create a texture
+    SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
+                                           SDL_TEXTUREACCESS_STATIC, 256, 256);
+    if (!texture) {
+
+    }
+
+    // Get texture properties
+    SDL_PropertiesID props = SDL_GetTextureProperties(texture);
+    
+    if (props == 0) {
+        printf("Failed to get texture properties: %s\n", SDL_GetError());
+    } 
+    else 
+    {
+        Uint32 format = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, 0);
+        
+        // Convert format to human-readable string
+        const char *format_name = SDL_GetPixelFormatName(format);
+        printf("Texture pixel format: %s\n", format_name);
+    }
++/
+
+/+
+    
+    int format = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, -1);
+    if (format == -1) {
+        printf("Failed to get texture format\n");
+    } else {
+        printf("Texture format: %d\n", format);
+
+        // Optional: Convert format to a human-readable string
+        const char *format_name = SDL_GetPixelFormatName((SDL_PixelFormat)format);
+        if (format_name) {
+            printf("Texture format name: %s\n", format_name);
+        } else {
+            printf("Unknown pixel format\n");
+        }
+    }
++/
 
 
 
