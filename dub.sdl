@@ -16,9 +16,7 @@ sourcePaths "libraries"
 sourcePaths "textures"
 sourcePaths "windows"
 
-//versions "SDL_2_30" "SDL_TTF_2012" "SDL_Image_200" "SDL_Mixer_200" "SDL_Net_200"
-versions "SDL_3_4" "SDL_Image_3_2" "SDL_Mixer_200" "SDL_TTF_2012" "SDL_Net_200"
-//libs "SDL3" "SDL3_net"
+versions "SDL_3_4" "SDL_Image_3_2" "SDL_Mixer_3_0" "SDL_TTF_3_2" "SDL_Net_3_0"
 
 importPaths "."
 importPaths "a_star"

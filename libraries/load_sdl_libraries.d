@@ -27,10 +27,6 @@ import std.string;
 
 void load_sdl_libraries()
 {
-    //SDL_version v;
-    
-    writeln("Inside load_sdl_libraries");
-
     Version versions;
 
     versions.compiled = SDL_VERSION;    // hardcoded version from SDL headers
@@ -51,10 +47,6 @@ void load_sdl_libraries()
     //       SDL_VERSIONNUM_MINOR(versions.linked),
     //       SDL_VERSIONNUM_MICRO(versions.linked));
 
-   writeln("AFTER");
-    
-    
-    
 
     //string appPath = dirName(thisExePath());
 
@@ -68,7 +60,6 @@ void load_sdl_libraries()
 
     string pathToLibs = parentDirectoryOfThisPath ~ `\` ~ "libraries" ~ `\`;
     writeln("pathToLibs = ", pathToLibs);
-
 
     string pathAndFileName = pathToLibs ~ "SDL3.dll";
     
@@ -87,19 +78,23 @@ void load_sdl_libraries()
     auto image = loadSDLImage(pathAndFileName.toStringz());
     
     writeln("loadSDLImage returned: ", image); 
+    
     //SDL_IMAGE_VERSION(&v);
     //writeln("Image version loaded is: ", v.major, ".", v.minor, ".", v.patch);
     
     /+
-    There is no explicit IMG_Init() equivalent. The IMG_Load() function, which loads images, automatically initializes the necessary image loaders if they haven't already been initialized. This means you can directly use IMG_Load() to load images without needing to call a separate initialization function
+    There is no explicit IMG_Init() equivalent. The IMG_Load() function, which loads images,
+    automatically initializes the necessary image loaders if they haven't already been initialized. 
+    This means you can directly use IMG_Load() to load images without needing to call a separate 
+    initialization function
     +/
     
     //auto imageInit = IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
     //writeln("IMG_init returned (0 is failure): ", imageInit);
 
     pathAndFileName = pathToLibs ~ "SDL3_ttf.dll";
-    //auto ttf = loadSDLTTF(pathAndFileName.toStringz());
-    //writeln("loadSDLTTF returned: ", ttf);
+    auto ttf = loadSDLTTF(pathAndFileName.toStringz());
+    writeln("loadSDLTTF returned: ", ttf);
     
     //SDL_TTF_VERSION(&v);
     
@@ -109,8 +104,9 @@ void load_sdl_libraries()
 
 
     pathAndFileName = pathToLibs ~ "SDL3_mixer.dll";
-    //auto mixer = loadSDLMixer(pathAndFileName.toStringz());
-    //writeln("loadSDLMixer returned: ", mixer); 
+    writeln("pathAndFileName for mixer = ", pathAndFileName);
+    auto mixer = loadSDLMixer(pathAndFileName.toStringz());
+    writeln("loadSDLMixer returned: ", mixer); 
     
     //SDL_MIXER_VERSION(&v);
     //writeln("MIXER version loaded is: ", v.major, "x", v.minor, ".", v.patch);
@@ -124,6 +120,6 @@ void load_sdl_libraries()
     }
 
     pathAndFileName = pathToLibs ~ "SDL3_net.dll";
-    //auto net = loadSDLNet(pathAndFileName.toStringz());
-    //writeln("loadSDLNet returned: ", net);
+    auto net = loadSDLNet(pathAndFileName.toStringz());
+    writeln("loadSDLNet returned: ", net);
 }
