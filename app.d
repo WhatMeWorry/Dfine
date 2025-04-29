@@ -115,10 +115,10 @@ int main()
     
     SDL_Initialize();
     
-    breakup1();
+    //breakup1();
     //trimFileIfPixelsAreNotEven();
     //hugePNGfileIntoQuadPNGfiles();
-    exit(-1);
+    //exit(-1);
     
     //display_info();
     

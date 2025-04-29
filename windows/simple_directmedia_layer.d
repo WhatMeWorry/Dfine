@@ -58,47 +58,36 @@ SDL_STRUCT!(I) createSDLwindow(I)(string name, I width, I height)
     temp.screen.width = width;
     temp.screen.height = height;
    
-    temp.window = SDL_CreateWindow(toStringz(name),
-                                   //SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,  // SDL2
-                                   //SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                   width, height, 
-                                   SDL_WINDOW_RESIZABLE );
-    if( temp.window == null )
+    temp.window = SDL_CreateWindow(toStringz(name), width, height, SDL_WINDOW_RESIZABLE);
+    if (temp.window == null)
     {
-        writeln( "sdl Window could not be created. SDL_Error: %s", SDL_GetError() );
-        exit(-1);
+        writeln("sdl Window could not be created. SDL_Error: %s", SDL_GetError());  exit(-1);
     }
-    else
+
+    temp.renderer = SDL_CreateRenderer(temp.window, null);
+    if (temp.renderer == null)
     {
-        
-        if (SDL_SetWindowResizable(temp.window, true))
-        {
-            //writeln("Line 71 simple_directmedia_layer");
-            //const char* errorMessage = SDL_GetError();
-            
-            writeln("SDL_SetWindowResizable failed: ", to!string(SDL_GetError()));
-            
-            //writeln("SDL_SetWindowResizable failed: ", toStringz(SDL_GetError()));
-            
-            writeln("SDL_SetWindowResizable failed: ", fromStringz(SDL_GetError()));
-      
-            
-            //fprintf("Failed to create window: %s\n", SDL_GetError());
-            //writeln( "sdl Window could not be resized. SDL_Error: %s", SDL_GetError() );
-            exit(-1);
-        }
-        
-        // create a renderer for our window
-        temp.renderer = SDL_CreateRenderer( temp.window, null );
-        if( temp.renderer == null )
-        {
-            writeln( "Renderer could not be created. SDL Error: %s", SDL_GetError() );
-            exit(-1);
-        }
+        writeln( "Renderer could not be created. SDL Error: %s", SDL_GetError() );  exit(-1);
     }
     
     temp.windowID = SDL_GetWindowID(temp.window);
+    if (temp.windowID == 0)
+    {
+        writeln( "SDL_GetWindowID failded. SDL Error: %s", SDL_GetError() );  exit(-1);
+    }
     
+    auto ok = SDL_SetWindowTitle(temp.window, toStringz("Overwrite Name"));
+    if (ok == false)
+    {
+        writeln("SDL_SetWindowTitle failed. SDL_Error: %s", SDL_GetError());  exit(-1);
+    }
+
+    auto ret = SDL_SetWindowResizable(temp.window, false);
+    if (ret == false)
+    {
+        writeln("SDL_SetWindowResizable failed. SDL_Error: %s", SDL_GetError());  exit(-1);
+    }
+
     return temp;
 }
 
@@ -137,38 +126,4 @@ void createSDLwindow(ref Globals g)   // ABSOLETE
         }
     }
 }
-+/
-
-
-
-
-
-/+
-prebuilt SDL3 .lib files can be found on GitHub under the "Assets" section of official 
-releases. You can also build them yourself from the source code available on the same repository. 
-Here's a breakdown of how to get them:
-
-1. Official Releases on GitHub:
-
-Navigate to the official SDL3 GitHub repository releases page. https://github.com/libsdl-org/SDL/releases
-
-
-Look for the desired release version (e.g., "SDL 3.0.4").
-
-Under "Assets", you'll find prebuilt .lib files for different platforms and architectures (e.g., Windows, macOS, Linux). 
-
-Download the appropriate archive (e.g., a zip file for Windows
-
-
-
-
-
-Error: linker exited with status 1
-       C:\D\dmd2\windows\bin64\lld-link.exe /NOLOGO "C:\Users\kheas\AppData\Local\dub\cache\dfine\~master\build\application-debug-HFIG97JEvO1MRYFNHQr6DA\dfine.obj" /OUT:"C:\Users\kheas\AppData\Local\dub\cache\dfine\~master\build\application-debug-HFIG97JEvO1MRYFNHQr6DA\dfine.exe" 
-       /DEFAULTLIB:"C:\Users\kheas\AppData\Local\dub\cache\bindbc-sdl\2.2.0\build\dynamic-debug-2k-KrVMSYO5IGhu7k4SOgA\BindBC_SDL.lib" /DEFAULTLIB:"C:\Users\kheas\AppData\Local\dub\cache\bindbc-common\1.0.5\build\noBC-debug-K5h0lBB6NE8JpYAJvoDElg\BindBC_Common.lib" /DEFAULTLIB:"C:\Users\kheas\AppData\Local\dub\cache\bindbc-loader\1.1.5\build\noBC-debug-zNtnC9KlQyih0pXEUgoocA\BindBC_Loader.lib" 
-       /DEFAULTLIB:"SDL3.lib" 
-       /DEFAULTLIB:"SDL3_net.lib" 
-       /DEFAULTLIB:phobos64 /DEBUG  
-       /LIBPATH:"C:\D\dmd2\windows\bin64\..\lib64\mingw"
-       
 +/
