@@ -196,27 +196,28 @@ void hugePNGfileIntoQuadPNGfiles()
         writeln("Image dimensions must be divisible by 2");
     }
 
-    SDL_Rect[4] quads = 
+    SDL_Rect[4] quads =
     [
-        SDL_Rect(0, 0, halfWidth, halfHeight),                  // top left
-        SDL_Rect(halfWidth, 0, halfWidth, halfHeight),          // top right
-        SDL_Rect(0, halfHeight, halfWidth, halfHeight),         // bottom left
-        SDL_Rect(halfWidth, halfHeight, halfWidth, halfHeight)  // bottom right
+        SDL_Rect(0,         0,          halfWidth, halfHeight),  // top left
+        SDL_Rect(halfWidth, 0,          halfWidth, halfHeight),  // top right
+        SDL_Rect(0,         halfHeight, halfWidth, halfHeight),  // bottom left
+        SDL_Rect(halfWidth, halfHeight, halfWidth, halfHeight)   // bottom right
     ];
 
     // Create and save each quadrant foreach (int i; 0 .. 10) {
     foreach (int i; 0..4)
     {
-    
         SDL_Surface *quadSurface = SDL_CreateSurface(halfWidth, halfHeight, bigImage.format);
-        if (!quadSurface) {
+        if (!quadSurface)
+        {
             writefln("SDL_CreateRGBSurface failed: %s", SDL_GetError());
             exit(-1);
         }
 
         // Copy the quadrant to the new surface
                        //   source    srcRect    destination  dstRect
-        if (SDL_BlitSurface(bigImage, &quads[i], quadSurface, null) < 0) {
+        if (SDL_BlitSurface(bigImage, &quads[i], quadSurface, null) < 0)
+        {
             writefln("SDL_BlitSurface failed: %s", SDL_GetError());
         }
 
@@ -226,7 +227,8 @@ void hugePNGfileIntoQuadPNGfiles()
         
         // Save the quadrant as a PNG
         
-        if (IMG_SavePNG(quadSurface, toStringz(fileName)) < 0) {
+        if (IMG_SavePNG(quadSurface, toStringz(fileName)) < 0)
+        {
             writefln("IMG_SavePNG failed: %s", SDL_GetError());
         }
     }

@@ -92,38 +92,50 @@ SDL_STRUCT!(I) createSDLwindow(I)(string name, I width, I height)
 }
 
 /+
-void createSDLwindow(ref Globals g)   // ABSOLETE
-{
-    if( SDL_Init( SDL_INIT_EVERYTHING ) < 0 )  // SDL_INIT_VIDEO
-    {
-        writeln( "SDL could not initialize. SDL_Error: %s", SDL_GetError() );
-        assert(0);
-    }
-    else
-    {
-        //Create window
-        g.sdl.window = SDL_CreateWindow( "SDL Tutorial",
-                                         //SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                         g.sdl.screenWidth, g.sdl.screenHeight, 
-                                         SDL_WINDOW_SHOWN );
-        if( g.sdl.window == null )
-        {
-            printf( "sdl Window could not be created. SDL_Error: %s", SDL_GetError() );
-            assert(0);
-        }
-        else
-        {
-            SDL_SetWindowResizable(g.sdl.window, true);
-            
-            // create a renderer for our window
-            g.sdl.renderer = SDL_CreateRenderer( g.sdl.window, -1, SDL_RENDERER_ACCELERATED );
-            if( g.sdl.renderer == null )
-            {
-                printf( "Renderer could not be created. SDL Error: %s", SDL_GetError() );
-                assert(0);
-            }
-        }
-    }
-}
+
+SDL_Window
+
+SDL_Window is the struct that holds all info about the Window itself: size, position, full screen, borders etc.
+
+SDL_Renderer
+
+SDL_Renderer is a struct that handles all rendering. It is tied to a SDL_Window so it can only render within that 
+SDL_Window. It also keeps track the settings related to the rendering. There are several important functions tied 
+to the SDL_Renderer:
+
+    SDL_SetRenderDrawColor(renderer, r, g, b, a)  This sets the color you clear the screen to (see below).
+
+    SDL_RenderClear(renderer)     This clears the rendering target with the draw color set above.
+
+    SDL_RenderCopy(   // This is probably the function you'll be using the most, it's used for rendering a 
+                      // SDL_Texture and has the following parameters:
+                   SDL_Renderer*   renderer,       // The renderer you want to use for rendering.
+                   SDL_Texture*    texture,        // The texture you want to render.
+                   const SDL_Rect* srcrect,        // Part of texture you want to render, NULL to render the entire texture.
+                   const SDL_Rect* dstrect)        // Where you want to render the texture in the window. If the width and 
+                                                   // height of this SDL_Rect is smaller or larger than the dimensions of the 
+                                                   // texture itself, the texture will be stretched according to this SDL_Rect.
+                   SDL_RenderPresent(renderer)     // The other SDL_Render*() functions draws to a hidden target. This function 
+                                                   // will take all of that and draw it in the window tied to the renderer.
+SDL_Texture and SDL_Surface
+
+The SDL_Renderer renders SDL_Texture, which stores the pixel information of one element. It's the new version of SDL_Surface which 
+is much the same. The difference is mostly that SDL_Surface is just a struct containing pixel information, while SDL_Texture is an 
+efficient, driver-specific representation of pixel data.
+
+You can convert an SDL_Surface to SDL_Texture using
+
+SDL_Texture* SDL_CreateTextureFromSurface(SDL_Renderer* renderer, SDL_Surface*  surface)
+After this, the SDL_Surface should be freed using
+
+SDL_FreeSurface( SDL_Surface* surface )
+Another important difference is that SDL_Surface uses software rendering (via CPU) while 
+SDL_Texture uses hardware rendering (via GPU).
+
+SDL_Rect
+The simplest struct in SDL. It contains only four shorts: x, y which holds the position and w, h which holds width and height.
+
+It's important to note that 0, 0 is the upper-left corner in SDL. So a higher y-value means lower, 
+and the bottom-right corner will have the coordinate x + w, y + h.
+
 +/
