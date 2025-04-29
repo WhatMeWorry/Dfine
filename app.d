@@ -118,6 +118,8 @@ int main()
     //breakup1();
     //trimFileIfPixelsAreNotEven();
     //hugePNGfileIntoQuadPNGfiles();
+    
+    //assembleQuadFilesItoOnePNGfile();
     //exit(-1);
     
     //display_info();
@@ -168,7 +170,7 @@ int main()
     // https://github.com/BindBC/bindbc-sdl/issues/53   
     // https://github.com/ichordev/bindbc-sdl/blob/74390eedeb7395358957701db2ede6b48a8d0643/source/bindbc/sdl/config.d#L12
     
-    SDL_Window * SDL_CreateWindow(const char *title, int w, int h, SDL_WindowFlags flags);
+    //SDL_Window * SDL_CreateWindow(const char *title, int w, int h, SDL_WindowFlags flags);
 
     mini.sdl = createSDLwindow("Mini Map", mini.sdl.screen.width,
                                            mini.sdl.screen.height);  // screen or pixel width x height
@@ -232,7 +234,6 @@ int main()
     // https://thenumb.at/cpp-course/sdl2/03/03.html
 
     SDL_Event event;
-    //bool running = true;
     
     Status status;
     status.running = true;

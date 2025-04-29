@@ -10,7 +10,7 @@ import core.stdc.stdlib : exit;
 import datatypes : Location;
 import a_star.spot : writeAndPause;
 import core.stdc.stdio : printf;
-import hexmath : isOdd;
+import hexmath : isOdd, isEven;
 
 import std.string : toStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
@@ -66,6 +66,76 @@ SDL_Texture* LoadImageToTexture(SDL_Renderer *renderer, string fileName)
     }
     return texture;
 }
+
+
+void assembleQuadFilesItoOnePNGfile()
+{
+    SDL_Surface *image;
+
+    image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA0.png");
+
+    string pixelFormat = to!string(SDL_GetPixelFormatName(image.format));
+    writeln("pixelFormat = ", pixelFormat);
+    writeln("image.w x h = ", image.w, " x ", image.h);
+
+    int width = image.w;
+    int height = image.h;
+
+    if (isOdd(width*2) || isOdd(height*2)) 
+    {
+        writeln("Image dimensions must be divisible by 2");
+    }
+
+    SDL_Surface *combined = SDL_CreateSurface(width*2, height*2, image.format);
+    if (combined == null)
+    {
+        writefln("SDL_CreateSurface failed: %s", SDL_GetError());  exit(-1);
+    }
+
+    SDL_Rect[4] quads =
+    [
+        SDL_Rect(0,     0,      width, height),  // top left
+        SDL_Rect(width, 0,      width, height),  // top right
+        SDL_Rect(0,     height, width, height),  // bottom left
+        SDL_Rect(width, height, width, height)   // bottom right
+    ];
+
+    if (SDL_BlitSurface(image, null, combined, &quads[0]) < 0) {
+        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
+    }
+    
+    image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA1.png");
+
+    if (SDL_BlitSurface(image, null, combined, &quads[1]) < 0) {
+        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
+    }
+    
+    image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA2.png");
+
+    if (SDL_BlitSurface(image, null, combined, &quads[2]) < 0) {
+        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
+    }
+    
+    image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA3.png");
+
+    if (SDL_BlitSurface(image, null, combined, &quads[3]) < 0) {
+        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
+    }
+    
+    
+    
+    //if (SDL_BlitSurface(combined, NULL, window_surface, &dest_rect) < 0) {
+    //    SDL_Log("Failed to blit surface: %s", SDL_GetError());  exit(-1);
+    //}
+
+    
+}
+
+
+
+
+
+
 
 void textureProperties(SDL_Texture *texture)
 {
