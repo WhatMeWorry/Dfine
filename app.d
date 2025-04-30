@@ -119,8 +119,8 @@ int main()
     //trimFileIfPixelsAreNotEven();
     //hugePNGfileIntoQuadPNGfiles();
     
-    //assembleQuadFilesItoOnePNGfile();
-    //exit(-1);
+    assembleQuadFilesItoOnePNGfile();
+    exit(-1);
     
     //display_info();
     

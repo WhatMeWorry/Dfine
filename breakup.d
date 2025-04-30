@@ -68,8 +68,65 @@ SDL_Texture* LoadImageToTexture(SDL_Renderer *renderer, string fileName)
 }
 
 
+SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
+{
+    SDL_Surface *surface = SDL_CreateSurface(width, height, pixelFormat);
+    if (surface == null)
+    {
+        writefln("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());  
+        exit(-1);
+    }
+    
+    return surface;
+}
+
+
+void blitSurfaceToSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst, SDL_Rect *dstRect)
+{
+    bool result = SDL_BlitSurface(src, srcRect, dst, dstRect);
+    if (result == false)
+    {
+        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  
+        exit(-1);
+    }
+}
+
+
+void CreateWindowAndRenderer(string title, int width, int height, SDL_WindowFlags windowFlags, 
+                             SDL_Window **window, SDL_Renderer **renderer)
+{
+    // If you pass 0 for the flags parameter
+    // Essentially, passing 0 results in a standard, visible, non-resizable window with decorations, 
+    // positioned according to the system's default placement (or SDL_WINDOWPOS_UNDEFINED).
+
+    bool result = SDL_CreateWindowAndRenderer(toStringz(title), width, height, 
+                                              windowFlags, window, renderer);
+    if (result == false)
+    {
+        writefln("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());  
+        exit(-1);
+    }
+    if ((window == null) || (renderer == null))
+    {
+        writeln("either window or renderer or both were not initialized");
+        exit(-1);
+    }
+}
+
+ 
+
+
 void assembleQuadFilesItoOnePNGfile()
 {
+    SDL_Window   *window;
+    SDL_Renderer *renderer;
+    immutable defaultWinFlags = 0;
+
+    CreateWindowAndRenderer("Assemble", 1500, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    writeln("window = ", window);
+    writeln("renderer = ", renderer);
+
     SDL_Surface *image;
 
     image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA0.png");
@@ -103,31 +160,86 @@ void assembleQuadFilesItoOnePNGfile()
     if (SDL_BlitSurface(image, null, combined, &quads[0]) < 0) {
         writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
     }
-    
+
     image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA1.png");
 
     if (SDL_BlitSurface(image, null, combined, &quads[1]) < 0) {
         writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
     }
-    
+
     image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA2.png");
 
     if (SDL_BlitSurface(image, null, combined, &quads[2]) < 0) {
         writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
     }
-    
+
+
     image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA3.png");
 
     if (SDL_BlitSurface(image, null, combined, &quads[3]) < 0) {
         writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
     }
     
-    
-    
-    //if (SDL_BlitSurface(combined, NULL, window_surface, &dest_rect) < 0) {
-    //    SDL_Log("Failed to blit surface: %s", SDL_GetError());  exit(-1);
-    //}
+/+    
+        string fileName = "./images/" ~ "COMBINE" ~ ".png";
+        if (IMG_SavePNG(combined, toStringz(fileName)) < 0) {
+        writefln("IMG_SavePNG failed: %s", SDL_GetError());
+        }
+        exit(-1);
++/
 
+    SDL_Surface *dstSurface = SDL_CreateSurface(1500, 1500, image.format);
+
+
+    // blitSurfaceToSurface(combined, null, dstSurface, null);
+
+    SDL_Surface *windowSurface = SDL_GetWindowSurface(window);
+
+    // Blit the image onto the window surface
+    // blitSurfaceToSurface(dstSurface, null, windowSurface, null);
+
+    blitSurfaceToSurface(combined, &quads[1], windowSurface, null);
+
+    SDL_UpdateWindowSurface(window);
+
+    writeln("after SDL_UpdateWindowSurface");
+
+    //SDL_Delay(3000);
+
+
+    auto sRect = SDL_Rect(2000, 2000, width, height);
+
+    blitSurfaceToSurface(combined, &sRect, windowSurface, null);
+
+    SDL_UpdateWindowSurface(window);
+
+    SDL_Delay(3000);
+    
+    foreach (int i; 0 .. 100) 
+    {
+
+        sRect = SDL_Rect(i*50, i*50, width, height);
+
+        blitSurfaceToSurface(combined, &sRect, windowSurface, null);
+
+        SDL_UpdateWindowSurface(window);
+
+        SDL_Delay(250);
+    }
+
+    
+    
+    /+
+    sRect = SDL_Rect(2200, 2200, width, height);
+
+    blitSurfaceToSurface(combined, &sRect, windowSurface, null);
+
+    SDL_UpdateWindowSurface(window);
+
+    SDL_Delay(3000);
+    +/
+    
+    exit(-1);
     
 }
 
