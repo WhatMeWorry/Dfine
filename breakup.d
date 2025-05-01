@@ -45,7 +45,7 @@ card, including the creation and management of textures.
 There isn't a hard limit to the number of SDL surfaces you can create
 +/
 
-SDL_Surface* LoadImageToSurface(string fileName)
+SDL_Surface* loadImageToSurface(string fileName)
 {
     SDL_Surface *surface = IMG_Load(toStringz(fileName));
     if (surface == null) 
@@ -56,7 +56,7 @@ SDL_Surface* LoadImageToSurface(string fileName)
     return surface;
 }
 
-SDL_Texture* LoadImageToTexture(SDL_Renderer *renderer, string fileName)
+SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string fileName)
 {
     SDL_Texture *texture = IMG_LoadTexture(renderer, toStringz(fileName));
     if (texture == null) 
@@ -73,10 +73,9 @@ SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
     SDL_Surface *surface = SDL_CreateSurface(width, height, pixelFormat);
     if (surface == null)
     {
-        writefln("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());  
+        writefln("SDL_CreateSurface failed: %s", SDL_GetError());  
         exit(-1);
     }
-    
     return surface;
 }
 
@@ -92,7 +91,7 @@ void blitSurfaceToSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst,
 }
 
 
-void CreateWindowAndRenderer(string title, int width, int height, SDL_WindowFlags windowFlags, 
+void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlags windowFlags, 
                              SDL_Window **window, SDL_Renderer **renderer)
 {
     // If you pass 0 for the flags parameter
@@ -113,23 +112,57 @@ void CreateWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
     }
 }
 
- 
+
+void zoomAnImage()
+{
+    SDL_Surface *earth;
+
+    earth = loadImageToSurface("./images/earth1024x1024.png");
+
+    SDL_Window   *window;
+    SDL_Renderer *renderer;
+    createWindowAndRenderer("Earth", earth.w, earth.h, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    SDL_Surface *windowSurface = SDL_GetWindowSurface(window);
+
+    /+
+    Zooming is achieved by adjusting the source rectangle (srcRect) and destination rectangle (dstRect) 
+    when rendering a texture. A smaller srcRect relative to the texture size zooms in by rendering a 
+    smaller portion of the texture to a larger dstRect on the screen.
+    +/
+
+    //blitSurfaceToSurface(earth, null, windowSurface, null);  // 1:1
+    
+
+    
+    SDL_Rect src = SDL_Rect(cast(int) earth.w*.25, cast(int)earth.h*.25, cast(int)earth.w*.75, cast(int)earth.h*.75);
+    writeln("src = ", src);
+    
+    blitSurfaceToSurface(earth, &src, windowSurface, null);
+
+    SDL_UpdateWindowSurface(window);
+    
+    SDL_Delay(6000);
+}
+
+
+
+
 
 
 void assembleQuadFilesItoOnePNGfile()
 {
     SDL_Window   *window;
     SDL_Renderer *renderer;
-    immutable defaultWinFlags = 0;
 
-    CreateWindowAndRenderer("Assemble", 1500, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("Assemble", 1500, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     writeln("window = ", window);
     writeln("renderer = ", renderer);
 
     SDL_Surface *image;
 
-    image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA0.png");
+    image = loadImageToSurface("./images/CNA_Maps_PNG/quadA0.png");
 
     string pixelFormat = to!string(SDL_GetPixelFormatName(image.format));
     writeln("pixelFormat = ", pixelFormat);
@@ -143,11 +176,7 @@ void assembleQuadFilesItoOnePNGfile()
         writeln("Image dimensions must be divisible by 2");
     }
 
-    SDL_Surface *combined = SDL_CreateSurface(width*2, height*2, image.format);
-    if (combined == null)
-    {
-        writefln("SDL_CreateSurface failed: %s", SDL_GetError());  exit(-1);
-    }
+    SDL_Surface *combined = createSurface(width*2, height*2, image.format);
 
     SDL_Rect[4] quads =
     [
@@ -157,39 +186,32 @@ void assembleQuadFilesItoOnePNGfile()
         SDL_Rect(width, height, width, height)   // bottom right
     ];
 
-    if (SDL_BlitSurface(image, null, combined, &quads[0]) < 0) {
-        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
+    blitSurfaceToSurface(image, null, combined, &quads[0]);
+
+
+    image = loadImageToSurface("./images/CNA_Maps_PNG/quadA1.png");
+
+    blitSurfaceToSurface(image, null, combined, &quads[1]);
+
+
+    image = loadImageToSurface("./images/CNA_Maps_PNG/quadA2.png");
+
+    blitSurfaceToSurface(image, null, combined, &quads[2]);
+
+
+    image = loadImageToSurface("./images/CNA_Maps_PNG/quadA3.png");
+
+    blitSurfaceToSurface(image, null, combined, &quads[3]);
+
+    /+
+    string fileName = "./images/" ~ "COMBINE" ~ ".png";
+    if (IMG_SavePNG(combined, toStringz(fileName)) < 0) {
+    writefln("IMG_SavePNG failed: %s", SDL_GetError());
     }
-
-    image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA1.png");
-
-    if (SDL_BlitSurface(image, null, combined, &quads[1]) < 0) {
-        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
-    }
-
-    image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA2.png");
-
-    if (SDL_BlitSurface(image, null, combined, &quads[2]) < 0) {
-        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
-    }
-
-
-    image = LoadImageToSurface("./images/CNA_Maps_PNG/quadA3.png");
-
-    if (SDL_BlitSurface(image, null, combined, &quads[3]) < 0) {
-        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  exit(-1);
-    }
-    
-/+    
-        string fileName = "./images/" ~ "COMBINE" ~ ".png";
-        if (IMG_SavePNG(combined, toStringz(fileName)) < 0) {
-        writefln("IMG_SavePNG failed: %s", SDL_GetError());
-        }
-        exit(-1);
-+/
+    exit(-1);
+    +/
 
     SDL_Surface *dstSurface = SDL_CreateSurface(1500, 1500, image.format);
-
 
     // blitSurfaceToSurface(combined, null, dstSurface, null);
 
@@ -224,7 +246,7 @@ void assembleQuadFilesItoOnePNGfile()
 
         SDL_UpdateWindowSurface(window);
 
-        SDL_Delay(250);
+        SDL_Delay(50);
     }
 
     
@@ -319,7 +341,7 @@ F2 getTextureSize(SDL_Texture *texture)
 
 void trimFileIfPixelsAreNotEven()
 {
-    SDL_Surface *image = LoadImageToSurface("./images/quadA0.png");
+    SDL_Surface *image = loadImageToSurface("./images/quadA0.png");
 
     string pixelFormat = to!string(SDL_GetPixelFormatName(image.format));
     writeln("pixelFormat = ", pixelFormat);
@@ -362,7 +384,7 @@ void trimFileIfPixelsAreNotEven()
 
 void hugePNGfileIntoQuadPNGfiles()
 {
-    SDL_Surface *bigImage = LoadImageToSurface("./images/quadA0.png");
+    SDL_Surface *bigImage = loadImageToSurface("./images/quadA0.png");
 
     string pixelFormat = to!string(SDL_GetPixelFormatName(bigImage.format));
     writeln("pixelFormat = ", pixelFormat);
@@ -439,7 +461,7 @@ void breakup1()
 
     m1.renderer = SDL_CreateRenderer(m1.window, "Renderer 1");
 
-    m1.texture = LoadImageToTexture(m1.renderer, "./images/1.png");  // file to texture
+    m1.texture = loadImageToTexture(m1.renderer, "./images/1.png");  // file to texture
 
     m2 = m1;
 
@@ -450,7 +472,7 @@ void breakup1()
 
     m2.renderer = SDL_CreateRenderer(m2.window, "Renderer 2");
 
-    m2.texture = LoadImageToTexture(m2.renderer, "./images/2.png");  // file to texture
+    m2.texture = loadImageToTexture(m2.renderer, "./images/2.png");  // file to texture
 
     main.win.w = 1000;
     main.win.h = 1000;
@@ -462,7 +484,7 @@ void breakup1()
 
     main.renderer = SDL_CreateRenderer(main.window, "Renderer 3");
 
-    main.texture = LoadImageToTexture(main.renderer, "./images/2.png");
+    main.texture = loadImageToTexture(main.renderer, "./images/2.png");
     
 /+
     main.texture = SDL_CreateTexture(main.renderer,
