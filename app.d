@@ -121,7 +121,8 @@ int main()
     
     //assembleQuadFilesItoOnePNGfile();
     
-    zoomAnImage;
+    //zoomAnImage;
+    zoom_grok;
     exit(-1);
     
     //display_info();
