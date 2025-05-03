@@ -112,6 +112,77 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
     }
 }
 
+void zoom_grok()
+{
+ 
+
+    SDL_Window* window = SDL_CreateWindow("SDL3 Zoom Example", 800, 600, 0);
+
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, "zoom renderer");
+    SDL_SetRenderVSync(renderer, true);
+
+    SDL_Surface* surface = loadImageToSurface("./images/earth1024x1024.png");
+    if (!surface) {
+        SDL_Log("Failed to load image: %s", SDL_GetError());
+        exit(-1);
+    }
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_DestroySurface(surface);
+
+    float zoom = 1.0f; // Initial zoom level
+    bool quit = false;
+    SDL_Event event;
+
+    while (!quit) {
+        while (SDL_PollEvent(&event)) 
+        {
+            switch (event.type)
+            {
+                case SDL_EVENT_QUIT:
+                    quit = true;
+                    break;
+                case SDL_EVENT_MOUSE_WHEEL:
+                    // Adjust zoom based on mouse wheel
+                    if (event.wheel.y > 0) zoom *= 1.1f; // Zoom in
+                    else if (event.wheel.y < 0) zoom /= 1.1f; // Zoom out
+                    //zoom = SDL_clamp(zoom, 0.1, 10.0); // Limit zoom range
+                    break;
+                default: 
+                    break;
+            }
+        }
+
+        // Clear the renderer
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderClear(renderer);
+
+        // Get texture dimensions
+        float texW, texH;
+
+        bool ok = SDL_GetTextureSize(texture, &texW, &texH);
+
+        // Calculate scaled dimensions
+        int scaledW = cast(int)(texW * zoom);
+        int scaledH = cast(int)(texH * zoom);
+
+        // Center the image
+        int centerX = (800 - scaledW) / 2; // Window width = 800
+        int centerY = (600 - scaledH) / 2; // Window height = 600
+
+        // Define destination rectangle
+        SDL_FRect dstRect = { cast(float) centerX, cast(float) centerY, cast(float) scaledW, cast(float) scaledH};
+
+        // Render the texture with zoom
+        SDL_RenderTexture(renderer, texture, null, &dstRect);
+
+        // Present the frame
+        SDL_RenderPresent(renderer);
+    }
+}
+
+
+
+
 
 void zoomAnImage()
 {
@@ -135,10 +206,10 @@ void zoomAnImage()
     
 
     
-    SDL_Rect src = SDL_Rect(cast(int) earth.w*.25, cast(int)earth.h*.25, cast(int)earth.w*.75, cast(int)earth.h*.75);
-    writeln("src = ", src);
+    //SDL_Rect src = SDL_Rect(cast(int) earth.w*.25, cast(int)earth.h*.25, cast(int)earth.w*.75, cast(int)earth.h*.75);
+    //writeln("src = ", src);
     
-    blitSurfaceToSurface(earth, &src, windowSurface, null);
+    //blitSurfaceToSurface(earth, &src, windowSurface, null);
 
     SDL_UpdateWindowSurface(window);
     
