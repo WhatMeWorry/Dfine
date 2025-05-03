@@ -158,16 +158,6 @@ void zoom_grok()
     SDL_Renderer *renderer;
 
     createWindowAndRenderer("Zoom Grok", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
-    
-    
-    //SDL_Window *window = createWindow("SDL3", 800, 600, cast(SDL_WindowFlags) 0 );
-
-    //writeln("window = ", window);
-
-    //SDL_Renderer *renderer = createRenderer(window, "zoom renderer");
-    //SDL_SetRenderVSync(renderer, true);
-
-   
 
 
     SDL_Surface* surface = loadImageToSurface("./images/earth1024x1024.png");
