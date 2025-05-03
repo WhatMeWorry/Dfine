@@ -12,7 +12,7 @@ import a_star.spot : writeAndPause;
 import core.stdc.stdio : printf;
 import hexmath : isOdd, isEven;
 
-import std.string : toStringz;  // converts D string to C string
+import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 
 import bindbc.sdl;  // SDL_* all remaining declarations
@@ -45,6 +45,32 @@ card, including the creation and management of textures.
 There isn't a hard limit to the number of SDL surfaces you can create
 +/
 
+
+SDL_Window* createWindow(string winName, int w, int h, SDL_WindowFlags flag)
+{
+    SDL_Window *window = SDL_CreateWindow(winName.toStringz(), w, h, flag);
+    if (window == null)
+    {
+        writeln("SDL_CreateWindow failed: ", SDL_GetError().fromStringz() );
+        exit(-1);
+    }
+    return window;
+}
+
+SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
+{
+    import std.utf : toUTFz;      //toUTFz!(const(char)*)("hello world");
+    SDL_Renderer *renderer =  SDL_CreateRenderer(window, toUTFz!(const(char)*)(rendererName) );
+    if (renderer == null)
+    {
+        writeln("SDL_CreateRenderer failed: ", SDL_GetError().fromStringz() );
+        exit(-1);
+    }
+    return renderer;
+}
+    
+ 
+
 SDL_Surface* loadImageToSurface(string fileName)
 {
     SDL_Surface *surface = IMG_Load(toStringz(fileName));
@@ -73,10 +99,24 @@ SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
     SDL_Surface *surface = SDL_CreateSurface(width, height, pixelFormat);
     if (surface == null)
     {
-        writefln("SDL_CreateSurface failed: %s", SDL_GetError());  
+        writeln("SDL_CreateSurface failed: ", to!string(SDL_GetError()));  
         exit(-1);
     }
     return surface;
+}
+
+
+SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surface)
+{
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (texture == null)
+    {
+        import std.string : fromStringz;
+        writeln("error = ", cast(string) SDL_GetError().fromStringz() );
+        //writefln("SDL_CreateTextureFromSurface failed: %s", SDL_GetError());  
+        exit(-1);
+    }
+    return texture;
 }
 
 
@@ -114,26 +154,32 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
 
 void zoom_grok()
 {
- 
+    SDL_Window   *window;
+    SDL_Renderer *renderer;
 
-    SDL_Window* window = SDL_CreateWindow("SDL3 Zoom Example", 800, 600, 0);
+    createWindowAndRenderer("Zoom Grok", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    
+    
+    //SDL_Window *window = createWindow("SDL3", 800, 600, cast(SDL_WindowFlags) 0 );
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, "zoom renderer");
-    SDL_SetRenderVSync(renderer, true);
+    //writeln("window = ", window);
+
+    //SDL_Renderer *renderer = createRenderer(window, "zoom renderer");
+    //SDL_SetRenderVSync(renderer, true);
+
+   
+
 
     SDL_Surface* surface = loadImageToSurface("./images/earth1024x1024.png");
-    if (!surface) {
-        SDL_Log("Failed to load image: %s", SDL_GetError());
-        exit(-1);
-    }
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_DestroySurface(surface);
+
+    SDL_Texture* texture = createTextureFromSurface(renderer, surface);
 
     float zoom = 1.0f; // Initial zoom level
     bool quit = false;
     SDL_Event event;
 
-    while (!quit) {
+    while (!quit) 
+    {
         while (SDL_PollEvent(&event)) 
         {
             switch (event.type)
@@ -151,6 +197,7 @@ void zoom_grok()
                     break;
             }
         }
+        writeln("zoom = ", zoom);
 
         // Clear the renderer
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -161,16 +208,24 @@ void zoom_grok()
 
         bool ok = SDL_GetTextureSize(texture, &texW, &texH);
 
+        writeln("texW x texH = ", texW, "  ", texH);
+
         // Calculate scaled dimensions
         int scaledW = cast(int)(texW * zoom);
         int scaledH = cast(int)(texH * zoom);
+        
+        writeln("scaledW, scaledH = ", scaledW, ", ", scaledH);
 
         // Center the image
         int centerX = (800 - scaledW) / 2; // Window width = 800
         int centerY = (600 - scaledH) / 2; // Window height = 600
+        
+        writeln("centerX, centerY = ", centerX, ", ", centerY);
 
         // Define destination rectangle
         SDL_FRect dstRect = { cast(float) centerX, cast(float) centerY, cast(float) scaledW, cast(float) scaledH};
+        
+        writeln("dstRect = ", dstRect);
 
         // Render the texture with zoom
         SDL_RenderTexture(renderer, texture, null, &dstRect);
