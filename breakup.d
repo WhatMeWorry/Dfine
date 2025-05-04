@@ -152,6 +152,28 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
     }
 }
 
+void getWindowSize(SDL_Window *window, int *w, int *h)
+{
+    bool result = SDL_GetWindowSize(window, w, h);
+    if (result == false)
+    {
+        writefln("SDL_GetWindowSize failed: %s", SDL_GetError());  
+        exit(-1);
+    }
+}
+
+void getTextureSize(SDL_Texture *texture, float *w, float *h)
+{
+    bool result = SDL_GetTextureSize(texture, w, h);
+    if (result == false)
+    {
+        writefln("SDL_GetWindowSize failed: %s", SDL_GetError());  
+        exit(-1);
+    }
+}
+
+
+
 void zoom_grok()
 {
     SDL_Window   *window;
@@ -159,21 +181,72 @@ void zoom_grok()
 
     createWindowAndRenderer("Zoom Grok", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
+    int winW;  int winH;
+    getWindowSize(window, &winW, &winH);
+    writeln("texW x texH = ", winW, "  ", winH);
 
-    SDL_Surface* surface = loadImageToSurface("./images/earth1024x1024.png");
-
+    //SDL_Surface* surface = loadImageToSurface("./images/earth1024x1024.png");
+    
+    SDL_Surface* surface = loadImageToSurface("./images/COMBINE.png");
+    
     SDL_Texture* texture = createTextureFromSurface(renderer, surface);
-
+    
+    int maxX; int maxY;
+    bool r = SDL_GetWindowMaximumSize(window, &maxX, &maxY);
+    writeln("r = ", r);
+    
+    writeln("maxX and maxY = ", maxX, ", ", maxY);
+    
+    float tW;  float tH;
+    getTextureSize(texture, &tW, &tH);
+    writeln("&tW, &tH = ", tW, "----", tH);
+                                 // swap w and h
+    SDL_FRect destRect = { 0, 0, 6000,6500};    //cast(float) tH, cast(float) tW };
+    SDL_FPoint *center = null;
+    bool res = SDL_RenderTextureRotated(renderer, texture, null, &destRect /+null+/, 90.0, center, SDL_FLIP_NONE); // 90 degree rotation    
+    writeln("res = ", res);
+        //SDL_RenderTexture(renderer, texture, null, &dstRect);
+        SDL_RenderPresent(renderer);
+        SDL_Delay(10000);
+        //exit(-1);
+    
+    
     float zoom = 1.0f; // Initial zoom level
     bool quit = false;
     SDL_Event event;
-
+    int offsetX;
+    int offsetY;
     while (!quit) 
     {
         while (SDL_PollEvent(&event)) 
         {
             switch (event.type)
             {
+                case SDL_EVENT_KEY_DOWN:
+                    {
+                    
+                    if (event.key.key == SDLK_UP) 
+                    {  
+                        offsetY = offsetY + 10;    
+                    }
+                    else
+                    if (event.key.key == SDLK_DOWN) 
+                    {  
+                        offsetY = offsetY - 10;    
+                    }
+                    else
+                    if (event.key.key == SDLK_LEFT) 
+                    {  
+                        offsetX = offsetX + 10;    
+                    }
+                    else
+                    if (event.key.key == SDLK_RIGHT) 
+                    {  
+                        offsetX = offsetX - 10;    
+                    }
+                    
+                    }
+                    break;
                 case SDL_EVENT_QUIT:
                     quit = true;
                     break;
@@ -195,7 +268,7 @@ void zoom_grok()
 
         // Get texture dimensions
         float texW, texH;
-
+        
         bool ok = SDL_GetTextureSize(texture, &texW, &texH);
 
         writeln("texW x texH = ", texW, "  ", texH);
@@ -207,8 +280,11 @@ void zoom_grok()
         writeln("scaledW, scaledH = ", scaledW, ", ", scaledH);
 
         // Center the image
-        int centerX = (800 - scaledW) / 2; // Window width = 800
-        int centerY = (600 - scaledH) / 2; // Window height = 600
+        int centerX = (winW - scaledW) / 2;
+        int centerY = (winH - scaledH) / 2;
+        
+        centerX = centerX + offsetX;
+        centerY = centerY + offsetY;
         
         writeln("centerX, centerY = ", centerX, ", ", centerY);
 
@@ -222,6 +298,7 @@ void zoom_grok()
 
         // Present the frame
         SDL_RenderPresent(renderer);
+        
     }
 }
 
@@ -319,13 +396,13 @@ void assembleQuadFilesItoOnePNGfile()
 
     blitSurfaceToSurface(image, null, combined, &quads[3]);
 
-    /+
+    // /+ ============================================================
     string fileName = "./images/" ~ "COMBINE" ~ ".png";
     if (IMG_SavePNG(combined, toStringz(fileName)) < 0) {
     writefln("IMG_SavePNG failed: %s", SDL_GetError());
     }
     exit(-1);
-    +/
+   //  ============================================================ +/
 
     SDL_Surface *dstSurface = SDL_CreateSurface(1500, 1500, image.format);
 
@@ -355,7 +432,6 @@ void assembleQuadFilesItoOnePNGfile()
     
     foreach (int i; 0 .. 100) 
     {
-
         sRect = SDL_Rect(i*50, i*50, width, height);
 
         blitSurfaceToSurface(combined, &sRect, windowSurface, null);
@@ -365,8 +441,7 @@ void assembleQuadFilesItoOnePNGfile()
         SDL_Delay(50);
     }
 
-    
-    
+
     /+
     sRect = SDL_Rect(2200, 2200, width, height);
 
