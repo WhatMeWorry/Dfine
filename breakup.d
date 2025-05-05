@@ -82,6 +82,16 @@ SDL_Surface* loadImageToSurface(string fileName)
     return surface;
 }
 
+
+void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
+{
+    if (IMG_SavePNG(surface, toStringz(file)) == false)
+    {
+        writeln("IMG_SavePNG failed with file: ", file);
+        exit(-1);
+    }
+}
+
 SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string fileName)
 {
     SDL_Texture *texture = IMG_LoadTexture(renderer, toStringz(fileName));
@@ -172,6 +182,182 @@ void getTextureSize(SDL_Texture *texture, float *w, float *h)
     }
 }
 
+/+
+struct SDL_Texture
+{
+    SDL_PixelFormat format;     // The format of the texture, read-only
+    int w;                      // The width of the texture, read-only
+    int h;                      // The height of the texture, read-only
+};
+
+struct SDL_Surface
+{
+    SDL_SurfaceFlags flags;     // The flags of the surface, read-only
+    SDL_PixelFormat format;     // The format of the surface, read-only
+    int w;                      // The width of the surface, read-only
+    int h;                      // The height of the surface, read-only
+    int pitch;                  // The distance in bytes between rows of pixels, read-only
+    void *pixels;               // A pointer to the pixels of the surface, the pixels are writeable if non-NULL
+};
++/
+
+
+
+
+
+// https://github.com/libsdl-org/SDL/blob/main/examples/renderer/08-rotating-textures/rotating-textures.c
+
+void fromGithub()
+{
+    // we will use this renderer to draw into this window every frame
+
+    SDL_Window   *window   = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture  = null;
+    SDL_Surface  *surface  = null;
+    int texture_width = 0;
+    int texture_height = 0;
+
+    int WINDOW_WIDTH = 2048; // 1024;
+    int WINDOW_HEIGHT = 2048; // 1024;
+
+    createWindowAndRenderer("fromGithub", WINDOW_WIDTH, WINDOW_HEIGHT, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    // Textures are pixel data that we upload to the video hardware for fast drawing. Lots of 2D
+    // engines refer to these as "sprites." We'll do a static texture (upload once, draw many
+    // times) with data from a bitmap file.
+
+    // SDL_Surface is pixel data the CPU can access. SDL_Texture is pixel data the GPU can access.
+
+    surface = loadImageToSurface("./images/earth1024x1024.png");
+    
+
+
+    texture_width = surface.w;   // SDL_FPoint
+    texture_height = surface.h;  // saves call to 
+
+    texture = createTextureFromSurface(renderer, surface);
+    
+    bool quit = false;
+    SDL_Event event;
+    while (!quit) 
+    {
+        while (SDL_PollEvent(&event)) 
+        {
+            switch (event.type)
+            {
+                case SDL_EVENT_QUIT:
+                    quit = true;
+                    break;
+                default: 
+                    break;
+            }
+        }
+
+    SDL_FPoint center;
+    SDL_FRect dst_rect;
+    const ulong now = SDL_GetTicks();
+
+    // we'll have a texture rotate around over 2 seconds (2000 milliseconds). 360 degrees in a circle
+    
+    const float rotation = (((float) ((int) (now % 2000))) / 2000.0f) * 360.0f;
+
+    // as you can see from this, rendering draws over whatever was drawn before it
+    
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);  // black, full alpha
+    SDL_RenderClear(renderer);  // start with a blank canvas
+
+    // Center this one, and draw it with some rotation so it spins
+    
+    dst_rect.x = ( cast(float) (WINDOW_WIDTH - texture_width  ) ) / 2.0f;
+    dst_rect.y = ( cast(float) (WINDOW_HEIGHT - texture_height) ) / 2.0f;
+    dst_rect.w = cast(float) texture_width;
+    dst_rect.h = cast(float) texture_height;
+    
+    // rotate it around the center of the texture; you can rotate it from a different point, too
+    
+    center.x = texture_width / 2.0f;
+    center.y = texture_height / 2.0f;
+    
+    SDL_RenderTextureRotated(renderer, texture, null, &dst_rect, rotation, &center, SDL_FLIP_NONE);
+
+    SDL_RenderPresent(renderer);  // put it all on the screen
+
+    }
+}
+
+
+
+
+
+
+void rotateAndSavePNG()
+{
+    SDL_Window   *window;
+    SDL_Renderer *renderer;
+
+    createWindowAndRenderer("RotateAndSavePNG", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    SDL_Point win;
+
+    getWindowSize(window, &win.x, &win.y);
+    writeln("win size = ", win.x, " X ", win.y);
+
+    SDL_Surface* surface = loadImageToSurface("./images/earth1024x1024.png");
+    
+    SDL_Texture* texture = createTextureFromSurface(renderer, surface);
+
+    SDL_FPoint *center = null;
+    
+    
+    /+
+    In SDL3, there isn't a direct function to copy a texture to a surface. However, 
+    you can achieve this by rendering the texture to a new texture, which can then 
+    be converted to a surface. This involves setting the new texture as a render target, 
+    rendering the original texture to it, and then reading the pixels from the rendering 
+    target into a surface using SDL_RenderReadPixels
+    +/
+    
+    // SDL_CreateTexture with the SDL_TEXTUREACCESS_TARGET flag to create a texture that 
+    // can be rendered to
+    
+    // newTexture = SDL_CreateTexture(renderer, SDL_PixelFormat format, SDL_TextureAccess access, int w, int h);
+    
+    // Set the new texture as the render target: Use SDL_SetRenderTarget to make the new 
+    // texture the target for rendering. 
+    
+    // bool SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture);
+    
+    // Render the original texture to the new texture: Use SDL_RenderCopy or SDL_RenderCopyEx 
+    // to draw the original texture onto the new texture. 
+    
+    
+    
+    // Read the pixels from the rendering target into a surface: Use SDL_RenderReadPixels 
+    // to copy the pixel data from the new texture (the render target) into a memory buffer. 
+    
+    // SDL_Surface * SDL_RenderReadPixels(SDL_Renderer *renderer, const SDL_Rect *rect);
+    
+    // Create a surface from the memory buffer: Use SDL_CreateRGBSurfaceWithFormat to create 
+    // an SDL_Surface from the memory buffe
+    
+    // Destroy the new texture: Use SDL_DestroyTexture to free the memory used by the new texture. 
+    
+    bool res = SDL_RenderTextureRotated(renderer, texture, null, null, 90.0, center, SDL_FLIP_NONE);
+    if (res == false)
+    {
+        writeln("texture rotation failed");
+    }
+    
+
+    string filePathAndName = "./images/earthRotated.png";
+
+
+    saveSurfaceToPNGfile(surface, filePathAndName);
+        
+}
+
+
 
 
 void zoom_grok()
@@ -192,23 +378,23 @@ void zoom_grok()
     SDL_Texture* texture = createTextureFromSurface(renderer, surface);
     
     int maxX; int maxY;
-    bool r = SDL_GetWindowMaximumSize(window, &maxX, &maxY);
-    writeln("r = ", r);
-    
+    //bool r = SDL_GetWindowMaximumSize(window, &maxX, &maxY);
+    getWindowSize(window, &maxX, &maxY);
+
     writeln("maxX and maxY = ", maxX, ", ", maxY);
     
     float tW;  float tH;
     getTextureSize(texture, &tW, &tH);
     writeln("&tW, &tH = ", tW, "----", tH);
                                  // swap w and h
-    SDL_FRect destRect = { 0, 0, 6000,6500};    //cast(float) tH, cast(float) tW };
+    SDL_FRect destRect = { 0, 0, 6000,6000};    //cast(float) tH, cast(float) tW };
     SDL_FPoint *center = null;
-    bool res = SDL_RenderTextureRotated(renderer, texture, null, &destRect /+null+/, 90.0, center, SDL_FLIP_NONE); // 90 degree rotation    
+    bool res = SDL_RenderTextureRotated(renderer, texture, null, /+&destRect+/ null, 90.0, center, SDL_FLIP_NONE); // 90 degree rotation    
     writeln("res = ", res);
         //SDL_RenderTexture(renderer, texture, null, &dstRect);
         SDL_RenderPresent(renderer);
-        SDL_Delay(10000);
-        //exit(-1);
+        SDL_Delay(3000);
+        exit(-1);
     
     
     float zoom = 1.0f; // Initial zoom level

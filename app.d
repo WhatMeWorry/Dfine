@@ -122,7 +122,8 @@ int main()
     //assembleQuadFilesItoOnePNGfile();
     
     //zoomAnImage;
-    zoom_grok;
+    //zoom_grok;
+    fromGithub();
     exit(-1);
     
     //display_info();
