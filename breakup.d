@@ -204,6 +204,73 @@ struct SDL_Surface
 
 
 
+// THIS WORKS!!!
+
+void rotateAndScale()
+{
+    SDL_Window   *window   = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture  = null;
+    SDL_Surface  *surface  = null;
+
+    int winWidth = 2000;
+    int winHeight = 2000;
+
+    createWindowAndRenderer("rotateAndScale", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    //surface = loadImageToSurface("./images/earth1024x1024.png");
+    
+    surface = loadImageToSurface("./images/COMBINE.png");
+
+    texture = createTextureFromSurface(renderer, surface);
+
+    // Define the initial destination rectangle
+    SDL_FRect dst_rect = {0, 0, winWidth, winHeight};
+
+    // Scaling factor
+    float scale_factor = 1f;
+
+
+    foreach (i; 0..100)
+    {
+    scale_factor = scale_factor * 0.999;       // 1.001;
+    
+    // Adjust the destination rectangle for scaling
+    
+    writeln("First dst_rect.w = ", dst_rect.w);
+    
+    dst_rect.w = cast(int)(dst_rect.w * scale_factor);
+    dst_rect.h = cast(int)(dst_rect.h * scale_factor);
+
+    writeln("dst_rect.w = ", dst_rect.w);
+
+    dst_rect.x = ( cast(float) (winWidth - dst_rect.w  ) ) / 2.0f;
+    dst_rect.y = ( cast(float) (winHeight - dst_rect.h ) ) / 2.0f;
+
+    // Rotation angle
+    //double angle = 90.0;
+    
+
+    const ulong now = SDL_GetTicks();
+    // we'll have a texture rotate around over 2 seconds (2000 milliseconds). 360 degrees in a circle
+    const float angle = (((float) ((int) (now % 2000))) / 2000.0f) * 360.0f;
+    
+
+    // Define the rotation center (center of the texture)
+    SDL_FPoint center = {dst_rect.w / 2.0f, dst_rect.h / 2.0f};
+
+    writeln("dst_rect = ", dst_rect);
+
+
+    // Render the texture with scaling and rotation
+    SDL_RenderClear(renderer);
+    SDL_RenderTextureRotated(renderer, texture, null, &dst_rect, angle, &center, SDL_FLIP_NONE); // Apply rotation and scaling
+    SDL_RenderPresent(renderer);
+
+    SDL_Delay(100); // Wait for 2 seconds
+    }
+}
+
 
 // https://github.com/libsdl-org/SDL/blob/main/examples/renderer/08-rotating-textures/rotating-textures.c
 
@@ -230,8 +297,6 @@ void fromGithub()
     // SDL_Surface is pixel data the CPU can access. SDL_Texture is pixel data the GPU can access.
 
     surface = loadImageToSurface("./images/earth1024x1024.png");
-    
-
 
     texture_width = surface.w;   // SDL_FPoint
     texture_height = surface.h;  // saves call to 

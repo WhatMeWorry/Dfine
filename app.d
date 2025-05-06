@@ -123,7 +123,8 @@ int main()
     
     //zoomAnImage;
     //zoom_grok;
-    fromGithub();
+    rotateAndScale();
+    //fromGithub();
     exit(-1);
     
     //display_info();
