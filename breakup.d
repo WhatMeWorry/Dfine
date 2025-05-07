@@ -202,9 +202,54 @@ struct SDL_Surface
 +/
 
 
+bool isRectWithinBiggerRect(SDL_FRect inner, SDL_FRect outer)
+{
+        /+
+        +--------------------------+
+        |                          |
+        |     +-------+            |
+        |     |       |            |
+        |     |       |            |
+        |     |       |            |
+        |     +-------+            |
+        |                          |
+        |                          |
+        |                          |
+        +--------------------------+
+        +/
+
+    if (inner.x < outer.x)
+    {
+        // writeln("outside on left side");
+        return false;
+    }
+    if (inner.y < outer.y)
+    {
+        // writeln("outside on top");
+        return false;
+    }
+    if ((inner.x + inner.w) > (outer.x + outer.w))
+    {
+        // writeln("outside on right side");
+        return false;
+    }
+    if ((inner.y + inner.h) > (outer.y + outer.y))
+    {
+        // writeln("outside on bottom");
+        return false;
+    }
+   
+   return true;
+}
+
 
 
 // THIS WORKS!!!
+
+// This works fine for zooming in on small and large textures.
+// but when zooming out, large textures get smaller but no new pixels are added. you
+// would expect to see more of the large texture as is  recedes into the back 
+// because the src_rect never changes!
 
 void rotateAndScale()
 {
@@ -213,10 +258,14 @@ void rotateAndScale()
     SDL_Texture  *texture  = null;
     SDL_Surface  *surface  = null;
 
-    int winWidth = 2000;
-    int winHeight = 2000;
+    int winWidth = 1000;
+    int winHeight = 1000;
 
     createWindowAndRenderer("rotateAndScale", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    // Define the initial destination rectangle
+    
+    SDL_FRect dst_rect = {0, 0, winWidth, winHeight};
 
     //surface = loadImageToSurface("./images/earth1024x1024.png");
 
@@ -224,13 +273,23 @@ void rotateAndScale()
 
     texture = createTextureFromSurface(renderer, surface);
 
-    // Define the initial destination rectangle
-    SDL_FRect dst_rect = {0, 0, winWidth, winHeight};
+    float texWidth; float texHeight;
+    getTextureSize(texture, &texWidth, &texHeight);
     
     // Important Note: x and y of srcRect must stay within the range of 0..maxWidth and 0..maxHeight
     // or else the SDL_RenderTextureRotated will distort the image.
     
-    SDL_FRect srcRect = {4500, 4500, winWidth, winHeight};
+    // Another way of thinking about this is that it is invalid to access 
+    // any pixels outside of a texture's boundaries.
+
+    SDL_FPoint texCenter = {texWidth / 2.0f, texHeight / 2.0f};
+    
+    // SDL3 position rects at its upper left corner. Need to adjust in northwest direction
+
+    texCenter.x = texCenter.x - (winWidth/2.0f);
+    texCenter.y = texCenter.y - (winHeight/2.0f);
+    
+    SDL_FRect srcRect = {texCenter.x, texCenter.y, winWidth, winHeight};
 
     // Rotation angle
     double angle = 90.0;
@@ -305,8 +364,6 @@ void rotateAndScale()
 
         dst_rect.x = ( cast(float) (winWidth - dst_rect.w  ) ) / 2.0f;
         dst_rect.y = ( cast(float) (winHeight - dst_rect.h ) ) / 2.0f;
-
-
 
         const ulong now = SDL_GetTicks();
         
