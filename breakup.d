@@ -219,55 +219,115 @@ void rotateAndScale()
     createWindowAndRenderer("rotateAndScale", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     //surface = loadImageToSurface("./images/earth1024x1024.png");
-    
-    surface = loadImageToSurface("./images/COMBINE.png");
+
+    surface = loadImageToSurface("./images/COMBINE_A.png");
 
     texture = createTextureFromSurface(renderer, surface);
 
     // Define the initial destination rectangle
     SDL_FRect dst_rect = {0, 0, winWidth, winHeight};
-
-    // Scaling factor
-    float scale_factor = 1f;
-
-
-    foreach (i; 0..100)
-    {
-    scale_factor = scale_factor * 0.999;       // 1.001;
     
-    // Adjust the destination rectangle for scaling
+    // Important Note: x and y of srcRect must stay within the range of 0..maxWidth and 0..maxHeight
+    // or else the SDL_RenderTextureRotated will distort the image.
     
-    writeln("First dst_rect.w = ", dst_rect.w);
-    
-    dst_rect.w = cast(int)(dst_rect.w * scale_factor);
-    dst_rect.h = cast(int)(dst_rect.h * scale_factor);
-
-    writeln("dst_rect.w = ", dst_rect.w);
-
-    dst_rect.x = ( cast(float) (winWidth - dst_rect.w  ) ) / 2.0f;
-    dst_rect.y = ( cast(float) (winHeight - dst_rect.h ) ) / 2.0f;
+    SDL_FRect srcRect = {4500, 4500, winWidth, winHeight};
 
     // Rotation angle
-    //double angle = 90.0;
-    
+    double angle = 90.0;
 
-    const ulong now = SDL_GetTicks();
-    // we'll have a texture rotate around over 2 seconds (2000 milliseconds). 360 degrees in a circle
-    const float angle = (((float) ((int) (now % 2000))) / 2000.0f) * 360.0f;
-    
+    // Scaling factor
+    float scale_factor = 1.0f;
 
-    // Define the rotation center (center of the texture)
-    SDL_FPoint center = {dst_rect.w / 2.0f, dst_rect.h / 2.0f};
+    bool quit = false;
+    SDL_Event event;
+    while (!quit) 
+    {
+        while (SDL_PollEvent(&event)) 
+        {
+            switch (event.type)
+            {
+                case SDL_EVENT_QUIT:
+                    quit = true;
+                    break;
+               case SDL_EVENT_KEY_DOWN:
+                    {
+                        if (event.key.key == SDLK_PAGEUP) 
+                        {
+                            scale_factor *= 1.1f;
+                        }
+                        if (event.key.key == SDLK_PAGEDOWN) 
+                        {
+                            scale_factor /= 1.1f;
+                        }
+                        if (event.key.key == SDLK_UP) 
+                        {
+                            srcRect.x += 50;
+                        }
+                        if (event.key.key == SDLK_DOWN) 
+                        {
+                            srcRect.x -= 50;
+                        }
+                        if (event.key.key == SDLK_LEFT) 
+                        {
+                            srcRect.y += 50;
+                        }
+                        if (event.key.key == SDLK_RIGHT) 
+                        {
+                            srcRect.y -= 50;
+                        }
+                    }
+                    break;
+                case SDL_EVENT_MOUSE_WHEEL:
+                    {
+                        if (event.wheel.y > 0)
+                            scale_factor *= 1.1f;      // Zoom in
+                        else if (event.wheel.y < 0)
+                            scale_factor /= 1.1f;      // Zoom out
+                        writeln("scale_factor = ", scale_factor);
+                        //zoom = SDL_clamp(zoom, 0.1, 10.0); // Limit zoom range
+                    }
+                    break;
+                default: 
+                    break;
+            }
+        }
 
-    writeln("dst_rect = ", dst_rect);
+        //scale_factor = scale_factor * 0.999;       // 1.001;
+
+        // Adjust the destination rectangle for scaling
+
+        // writeln("First dst_rect.w = ", dst_rect.w);
+
+        dst_rect.w = cast(int)(dst_rect.w * scale_factor);
+        dst_rect.h = cast(int)(dst_rect.h * scale_factor);
+
+        // writeln("dst_rect.w = ", dst_rect.w);
+
+        dst_rect.x = ( cast(float) (winWidth - dst_rect.w  ) ) / 2.0f;
+        dst_rect.y = ( cast(float) (winHeight - dst_rect.h ) ) / 2.0f;
 
 
-    // Render the texture with scaling and rotation
-    SDL_RenderClear(renderer);
-    SDL_RenderTextureRotated(renderer, texture, null, &dst_rect, angle, &center, SDL_FLIP_NONE); // Apply rotation and scaling
-    SDL_RenderPresent(renderer);
 
-    SDL_Delay(100); // Wait for 2 seconds
+        const ulong now = SDL_GetTicks();
+        
+        // we'll have a texture rotate around over 2 seconds (2000 milliseconds). 360 degrees in a circle
+        
+        //const float angle = (((float) ((int) (now % 2000))) / 2000.0f) * 360.0f;
+        //angle = angle + 1.0;
+
+        // Define the rotation center (center of the texture)
+        
+        SDL_FPoint center = {dst_rect.w / 2.0f, dst_rect.h / 2.0f};
+
+        writeln("srcRect = ", srcRect);
+        //writeln("dst_rect = ", dst_rect);
+
+        // Render the texture with scaling and rotation
+        SDL_RenderClear(renderer);
+        SDL_RenderTextureRotated(renderer, texture, &srcRect /+null+/, &dst_rect, angle, &center, SDL_FLIP_NONE); // Apply rotation and scaling
+        SDL_RenderPresent(renderer);
+
+        SDL_Delay(400); // Wait for 2 seconds
     }
 }
 
@@ -606,7 +666,11 @@ void assembleQuadFilesItoOnePNGfile()
 
     SDL_Surface *image;
 
-    image = loadImageToSurface("./images/CNA_Maps_PNG/quadA0.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadA0.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadB0.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadC0.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadD0.png");
+    image = loadImageToSurface("./images/CNA_Maps_PNG/quadE0.png");
 
     string pixelFormat = to!string(SDL_GetPixelFormatName(image.format));
     writeln("pixelFormat = ", pixelFormat);
@@ -632,28 +696,37 @@ void assembleQuadFilesItoOnePNGfile()
 
     blitSurfaceToSurface(image, null, combined, &quads[0]);
 
-
-    image = loadImageToSurface("./images/CNA_Maps_PNG/quadA1.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadA1.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadB1.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadC1.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadD1.png");
+    image = loadImageToSurface("./images/CNA_Maps_PNG/quadE1.png");
 
     blitSurfaceToSurface(image, null, combined, &quads[1]);
 
-
-    image = loadImageToSurface("./images/CNA_Maps_PNG/quadA2.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadA2.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadB2.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadC2.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadD2.png");
+    image = loadImageToSurface("./images/CNA_Maps_PNG/quadE2.png");
 
     blitSurfaceToSurface(image, null, combined, &quads[2]);
 
-
-    image = loadImageToSurface("./images/CNA_Maps_PNG/quadA3.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadA3.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadB3.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadC3.png");
+    //image = loadImageToSurface("./images/CNA_Maps_PNG/quadD3.png");
+    image = loadImageToSurface("./images/CNA_Maps_PNG/quadE3.png");
 
     blitSurfaceToSurface(image, null, combined, &quads[3]);
 
     // /+ ============================================================
-    string fileName = "./images/" ~ "COMBINE" ~ ".png";
+    string fileName = "./images/" ~ "COMBINE" ~ "_E" ~ ".png";
     if (IMG_SavePNG(combined, toStringz(fileName)) < 0) {
     writefln("IMG_SavePNG failed: %s", SDL_GetError());
     }
     exit(-1);
-   //  ============================================================ +/
+    //  ============================================================ +/
 
     SDL_Surface *dstSurface = SDL_CreateSurface(1500, 1500, image.format);
 

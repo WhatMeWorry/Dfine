@@ -120,10 +120,13 @@ int main()
     //hugePNGfileIntoQuadPNGfiles();
     
     //assembleQuadFilesItoOnePNGfile();
+    //exit(-1);
     
     //zoomAnImage;
     //zoom_grok;
+    
     rotateAndScale();
+    
     //fromGithub();
     exit(-1);
     
