@@ -244,6 +244,155 @@ bool isRectWithinBiggerRect(SDL_FRect inner, SDL_FRect outer)
 
 
 
+
+        /+      Texture
+        +--------------------------+        A                 B
+        |    a         b           |         +---------------+
+        |     +-------+            |         |               |
+        |     |Tracker|     O      |         |               |
+        |     |Camera |            |         |     Window    |
+        |     |  X O  |            |         |               |
+        |     +-------+            |         |      X O      |
+        |    c         d           |         |               |
+        |                      O   |         +---------------+
+        |     O                    |        C                 D
+        +--------------------------+
+        
+        The entire contents of the Tracker Camera (a:b:c:d) is always drawn (pixel copied)
+        from the Tracker Camera to the Windows (A:B:C:D).
+        
+        The Tracker Camera (inner rectangle) can move up and down so long as all sides remain
+        within the texture (outer rectangle).  Additionally, the Tracker Camera can expand or
+        shrink proportionally in the horizontal and vertical directions: Uniform Scaling. This
+        effectively operates like a zoom in or out operation.
+        
+        The Texture is a static read-only rectangle.  The Window is is fixed size; though this 
+        could easily be made resizable.  The Tracker Camera is dynamic with the exception that
+        it must stay within the confines of the Texture. Like wise, the Tracker Camera can grow
+        (zoom out) no larger than the entire Texture.
+        +/
+
+void trackerCamera()
+{
+    SDL_Window   *window   = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture  = null;
+    SDL_Surface  *surface  = null;
+
+    int winWidth = 1000;
+    int winHeight = 1000;
+
+    createWindowAndRenderer("trackerCamera", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    // WINDOW RECT/CENTER
+
+    SDL_FRect winRect = { 0, 0, winWidth, winHeight };
+    SDL_FPoint winCenter = { winRect.x + (winRect.w/2.0f), winRect.y + (winRect.h/2.0f) };
+
+    // Define the initial destination rectangle
+
+    //surface = loadImageToSurface("./images/earth1024x1024.png");
+
+    surface = loadImageToSurface("./images/COMBINE_A.png");
+
+    texture = createTextureFromSurface(renderer, surface);
+
+    // TEXTURE RECT/CENTER
+    
+    SDL_FRect  texRect;
+    texRect.x = 0;
+    texRect.y = 0;
+    getTextureSize(texture, &texRect.w, &texRect.h);
+
+    SDL_FPoint texCenter = { texRect.w / 2.0f, texRect.h / 2.0f };
+
+    float angle = 0.0;
+
+    // CAMERA RECT/CENTER
+
+    SDL_FRect  cameraRect;
+    cameraRect.x = texCenter.x - (winWidth/2.0f);   // SDL3 positions rects at its upper left corner.
+    cameraRect.y = texCenter.y - (winHeight/2.0f);  // Need to adjust in northwest direction
+    cameraRect.w = winWidth;
+    cameraRect.h = winHeight;
+
+    SDL_FPoint cameraCenter;
+    cameraCenter.x = cameraRect.x + (cameraRect.w / 2.0f);
+    cameraCenter.y = cameraRect.y + (cameraRect.h / 2.0f);
+
+    writeln("cameraRect = ", cameraRect);
+    writeln("cameraCenter = ", cameraCenter);
+    writeln("winRect = ", winRect);
+    writeln("winCenter = ", winCenter);
+
+    SDL_RenderClear(renderer);
+    
+    float scale_factor = 1.0;
+    
+    bool quit = false;
+    SDL_Event event;
+    while (!quit) 
+    {
+        while (SDL_PollEvent(&event)) 
+        {
+            switch (event.type)
+            {
+                case SDL_EVENT_QUIT:
+                    quit = true;
+                    break;
+               case SDL_EVENT_KEY_DOWN:
+                    {
+                        if (event.key.key == SDLK_PAGEUP) 
+                        {
+                            scale_factor *= 1.1f;
+                        }
+                    }
+                    break;
+                case SDL_EVENT_MOUSE_WHEEL:
+                    {
+                    }
+                    break;
+                default: 
+                    break;
+            }
+        }
+        
+        SDL_FPoint delta = { (cameraRect.w * scale_factor) - cameraRect.w, 
+                             (cameraRect.h * scale_factor) - cameraRect.h };
+        
+        cameraRect.w = (cameraRect.w * scale_factor);
+        cameraRect.h = (cameraRect.h * scale_factor);
+
+        cameraRect.x = cameraRect.x - (delta.x/2.0f);
+        cameraRect.y = cameraRect.y - (delta.y/2.0f);
+
+        
+        // game loop
+        SDL_RenderTextureRotated(renderer, texture, &cameraRect, &winRect, angle, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
+        SDL_RenderPresent(renderer);
+
+    }
+}
+    
+    
+    
+    
+    
+    
+/+   
+    SDL_RenderTextureRotated(renderer, texture, &cameraRect, &winRect, angle, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
+    SDL_RenderPresent(renderer);
+
+    SDL_Delay(2000); // Wait for 2 seconds
+   
+    SDL_RenderPresent(renderer);
++/
+
+
+
+
+
+
 // THIS WORKS!!!
 
 // This works fine for zooming in on small and large textures.
@@ -381,7 +530,7 @@ void rotateAndScale()
 
         // Render the texture with scaling and rotation
         SDL_RenderClear(renderer);
-        SDL_RenderTextureRotated(renderer, texture, &srcRect /+null+/, &dst_rect, angle, &center, SDL_FLIP_NONE); // Apply rotation and scaling
+        SDL_RenderTextureRotated(renderer, texture, &srcRect, &dst_rect, angle, &center, SDL_FLIP_NONE); // Apply rotation and scaling
         SDL_RenderPresent(renderer);
 
         SDL_Delay(400); // Wait for 2 seconds

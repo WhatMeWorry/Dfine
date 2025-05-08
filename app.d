@@ -125,7 +125,9 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
-    rotateAndScale();
+    trackerCamera();
+    
+    //rotateAndScale();
     
     //fromGithub();
     exit(-1);
