@@ -202,7 +202,7 @@ struct SDL_Surface
 +/
 
 
-bool isRectWithinBiggerRect(SDL_FRect inner, SDL_FRect outer)
+void keepRectWithinBiggerRect(SDL_FRect *inner, SDL_FRect *outer)
 {
         /+
         +--------------------------+
@@ -220,26 +220,21 @@ bool isRectWithinBiggerRect(SDL_FRect inner, SDL_FRect outer)
 
     if (inner.x < outer.x)
     {
-        // writeln("outside on left side");
-        return false;
+        inner.x = outer.x;  // if outside on left, put back in
     }
-    if (inner.y < outer.y)
+    if (inner.y < outer.y)  // if outside on top, put back in
     {
-        // writeln("outside on top");
-        return false;
+        inner.y = outer.y;
     }
-    if ((inner.x + inner.w) > (outer.x + outer.w))
+    if ((inner.x + inner.w) >= (outer.x + outer.w))
     {
-        // writeln("outside on right side");
-        return false;
+        inner.x = (outer.x + outer.w) - inner.w;
     }
-    if ((inner.y + inner.h) > (outer.y + outer.y))
+    if ((inner.y + inner.h) > (outer.y + outer.h))
     {
-        // writeln("outside on bottom");
-        return false;
+        inner.y = (outer.y + outer.h) - inner.h;
     }
-   
-   return true;
+
 }
 
 
@@ -279,8 +274,8 @@ void trackerCamera()
     SDL_Texture  *texture  = null;
     SDL_Surface  *surface  = null;
 
-    int winWidth = 1000;
-    int winHeight = 1000;
+    int winWidth = 2000;
+    int winHeight = 2000;
 
     createWindowAndRenderer("trackerCamera", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
@@ -344,8 +339,39 @@ void trackerCamera()
                     {
                         if (event.key.key == SDLK_PAGEUP) 
                         {
-                            scale_factor *= 1.1f;
+                            scale_factor *= 1.01f;
+
+                            SDL_FPoint delta = { (cameraRect.w * scale_factor) - cameraRect.w, 
+                                                 (cameraRect.h * scale_factor) - cameraRect.h };
+
+                            cameraRect.w = (cameraRect.w * scale_factor);
+                            cameraRect.h = (cameraRect.h * scale_factor);
+
+                            cameraRect.x = cameraRect.x - (delta.x/2.0f);
+                            cameraRect.y = cameraRect.y - (delta.y/2.0f);
+
+                            writeln("cameraRect = ", cameraRect);
+                            writeln("cameraCenter = ", cameraCenter);
                         }
+                        else if (event.key.key == SDLK_UP) 
+                        {
+                            cameraRect.y -= 50;
+                        }
+                        else if (event.key.key == SDLK_DOWN) 
+                        {
+                            cameraRect.y += 50;
+                        }
+                        else if (event.key.key == SDLK_LEFT) 
+                        {
+                            cameraRect.x -= 50;
+                        }
+                        else if (event.key.key == SDLK_RIGHT) 
+                        {
+                            cameraRect.x += 50;
+                        }
+                        
+                        keepRectWithinBiggerRect(&cameraRect, &texRect);
+                        writeln("cameraRect.x = ", cameraRect.x);
                     }
                     break;
                 case SDL_EVENT_MOUSE_WHEEL:
@@ -357,6 +383,8 @@ void trackerCamera()
             }
         }
         
+        
+        /+
         SDL_FPoint delta = { (cameraRect.w * scale_factor) - cameraRect.w, 
                              (cameraRect.h * scale_factor) - cameraRect.h };
         
@@ -366,11 +394,18 @@ void trackerCamera()
         cameraRect.x = cameraRect.x - (delta.x/2.0f);
         cameraRect.y = cameraRect.y - (delta.y/2.0f);
 
+        writeln("cameraRect = ", cameraRect);
+        writeln("cameraCenter = ", cameraCenter);
+        +/
+        
+        
         
         // game loop
         SDL_RenderTextureRotated(renderer, texture, &cameraRect, &winRect, angle, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
         SDL_RenderPresent(renderer);
 
+
+        //SDL_Delay(2000); // Wait for 2 seconds
     }
 }
     
