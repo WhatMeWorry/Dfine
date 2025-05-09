@@ -201,8 +201,29 @@ struct SDL_Surface
 };
 +/
 
+bool isRectOutsideBiggerRectZoom(SDL_FRect *inner, SDL_FRect *outer)
+{
+    if (inner.w > outer.w)
+    {
+        writeln("inner.w is now larger than outer.w");
+        //inner.w = outer.w;
+        return true;
+    }
+    if (inner.h > outer.h)
+    {
+        //inner.h = outer.h;
+        writeln("inner.h is now larger than outer.h");
+        return true;
+    }
+    return false;
+}
 
-void keepRectWithinBiggerRect(SDL_FRect *inner, SDL_FRect *outer)
+
+
+
+
+
+void keepRectWithinBiggerRectArrowMovement(SDL_FRect *inner, SDL_FRect *outer)
 {
         /+
         +--------------------------+
@@ -217,6 +238,8 @@ void keepRectWithinBiggerRect(SDL_FRect *inner, SDL_FRect *outer)
         |                          |
         +--------------------------+
         +/
+
+    // treat outer as read-only
 
     if (inner.x < outer.x)
     {
@@ -274,8 +297,8 @@ void trackerCamera()
     SDL_Texture  *texture  = null;
     SDL_Surface  *surface  = null;
 
-    int winWidth = 2000;
-    int winHeight = 2000;
+    int winWidth = 1000;
+    int winHeight = 1000;
 
     createWindowAndRenderer("trackerCamera", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
@@ -288,7 +311,7 @@ void trackerCamera()
 
     //surface = loadImageToSurface("./images/earth1024x1024.png");
 
-    surface = loadImageToSurface("./images/COMBINE_A.png");
+    surface = loadImageToSurface("./images/COMBINE_RotatedA.png");
 
     texture = createTextureFromSurface(renderer, surface);
 
@@ -339,10 +362,13 @@ void trackerCamera()
                     {
                         if (event.key.key == SDLK_PAGEUP) 
                         {
-                            scale_factor *= 1.01f;
+                            //scale_factor *= 1.01f;
+                            scale_factor = 1.01;
 
                             SDL_FPoint delta = { (cameraRect.w * scale_factor) - cameraRect.w, 
                                                  (cameraRect.h * scale_factor) - cameraRect.h };
+
+                            SDL_FRect previous = cameraRect;
 
                             cameraRect.w = (cameraRect.w * scale_factor);
                             cameraRect.h = (cameraRect.h * scale_factor);
@@ -351,27 +377,61 @@ void trackerCamera()
                             cameraRect.y = cameraRect.y - (delta.y/2.0f);
 
                             writeln("cameraRect = ", cameraRect);
-                            writeln("cameraCenter = ", cameraCenter);
+                            //writeln("cameraCenter = ", cameraCenter);
+                            
+                            if (isRectOutsideBiggerRectZoom(&cameraRect, &texRect))
+                            {
+                                cameraRect = previous;
+                            }
+                            
+                            
                         }
-                        else if (event.key.key == SDLK_UP) 
+                        if (event.key.key == SDLK_PAGEDOWN) 
+                        {
+                            //scale_factor /= 1.1f;
+                            
+                            scale_factor = 0.99f;
+                            
+                            SDL_FPoint delta = { (cameraRect.w * scale_factor) - cameraRect.w, 
+                                                 (cameraRect.h * scale_factor) - cameraRect.h };
+                                                 
+                            SDL_FRect previous = cameraRect;
+
+                            cameraRect.w = (cameraRect.w * scale_factor);
+                            cameraRect.h = (cameraRect.h * scale_factor);
+
+                            cameraRect.x = cameraRect.x - (delta.x/2.0f);
+                            cameraRect.y = cameraRect.y - (delta.y/2.0f);
+
+                            // we zoom in the camera infinitely so we never have to check cameraRects boundaries 
+
+                        }
+                        if (event.key.key == SDLK_UP) 
                         {
                             cameraRect.y -= 50;
+                            keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
                         }
-                        else if (event.key.key == SDLK_DOWN) 
+                        if (event.key.key == SDLK_DOWN) 
                         {
                             cameraRect.y += 50;
+                            keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
                         }
-                        else if (event.key.key == SDLK_LEFT) 
+                        if (event.key.key == SDLK_LEFT) 
                         {
                             cameraRect.x -= 50;
+                            keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
                         }
-                        else if (event.key.key == SDLK_RIGHT) 
+                        if (event.key.key == SDLK_RIGHT) 
                         {
                             cameraRect.x += 50;
+                            keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
                         }
                         
-                        keepRectWithinBiggerRect(&cameraRect, &texRect);
-                        writeln("cameraRect.x = ", cameraRect.x);
+                        cameraCenter.x = cameraRect.x + (cameraRect.w / 2.0f);
+                        cameraCenter.y = cameraRect.y + (cameraRect.h / 2.0f);
+                        
+                        //writeln("cameraRect = ", cameraRect);
+                        writeln("cameraCenter = ", cameraCenter);
                     }
                     break;
                 case SDL_EVENT_MOUSE_WHEEL:
@@ -383,29 +443,9 @@ void trackerCamera()
             }
         }
         
-        
-        /+
-        SDL_FPoint delta = { (cameraRect.w * scale_factor) - cameraRect.w, 
-                             (cameraRect.h * scale_factor) - cameraRect.h };
-        
-        cameraRect.w = (cameraRect.w * scale_factor);
-        cameraRect.h = (cameraRect.h * scale_factor);
-
-        cameraRect.x = cameraRect.x - (delta.x/2.0f);
-        cameraRect.y = cameraRect.y - (delta.y/2.0f);
-
-        writeln("cameraRect = ", cameraRect);
-        writeln("cameraCenter = ", cameraCenter);
-        +/
-        
-        
-        
-        // game loop
         SDL_RenderTextureRotated(renderer, texture, &cameraRect, &winRect, angle, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
         SDL_RenderPresent(renderer);
 
-
-        //SDL_Delay(2000); // Wait for 2 seconds
     }
 }
     
