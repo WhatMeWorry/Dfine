@@ -218,11 +218,6 @@ bool isRectOutsideBiggerRectZoom(SDL_FRect *inner, SDL_FRect *outer)
     return false;
 }
 
-
-
-
-
-
 void keepRectWithinBiggerRectArrowMovement(SDL_FRect *inner, SDL_FRect *outer)
 {
         /+
@@ -259,6 +254,77 @@ void keepRectWithinBiggerRectArrowMovement(SDL_FRect *inner, SDL_FRect *outer)
     }
 
 }
+
+
+
+void createRealBigSurface()
+{
+    SDL_Window   *window   = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture  = null;
+    SDL_Surface  *surface  = null;
+
+    int winWidth = 1000;
+    int winHeight = 1000;
+
+    createWindowAndRenderer("Real Big Texture", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    SDL_PropertiesID props = SDL_GetRendererProperties(renderer);
+    int max_texture_size = cast(int) SDL_GetNumberProperty(props, SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, 0);
+    
+    writeln("max_texture_size = ", max_texture_size);
+    exit(-1);
+
+    SDL_Surface *image0;
+    SDL_Surface *image1;
+    SDL_Surface *image2;
+    SDL_Surface *image3;
+
+    image0 = loadImageToSurface("./images/COMBINE_B.png");
+    image1 = loadImageToSurface("./images/COMBINE_C.png");
+    image2 = loadImageToSurface("./images/COMBINE_D.png");
+    image3 = loadImageToSurface("./images/COMBINE_E.png");
+
+    string pixelFormat = to!string(SDL_GetPixelFormatName(image0.format));
+    writeln("pixelFormat = ", pixelFormat);
+    writeln("image.w x h = ", image0.w, " x ", image0.h);
+
+    int width = image0.w;
+    int height = image0.h;
+
+
+    SDL_Surface *surface0 = createSurface(width, height, image0.format);
+    SDL_Surface *surface1 = createSurface(width, height, image1.format);
+    SDL_Surface *surface2 = createSurface(width, height, image2.format);
+    SDL_Surface *surface3 = createSurface(width, height, image3.format);
+
+    SDL_Surface *huge = createSurface(4*6692, 1*10594, image0.format);
+
+
+    SDL_Rect[4] quads =
+    [
+        SDL_Rect(0,     0,  6680, 10594),  // top left
+        SDL_Rect(6681,  0,  6686, 10594),  // top right
+        SDL_Rect(13368, 0,  6688, 10594),  // bottom left
+        SDL_Rect(20057, 0,  6692, 10594)   // bottom right
+    ];
+
+    blitSurfaceToSurface(image0, null, huge, &quads[0]);
+    blitSurfaceToSurface(image1, null, huge, &quads[1]);
+    blitSurfaceToSurface(image2, null, huge, &quads[2]);
+    blitSurfaceToSurface(image3, null, huge, &quads[3]);
+    
+    string fileName = "./images/" ~ "HUGE" ~ ".png";
+    if (IMG_SavePNG(huge, toStringz(fileName)) < 0) {
+        writefln("IMG_SavePNG failed: %s", SDL_GetError());
+    }
+    else
+    {
+        writeln("IMG_SavePNG succeeded");
+    }
+}
+
+
 
 
 

@@ -125,6 +125,8 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
+    createRealBigSurface();
+    exit(-1);
     trackerCamera();
     
     //rotateAndScale();
