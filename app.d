@@ -125,11 +125,14 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
-    createRealBigSurface();
+    //createRealBigSurface();
+
+    composingImage();
     exit(-1);
-    trackerCamera();
     
-    //rotateAndScale();
+    //trackerCamera();
+    
+    rotateAndScale();
     
     //fromGithub();
     exit(-1);

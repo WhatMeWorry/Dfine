@@ -51,7 +51,7 @@ SDL_Window* createWindow(string winName, int w, int h, SDL_WindowFlags flag)
     SDL_Window *window = SDL_CreateWindow(winName.toStringz(), w, h, flag);
     if (window == null)
     {
-        writeln("SDL_CreateWindow failed: ", SDL_GetError().fromStringz() );
+        writeln("SDL_CreateWindow failed: ", to!string(SDL_GetError()) );
         exit(-1);
     }
     return window;
@@ -59,11 +59,11 @@ SDL_Window* createWindow(string winName, int w, int h, SDL_WindowFlags flag)
 
 SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
 {
-    import std.utf : toUTFz;      //toUTFz!(const(char)*)("hello world");
+    import std.utf : toUTFz;
     SDL_Renderer *renderer =  SDL_CreateRenderer(window, toUTFz!(const(char)*)(rendererName) );
     if (renderer == null)
     {
-        writeln("SDL_CreateRenderer failed: ", SDL_GetError().fromStringz() );
+        writeln("SDL_CreateRenderer failed: ", to!string(SDL_GetError()));
         exit(-1);
     }
     return renderer;
@@ -71,13 +71,13 @@ SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
     
  
 
-SDL_Surface* loadImageToSurface(string fileName)
+SDL_Surface* loadImageToSurface(string file)
 {
-    SDL_Surface *surface = IMG_Load(toStringz(fileName));
+    SDL_Surface *surface = IMG_Load(toStringz(file));
     if (surface == null) 
     {
-        writeln("IMG_Load failed with file: ", fileName);
-        exit(-1);
+        writeln("IMG_Load failed with file: ", file, " because ", to!string(SDL_GetError()));
+        exit(-1);  // IMG_Load failed with file: ./images/huge.png because Image too large to decode
     }
     return surface;
 }
@@ -87,17 +87,17 @@ void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
 {
     if (IMG_SavePNG(surface, toStringz(file)) == false)
     {
-        writeln("IMG_SavePNG failed with file: ", file);
+        writeln("IMG_SavePNG failed with file ", file, " : ", to!string(SDL_GetError()));
         exit(-1);
     }
 }
 
-SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string fileName)
+SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
 {
-    SDL_Texture *texture = IMG_LoadTexture(renderer, toStringz(fileName));
+    SDL_Texture *texture = IMG_LoadTexture(renderer, toStringz(file));
     if (texture == null) 
     {
-        writeln("IMG_LoadTexture failed with file: ", fileName);
+        writeln("IMG_LoadTexture failed with file ", file, " : ", to!string(SDL_GetError()));
         exit(-1);
     }
     return texture;
@@ -121,9 +121,7 @@ SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surfa
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (texture == null)
     {
-        import std.string : fromStringz;
-        writeln("error = ", cast(string) SDL_GetError().fromStringz() );
-        //writefln("SDL_CreateTextureFromSurface failed: %s", SDL_GetError());  
+        writeln("SDL_CreateTextureFromSurface failed: ", to!string(SDL_GetError()));
         exit(-1);
     }
     return texture;
@@ -135,7 +133,7 @@ void blitSurfaceToSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst,
     bool result = SDL_BlitSurface(src, srcRect, dst, dstRect);
     if (result == false)
     {
-        writefln("SDL_BlitSurface failed: %s", SDL_GetError());  
+        writeln("SDL_BlitSurface failed: ", to!string(SDL_GetError())); 
         exit(-1);
     }
 }
@@ -152,7 +150,7 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
                                               windowFlags, window, renderer);
     if (result == false)
     {
-        writefln("SDL_CreateWindowAndRenderer failed: %s", SDL_GetError());  
+        writeln("SDL_CreateWindowAndRenderer failed: ", to!string(SDL_GetError())); 
         exit(-1);
     }
     if ((window == null) || (renderer == null))
@@ -167,20 +165,38 @@ void getWindowSize(SDL_Window *window, int *w, int *h)
     bool result = SDL_GetWindowSize(window, w, h);
     if (result == false)
     {
-        writefln("SDL_GetWindowSize failed: %s", SDL_GetError());  
+        writeln("getWindowSize failed: ", to!string(SDL_GetError()));  
         exit(-1);
     }
 }
 
 void getTextureSize(SDL_Texture *texture, float *w, float *h)
 {
+    writeln("******************************************************************");
     bool result = SDL_GetTextureSize(texture, w, h);
     if (result == false)
     {
-        writefln("SDL_GetWindowSize failed: %s", SDL_GetError());  
+        writeln("getTextureSize failed: ", to!string(SDL_GetError()));  
         exit(-1);
     }
 }
+
+void squareOffTexture(ref float w, ref float h)
+{
+    writeln("w = ", w);
+    writeln("h = ", h);
+    if (h > w)
+    {
+        h = w;
+    }
+    else
+    {
+        w = h;
+    }
+    writeln("w = ", w);
+    writeln("h = ", h);
+}
+
 
 /+
 struct SDL_Texture
@@ -330,6 +346,186 @@ void createRealBigSurface()
 }
 
 
+        /+                                          Window
+        +--------+   +--------+         +--------------------------+
+        |        |   |        |         |                          |
+        |texture1|   |texture1|         |     +-------+            |
+        |        |   |        |         |     |texture|            |
+        +--------+   +--------+         |     |1      |            |
+                                        |     |     +-+------------+-+
+                                        |     +-----+-+            | |
+                                        |           |              | |
+                                        |           |   texture 2  | |
+                                        +-----------+--------------+ |
+                                                    |                |
+                                                    |                |
+                                                    +----------------+
+                                                    
+        The ObjectsWorld will take in multiple textures and display them
+        them into the window. The user can select each object and: 
+           1) move them (position them) anywhere within or without the Window. 
+           2) resize them (zoomed in or out) 
+           3) change the opacity anywhere between fully transparent and fully opaque.
+        Finally, the composed window can we saved off to a PNG image file.
+        +/
+
+void composingImage()
+{
+    SDL_Window   *window   = null;
+    SDL_Renderer *renderer = null;
+    SDL_Surface  *surface  = null;
+    SDL_Texture  *tex1  = null;
+    SDL_Texture  *tex2  = null;
+    
+    int winW = 1000;
+    int winH = 1000;
+
+    createWindowAndRenderer("composingImage", winW, winH, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    SDL_FRect winRect = { 0, 0, winW, winH };
+    SDL_FPoint winCenter = { winRect.x + (winRect.w/2.0f), winRect.y + (winRect.h/2.0f) };
+
+
+    surface = loadImageToSurface("./images/1.png");
+    tex1 = createTextureFromSurface(renderer, surface);
+    surface = loadImageToSurface("./images/2.png");
+    tex2 = createTextureFromSurface(renderer, surface);
+    
+    SDL_FRect tex1Rect;
+    tex1Rect.x = 0;
+    tex1Rect.y = 0;
+    getTextureSize(tex1, &tex1Rect.w, &tex1Rect.h);
+    squareOffTexture(tex1Rect.w, tex1Rect.h);
+    
+    SDL_FRect tex1RectOut = winRect;
+    
+    displayTextureProperties(tex1);
+    
+    writeln("winRect = ", winRect);
+    writeln("tex1Rect = ", tex1Rect);
+    
+    
+    
+
+    int a = 250;
+
+    SDL_SetTextureBlendMode(tex1, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureAlphaMod(tex1, cast(ubyte) a); // 127 is 50% transparency
+    
+    SDL_SetRenderDrawColor(renderer, 128, 128, 128, 1); // Background color
+    
+    bool quit = false;
+    SDL_Event event;
+    while (!quit) 
+    {
+        while (SDL_PollEvent(&event)) 
+        {
+            switch (event.type)
+            {
+                case SDL_EVENT_QUIT:
+                    quit = true;
+                    break;
+               case SDL_EVENT_KEY_DOWN:
+                    {
+                        if (event.key.key == SDLK_PAGEUP) 
+                        {
+                        }
+                        if (event.key.key == SDLK_PAGEDOWN) 
+                        {
+                        }
+                        if (event.key.key == SDLK_UP) 
+                        {
+                            tex1RectOut.y = tex1RectOut.y - 10;
+                        }
+                        if (event.key.key == SDLK_DOWN) 
+                        {
+                            tex1RectOut.y = tex1RectOut.y + 10;
+                        }
+                        if (event.key.key == SDLK_LEFT) 
+                        {
+                            tex1RectOut.x = tex1RectOut.x - 10;
+                        }
+                        if (event.key.key == SDLK_RIGHT) 
+                        {
+                            tex1RectOut.x = tex1RectOut.x + 10;
+                        }
+                        
+                        if (event.key.key == SDLK_F1) 
+                        {
+                            a = a + 5;  writeln("a = ", a);
+                        }
+                        if (event.key.key == SDLK_F2) 
+                        {
+                            a = a - 5;  writeln("a = ", a);
+                        }
+ 
+                    }
+                    break;
+                case SDL_EVENT_MOUSE_WHEEL:
+                    {
+                    }
+                    break;
+                default: 
+                    break;
+            }
+        }
+        
+        SDL_SetTextureAlphaMod(tex1, cast(ubyte) a);
+        SDL_RenderClear(renderer);  // fills the entire rendering target with the current draw color that was previously set
+        //SDL_RenderTextureRotated(renderer, tex1, &tex1Rect, &winRect, 0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
+          SDL_RenderTextureRotated(renderer, tex1, &tex1Rect, &tex1RectOut, 0, &winCenter, SDL_FLIP_NONE);
+        
+        SDL_RenderPresent(renderer);
+
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  
+  /+ 
+    foreach(i; 0..23) 
+    {
+        a = a + 10;
+        SDL_SetTextureAlphaMod(tex1, cast(ubyte) a);
+        SDL_RenderClear(renderer);  // fills the entire rendering target with the current draw color that was previously set
+        SDL_RenderTextureRotated(renderer, tex1, &tex1Rect, &winRect, 0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
+        SDL_RenderPresent(renderer);
+        SDL_Delay(1000);
+    }
+SDL_Delay(4000);
+    +/
+/+
+    SDL_FRect tex2Rect;
+    tex2Rect.x = 0;
+    tex2Rect.y = 0;
+    getTextureSize(tex2, &tex2Rect.w, &tex2Rect.h);
+    squareOffTexture(tex2Rect.w, tex2Rect.h);
+    
+    displayTextureProperties(tex2);
+    SDL_SetTextureBlendMode(tex2, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureAlphaMod(tex2, 75); // 127 is 50% transparency   0: Fully transparent (the texture will be invisible).
+                                                               // 255: Fully opaque (no transparency).
+    
+    SDL_RenderTextureRotated(renderer, tex2, &tex2Rect, &winRect, 0.0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
+    SDL_RenderPresent(renderer);
+    
+    SDL_Delay(8000);
+  +/  
+  
+}
+
+
+
 
 
 
@@ -347,8 +543,10 @@ void createRealBigSurface()
         |     O                    |        C                 D
         +--------------------------+
         
-        The entire contents of the Tracker Camera (a:b:c:d) is always drawn (pixel copied)
-        from the Tracker Camera to the Windows (A:B:C:D).
+        The Tracker Camera can move horzontally and vertically as well as zoom in and out. 
+        
+        The entire contents of the Tracker Camera (a:b:c:d) is drawn (pixel copied)
+        from the current position of the Tracker Camera to the Window (A:B:C:D).
         
         The Tracker Camera (inner rectangle) can move up and down so long as all sides remain
         within the texture (outer rectangle).  Additionally, the Tracker Camera can expand or
@@ -358,7 +556,7 @@ void createRealBigSurface()
         The Texture is a static read-only rectangle.  The Window is is fixed size; though this 
         could easily be made resizable.  The Tracker Camera is dynamic with the exception that
         it must stay within the confines of the Texture. Like wise, the Tracker Camera can grow
-        (zoom out) no larger than the entire Texture.
+        (zoom out) no larger than the Texture.
         +/
 
 void trackerCamera()
@@ -380,9 +578,9 @@ void trackerCamera()
 
     // Define the initial destination rectangle
 
-    //surface = loadImageToSurface("./images/earth1024x1024.png");
-
-    surface = loadImageToSurface("./images/COMBINE_RotatedA.png");
+    // surface = loadImageToSurface("./images/earth1024x1024.png");
+    // surface = loadImageToSurface("./images/COMBINE_RotatedA.png");
+    surface = loadImageToSurface("./images/two.png");
 
     texture = createTextureFromSurface(renderer, surface);
 
@@ -564,7 +762,9 @@ void rotateAndScale()
 
     //surface = loadImageToSurface("./images/earth1024x1024.png");
 
-    surface = loadImageToSurface("./images/COMBINE_A.png");
+    //surface = loadImageToSurface("./images/COMBINE_A.png");
+    
+    surface = loadImageToSurface("./images/two.png");
 
     texture = createTextureFromSurface(renderer, surface);
 
@@ -634,9 +834,11 @@ void rotateAndScale()
                 case SDL_EVENT_MOUSE_WHEEL:
                     {
                         if (event.wheel.y > 0)
-                            scale_factor *= 1.1f;      // Zoom in
+                            //scale_factor *= 1.1f;      // Zoom in
+                            angle = angle + 1;
                         else if (event.wheel.y < 0)
-                            scale_factor /= 1.1f;      // Zoom out
+                            //scale_factor /= 1.1f;      // Zoom out
+                            angle = angle - 1;
                         writeln("scale_factor = ", scale_factor);
                         //zoom = SDL_clamp(zoom, 0.1, 10.0); // Limit zoom range
                     }
@@ -671,7 +873,7 @@ void rotateAndScale()
         
         SDL_FPoint center = {dst_rect.w / 2.0f, dst_rect.h / 2.0f};
 
-        writeln("srcRect = ", srcRect);
+        //writeln("srcRect = ", srcRect);
         //writeln("dst_rect = ", dst_rect);
 
         // Render the texture with scaling and rotation
@@ -1138,7 +1340,7 @@ void assembleQuadFilesItoOnePNGfile()
 
 
 
-void textureProperties(SDL_Texture *texture)
+void displayTextureProperties(SDL_Texture *texture)
 {
     //uint format;
     string pixelFormat;
@@ -1160,17 +1362,29 @@ void textureProperties(SDL_Texture *texture)
         writeln("SDL_GetTextureProperties failed");
         exit(-1);
     }
+    
+    
+    //SDL_TextureInfo textureInfo;
+    //SDL_GetTextureInfo(texture, &textureInfo);
+
+    //printf("Texture Format: %s\n", SDL_GetPixelFormatName(textureInfo.format));
+    
+    SDL_PixelFormat format = texture.format;
+    writeln("+++++++++++++ format = ", format);
 
     // Use SDL_GetNumberProperty, SDL_GetStringProperty, etc., to retrieve specific 
     // properties from the returned SDL_PropertiesID
         
     // Get the texture's pixel format
     
-    long format = SDL_GetNumberProperty(texProps, SDL_PROP_TEXTURE_FORMAT_NUMBER, -1);
-    if (format == -1) 
-    {
-        writeln("SDL_GetNumberProperty failed");  exit(-1);
-    } 
+    //long format = SDL_GetNumberProperty(texProps, SDL_PROP_TEXTURE_FORMAT_NUMBER, -1);
+    //if (format == -1) 
+    //{
+    //    writeln("SDL_GetNumberProperty failed");  exit(-1);
+    //} 
+    
+    //string pixelFormat = to!string(SDL_GetPixelFormatName(format));
+    //writeln("pixelFormat = ", pixelFormat);
     
     writefln("Texture format: %d", format);
 
@@ -1180,30 +1394,12 @@ void textureProperties(SDL_Texture *texture)
     if (formatName) 
     {
         writefln("Texture format name: %s", formatName);
+        
     } 
     else 
     {
         writefln("Unknown pixel format\n");  exit(-1);
     }
-
-
-}
-
-
-F2 getTextureSize(SDL_Texture *texture)
-{
-    //uint format;
-    F2 dims;
-    
-    //SDL_QueryTexture(texture, &format, null, &dims.w, &dims.h);
-    
-    if (SDL_GetTextureSize(texture, &dims.w, &dims.h) == false)
-    {
-        writeln("SDL_GetTextureSize failed");
-        exit(-1);
-    }
-
-    return dims;
 }
 
 void trimFileIfPixelsAreNotEven()
@@ -1362,9 +1558,9 @@ void breakup1()
 
     //SDL_SetRenderTarget(main.renderer, largeTexture);  // specify that you want to draw to the target texture instead of the screen.
 
-    textureProperties(m1.texture);
-    textureProperties(m2.texture);
-    textureProperties(main.texture);
+    displayTextureProperties(m1.texture);
+    displayTextureProperties(m2.texture);
+    displayTextureProperties(main.texture);
     
     //D2 d2 = getTextureSize(m1.texture);
     //int w = d2.w * 2;
