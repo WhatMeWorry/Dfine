@@ -7,7 +7,7 @@ import std.container.rbtree : RedBlackTree;  // template
 import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
-import datatypes : Location;
+import datatypes;
 import a_star.spot : writeAndPause;
 import core.stdc.stdio : printf;
 import hexmath : isOdd, isEven;
@@ -349,13 +349,13 @@ void createRealBigSurface()
         /+                                          Window
         +--------+   +--------+         +--------------------------+
         |        |   |        |         |                          |
-        |texture1|   |texture1|         |     +-------+            |
-        |        |   |        |         |     |texture|            |
-        +--------+   +--------+         |     |1      |            |
-                                        |     |     +-+------------+-+
-                                        |     +-----+-+            | |
-                                        |           |              | |
-                                        |           |   texture 2  | |
+        |texture1|   |texture1|         |     +-------+            |         tab key: select textures
+        |        |   |        |         |     |texture|            |         arrow keys: move current selected texture up
+        +--------+   +--------+         |     |1      |            |                     down, left, right
+                                        |     |     +-+------------+-+       F1: increase texture transparency
+                                        |     +-----+-+            | |       F2: decrease texture transparency
+                                        |           |              | |       Page Up: increase size of texture
+                                        |           |   texture 2  | |       Page Down: decrease size of texture
                                         +-----------+--------------+ |
                                                     |                |
                                                     |                |
@@ -373,12 +373,15 @@ void composingImage()
 {
     SDL_Window   *window   = null;
     SDL_Renderer *renderer = null;
-    SDL_Surface  *surface  = null;
-    SDL_Texture  *tex1  = null;
-    SDL_Texture  *tex2  = null;
-    
+    //SDL_Surface  *surface  = null;
+    //SDL_Texture  *tex1  = null;
+    //SDL_Texture  *tex2  = null;
+
     int winW = 1000;
     int winH = 1000;
+
+    Tile tile1;
+    Tile tile2;
 
     createWindowAndRenderer("composingImage", winW, winH, cast(SDL_WindowFlags) 0, &window, &renderer);
 
@@ -386,33 +389,37 @@ void composingImage()
     SDL_FPoint winCenter = { winRect.x + (winRect.w/2.0f), winRect.y + (winRect.h/2.0f) };
 
 
-    surface = loadImageToSurface("./images/1.png");
-    tex1 = createTextureFromSurface(renderer, surface);
-    surface = loadImageToSurface("./images/2.png");
-    tex2 = createTextureFromSurface(renderer, surface);
+    tile1.surface = loadImageToSurface("./images/1.png");
+    tile1.texture = createTextureFromSurface(renderer, tile1.surface);
+
+    tile2.surface = loadImageToSurface("./images/2.png");
+    tile2.texture = createTextureFromSurface(renderer, tile2.surface);
+
+    writeln("tile1 = ", tile1);
+
+    tile1.rect.src.x = 0;
+    tile1.rect.src.y = 0;
+    getTextureSize(tile1.texture, &tile1.rect.src.w, &tile1.rect.src.h);
+    squareOffTexture(tile1.rect.src.w, tile1.rect.src.h);
     
-    SDL_FRect tex1Rect;
-    tex1Rect.x = 0;
-    tex1Rect.y = 0;
-    getTextureSize(tex1, &tex1Rect.w, &tex1Rect.h);
-    squareOffTexture(tex1Rect.w, tex1Rect.h);
+    tile1.rect.dst = winRect;
     
-    SDL_FRect tex1RectOut = winRect;
-    
-    displayTextureProperties(tex1);
+    displayTextureProperties(tile1.texture);
     
     writeln("winRect = ", winRect);
-    writeln("tex1Rect = ", tex1Rect);
+    writeln("tile1.rect.src = ", tile1.rect.src);
+    writeln("tile1.rect.dst = ", tile1.rect.dst);
     
     
     
 
     int a = 250;
 
-    SDL_SetTextureBlendMode(tex1, SDL_BLENDMODE_BLEND);
-    SDL_SetTextureAlphaMod(tex1, cast(ubyte) a); // 127 is 50% transparency
+    SDL_SetTextureBlendMode(tile1.texture, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureAlphaMod(tile1.texture, cast(ubyte) a); // 127 is 50% transparency
     
-    SDL_SetRenderDrawColor(renderer, 128, 128, 128, 1); // Background color
+    //                            SDL_ALPHA_OPAQUE = 255   SDL_ALPHA_TRANSPARENT = 0           
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_TRANSPARENT); // Background color
     
     bool quit = false;
     SDL_Event event;
@@ -435,19 +442,19 @@ void composingImage()
                         }
                         if (event.key.key == SDLK_UP) 
                         {
-                            tex1RectOut.y = tex1RectOut.y - 10;
+                            tile1.rect.dst.y = tile1.rect.dst.y - 10;
                         }
                         if (event.key.key == SDLK_DOWN) 
                         {
-                            tex1RectOut.y = tex1RectOut.y + 10;
+                            tile1.rect.dst.y = tile1.rect.dst.y + 10;
                         }
                         if (event.key.key == SDLK_LEFT) 
                         {
-                            tex1RectOut.x = tex1RectOut.x - 10;
+                            tile1.rect.dst.x = tile1.rect.dst.x - 10;
                         }
                         if (event.key.key == SDLK_RIGHT) 
                         {
-                            tex1RectOut.x = tex1RectOut.x + 10;
+                            tile1.rect.dst.x = tile1.rect.dst.x + 10;
                         }
                         
                         if (event.key.key == SDLK_F1) 
@@ -470,10 +477,10 @@ void composingImage()
             }
         }
         
-        SDL_SetTextureAlphaMod(tex1, cast(ubyte) a);
+        SDL_SetTextureAlphaMod(tile1.texture, cast(ubyte) a);
         SDL_RenderClear(renderer);  // fills the entire rendering target with the current draw color that was previously set
         //SDL_RenderTextureRotated(renderer, tex1, &tex1Rect, &winRect, 0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
-          SDL_RenderTextureRotated(renderer, tex1, &tex1Rect, &tex1RectOut, 0, &winCenter, SDL_FLIP_NONE);
+          SDL_RenderTextureRotated(renderer, tile1.texture, &tile1.rect.src, &tile1.rect.dst, 0, &winCenter, SDL_FLIP_NONE);
         
         SDL_RenderPresent(renderer);
 
@@ -521,7 +528,7 @@ SDL_Delay(4000);
     
     SDL_Delay(8000);
   +/  
-  
+
 }
 
 

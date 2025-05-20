@@ -5,6 +5,21 @@ import bindbc.sdl;
 
 //import textures.texture : Texture;
 
+struct Rects
+{
+    SDL_FRect src;
+    SDL_FRect dst;
+} 
+
+
+struct Tile
+{
+    SDL_Surface  *surface;
+    SDL_Texture  *texture;
+    Rects rect;
+    int       alpha;  // 0-255
+    double    angle;  // 0.0-360.0
+}
 
 struct Location   // holds a hex's location on a hexboard
 {
