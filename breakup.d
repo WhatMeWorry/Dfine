@@ -373,12 +373,11 @@ void composingImage()
 {
     SDL_Window   *window   = null;
     SDL_Renderer *renderer = null;
-    //SDL_Surface  *surface  = null;
-    //SDL_Texture  *tex1  = null;
-    //SDL_Texture  *tex2  = null;
 
     int winW = 1000;
     int winH = 1000;
+    
+    Tile[] tiles;
 
     Tile tile1;
     Tile tile2;
@@ -389,38 +388,50 @@ void composingImage()
     SDL_FPoint winCenter = { winRect.x + (winRect.w/2.0f), winRect.y + (winRect.h/2.0f) };
 
 
+
     tile1.surface = loadImageToSurface("./images/1.png");
     tile1.texture = createTextureFromSurface(renderer, tile1.surface);
 
     tile2.surface = loadImageToSurface("./images/2.png");
     tile2.texture = createTextureFromSurface(renderer, tile2.surface);
 
-    writeln("tile1 = ", tile1);
+
+
 
     tile1.rect.src.x = 0;
     tile1.rect.src.y = 0;
     getTextureSize(tile1.texture, &tile1.rect.src.w, &tile1.rect.src.h);
     squareOffTexture(tile1.rect.src.w, tile1.rect.src.h);
-    
+
     tile1.rect.dst = winRect;
-    
     displayTextureProperties(tile1.texture);
-    
-    writeln("winRect = ", winRect);
-    writeln("tile1.rect.src = ", tile1.rect.src);
-    writeln("tile1.rect.dst = ", tile1.rect.dst);
-    
-    
-    
+    tile1.alpha = 250;
+    tile1.angle = 0.0;
 
-    int a = 250;
+    tile2.rect.src.x = 0;
+    tile2.rect.src.y = 0;
+    getTextureSize(tile2.texture, &tile2.rect.src.w, &tile2.rect.src.h);
+    squareOffTexture(tile2.rect.src.w, tile2.rect.src.h);
 
-    SDL_SetTextureBlendMode(tile1.texture, SDL_BLENDMODE_BLEND);
-    SDL_SetTextureAlphaMod(tile1.texture, cast(ubyte) a); // 127 is 50% transparency
-    
+    tile2.rect.dst = winRect;
+    displayTextureProperties(tile2.texture);
+    tile2.alpha = 250;
+    tile2.angle = 0.0;
+
+    int i = 0;  // index to current tile
+
+    tiles ~= tile1;
+    tiles ~= tile2;
+
+    writeln("tiles[i] = ", tiles[i]);
+    writeln("tiles[1] = ", tiles[1]);
+
+    SDL_SetTextureBlendMode(tiles[i].texture, SDL_BLENDMODE_BLEND);
+     SDL_SetTextureAlphaMod(tiles[i].texture, cast(ubyte) tiles[i].alpha); // 127 is 50% transparency
+
     //                            SDL_ALPHA_OPAQUE = 255   SDL_ALPHA_TRANSPARENT = 0           
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_TRANSPARENT); // Background color
-    
+
     bool quit = false;
     SDL_Event event;
     while (!quit) 
@@ -434,6 +445,25 @@ void composingImage()
                     break;
                case SDL_EVENT_KEY_DOWN:
                     {
+                        if (event.key.key == SDLK_TAB) 
+                        {
+                            writeln("tiles.length = ", tiles.length);
+                            writeln("i = ", i);
+                            if (i == (tiles.length-1))
+                                i = 0;
+                            else
+                                i++;
+                        }
+                        if (event.key.key == SDLK_HOME) 
+                        {
+                            writeln("tiles[i].angle = ", tiles[i].angle);
+                            tiles[i].angle += .1;
+                        }
+                        if (event.key.key == SDLK_END) 
+                        {
+                            writeln("tiles[i].angle = ", tiles[i].angle);
+                            tiles[i].angle -= .1;
+                        }
                         if (event.key.key == SDLK_PAGEUP) 
                         {
                         }
@@ -442,55 +472,65 @@ void composingImage()
                         }
                         if (event.key.key == SDLK_UP) 
                         {
-                            tile1.rect.dst.y = tile1.rect.dst.y - 10;
+                            tiles[i].rect.dst.y -= 2;
                         }
                         if (event.key.key == SDLK_DOWN) 
                         {
-                            tile1.rect.dst.y = tile1.rect.dst.y + 10;
+                            tiles[i].rect.dst.y += 2;
                         }
                         if (event.key.key == SDLK_LEFT) 
                         {
-                            tile1.rect.dst.x = tile1.rect.dst.x - 10;
+                            tiles[i].rect.dst.x -= 2;
                         }
                         if (event.key.key == SDLK_RIGHT) 
                         {
-                            tile1.rect.dst.x = tile1.rect.dst.x + 10;
+                            tiles[i].rect.dst.x += 2;
                         }
-                        
                         if (event.key.key == SDLK_F1) 
                         {
-                            a = a + 5;  writeln("a = ", a);
+                            tiles[i].alpha += 2;   writeln("tiles[i].alpha = ", tiles[i].alpha);
                         }
                         if (event.key.key == SDLK_F2) 
                         {
-                            a = a - 5;  writeln("a = ", a);
+                            tiles[i].alpha -= 2;   writeln("tiles[i].alpha = ", tiles[i].alpha);
                         }
- 
                     }
                     break;
                 case SDL_EVENT_MOUSE_WHEEL:
                     {
                     }
                     break;
-                default: 
+                default:
                     break;
             }
         }
-        
-        SDL_SetTextureAlphaMod(tile1.texture, cast(ubyte) a);
+        /+
+        SDL_SetTextureAlphaMod(tiles[i].texture, cast(ubyte) tiles[i].alpha);
         SDL_RenderClear(renderer);  // fills the entire rendering target with the current draw color that was previously set
         //SDL_RenderTextureRotated(renderer, tex1, &tex1Rect, &winRect, 0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
-          SDL_RenderTextureRotated(renderer, tile1.texture, &tile1.rect.src, &tile1.rect.dst, 0, &winCenter, SDL_FLIP_NONE);
-        
+          SDL_RenderTextureRotated(renderer, tiles[i].texture, &tiles[i].rect.src, &tiles[i].rect.dst, 0, &winCenter, SDL_FLIP_NONE);
+
+        SDL_RenderPresent(renderer);
+        +/
+        SDL_RenderClear(renderer);
+        foreach( t; tiles)
+        {
+            SDL_SetTextureAlphaMod(t.texture, cast(ubyte) t.alpha);
+            //SDL_RenderClear(renderer);  // fills the entire rendering target with the current draw color that was previously set
+            //SDL_RenderTextureRotated(renderer, tex1, &tex1Rect, &winRect, 0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
+              SDL_RenderTextureRotated(renderer, t.texture, &t.rect.src, &t.rect.dst, t.angle, &winCenter, SDL_FLIP_NONE);
+
+            //SDL_RenderPresent(renderer);
+        }
         SDL_RenderPresent(renderer);
 
     }
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     
     
     
