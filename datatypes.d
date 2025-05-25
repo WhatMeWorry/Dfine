@@ -53,6 +53,13 @@ struct ScreenSize(I)
     I height;
 }
 
+
+struct SDL_Dimensions
+{
+    int w;
+    int h;
+}
+
 struct Spot
 {
     //@disable this();   // disables default constructor

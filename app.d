@@ -44,6 +44,7 @@ import a_star.spot;
 import datatypes : Location, Status;
 import windows.events : handleEvents;
 
+
 import std.conv : roundTo;
 import std.stdio : writeln;
 import core.stdc.stdlib : exit;
@@ -56,6 +57,7 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 import bindbc.loader;
 
 import breakup;
+import magnify;
 
 
 
@@ -126,6 +128,9 @@ int main()
     //zoom_grok;
     
     //createRealBigSurface();
+
+    magnifyImage();
+    exit(-1);
 
     composingImage();
     exit(-1);

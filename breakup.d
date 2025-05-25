@@ -349,7 +349,7 @@ void createRealBigSurface()
         /+                                          Window
         +--------+   +--------+         +--------------------------+
         |        |   |        |         |                          |
-        |texture1|   |texture1|         |     +-------+            |         tab key: select textures
+        |texture1|   |texture2|         |     +-------+            |         tab key: select textures
         |        |   |        |         |     |texture|            |         arrow keys: move current selected texture up
         +--------+   +--------+         |     |1      |            |                     down, left, right
                                         |     |     +-+------------+-+       F1: increase texture transparency
@@ -368,6 +368,14 @@ void createRealBigSurface()
            3) change the opacity anywhere between fully transparent and fully opaque.
         Finally, the composed window can we saved off to a PNG image file.
         +/
+
+void resizeRect(ref SDL_FRect rect, double delta)
+{
+    rect.x += delta;
+    rect.y += delta;
+    rect.w -= delta;
+    rect.h -= delta;
+}
 
 void composingImage()
 {
@@ -402,10 +410,12 @@ void composingImage()
     tile1.rect.src.y = 0;
     getTextureSize(tile1.texture, &tile1.rect.src.w, &tile1.rect.src.h);
     squareOffTexture(tile1.rect.src.w, tile1.rect.src.h);
+    
+    
 
     tile1.rect.dst = winRect;
     displayTextureProperties(tile1.texture);
-    tile1.alpha = 250;
+    tile1.alpha = 127;
     tile1.angle = 0.0;
 
     tile2.rect.src.x = 0;
@@ -415,16 +425,15 @@ void composingImage()
 
     tile2.rect.dst = winRect;
     displayTextureProperties(tile2.texture);
-    tile2.alpha = 250;
+    tile2.alpha = 127;
     tile2.angle = 0.0;
 
     int i = 0;  // index to current tile
 
     tiles ~= tile1;
-    tiles ~= tile2;
+    //tiles ~= tile2;   //************************************************************************************************
 
     writeln("tiles[i] = ", tiles[i]);
-    writeln("tiles[1] = ", tiles[1]);
 
     SDL_SetTextureBlendMode(tiles[i].texture, SDL_BLENDMODE_BLEND);
      SDL_SetTextureAlphaMod(tiles[i].texture, cast(ubyte) tiles[i].alpha); // 127 is 50% transparency
@@ -445,7 +454,7 @@ void composingImage()
                     break;
                case SDL_EVENT_KEY_DOWN:
                     {
-                        if (event.key.key == SDLK_TAB) 
+                        if (event.key.key == SDLK_TAB)   // PICK TILE
                         {
                             writeln("tiles.length = ", tiles.length);
                             writeln("i = ", i);
@@ -454,7 +463,7 @@ void composingImage()
                             else
                                 i++;
                         }
-                        if (event.key.key == SDLK_HOME) 
+                        if (event.key.key == SDLK_HOME)   // ROTATE
                         {
                             writeln("tiles[i].angle = ", tiles[i].angle);
                             tiles[i].angle += .1;
@@ -464,33 +473,40 @@ void composingImage()
                             writeln("tiles[i].angle = ", tiles[i].angle);
                             tiles[i].angle -= .1;
                         }
-                        if (event.key.key == SDLK_PAGEUP) 
+                        
+                        if (event.key.key == SDLK_PAGEUP) // RESIZE RECT
                         {
+                            resizeRect(tiles[i].rect.src, 10.0);
+                            writeln("tiles[i].rect.src = ", tiles[i].rect.src);
                         }
-                        if (event.key.key == SDLK_PAGEDOWN) 
+                        if (event.key.key == SDLK_PAGEDOWN)
                         {
+                            resizeRect(tiles[i].rect.src, -10.0);
+                            writeln("tiles[i].rect.src = ", tiles[i].rect.src);
                         }
-                        if (event.key.key == SDLK_UP) 
+                        
+                        if (event.key.key == SDLK_UP)    // MOVE RECT
                         {
                             tiles[i].rect.dst.y -= 2;
                         }
-                        if (event.key.key == SDLK_DOWN) 
+                        if (event.key.key == SDLK_DOWN)
                         {
                             tiles[i].rect.dst.y += 2;
                         }
-                        if (event.key.key == SDLK_LEFT) 
+                        if (event.key.key == SDLK_LEFT)
                         {
                             tiles[i].rect.dst.x -= 2;
                         }
-                        if (event.key.key == SDLK_RIGHT) 
+                        if (event.key.key == SDLK_RIGHT)
                         {
                             tiles[i].rect.dst.x += 2;
                         }
-                        if (event.key.key == SDLK_F1) 
+                        
+                        if (event.key.key == SDLK_F1)      // ALPHA
                         {
                             tiles[i].alpha += 2;   writeln("tiles[i].alpha = ", tiles[i].alpha);
                         }
-                        if (event.key.key == SDLK_F2) 
+                        if (event.key.key == SDLK_F2)
                         {
                             tiles[i].alpha -= 2;   writeln("tiles[i].alpha = ", tiles[i].alpha);
                         }
