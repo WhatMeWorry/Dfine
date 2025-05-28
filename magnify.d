@@ -8,6 +8,88 @@ import std.stdio;
 import std.conv;
 import core.stdc.stdlib : exit;
 
+/+
+Yes, in SDL3, you can display the same texture to two different renderers. A texture in SDL3 
+is not bound to a specific renderer; it’s a resource that can be used by any renderer, provided
+the texture is compatible with the rendering context. However, there are some nuances to consider,
+as textures are typically created for a specific renderer, and sharing them across renderers may
+require careful handling.
+
+Key Points for Using the Same Texture with Multiple Renderers
+
+Texture Creation:
+
+Textures are created using SDL_CreateTexture or related functions (e.g., SDL_CreateTextureFromSurface) 
+and are associated with a specific renderer at creation time. The texture’s format and properties (e.g., 
+pixel format, dimensions) are tied to the renderer it was created for.
+
+Sharing Textures Across Renderers:
+
+SDL3 does not natively support sharing a single texture object directly between multiple renderers 
+because textures are renderer-specific (e.g., they are tied to the underlying graphics API like OpenGL, 
+Direct3D, or Metal). You cannot directly pass the same SDL_Texture pointer to different renderers, as 
+textures are tied to the renderer’s graphics context. To display the same texture content in two 
+different renderers, you typically need to create separate texture objects for each renderer, copying
+the pixel data to both.
+
+Approaches to Achieve This:
+
+Option 1: Create Two Textures from the Same Source:
+
+Load the source data (e.g., an image or surface) and create a separate texture for each renderer using
+SDL_CreateTextureFromSurface or similar. This ensures each renderer has its own texture with the same 
+visual content.
+
+Option 2: Copy Pixel Data:
+
+If you need to dynamically update the texture, use SDL_UpdateTexture to copy the same pixel data to 
+both textures.
+
+Option 3: Render to Texture and Copy:
+
+If you want to render something complex to a texture and reuse it, you can render to a target texture 
+in one renderer, extract the pixel data (e.g., using SDL_RenderReadPixels), and then create or update 
+a texture in the second renderer with that data.
+
+Option 4: Shared Context (Advanced):
+
+In some graphics APIs (e.g., OpenGL), you can share textures between contexts if the renderers are 
+using compatible contexts. However, this is low-level, not directly supported by SDL’s high-level API, 
+and requires manual handling of the underlying graphics API.
+
+Performance Considerations:
+
+Creating and maintaining two textures with the same data requires additional memory.
+Copying pixel data frequently (e.g., via SDL_RenderReadPixels or SDL_UpdateTexture) can be slow, 
+especially for large textures or real-time applications. If possible, cache the textures and minimize
+updates to optimize performance
+
++/
+
+/+
+int main(int argc, char* argv[]) {
+    SDL_Window* window = SDL_CreateWindow("Texture Transfer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Texture* source_texture = SDL_CreateTextureFromSurface(renderer, SDL_CreateRGBSurface(NULL, 640, 480, 32, 0, 0, 0, 0));
+    SDL_Texture* destination_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 640, 480);
+
+    // Set destination texture as render target
+    SDL_SetRenderTarget(renderer, destination_texture);
+
+    // Draw the source texture to the destination texture
+    SDL_RenderCopy(renderer, source_texture, NULL, NULL);
+
+    // Reset render target to the window
+    SDL_SetRenderTarget(renderer, NULL);
+
+    // Draw the destination texture to the window
+    SDL_RenderCopy(renderer, destination_texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+
+    return 0;
+}
++/
+
 /+           Light Window  (Input)
         +--------------------------+
         |                          |         one or more textures may be put into the light board
@@ -68,6 +150,14 @@ void magnifyImage()
     SDL_FRect outWinRect = { 0, 0, outWinDim.w, outWinDim.h };
     
     Tile[] tiles;
+    
+    Tile outTile;
+    
+    
+    outTile.texture = SDL_CreateTexture(outRenderer, SDL_PIXELFORMAT_RGBA8888, 
+                                        SDL_TEXTUREACCESS_TARGET, outWinDim.w, outWinDim.h);
+                                        
+    outTile.rect.dst = outWinRect;
 
     Tile tile1;
     Tile tile2;
@@ -110,6 +200,9 @@ void magnifyImage()
     displayTextureProperties(tile2.texture);
     tile2.alpha = 127;
     tile2.angle = 0.0;
+    
+    
+    
 
     int i = 0;  // index to current tile
 
@@ -117,6 +210,7 @@ void magnifyImage()
     tiles ~= tile2;   //************************************************************************************************
 
     writeln("tiles[i] = ", tiles[i]);
+    writeln("outTile = ", outTile);
 
     SDL_SetTextureBlendMode(tiles[i].texture, SDL_BLENDMODE_BLEND);
      SDL_SetTextureAlphaMod(tiles[i].texture, cast(ubyte) tiles[i].alpha); // 127 is 50% transparency
@@ -207,32 +301,20 @@ void magnifyImage()
                     break;
             }
         }
-        /+
-        SDL_SetTextureAlphaMod(tiles[i].texture, cast(ubyte) tiles[i].alpha);
-        SDL_RenderClear(inRenderer);  // fills the entire rendering target with the current draw color that was previously set
-        //SDL_RenderTextureRotated(inRenderer, tex1, &tex1Rect, &winRect, 0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
-          SDL_RenderTextureRotated(inRenderer, tiles[i].texture, &tiles[i].rect.src, &tiles[i].rect.dst, 0, &winCenter, SDL_FLIP_NONE);
-
-        SDL_RenderPresent(inRenderer);
-        +/
+        
         SDL_RenderClear(inRenderer);
+        SDL_RenderClear(outRenderer);
         
         foreach( t; tiles)
         {
             SDL_SetTextureAlphaMod(t.texture, cast(ubyte) t.alpha);
-            //SDL_RenderClear(inRenderer);  // fills the entire rendering target with the current draw color that was previously set
-            //SDL_RenderTextureRotated(inRenderer, tex1, &tex1Rect, &winRect, 0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
-              SDL_RenderTextureRotated(inRenderer, t.texture, &t.rect.src, &t.rect.dst, t.angle, &winCenter, SDL_FLIP_NONE);
-
-            //SDL_RenderPresent(inRenderer);
+            SDL_RenderTextureRotated(inRenderer, t.texture, &t.rect.src, &t.rect.dst, t.angle, &winCenter, SDL_FLIP_NONE);
         }
-        
-        
+
         // Define rectangle (x, y, width, height)
         SDL_FRect rect = { 100.0f, 100.0f, 200.0f, 200.0f };
 
         ubyte ur, ug, ub, ua;
-        // Assuming inRenderer is your SDL_Renderer
         SDL_GetRenderDrawColor(inRenderer, &ur, &ug, &ub, &ua);
 
         // Draw red rectangle border
@@ -240,20 +322,38 @@ void magnifyImage()
 
         SDL_RenderRect(inRenderer, &rect);
         
+        SDL_RenderPresent(inRenderer);
+        
         SDL_SetRenderDrawColor(inRenderer, ur, ug, ub, ua);  // RESTORE COLOR
         
-        writeln("rect = ", rect);
-        writeln("outWinRect = ", outWinRect);
-        writeln("outRenderer = ", outRenderer);
-        writeln("tiles[0].texture = ", tiles[0].texture);
         
+        SDL_GetRenderDrawColor(inRenderer, &ur, &ug, &ub, &ua);
+        // Draw green rectangle border
+        SDL_SetRenderDrawColor(outRenderer, 0, 255, 0, 255);
+
+        SDL_RenderRect(outRenderer, &rect);
         
-        // SDL_RenderTextureRotated(outRenderer, tiles[0].texture, &rect, &outWinRect, 0.0, null, SDL_FLIP_NONE);
-        SDL_RenderClear(outRenderer);
-        SDL_RenderTexture(outRenderer, tiles[0].texture, &rect, &outWinRect);
+        SDL_SetRenderDrawColor(outRenderer, ur, ug, ub, ua);  // RESTORE COLOR
+        
+        //SDL_RenderPresent(outRenderer);
+        
+        //+
+        // Set the render target from Window (default) to destination texture
+        
+        SDL_SetRenderTarget(outRenderer, outTile.texture);
+
+        // Draw the source texture to the destination texture
+        //            (dest texture) (source texture)
+
+        SDL_RenderTexture(outRenderer,  tiles[0].texture, &tiles[0].rect.src, &outTile.rect.dst);  // remember: renderer is actually dest texture
+
+        SDL_SetRenderTarget(outRenderer, null);  // set renderer back to its associated window
+
+        //SDL_RenderTexture(outRenderer, outTile.texture, null, null);
+        
         SDL_RenderPresent(outRenderer);
 
-        SDL_RenderPresent(inRenderer);
+        //+/
        
 
     }
