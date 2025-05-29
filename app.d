@@ -129,6 +129,9 @@ int main()
     
     //createRealBigSurface();
 
+    google();
+    exit(-1);
+
     magnifyImage();
     exit(-1);
 

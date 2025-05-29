@@ -360,3 +360,125 @@ void magnifyImage()
 }
 
 
+void google()
+{
+  // Initialize SDL
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    writeln(SDL_GetError());
+    return;
+  }
+  
+writeln("A");
+
+  // Create a window
+  SDL_Window *window = SDL_CreateWindow("Texture Copy Example", 1000, 1000, 0);
+  if (!window) {
+    writeln(SDL_GetError());
+    return;
+  }
+writeln("B");
+  // Create a renderer
+  //SDL_Renderer * SDL_CreateRenderer(SDL_Window *window, const char *name);
+  SDL_Renderer *renderer = SDL_CreateRenderer(window, null);
+  if (!renderer) {
+    writeln(SDL_GetError());
+    return;
+  }
+  
+writeln("C");
+  SDL_Surface *surface = IMG_Load("./images/3.png");
+  if (!surface) {
+    writeln(SDL_GetError());
+    return;
+  }
+writeln("D");
+  // Create a texture from the surface
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+  if (!texture) {
+    writeln(SDL_GetError());
+    return;
+  }
+
+  // Create a new texture to copy into (optional)
+    float w, h;
+    //SDL_QueryTexture(texture, NULL, NULL, &width, &height);  // SDL2 only
+
+    if (SDL_GetTextureSize(texture, &w, &h) == false)  // new for SDL3
+    {
+        writeln(SDL_GetError());
+        return;
+    }
+    writeln("SDL_GetTextureSize returned ", w, " and ", h);
+
+    SDL_PropertiesID props = SDL_GetTextureProperties(texture);
+
+    long width, height;
+    if (props) 
+    {
+        width = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_WIDTH_NUMBER, 0); // 0 as default
+        height = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0); // 0 as default
+        writeln("Texture Width x Height: ", width, " x ", height);
+    } else {
+        writeln(SDL_GetError());
+        return;
+    }
+    
+    SDL_Texture *new_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, cast(int) width, cast(int) height);
+    if (!new_texture) {
+        writeln(SDL_GetError());
+        return;
+    }
+  
+/+     THE BELOW PARAGRAPH IS WRONG AND CAME UP IN GOOGLE GEMINI AI
+ 
+In SDL3, SDL_RenderCopy is still the primary function for copying a portion of a texture to 
+the current rendering target. While some functions have been renamed or replaced, SDL_RenderCopy 
+remains functional and is the recommended way to perform basic texture rendering. 
+
+                GROK 3 replied correctly with:
+In SDL3, the function SDL_RenderCopy is not listed in the official SDL3 documentation, and the 
+SDL Wiki explicitly states that no page exists for SDL3/SDL_RenderCopy. Instead, SDL3 introduces 
+SDL_RenderTexture, which serves a similar purpose—copying a portion of a texture to the current 
+rendering target with subpixel precision. It is defined in SDL3/SDL_render.h and has the signature:
+
+bool SDL_RenderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect);
++/
+
+  // Copy the texture (either to a new texture or directly to the window)
+  // Example 1: Copy to a new texture
+  
+  SDL_SetRenderTarget(renderer, new_texture);
+  
+  SDL_RenderClear(renderer); // Clear the new texture
+
+  SDL_RenderTexture(renderer, texture, null, null);
+  
+  // Example 2: Copy directly to the window (without a new texture)
+  /+
+  SDL_SetRenderTarget(renderer, null); // Set back to the window
+  
+  SDL_RenderClear(renderer);
+  
+  SDL_RenderTexture(renderer, texture, null, null);
+  +/
+  // Set the new texture as the rendering target (if used)
+  SDL_SetRenderTarget(renderer, null); // Set back to the window
+
+  // Render the copied texture (or the original if direct copy)
+  //SDL_RenderCopy(renderer, new_texture, null, null); // Render the copied texture to the window
+  SDL_RenderTexture(renderer, texture, null, null);
+
+  // Present the renderer (display the image on the screen)
+  SDL_RenderPresent(renderer);
+
+  // Keep the window open until the user closes it
+  SDL_Event event;
+  while (SDL_WaitEvent(&event)) {
+    if (event.type == SDL_EVENT_QUIT) {
+      break;
+    }
+  }
+
+}
+
+
