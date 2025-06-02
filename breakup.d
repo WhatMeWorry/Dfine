@@ -73,13 +73,26 @@ SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
 
 SDL_Surface* loadImageToSurface(string file)
 {
-    SDL_Surface *surface = IMG_Load(toStringz(file));
-    if (surface == null) 
+    SDL_Surface *surface = IMG_Load(toStringz(file));  // IMG_Load function supports a wide range of image formats,
+    if (surface == null)                               // including PCX, GIF, JPG, TIF, LBM, and PNG.
     {
         writeln("IMG_Load failed with file: ", file, " because ", to!string(SDL_GetError()));
-        exit(-1);  // IMG_Load failed with file: ./images/huge.png because Image too large to decode
+        exit(-1);    // IMG_Load failed with file: ./images/huge.png because Image too large to decode
+    }                // IMG_Load failed with file: ./images/9.png because Couldn't open ./images/9.png: 
+    return surface;  // The system cannot find the file specified.
+}
+
+
+SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
+{
+    SDL_Texture *texture = IMG_LoadTexture(renderer, toStringz(file));  // Some of the supported formats include 
+                                                                        // BMP, GIF, JPG, PNG, TGA, ICO, and CUR
+    if (texture == null) 
+    {
+        writeln("IMG_LoadTexture failed with file ", file, " : ", to!string(SDL_GetError()));
+        exit(-1);
     }
-    return surface;
+    return texture;
 }
 
 
@@ -90,17 +103,6 @@ void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
         writeln("IMG_SavePNG failed with file ", file, " : ", to!string(SDL_GetError()));
         exit(-1);
     }
-}
-
-SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
-{
-    SDL_Texture *texture = IMG_LoadTexture(renderer, toStringz(file));
-    if (texture == null) 
-    {
-        writeln("IMG_LoadTexture failed with file ", file, " : ", to!string(SDL_GetError()));
-        exit(-1);
-    }
-    return texture;
 }
 
 
@@ -125,6 +127,39 @@ SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surfa
         exit(-1);
     }
     return texture;
+}
+
+SDL_Texture* createTexture(SDL_Renderer *renderer, SDL_PixelFormat format, SDL_TextureAccess access, int width, int height)
+{
+    SDL_Texture *texture = SDL_CreateTexture(renderer, format, access, width, height);
+    if (!texture)
+    {
+        writeln("SDL_CreateTextureFromSurface failed: ", to!string(SDL_GetError()));
+        exit(-1);
+    }
+    return texture;
+}
+
+
+void getTextureSize(SDL_Texture *texture, float *width, float *height)
+{
+    if (SDL_GetTextureSize(texture, width, height) == false)  // new for SDL3
+    {
+        writeln("SDL_GetTextureSize failed: ", to!string(SDL_GetError()));
+        exit(-1);
+    }
+}
+
+
+SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
+{
+    SDL_PropertiesID props = SDL_GetTextureProperties(texture);
+    if (!props) 
+    {
+        writeln("SDL_GetTextureProperties failed: ", to!string(SDL_GetError()));
+        exit(-1);
+    }
+    return props;
 }
 
 
@@ -162,24 +197,14 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
 
 void getWindowSize(SDL_Window *window, int *w, int *h)
 {
-    bool result = SDL_GetWindowSize(window, w, h);
-    if (result == false)
+    if (SDL_GetWindowSize(window, w, h) == false)
     {
-        writeln("getWindowSize failed: ", to!string(SDL_GetError()));  
+        writeln("SDL_GetWindowSize failed: ", to!string(SDL_GetError()));  
         exit(-1);
     }
 }
 
-void getTextureSize(SDL_Texture *texture, float *w, float *h)
-{
-    writeln("******************************************************************");
-    bool result = SDL_GetTextureSize(texture, w, h);
-    if (result == false)
-    {
-        writeln("getTextureSize failed: ", to!string(SDL_GetError()));  
-        exit(-1);
-    }
-}
+
 
 void squareOffTexture(ref float w, ref float h)
 {
