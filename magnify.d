@@ -368,48 +368,46 @@ void google()
         return;
     }
 
-    SDL_Window *window = createWindow("Texture Copy Example", 2000, 2000, cast(SDL_WindowFlags) 0 );
+    SDL_Window *window = createWindow("Texture Composition", 1000, 1000, cast(SDL_WindowFlags) 0 );
 
     SDL_Renderer *renderer = createRenderer(window, null);
-
-    //SDL_Surface *surface = loadImageToSurface("./images/3.png");
-    //SDL_Texture *texture = createTextureFromSurface(renderer, surface);
     
-    SDL_Texture *texture = loadImageToTexture(renderer, "./images/3.png");
+    int wi, he;
+    getWindowSize(window, &wi, &he);
+    
+    SDL_Texture *textureOut = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, wi, he);
+
+    //SDL_Texture *texture = loadImageToTexture(renderer, "./images/3.png");
 
     SDL_Texture *tex1 = loadImageToTexture(renderer, "./images/1.png");
     SDL_Texture *tex2 = loadImageToTexture(renderer, "./images/2.png");
 
     // Create a new texture to copy into (optional)
-    float w, h;
+    //float w, h;
     // SDL_QueryTexture(texture, NULL, NULL, &width, &height);  // SDL2 only
 
-    SDL_GetTextureSize(texture, &w, &h);  // new for SDL3
+    //SDL_GetTextureSize(texture, &w, &h);  // new for SDL3
     
-    writeln("SDL_GetTextureSize returned ", w, " and ", h);
+    //writeln("SDL_GetTextureSize returned ", w, " and ", h);
 
+    /+
     SDL_PropertiesID props = getTextureProperties(texture);
-
     long width, height;
      width = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_WIDTH_NUMBER,  0);  // 0 as default
     height = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0);  // 0 as default
-    
     writeln("Texture Width x Height: ", width, " x ", height);
-
-    SDL_Texture *new_texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, cast(int) width, cast(int) height);
+    +/
+    
+    // make the new
+    //SDL_Texture *textureOut = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, cast(int) width, cast(int) height);
 
     /+     THE BELOW PARAGRAPH IS WRONG AND CAME UP IN GOOGLE GEMINI AI
- 
     In SDL3, SDL_RenderCopy is still the primary function for copying a portion of a texture to 
-    the current rendering target. While some functions have been renamed or replaced, SDL_RenderCopy 
-    remains functional and is the recommended way to perform basic texture rendering. 
-
                     GROK 3 replied correctly with:
     In SDL3, the function SDL_RenderCopy is not listed in the official SDL3 documentation, and the 
     SDL Wiki explicitly states that no page exists for SDL3/SDL_RenderCopy. Instead, SDL3 introduces 
     SDL_RenderTexture, which serves a similar purpose—copying a portion of a texture to the current 
     rendering target with subpixel precision. It is defined in SDL3/SDL_render.h and has the signature:
-
     bool SDL_RenderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect);
     +/
 
@@ -417,34 +415,38 @@ void google()
     
     // Example 1: Copy to a new texture
 
-    SDL_SetRenderTarget(renderer, new_texture);
+    SDL_SetRenderTarget(renderer, textureOut);  // Set the new textureOut as the rendering target
 
     SDL_RenderClear(renderer); // Clear the new texture
 
-   SDL_FRect rect1 = {200,200, 900, 900};
+    SDL_FRect rect1 = {0,0, 500, 500};
 
-    SDL_RenderTexture(renderer, texture, &rect1, &rect1);
+    SDL_FRect leftHalf  = {  0, 0, 500, 1000};
+    SDL_FRect rightHalf = {500, 0, 500, 1000};
+
+    SDL_RenderTexture(renderer, tex1, &leftHalf, &leftHalf);
     
-    SDL_FRect rect2 = {800,800, 900, 900};
+    //SDL_FRect rect2 = {200, 200, 1500, 1500};
     
-    SDL_RenderTexture(renderer, tex1, &rect2, &rect2);
+    SDL_FRect srcRect = { 3000, 3000, 500, 1000};
+    //SDL_FRect dstRect = { 0, 0, 500, 500 };
+    
+    SDL_RenderTexture(renderer, tex1, &srcRect, &leftHalf);
+    SDL_RenderTexture(renderer, tex2, &srcRect, &rightHalf);
+
 
     // Example 2: Copy directly to the window (without a new texture)
-    
     /+
     SDL_SetRenderTarget(renderer, null); // Set back to the window
-
     SDL_RenderClear(renderer);
-  
     SDL_RenderTexture(renderer, texture, null, null);
     +/
-    
-    // Set the new texture as the rendering target (if used)
+
     SDL_SetRenderTarget(renderer, null); // Set back to the window
 
-    // Render the copied texture (or the original if direct copy)
-    //SDL_RenderCopy(renderer, new_texture, null, null); // Render the copied texture to the window
-    SDL_RenderTexture(renderer, new_texture, null, null);
+    // Render the copied texture to the window
+
+    SDL_RenderTexture(renderer, textureOut, null, null);
 
     // Present the renderer (display the image on the screen)
     SDL_RenderPresent(renderer);
