@@ -140,13 +140,34 @@ SDL_Texture* createTexture(SDL_Renderer *renderer, SDL_PixelFormat format, SDL_T
 }
 
 
-void getTextureSize(SDL_Texture *texture, float *width, float *height)
+void getTextureSizeFloats(SDL_Texture *texture, float *width, float *height)
 {
     if (SDL_GetTextureSize(texture, width, height) == false)  // new for SDL3
     {
-        writeln("SDL_GetTextureSize failed: ", to!string(SDL_GetError()));
+        writeln("getTextureSizeFloats failed: ", to!string(SDL_GetError()));
         exit(-1);
     }
+}
+
+
+void getTextureSizeInts(SDL_Texture *texture, int *width, int *height)
+{
+
+    float *w; 
+    float *h;
+    if (SDL_GetTextureSize(texture, w, h) == false)  // new for SDL3
+    {
+        writeln("getTextureSizeInts failed: ", to!string(SDL_GetError()));
+        exit(-1);
+    }
+    width = cast(int*) w;
+    height = cast(int*) h;
+
+    /+
+    SDL_PropertiesID props = SDL_GetTextureProperties(texture);
+    SDL_GetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width);
+    SDL_GetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height);
+    +/
 }
 
 
@@ -432,7 +453,7 @@ void composingImage()
 
     tile1.rect.src.x = 0;
     tile1.rect.src.y = 0;
-    getTextureSize(tile1.texture, &tile1.rect.src.w, &tile1.rect.src.h);
+    getTextureSizeFloats(tile1.texture, &tile1.rect.src.w, &tile1.rect.src.h);
     squareOffTexture(tile1.rect.src.w, tile1.rect.src.h);
     
     
@@ -444,7 +465,7 @@ void composingImage()
 
     tile2.rect.src.x = 0;
     tile2.rect.src.y = 0;
-    getTextureSize(tile2.texture, &tile2.rect.src.w, &tile2.rect.src.h);
+    getTextureSizeFloats(tile2.texture, &tile2.rect.src.w, &tile2.rect.src.h);
     squareOffTexture(tile2.rect.src.w, tile2.rect.src.h);
 
     tile2.rect.dst = winRect;
@@ -595,7 +616,7 @@ SDL_Delay(4000);
     SDL_FRect tex2Rect;
     tex2Rect.x = 0;
     tex2Rect.y = 0;
-    getTextureSize(tex2, &tex2Rect.w, &tex2Rect.h);
+    getTextureSizeInts(tex2, &tex2Rect.w, &tex2Rect.h);
     squareOffTexture(tex2Rect.w, tex2Rect.h);
     
     displayTextureProperties(tex2);
@@ -676,7 +697,7 @@ void trackerCamera()
     SDL_FRect  texRect;
     texRect.x = 0;
     texRect.y = 0;
-    getTextureSize(texture, &texRect.w, &texRect.h);
+    getTextureSizeFloats(texture, &texRect.w, &texRect.h);
 
     SDL_FPoint texCenter = { texRect.w / 2.0f, texRect.h / 2.0f };
 
@@ -856,7 +877,7 @@ void rotateAndScale()
     texture = createTextureFromSurface(renderer, surface);
 
     float texWidth; float texHeight;
-    getTextureSize(texture, &texWidth, &texHeight);
+    getTextureSizeFloats(texture, &texWidth, &texHeight);
     
     // Important Note: x and y of srcRect must stay within the range of 0..maxWidth and 0..maxHeight
     // or else the SDL_RenderTextureRotated will distort the image.
@@ -1150,7 +1171,7 @@ void zoom_grok()
     writeln("maxX and maxY = ", maxX, ", ", maxY);
     
     float tW;  float tH;
-    getTextureSize(texture, &tW, &tH);
+    getTextureSizeFloats(texture, &tW, &tH);
     writeln("&tW, &tH = ", tW, "----", tH);
                                  // swap w and h
     SDL_FRect destRect = { 0, 0, 6000,6000};    //cast(float) tH, cast(float) tW };
@@ -1649,7 +1670,7 @@ void breakup1()
     displayTextureProperties(m2.texture);
     displayTextureProperties(main.texture);
     
-    //D2 d2 = getTextureSize(m1.texture);
+    //D2 d2 = getTextureSizeInts(m1.texture);
     //int w = d2.w * 2;
     //int h = d2.h * 2;
     //writeln("w x h = ", w, " ", h);

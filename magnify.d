@@ -6,8 +6,8 @@ import datatypes;
 import bindbc.sdl;
 import std.stdio;
 import std.conv;
-import core.stdc.stdlib : exit;
-
+import core.stdc.stdlib : exit, malloc;
+import core.stdc.string : memcpy;
 /+
 Yes, in SDL3, you can display the same texture to two different renderers. A texture in SDL3 
 is not bound to a specific renderer; it’s a resource that can be used by any renderer, provided
@@ -70,20 +70,20 @@ updates to optimize performance
 int main(int argc, char* argv[]) {
     SDL_Window* window = SDL_CreateWindow("Texture Transfer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-    SDL_Texture* source_texture = SDL_CreateTextureFromSurface(renderer, SDL_CreateRGBSurface(NULL, 640, 480, 32, 0, 0, 0, 0));
+    SDL_Texture* source_texture = SDL_CreateTextureFromSurface(renderer, SDL_CreateRGBSurface(null, 640, 480, 32, 0, 0, 0, 0));
     SDL_Texture* destination_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 640, 480);
 
     // Set destination texture as render target
     SDL_SetRenderTarget(renderer, destination_texture);
 
     // Draw the source texture to the destination texture
-    SDL_RenderCopy(renderer, source_texture, NULL, NULL);
+    SDL_RenderCopy(renderer, source_texture, null, null);
 
     // Reset render target to the window
-    SDL_SetRenderTarget(renderer, NULL);
+    SDL_SetRenderTarget(renderer, null);
 
     // Draw the destination texture to the window
-    SDL_RenderCopy(renderer, destination_texture, NULL, NULL);
+    SDL_RenderCopy(renderer, destination_texture, null, null);
     SDL_RenderPresent(renderer);
 
     return 0;
@@ -181,7 +181,7 @@ void magnifyImage()
 
     tile1.rect.src.x = 0;
     tile1.rect.src.y = 0;
-    getTextureSize(tile1.texture, &tile1.rect.src.w, &tile1.rect.src.h);
+    getTextureSizeFloats(tile1.texture, &tile1.rect.src.w, &tile1.rect.src.h);
     squareOffTexture(tile1.rect.src.w, tile1.rect.src.h);
     
     
@@ -193,7 +193,7 @@ void magnifyImage()
 
     tile2.rect.src.x = 0;
     tile2.rect.src.y = 0;
-    getTextureSize(tile2.texture, &tile2.rect.src.w, &tile2.rect.src.h);
+    getTextureSizeFloats(tile2.texture, &tile2.rect.src.w, &tile2.rect.src.h);
     squareOffTexture(tile2.rect.src.w, tile2.rect.src.h);
 
     tile2.rect.dst = winRect;
@@ -384,7 +384,7 @@ void google()
 
     // Create a new texture to copy into (optional)
     //float w, h;
-    // SDL_QueryTexture(texture, NULL, NULL, &width, &height);  // SDL2 only
+    // SDL_QueryTexture(texture, null, null, &width, &height);  // SDL2 only
 
     //SDL_GetTextureSize(texture, &w, &h);  // new for SDL3
     
@@ -531,36 +531,35 @@ void LightBoard()
 
     createWindowAndRenderer("Viewer", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
-    createWindowAndRenderer("min", 500, 500, cast(SDL_WindowFlags) 0, &minWin, &minRen);
+    createWindowAndRenderer("minWin", 750, 750, cast(SDL_WindowFlags) 0, &minWin, &minRen);
 
     // SDL_CreateTextureFromSurface failed: Texture dimensions are limited to 16384 x 16384
 
     SDL_Texture *lightBoard = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 16384, 16384);
+    
+    SDL_Texture *minTex = createTexture(minRen, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 750, 750);
 
     Slide[] slides;
     Slide slide;
     float w, h;
 
     slide.texture = loadImageToTexture(renderer, "./images/1.png");
-    getTextureSize(slide.texture, &w, &h);
+    getTextureSizeFloats(slide.texture, &w, &h);
     slide.size.w = w;  slide.size.h = h;
     slide.position.x = 0;  slide.position.y = 0;
     slides ~= slide;
 
     slide.texture = loadImageToTexture(renderer, "./images/2.png");
-    getTextureSize(slide.texture, &w, &h);
+    getTextureSizeFloats(slide.texture, &w, &h);
     slide.size.w = w;  slide.size.h = h;
     slide.position.x = 6600;  slide.position.y = 0;
     slides ~= slide;
     
     slide.texture = loadImageToTexture(renderer, "./images/3.png");
-    getTextureSize(slide.texture, &w, &h);
+    getTextureSizeFloats(slide.texture, &w, &h);
     slide.size.w = w;  slide.size.h = h;
     slide.position.x = 13200;  slide.position.y = 0;
     slides ~= slide;
-
-
-    writeln("slides = ", slides);
 
     // Example 1: Place images onto the lightBoard
 
@@ -570,42 +569,28 @@ void LightBoard()
 
     foreach( s; slides)
     {
-        //SDL_RenderClear(renderer);  // fills the entire rendering target with the current draw color that was previously set
-        //SDL_RenderTextureRotated(renderer, tex1, &tex1Rect, &winRect, 0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
-        //SDL_RenderTextureRotated(renderer, t.texture, &t.rect.src, &t.rect.dst, t.angle, &winCenter, SDL_FLIP_NONE);
         SDL_FRect dstRect;
         dstRect.x = s.position.x;  dstRect.y = s.position.y;
         dstRect.w = s.size.w;  dstRect.h = s.size.h;
         SDL_RenderTexture(renderer, s.texture, null, &dstRect);
-        //SDL_RenderPresent(renderer);
     }
 
     SDL_SetRenderTarget(renderer, null);  // set the renderer back to the Window
 
     SDL_FRect viewerRect = {500, 500, 1000, 1000};  // SDL_FRect rightHalf = {500, 0, 500, 1000};
 
-    SDL_RenderTexture(renderer, lightBoard, &viewerRect, null);
-
+    SDL_RenderTexture(renderer, lightBoard, null, null);
     SDL_RenderPresent(renderer);
+
+
+    minTex = loadImageToTexture(minRen, "./images/4.png");
     
-    
-    SDL_SetRenderTarget(minRen, null);
+    //SDL_SetRenderTarget(minRen, null); // minRen is already associated with minWin
     SDL_RenderClear(minRen);
-    SDL_RenderTexture(minRen, lightBoard, null, null);
-    
-    SDL_RenderPresent(minRen);
-    /+
-    SDL_RenderTexture(renderer, tex1, /+&srcRect+/ null, &leftHalf);
-    SDL_RenderTexture(renderer, tex2, &srcRect, &rightHalf);
-
-    SDL_SetRenderTarget(renderer, null); // Set back to the window
-
-    // Render the compositioned texture to the window
-
-    SDL_RenderTexture(renderer, textureOut, null, null);
-
-    SDL_RenderPresent(renderer);  // display the image on the screen
-    +/
+    SDL_RenderTexture(minRen, minTex, /+&viewerRect+/ null, null);
+    SDL_RenderPresent(minRen); 
+ 
+ 
 
     // Keep the window open until the user closes it
     SDL_Event event;
@@ -624,4 +609,113 @@ void LightBoard()
         }
     }
 
+}
+
+
+
+/+  THE PROBLEM WITH THIS DUP IS THAT THE SAME RENDERER IS USED FOR BOTH TEXTURE 
+SDL_Texture* DuplicateTexture(SDL_Renderer* renderer, SDL_Texture* originalTexture) 
+{
+    // Query original texture properties
+    SDL_PropertiesID props = SDL_GetTextureProperties(originalTexture);
+    
+    int width = SDL_GetIntProperty(props, SDL_PROPERTY_TEXTURE_WIDTH, 0);
+    int height = SDL_GetIntProperty(props, SDL_PROPERTY_TEXTURE_HEIGHT, 0);
+    
+    Uint32 format = SDL_GetUint32Property(props, SDL_PROPERTY_TEXTURE_FORMAT, SDL_PIXELFORMAT_UNKNOWN);
+    
+    SDL_TextureAccess access = SDL_GetIntProperty(props, SDL_PROPERTY_TEXTURE_ACCESS, SDL_TEXTUREACCESS_STATIC);
+
+    // Create a new texture with the same properties
+    SDL_Texture* newTexture = SDL_CreateTexture(renderer, format, access, width, height);
+    if (!newTexture) 
+    {
+        SDL_Log("Failed to create new texture: %s", SDL_GetError());
+        return null;
+    }
+
+    // Set the original texture as the render target (optional, for direct copying)
+    SDL_SetRenderTarget(renderer, newTexture);
+    
+    // Clear the new texture (optional, depending on blending)
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderClear(renderer);
+
+    // Copy the original texture to the new texture
+    SDL_RenderTexture(renderer, originalTexture, null, null);
+
+    // Reset the render target to the default (screen)
+    SDL_SetRenderTarget(renderer, null);
+
+    return newTexture;
+}
++/
+
+/+
+SDL_Surface* CopyTextureToSurface(SDL_Renderer* renderer, SDL_Texture* texture) 
+{
+    // Get texture dimensions
+    int width, height;
+
+    getTextureSizeInts(texture, &width, &height);
+
+    SDL_Surface* surface = createSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
+
+    // Set the texture as the render target (optional, if you need to render to it)
+    SDL_SetRenderTarget(renderer, texture);
+
+    // Create a temporary texture to read pixels
+    SDL_Texture* tempTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
+                                             SDL_TEXTUREACCESS_TARGET, width, height);
+
+    // Copy the input texture to the temporary texture
+    SDL_SetRenderTarget(renderer, tempTexture);
+    SDL_RenderClear(renderer);
+    SDL_RenderTexture(renderer, texture, null, null);
+    SDL_RenderPresent(renderer);
+
+    // Read pixels from the renderer
+    void* pixels = malloc(width * height * 4); // 4 bytes per pixel for RGBA8888
+
+    //                  (tempTexture)                              pixels
+    SDL_RenderReadPixels(renderer, null, SDL_PIXELFORMAT_RGBA8888, pixels, width * 4);
+
+    // Copy pixels to the surface
+    //      surface         raw data pixels
+    memcpy(surface.pixels, pixels, width * height * 4);
+
+    SDL_SetRenderTarget(renderer, null); // Reset render target
+
+    return surface;
+}
++/
+
+
+SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* texture) {
+    SDL_Surface* surface = NULL;
+    int w, h;
+    int pixelformat;
+
+    // Get texture dimensions and pixel format
+    SDL_GetTextureSize(texture, &w, &h);
+    SDL_GetTextureFormat(texture, &pixelformat);
+
+    // Create a surface with the same dimensions and format
+    surface = SDL_CreateSurface(w, h, pixelformat);
+    if (surface == NULL) {
+        SDL_LogError("Failed to create surface: %s", SDL_GetError());
+        return NULL;
+    }
+
+    // Render the texture to the renderer (if it's not the current target)
+    SDL_SetRenderTarget(renderer, NULL); // Set default render target
+
+    // Read pixel data from the texture
+    if (SDL_RenderReadPixels(renderer, NULL, surface->format->format, surface->pixels, surface->pitch) < 0) {
+        SDL_LogError("Failed to read pixels from texture: %s", SDL_GetError());
+        SDL_FreeSurface(surface);
+        return NULL;
+    }
+
+    return surface;
 }
