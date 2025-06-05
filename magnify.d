@@ -464,3 +464,164 @@ void google()
 }
 
 
+
+
+
+void enlargeAndReduce()
+{
+    SDL_Window *window = createWindow("Texture Composition", 1000, 1000, cast(SDL_WindowFlags) 0 );
+
+    SDL_Renderer *renderer = createRenderer(window, null);
+    
+    int wi, he;
+    getWindowSize(window, &wi, &he);
+    
+    SDL_Texture *textureOut = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, wi, he);
+
+    SDL_Texture *tex1 = loadImageToTexture(renderer, "./images/1.png");
+    SDL_Texture *tex2 = loadImageToTexture(renderer, "./images/2.png");
+
+    // Example 1: Copy to a new texture
+
+    SDL_SetRenderTarget(renderer, textureOut);  // Set the new textureOut as the rendering target
+
+    SDL_RenderClear(renderer); // Clear the new texture
+
+    SDL_FRect leftHalf  = {  0, 0, 500, 1000};
+    SDL_FRect rightHalf = {500, 0, 500, 1000};
+
+    //SDL_RenderTexture(renderer, tex1, &leftHalf, &leftHalf);
+
+    SDL_FRect srcRect = { 3000, 3000, 200, 400};
+
+    SDL_RenderTexture(renderer, tex1, /+&srcRect+/ null, &leftHalf);
+    SDL_RenderTexture(renderer, tex2, &srcRect, &rightHalf);
+
+
+    SDL_SetRenderTarget(renderer, null); // Set back to the window
+
+    // Render the compositioned texture to the window
+
+    SDL_RenderTexture(renderer, textureOut, null, null);
+
+    SDL_RenderPresent(renderer);  // display the image on the screen
+
+    // Keep the window open until the user closes it
+    SDL_Event event;
+    while (SDL_WaitEvent(&event)) 
+    {
+        if (event.type == SDL_EVENT_QUIT) 
+        {
+            break;
+        }
+    }
+
+}
+
+
+
+
+void LightBoard()
+{
+    SDL_Window   *window;
+    SDL_Renderer *renderer;
+    
+    SDL_Window   *minWin;
+    SDL_Renderer *minRen;
+
+    createWindowAndRenderer("Viewer", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    createWindowAndRenderer("min", 500, 500, cast(SDL_WindowFlags) 0, &minWin, &minRen);
+
+    // SDL_CreateTextureFromSurface failed: Texture dimensions are limited to 16384 x 16384
+
+    SDL_Texture *lightBoard = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 16384, 16384);
+
+    Slide[] slides;
+    Slide slide;
+    float w, h;
+
+    slide.texture = loadImageToTexture(renderer, "./images/1.png");
+    getTextureSize(slide.texture, &w, &h);
+    slide.size.w = w;  slide.size.h = h;
+    slide.position.x = 0;  slide.position.y = 0;
+    slides ~= slide;
+
+    slide.texture = loadImageToTexture(renderer, "./images/2.png");
+    getTextureSize(slide.texture, &w, &h);
+    slide.size.w = w;  slide.size.h = h;
+    slide.position.x = 6600;  slide.position.y = 0;
+    slides ~= slide;
+    
+    slide.texture = loadImageToTexture(renderer, "./images/3.png");
+    getTextureSize(slide.texture, &w, &h);
+    slide.size.w = w;  slide.size.h = h;
+    slide.position.x = 13200;  slide.position.y = 0;
+    slides ~= slide;
+
+
+    writeln("slides = ", slides);
+
+    // Example 1: Place images onto the lightBoard
+
+    SDL_SetRenderTarget(renderer, lightBoard);  // Set the new textureOut as the rendering target
+
+    SDL_RenderClear(renderer); // Clear the lightBoard
+
+    foreach( s; slides)
+    {
+        //SDL_RenderClear(renderer);  // fills the entire rendering target with the current draw color that was previously set
+        //SDL_RenderTextureRotated(renderer, tex1, &tex1Rect, &winRect, 0, &winCenter, SDL_FLIP_NONE); // Apply rotation and scaling
+        //SDL_RenderTextureRotated(renderer, t.texture, &t.rect.src, &t.rect.dst, t.angle, &winCenter, SDL_FLIP_NONE);
+        SDL_FRect dstRect;
+        dstRect.x = s.position.x;  dstRect.y = s.position.y;
+        dstRect.w = s.size.w;  dstRect.h = s.size.h;
+        SDL_RenderTexture(renderer, s.texture, null, &dstRect);
+        //SDL_RenderPresent(renderer);
+    }
+
+    SDL_SetRenderTarget(renderer, null);  // set the renderer back to the Window
+
+    SDL_FRect viewerRect = {500, 500, 1000, 1000};  // SDL_FRect rightHalf = {500, 0, 500, 1000};
+
+    SDL_RenderTexture(renderer, lightBoard, &viewerRect, null);
+
+    SDL_RenderPresent(renderer);
+    
+    
+    SDL_SetRenderTarget(minRen, null);
+    SDL_RenderClear(minRen);
+    SDL_RenderTexture(minRen, lightBoard, null, null);
+    
+    SDL_RenderPresent(minRen);
+    /+
+    SDL_RenderTexture(renderer, tex1, /+&srcRect+/ null, &leftHalf);
+    SDL_RenderTexture(renderer, tex2, &srcRect, &rightHalf);
+
+    SDL_SetRenderTarget(renderer, null); // Set back to the window
+
+    // Render the compositioned texture to the window
+
+    SDL_RenderTexture(renderer, textureOut, null, null);
+
+    SDL_RenderPresent(renderer);  // display the image on the screen
+    +/
+
+    // Keep the window open until the user closes it
+    SDL_Event event;
+    while (SDL_WaitEvent(&event)) 
+    {
+        if (event.type == SDL_EVENT_KEY_DOWN)
+        {
+            if (event.key.key == SDLK_ESCAPE)
+            {
+                break;
+            }
+        }
+        if (event.type == SDL_EVENT_QUIT) 
+        {
+            break;
+        }
+    }
+
+}

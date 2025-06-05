@@ -17,8 +17,7 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 
 import bindbc.sdl;  // SDL_* all remaining declarations
 
-struct D2 { int w; int h; }
-struct F2 { float w; float h; }
+
 
 struct Graphic
 {
@@ -477,7 +476,7 @@ void composingImage()
                 case SDL_EVENT_QUIT:
                     quit = true;
                     break;
-               case SDL_EVENT_KEY_DOWN:
+                case SDL_EVENT_KEY_DOWN:
                     {
                         if (event.key.key == SDLK_TAB)   // PICK TILE
                         {

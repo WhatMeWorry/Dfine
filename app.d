@@ -129,7 +129,10 @@ int main()
     
     //createRealBigSurface();
 
-    google();
+    LightBoard();
+    exit(-1);
+
+    enlargeAndReduce();
     exit(-1);
 
     magnifyImage();

@@ -11,6 +11,20 @@ struct Rects
     SDL_FRect dst;
 } 
 
+struct D2 { int w; int h; }
+struct F2 { float w; float h; }
+struct P2 { float x; float y; }
+
+
+struct Slide
+{
+    SDL_Texture  *texture;
+    P2           position;
+    F2           size;
+    int       alpha;  // 0-255
+    double    angle;  // 0.0-360.0
+}
+
 
 struct Tile
 {
