@@ -585,6 +585,8 @@ void LightBoard()
 
     minTex = loadImageToTexture(minRen, "./images/4.png");
     
+    SDL_Surface *kyle = copy_texture_to_surface(minRen, minTex);
+    
     //SDL_SetRenderTarget(minRen, null); // minRen is already associated with minWin
     SDL_RenderClear(minRen);
     SDL_RenderTexture(minRen, minTex, /+&viewerRect+/ null, null);
@@ -613,43 +615,7 @@ void LightBoard()
 
 
 
-/+  THE PROBLEM WITH THIS DUP IS THAT THE SAME RENDERER IS USED FOR BOTH TEXTURE 
-SDL_Texture* DuplicateTexture(SDL_Renderer* renderer, SDL_Texture* originalTexture) 
-{
-    // Query original texture properties
-    SDL_PropertiesID props = SDL_GetTextureProperties(originalTexture);
-    
-    int width = SDL_GetIntProperty(props, SDL_PROPERTY_TEXTURE_WIDTH, 0);
-    int height = SDL_GetIntProperty(props, SDL_PROPERTY_TEXTURE_HEIGHT, 0);
-    
-    Uint32 format = SDL_GetUint32Property(props, SDL_PROPERTY_TEXTURE_FORMAT, SDL_PIXELFORMAT_UNKNOWN);
-    
-    SDL_TextureAccess access = SDL_GetIntProperty(props, SDL_PROPERTY_TEXTURE_ACCESS, SDL_TEXTUREACCESS_STATIC);
 
-    // Create a new texture with the same properties
-    SDL_Texture* newTexture = SDL_CreateTexture(renderer, format, access, width, height);
-    if (!newTexture) 
-    {
-        SDL_Log("Failed to create new texture: %s", SDL_GetError());
-        return null;
-    }
-
-    // Set the original texture as the render target (optional, for direct copying)
-    SDL_SetRenderTarget(renderer, newTexture);
-    
-    // Clear the new texture (optional, depending on blending)
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-    SDL_RenderClear(renderer);
-
-    // Copy the original texture to the new texture
-    SDL_RenderTexture(renderer, originalTexture, null, null);
-
-    // Reset the render target to the default (screen)
-    SDL_SetRenderTarget(renderer, null);
-
-    return newTexture;
-}
-+/
 
 /+
 SDL_Surface* CopyTextureToSurface(SDL_Renderer* renderer, SDL_Texture* texture) 
@@ -691,31 +657,97 @@ SDL_Surface* CopyTextureToSurface(SDL_Renderer* renderer, SDL_Texture* texture)
 +/
 
 
-SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* texture) {
-    SDL_Surface* surface = NULL;
+SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* texture) 
+{
+    SDL_Surface* surface = null;
     int w, h;
-    int pixelformat;
+    //int pixelFormat;
 
     // Get texture dimensions and pixel format
-    SDL_GetTextureSize(texture, &w, &h);
-    SDL_GetTextureFormat(texture, &pixelformat);
+    getTextureSizeInts(texture, &w, &h);
+
+
+    /+
+    https://wiki.libsdl.org/SDL3/README-migration
+    
+    SDL_QueryTexture() has been removed. The properties of the texture can be queried using 
+        SDL_PROP_TEXTURE_FORMAT_NUMBER, 
+        SDL_PROP_TEXTURE_ACCESS_NUMBER, 
+        SDL_PROP_TEXTURE_WIDTH_NUMBER, and 
+        SDL_PROP_TEXTURE_HEIGHT_NUMBER. 
+    A function SDL_GetTextureSize() has been added to get the size of the texture as floating point values.
+    +/
+
+    SDL_PixelFormat pixelFormat;
+    SDL_PropertiesID props = SDL_GetTextureProperties(texture);  // SDL3 only function
+    if (props == 0) 
+    {
+        //printf("Failed to get texture properties: %s\n", SDL_GetError());
+    } 
+    else 
+    {                                        // SDL3 only function
+        pixelFormat = cast (SDL_PixelFormat) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
+        
+                                 // SDL2 and SDL3 function
+        const char *formatName = SDL_GetPixelFormatName(pixelFormat);
+        printf("Texture pixel format name: %s\n", formatName);
+    }
+                                            // SDL3 only
+    const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(pixelFormat);
+    if (!details) 
+    {
+        printf("SDL_GetPixelFormatDetails failed: %s\n", SDL_GetError());
+    }
+
+    // Print pixel format information
+
+    writeln("Bits per Pixel: ", details.bits_per_pixel);
+    writeln("Bytes per Pixel: ", details.bytes_per_pixel);
+    writefln("Rmask: 0x%08X, Gmask: 0x%08X, Bmask: 0x%08X, Amask: 0x%08X\n",
+             details.Rmask, details.Gmask, details.Bmask, details.Amask);
+
+
+    SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
+
+    writeln("access = ", access);
+    
+    switch (access) 
+    {
+        case SDL_TEXTUREACCESS_STATIC:
+            printf("Texture is SDL_TEXTUREACCESS_STATIC. Suitable for infrequent updates.\n");
+            break;
+        case SDL_TEXTUREACCESS_STREAMING:
+            printf("Texture is SDL_TEXTUREACCESS_STREAMING. Suitable for frequent updates.\n");
+            break;
+        case SDL_TEXTUREACCESS_TARGET:
+            printf("SDL_TEXTUREACCESS_TARGET. Texture is a render target.\n");
+            break;
+        default:
+            printf("Unknown texture access mode: %d\n", access);
+            break;
+    }
+    
+    
+    
+
+    long wide = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_WIDTH_NUMBER, 0);
+    long high = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0);
+
+    writeln("wide = ", wide);
+    writeln("high = ", high);
 
     // Create a surface with the same dimensions and format
-    surface = SDL_CreateSurface(w, h, pixelformat);
-    if (surface == NULL) {
-        SDL_LogError("Failed to create surface: %s", SDL_GetError());
-        return NULL;
+    surface = SDL_CreateSurface(w, h, pixelFormat);
+    if (surface == null) 
+    {
+        exit(-1);
     }
 
     // Render the texture to the renderer (if it's not the current target)
-    SDL_SetRenderTarget(renderer, NULL); // Set default render target
+    SDL_SetRenderTarget(renderer, null); // Set default render target
 
     // Read pixel data from the texture
-    if (SDL_RenderReadPixels(renderer, NULL, surface->format->format, surface->pixels, surface->pitch) < 0) {
-        SDL_LogError("Failed to read pixels from texture: %s", SDL_GetError());
-        SDL_FreeSurface(surface);
-        return NULL;
-    }
+    //SDL_RenderReadPixels(renderer, null, surface.format.format, surface.pixels, surface.pitch);
 
     return surface;
 }
