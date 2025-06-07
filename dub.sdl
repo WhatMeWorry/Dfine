@@ -15,6 +15,7 @@ sourcePaths "a_star"    // without: app.d(64,8): Error: unable to read module `p
 sourcePaths "libraries"
 sourcePaths "textures"
 sourcePaths "windows"
+sourcePaths "sdl3"
 
 versions "SDL_3_4" "SDL_Image_3_2" "SDL_Mixer_3_0" "SDL_TTF_3_2" "SDL_Net_3_0"
 

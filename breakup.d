@@ -11,6 +11,7 @@ import datatypes;
 import a_star.spot : writeAndPause;
 import core.stdc.stdio : printf;
 import hexmath : isOdd, isEven;
+import sdl_funcs_with_error_handling;
 
 import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
@@ -1473,7 +1474,7 @@ void assembleQuadFilesItoOnePNGfile()
 
 
 
-
+/+
 void displayTextureProperties(SDL_Texture *texture)
 {
     //uint format;
@@ -1496,7 +1497,6 @@ void displayTextureProperties(SDL_Texture *texture)
         writeln("SDL_GetTextureProperties failed");
         exit(-1);
     }
-    
     
     //SDL_TextureInfo textureInfo;
     //SDL_GetTextureInfo(texture, &textureInfo);
@@ -1535,6 +1535,7 @@ void displayTextureProperties(SDL_Texture *texture)
         writefln("Unknown pixel format\n");  exit(-1);
     }
 }
++/
 
 void trimFileIfPixelsAreNotEven()
 {

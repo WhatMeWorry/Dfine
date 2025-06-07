@@ -8,6 +8,7 @@ import std.stdio;
 import std.conv;
 import core.stdc.stdlib : exit, malloc;
 import core.stdc.string : memcpy;
+import sdl_funcs_with_error_handling;
 /+
 Yes, in SDL3, you can display the same texture to two different renderers. A texture in SDL3 
 is not bound to a specific renderer; it’s a resource that can be used by any renderer, provided
@@ -534,7 +535,15 @@ void LightBoard()
 
     SDL_Texture *lightBoard = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 16384, 16384);
     
-    SDL_Texture *minTex = createTexture(minRen, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 750, 750);
+    SDL_Surface *temp = loadImageToSurface("./images/4.png");
+
+    SDL_Surface *minSur = createSurface(temp.w, temp.h, SDL_PIXELFORMAT_RGBA8888);
+    
+    displaySurfaceProperties(minSur);
+    
+    SDL_Texture *minTex = createTexture(minRen, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, temp.w, temp.h);
+    
+    displayTextureProperties(minTex);
 
     Slide[] slides;
     Slide slide;
@@ -579,12 +588,13 @@ void LightBoard()
     SDL_RenderTexture(renderer, lightBoard, null, null);
     SDL_RenderPresent(renderer);
 
-
-    minTex = loadImageToTexture(minRen, "./images/4.png");
+    //minSur = loadImageToSurface("./images/4.png");  // did not seem to require a previous createSurface to work.
+    //displaySurfaceProperties(minSur);
     
-    SDL_Surface *kyle = copy_texture_to_surface(minRen, minTex);
+    copySurfaceToStreamingTexture(minSur, minTex);
     
-    //SDL_SetRenderTarget(minRen, null); // minRen is already associated with minWin
+    displayTextureProperties(minTex);
+    
     SDL_RenderClear(minRen);
     SDL_RenderTexture(minRen, minTex, /+&viewerRect+/ null, null);
     SDL_RenderPresent(minRen); 
@@ -611,92 +621,44 @@ void LightBoard()
 
 
 
-SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* texture) 
+void copySurfaceToStreamingTexture(SDL_Surface *surface, SDL_Texture *texture)
+{
+    writeln("Inside copySurfaceToStreamingTexture");
+    
+    /+
+    To update a streaming texture, you need to lock it first. This gets you access to the pixels
+    Note that this is considered a write-only operation: the buffer you get from locking
+    might not acutally have the existing contents of the texture, and you have to write to every
+    locked pixel
+
+    You can use SDL_LockTexture() to get an array of raw pixels, but we're going to use
+    SDL_LockTextureToSurface() here, because it wraps that array in a temporary SDL_Surface,
+    letting us use the surface drawing functions instead of lighting up individual pixels. */
+    +/
+
+    SDL_Surface* twin = duplicateSurface(surface); 
+
+    lockTextureToSurface(texture, null, &surface);  // will fail if texture is STATIC
+    writeln("AFTER LOCK ***************************");
+    
+    // /+ 
+    SDL_Rect r = { 0, 0, 900, 900 };
+    SDL_FillSurfaceRect(surface, null, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 255, 0));
+    SDL_FillSurfaceRect(surface, &r, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 0, 255));
+    // +/
+    
+    //SDL_BlitSurface(twin, null, surface, null);
+    
+    SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
+}
+
+
+
+SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* texture)
 {
     SDL_Surface* surface = null;
     int w, h;
-    //int pixelFormat;
-
-    // Get texture dimensions and pixel format
-    getTextureSizeInts(texture, &w, &h);
-
-    /+
-    https://wiki.libsdl.org/SDL3/README-migration
-    
-    SDL_QueryTexture() has been removed. The properties of the texture can be queried using 
-        SDL_PROP_TEXTURE_FORMAT_NUMBER, 
-        SDL_PROP_TEXTURE_ACCESS_NUMBER, 
-        SDL_PROP_TEXTURE_WIDTH_NUMBER, and 
-        SDL_PROP_TEXTURE_HEIGHT_NUMBER. 
-    A function SDL_GetTextureSize() has been added to get the size of the texture as floating point values.
-    +/
-
-    SDL_PixelFormat pixelFormat;
-    SDL_PropertiesID props = SDL_GetTextureProperties(texture);  // SDL3 only function
-    if (props == 0) 
-    {
-        //printf("Failed to get texture properties: %s\n", SDL_GetError());
-    } 
-    else 
-    {                                        // SDL3 only function
-        pixelFormat = cast (SDL_PixelFormat) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
-        
-                                 // SDL2 and SDL3 function
-        const char *formatName = SDL_GetPixelFormatName(pixelFormat);
-        printf("Texture pixel format name: %s\n", formatName);
-    }
-                                            // SDL3 only
-    const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(pixelFormat);
-    if (!details)
-    {
-        printf("SDL_GetPixelFormatDetails failed: %s\n", SDL_GetError());
-    }
-
-    // Print pixel format information
-
-    writeln("Bits per Pixel: ", details.bits_per_pixel);
-    writeln("Bytes per Pixel: ", details.bytes_per_pixel);
-    writefln("Rmask: 0x%08X, Gmask: 0x%08X, Bmask: 0x%08X, Amask: 0x%08X\n",
-             details.Rmask, details.Gmask, details.Bmask, details.Amask);
-
-    void *pixels;
-    int pitch;
-                
-    lockTexture(texture, null, &pixels, pitch);
-
-
-    SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
-
-    writeln("access = ", access);
-    
-    switch (access) 
-    {
-        case SDL_TEXTUREACCESS_STATIC:
-            printf("Texture is SDL_TEXTUREACCESS_STATIC. Suitable for infrequent updates.\n");
-            break;
-        case SDL_TEXTUREACCESS_STREAMING:
-            printf("Texture is SDL_TEXTUREACCESS_STREAMING. Suitable for frequent updates.\n");
-            break;
-        case SDL_TEXTUREACCESS_TARGET:
-            printf("SDL_TEXTUREACCESS_TARGET. Texture is a render target.\n");
-            break;
-        default:
-            printf("Unknown texture access mode: %d\n", access);
-            break;
-    }
-
-    long wide = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_WIDTH_NUMBER, 0);
-    long high = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0);
-
-    writeln("wide = ", wide);
-    writeln("high = ", high);
-
-    // Create a surface with the same dimensions and format
-    surface = SDL_CreateSurface(w, h, pixelFormat);
-    if (surface == null) 
-    {
-        exit(-1);
-    }
+ 
 
     // Render the texture to the renderer (if it's not the current target)
     SDL_SetRenderTarget(renderer, null); // Set default render target
@@ -760,54 +722,6 @@ pattern when creating the texture, or maybe it only affects the performance of t
 
 
 /+
-// Example using SDL_UpdateWindowSurfaceRects(...)
-
-void example()
-{
-
-    // Create a window
-    SDL_Window* window = SDL_CreateWindow("SDL_UpdateWindowSurfaceRects Example",
-                                          640, 480, 0);
-    if (!window) {
-        SDL_Log("Window could not be created! SDL_Error: %s", SDL_GetError());
-        SDL_Quit();
-        return 1;
-    }
-
-    // Get the window surface
-    SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
-    if (!screenSurface) {
-        SDL_Log("Surface could not be created! SDL_Error: %s", SDL_GetError());
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
-    }
-
-    // Fill the surface with a white background
-    Uint32 white = SDL_MapRGB(screenSurface->format, 255, 255, 255);
-    SDL_FillSurfaceRect(screenSurface, NULL, white);
-
-    // Define a rectangle to update (a red square in the center)
-    SDL_Rect rect = { 220, 140, 200, 200 }; // x, y, width, height
-    Uint32 red = SDL_MapRGB(screenSurface->format, 255, 0, 0);
-    SDL_FillSurfaceRect(screenSurface, &rect, red);
-
-    // Update only the specified rectangle on the screen
-    if (!SDL_UpdateWindowSurfaceRects(window, &rect, 1)) {
-        SDL_Log("Failed to update window surface! SDL_Error: %s", SDL_GetError());
-    }
-
-    // Wait for 2 seconds to display the result
-    SDL_Delay(2000);
-
-    // Clean up
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    return 0;
-}
-+/
-
-
 SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, width, height);
 SDL_Surface *surface = IMG_Load(file_path);
 if (surface) {
@@ -820,23 +734,27 @@ if (surface) {
 SDL_RenderClear(renderer);
 SDL_RenderCopy(renderer, texture, NULL, NULL);
 SDL_RenderPresent(renderer);
++/
 
 
+// TEXTURE TO TEXTURE
+// This Example demonstrates a Texture to Texture copy
+//
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_image.h> // If you're loading images
+/+
+textureToTextureCopy() 
+{
+    // SDL_Init(SDL_INIT_VIDEO);
+    // IMG_Init(IMG_INIT_PNG); // If you're using PNG
 
-int main(int argc, char* args[]) {
-    SDL_Init(SDL_INIT_VIDEO);
-    IMG_Init(IMG_INIT_PNG); // If you're using PNG
-
-    SDL_Window* window = SDL_CreateWindow("Texture Copy", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, 0);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+    //SDL_Window* window = SDL_CreateWindow("Texture Copy", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, 0);
+    //SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 
     // Load a source texture (replace "image.png" with your image)
-    SDL_Texture* sourceTexture = IMG_LoadTexture(renderer, "image.png");
+    //SDL_Texture* sourceTexture = IMG_LoadTexture(renderer, "image.png");
     //SDL_Texture* sourceTexture = SDL_CreateTextureFromSurface(renderer, surface); // Or create from surface
+
+
 
     // Create a target texture
     SDL_Texture* targetTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 600);
@@ -871,3 +789,23 @@ int main(int argc, char* args[]) {
 
     return 0;
 }
++/
+
+
+
+
+
+/+
+
+https://examples.libsdl.org/SDL3/renderer/07-streaming-textures/#:~:text=07%2Dstreaming%2Dtextures,function%20runs%20once%20at%20startup.
+
+
++/
+
+
+
+
+
+
+
+
