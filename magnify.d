@@ -144,7 +144,7 @@ void magnifyImage()
     //int winW = 500;
     //int winH = 500;
     
-    SDL_Dimensions inWinDim = { 500, 1000 };
+    SDL_Dimensions inWinDim = { 1500, 1500 };
     SDL_Dimensions outWinDim = { 500, 1000 };
     
     SDL_FRect outWinRect = { 0, 0, outWinDim.w, outWinDim.h };
@@ -200,9 +200,6 @@ void magnifyImage()
     displayTextureProperties(tile2.texture);
     tile2.alpha = 127;
     tile2.angle = 0.0;
-    
-    
-    
 
     int i = 0;  // index to current tile
 
@@ -537,7 +534,7 @@ void LightBoard()
 
     SDL_Texture *lightBoard = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 16384, 16384);
     
-    SDL_Texture *minTex = createTexture(minRen, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 750, 750);
+    SDL_Texture *minTex = createTexture(minRen, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 750, 750);
 
     Slide[] slides;
     Slide slide;
@@ -610,51 +607,8 @@ void LightBoard()
             break;
         }
     }
-
 }
 
-
-
-
-
-/+
-SDL_Surface* CopyTextureToSurface(SDL_Renderer* renderer, SDL_Texture* texture) 
-{
-    // Get texture dimensions
-    int width, height;
-
-    getTextureSizeInts(texture, &width, &height);
-
-    SDL_Surface* surface = createSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
-
-    // Set the texture as the render target (optional, if you need to render to it)
-    SDL_SetRenderTarget(renderer, texture);
-
-    // Create a temporary texture to read pixels
-    SDL_Texture* tempTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
-                                             SDL_TEXTUREACCESS_TARGET, width, height);
-
-    // Copy the input texture to the temporary texture
-    SDL_SetRenderTarget(renderer, tempTexture);
-    SDL_RenderClear(renderer);
-    SDL_RenderTexture(renderer, texture, null, null);
-    SDL_RenderPresent(renderer);
-
-    // Read pixels from the renderer
-    void* pixels = malloc(width * height * 4); // 4 bytes per pixel for RGBA8888
-
-    //                  (tempTexture)                              pixels
-    SDL_RenderReadPixels(renderer, null, SDL_PIXELFORMAT_RGBA8888, pixels, width * 4);
-
-    // Copy pixels to the surface
-    //      surface         raw data pixels
-    memcpy(surface.pixels, pixels, width * height * 4);
-
-    SDL_SetRenderTarget(renderer, null); // Reset render target
-
-    return surface;
-}
-+/
 
 
 SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* texture) 
@@ -665,7 +619,6 @@ SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* textur
 
     // Get texture dimensions and pixel format
     getTextureSizeInts(texture, &w, &h);
-
 
     /+
     https://wiki.libsdl.org/SDL3/README-migration
@@ -694,7 +647,7 @@ SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* textur
     }
                                             // SDL3 only
     const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(pixelFormat);
-    if (!details) 
+    if (!details)
     {
         printf("SDL_GetPixelFormatDetails failed: %s\n", SDL_GetError());
     }
@@ -705,6 +658,11 @@ SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* textur
     writeln("Bytes per Pixel: ", details.bytes_per_pixel);
     writefln("Rmask: 0x%08X, Gmask: 0x%08X, Bmask: 0x%08X, Amask: 0x%08X\n",
              details.Rmask, details.Gmask, details.Bmask, details.Amask);
+
+    void *pixels;
+    int pitch;
+                
+    lockTexture(texture, null, &pixels, pitch);
 
 
     SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
@@ -726,9 +684,6 @@ SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* textur
             printf("Unknown texture access mode: %d\n", access);
             break;
     }
-    
-    
-    
 
     long wide = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_WIDTH_NUMBER, 0);
     long high = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0);
@@ -750,4 +705,169 @@ SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* textur
     //SDL_RenderReadPixels(renderer, null, surface.format.format, surface.pixels, surface.pitch);
 
     return surface;
+}
+
+
+
+
+/+
+
+Are the following conclusions correct?
+
+1) I have heard that rendering textures is much faster than rendering surfaces. This 
+applies to only rendering right? Not handling them?  Exampe: loading images, modifying, 
+(blitting surfaces) / (rendering textures into another textures) etc.
+
+2) Textures aren't as modifiable as surfaces. If something keeps changing, it is better 
+    to use surfaces and then create a texture just to render it to the screen.
+
+========== Answer 1 =================
+
+1. Surfaces use the CPU/RAM. Textures normally use the GPU/VRAM (unless you use a software renderer).
+
+By using textures you're able to take advantage of your graphics hardware which usually makes drawing 
+them, onto another texture or onto the screen, much faster. This depends on your graphics hardware and 
+drivers but it is usually the case.
+
+If you're using surfaces you don't only suffer from the slower performance of the CPU to perform these 
+actions but you also pay the price of having to transfer all the pixels to the VRAM each frame. By using 
+SDL_UpdateWindowSurfaceRects instead of SDL_UpdateWindowSurface to only send the parts that have changed 
+each frame you might still get acceptable performance but this complicates the code and doesn't help if 
+there are too much changes happening all the time (such as when the background is scrolling).
+
+     SDL3
+bool SDL_UpdateWindowSurfaceRects(SDL_Window *window, const SDL_Rect *rects, int numrects);
+Function Parameters
+SDL_Window     *window   the window to update.
+const SDL_Rect *rects    an array of SDL_Rect structures representing areas of the surface to copy, in pixels.
+int            numrects  the number of rectangles.
+
+
+
+When loading an image from file you always load it into RAM first and then it has to be transferred onto 
+the VRAM when you create the texture. There is no performance advantage of using IMG_LoadTexture instead 
+of IMG_Load followed by SDL_CreateTextureFromSurface. It's just there for convenience.
+
+========== Answer 2 =================
+
+2. You cannot access the pixels directly but you can lock the texture and update the pixels (this will 
+involve sending pixel data from RAM to VRAM). It's also possible to use a texture as a render target 
+(if supported) to render directly to it just like you would render to the screen using SDL_RenderFillRect, 
+SDL_RenderCopy, etc. I have very little experience with this but I think you might have to set the access 
+pattern when creating the texture, or maybe it only affects the performance of these operations, I'm not sure.
+
++/
+
+
+/+
+// Example using SDL_UpdateWindowSurfaceRects(...)
+
+void example()
+{
+
+    // Create a window
+    SDL_Window* window = SDL_CreateWindow("SDL_UpdateWindowSurfaceRects Example",
+                                          640, 480, 0);
+    if (!window) {
+        SDL_Log("Window could not be created! SDL_Error: %s", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    // Get the window surface
+    SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
+    if (!screenSurface) {
+        SDL_Log("Surface could not be created! SDL_Error: %s", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    // Fill the surface with a white background
+    Uint32 white = SDL_MapRGB(screenSurface->format, 255, 255, 255);
+    SDL_FillSurfaceRect(screenSurface, NULL, white);
+
+    // Define a rectangle to update (a red square in the center)
+    SDL_Rect rect = { 220, 140, 200, 200 }; // x, y, width, height
+    Uint32 red = SDL_MapRGB(screenSurface->format, 255, 0, 0);
+    SDL_FillSurfaceRect(screenSurface, &rect, red);
+
+    // Update only the specified rectangle on the screen
+    if (!SDL_UpdateWindowSurfaceRects(window, &rect, 1)) {
+        SDL_Log("Failed to update window surface! SDL_Error: %s", SDL_GetError());
+    }
+
+    // Wait for 2 seconds to display the result
+    SDL_Delay(2000);
+
+    // Clean up
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    return 0;
+}
++/
+
+
+SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, width, height);
+SDL_Surface *surface = IMG_Load(file_path);
+if (surface) {
+    SDL_LockTexture(texture, NULL, &pixels, &pitch);
+    SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA8888, 0); // Convert to the same format as the texture
+    SDL_Memcpy(pixels, surface->pixels, pitch * surface->h); // Copy the image data to the texture
+    SDL_UnlockTexture(texture);
+}
+
+SDL_RenderClear(renderer);
+SDL_RenderCopy(renderer, texture, NULL, NULL);
+SDL_RenderPresent(renderer);
+
+
+
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_image.h> // If you're loading images
+
+int main(int argc, char* args[]) {
+    SDL_Init(SDL_INIT_VIDEO);
+    IMG_Init(IMG_INIT_PNG); // If you're using PNG
+
+    SDL_Window* window = SDL_CreateWindow("Texture Copy", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+
+    // Load a source texture (replace "image.png" with your image)
+    SDL_Texture* sourceTexture = IMG_LoadTexture(renderer, "image.png");
+    //SDL_Texture* sourceTexture = SDL_CreateTextureFromSurface(renderer, surface); // Or create from surface
+
+    // Create a target texture
+    SDL_Texture* targetTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 600);
+
+    // Set target texture as the rendering target
+    SDL_SetRenderTarget(renderer, targetTexture);
+
+    // Render the source texture to the target texture
+    SDL_Rect dstrect;
+    dstrect.x = 0;
+    dstrect.y = 0;
+    dstrect.w = 800;
+    dstrect.h = 600;
+    SDL_RenderCopy(renderer, sourceTexture, NULL, &dstrect);
+
+    // Reset the rendering target to the window
+    SDL_SetRenderTarget(renderer, NULL);
+
+    // Now, you can render the targetTexture to the screen
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, targetTexture, NULL, &dstrect);
+    SDL_RenderPresent(renderer);
+
+    SDL_Delay(2000);
+
+    SDL_DestroyTexture(sourceTexture);
+    SDL_DestroyTexture(targetTexture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    IMG_Quit();
+    SDL_Quit();
+
+    return 0;
 }

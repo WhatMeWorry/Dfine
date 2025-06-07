@@ -104,7 +104,7 @@ void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
     }
 }
 
-
+// SDL_CreateSurface   SDL3 only
 SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
 {
     SDL_Surface *surface = SDL_CreateSurface(width, height, pixelFormat);
@@ -115,6 +115,32 @@ SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
     }
     return surface;
 }
+
+
+// SDL_CreateSurfaceFrom   SDL3 only
+SDL_Surface* createSurfaceFrom(int width, int height, SDL_PixelFormat format, void *pixels, int pitch)
+{
+    SDL_Surface *surface = SDL_CreateSurfaceFrom(width, height, format, pixels, pitch);
+    if (surface == null)
+    {
+        writeln("SDL_CreateSurfaceFrom failed: ", to!string(SDL_GetError()));
+        exit(-1);
+    }
+    return surface;
+}
+
+
+
+void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int pitch)
+{
+    bool res = SDL_LockTexture(texture, null, pixels, &pitch);
+    if (res == false)
+    {
+        writeln("SDL_LockTexture failed: ", to!string(SDL_GetError()));  
+        exit(-1);
+    }
+}
+
 
 
 SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surface)
