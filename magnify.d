@@ -97,14 +97,14 @@ int main(int argc, char* argv[]) {
         |     +-------+            |         tab key: select textures
         |     |tex 1  |            |         arrow keys: move current selected texture up
         |     |   (   | )loupe     |                     down, left, right
-        |     |   ( +-+-)----------+-+       F1: increase texture transparency
-        |     +---(-+-+ )          | |       F2: decrease texture transparency
-        |           |              | |       Page Up: increase size of texture
-        |           |     tex 2    | |       Page Down: decrease size of texture
-        +-----------+--------------+ |
-                    |                |   The contents of the loupe will be displayed in
-                    |                |   the mannification windows.  The loupe can likewise
-                    +----------------+   be moved and resized.
+        |     |   ( +-+-)----------|.+       F1: increase texture transparency
+        |     +---(-+-+ )          | .       F2: decrease texture transparency
+        |           |              | .       Page Up: increase size of texture
+        |           |     tex 2    | .       Page Down: decrease size of texture
+        +--------------------------+ .
+                    .                .   The contents of the loupe will be displayed in
+                    .                .   the mannification windows.  The loupe can likewise
+                    +................+   be moved and resized.
                                                     
         The ObjectsWorld will take in multiple textures and display them
         them into the window. The user can select each object and: 
@@ -623,8 +623,6 @@ void LightBoard()
 
 void copySurfaceToStreamingTexture(SDL_Surface *surface, SDL_Texture *texture)
 {
-    writeln("Inside copySurfaceToStreamingTexture");
-    
     /+
     To update a streaming texture, you need to lock it first. This gets you access to the pixels
     Note that this is considered a write-only operation: the buffer you get from locking
@@ -633,56 +631,23 @@ void copySurfaceToStreamingTexture(SDL_Surface *surface, SDL_Texture *texture)
 
     You can use SDL_LockTexture() to get an array of raw pixels, but we're going to use
     SDL_LockTextureToSurface() here, because it wraps that array in a temporary SDL_Surface,
-    letting us use the surface drawing functions instead of lighting up individual pixels. */
+    letting us use the surface drawing or blit functions instead of lighting up individual pixels.
     +/
-
-    // Lock the texture for writing
-    // SDL_Surface *lockedSurface = NULL;
-    // if (SDL_LockTextureToSurface(streamingTexture, NULL, &lockedSurface) != 0) {
 
     SDL_Surface *lockedSurface = null;
     lockTextureToSurface(texture, null, &lockedSurface);  // will fail if texture is STATIC
-    
-    writeln("AFTER LOCK ***************************");
-    
-     /+ 
-    SDL_Rect r = { 0, 0, 900, 900 };
+
+      
+    SDL_Rect r = { 0, 0, 4000, 6000 };
+    /+
     SDL_FillSurfaceRect(surface, null, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 255, 0));
     SDL_FillSurfaceRect(surface, &r, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 0, 255));
      +/
-    
-    //SDL_BlitSurface(twin, null, surface, null);
-    
-    // Blit the surface to the locked texture's surface
-    // if (SDL_BlitSurface(mySurface, NULL, lockedSurface, NULL) != 0) {  from misc code
-    
-    //bool res = SDL_BlitSurface(surface, null, texture, null);
-    
-    // Blit the surface to the locked texture's surface
-    // if (SDL_BlitSurface(mySurface, NULL, lockedSurface, NULL) != 0) {
-    
-    bool res = SDL_BlitSurface(surface, null, lockedSurface, null);
+
+    blitSurface(surface, &r /+null+/, lockedSurface, &r /+null+/);
     
     SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
 }
-
-
-
-SDL_Surface* copy_texture_to_surface(SDL_Renderer* renderer, SDL_Texture* texture)
-{
-    SDL_Surface* surface = null;
-    int w, h;
- 
-
-    // Render the texture to the renderer (if it's not the current target)
-    SDL_SetRenderTarget(renderer, null); // Set default render target
-
-    // Read pixel data from the texture
-    //SDL_RenderReadPixels(renderer, null, surface.format.format, surface.pixels, surface.pitch);
-
-    return surface;
-}
-
 
 
 
