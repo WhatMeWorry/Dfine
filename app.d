@@ -58,6 +58,7 @@ import bindbc.loader;
 
 import breakup;
 import magnify;
+import standalone_demos;
 
 
 
@@ -128,7 +129,9 @@ int main()
     //zoom_grok;
     
     //createRealBigSurface();
-
+    ThreeSurfacesAndOneStreamingTexure();
+    exit(-1);
+    
     LightBoard();
     exit(-1);
 

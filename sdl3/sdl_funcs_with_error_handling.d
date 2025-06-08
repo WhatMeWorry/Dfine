@@ -30,7 +30,20 @@ void lockTextureToSurface(SDL_Texture *texture, const SDL_Rect *rect, SDL_Surfac
 }
 
 
-void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect, SDL_Surface *dstSurface, const SDL_Rect *dstRect)
+SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
+{
+    SDL_PropertiesID props = SDL_GetTextureProperties(texture);  // SDL3 only function
+    if (props == 0) 
+    {
+        writeln("SDL_GetTextureProperties failed: ", to!string(SDL_GetError()));  
+        exit(-1);
+    }
+    return props;
+}
+
+
+void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect, 
+                 SDL_Surface *dstSurface, const SDL_Rect *dstRect)
 {
     bool res = SDL_BlitSurface(srcSurface, srcRect, dstSurface, dstRect);
     if (res == false)
@@ -39,6 +52,39 @@ void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect, SDL_Surface *
         exit(-1);
     }
 }
+
+// This is a generalized function of copySurfaceToStreamingTexture
+
+void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
+                          SDL_Texture *texture, const SDL_Rect *texRect)
+{
+    /+
+    To update a streaming texture, you need to lock it first. This gets you access to the pixels
+    Note that this is considered a write-only operation: the buffer you get from locking
+    might not acutally have the existing contents of the texture, and you have to write to every
+    locked pixel
+
+    You can use SDL_LockTexture() to get an array of raw pixels, but we're going to use
+    SDL_LockTextureToSurface() here, because it wraps that array in a temporary SDL_Surface,
+    letting us use the surface drawing or blit functions instead of lighting up individual pixels.
+    +/
+
+    SDL_Surface *lockedSurface = null;
+    lockTextureToSurface(texture, null, &lockedSurface);  // will fail if texture is STATIC
+
+    /+
+    SDL_FillSurfaceRect(surface, null, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 255, 0));
+    SDL_FillSurfaceRect(surface, &r, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 0, 255));
+     +/
+
+    blitSurface(surface, surRect, lockedSurface, texRect);
+
+    SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
+}
+
+
+
+
 
 
 
@@ -66,19 +112,15 @@ void displayTextureProperties(SDL_Texture* texture)
     +/
 
     SDL_PixelFormat pixelFormat;
-    SDL_PropertiesID props = SDL_GetTextureProperties(texture);  // SDL3 only function
-    if (props == 0) 
-    {
-        printf("Failed to get texture properties: %s\n", SDL_GetError());
-    } 
-    else 
-    {                                        // SDL3 only function
-        pixelFormat = cast (SDL_PixelFormat) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
+    SDL_PropertiesID props = getTextureProperties(texture);  // SDL3 only function
+
+                                      // SDL3 only function
+    pixelFormat = cast (SDL_PixelFormat) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
         
-                                 // SDL2 and SDL3 function
-        const char *formatName = SDL_GetPixelFormatName(pixelFormat);
-        printf("    Texture pixel format name: %s\n", formatName);
-    }
+                          // SDL2 and SDL3 function
+    const char *formatName = SDL_GetPixelFormatName(pixelFormat);
+    printf("    Texture pixel format name: %s\n", formatName);
+
                                             // SDL3 only
     const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(pixelFormat);
     if (!details)
