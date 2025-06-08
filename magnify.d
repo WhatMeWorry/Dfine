@@ -535,13 +535,13 @@ void LightBoard()
 
     SDL_Texture *lightBoard = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 16384, 16384);
     
-    SDL_Surface *temp = loadImageToSurface("./images/4.png");
-
-    SDL_Surface *minSur = createSurface(temp.w, temp.h, SDL_PIXELFORMAT_RGBA8888);
+    SDL_Surface *minSur = loadImageToSurface("./images/4.png");
     
     displaySurfaceProperties(minSur);
-    
-    SDL_Texture *minTex = createTexture(minRen, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, temp.w, temp.h);
+
+    //SDL_Surface *minSur = createSurface(temp.w, temp.h, SDL_PIXELFORMAT_RGBA8888);
+
+    SDL_Texture *minTex = createTexture(minRen, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, minSur.w, minSur.h);
     
     displayTextureProperties(minTex);
 
@@ -596,7 +596,7 @@ void LightBoard()
     displayTextureProperties(minTex);
     
     SDL_RenderClear(minRen);
-    SDL_RenderTexture(minRen, minTex, /+&viewerRect+/ null, null);
+        SDL_RenderTexture(minRen, minTex, /+&viewerRect+/ null, null);
     SDL_RenderPresent(minRen); 
  
  
@@ -636,18 +636,32 @@ void copySurfaceToStreamingTexture(SDL_Surface *surface, SDL_Texture *texture)
     letting us use the surface drawing functions instead of lighting up individual pixels. */
     +/
 
-    SDL_Surface* twin = duplicateSurface(surface); 
+    // Lock the texture for writing
+    // SDL_Surface *lockedSurface = NULL;
+    // if (SDL_LockTextureToSurface(streamingTexture, NULL, &lockedSurface) != 0) {
 
-    lockTextureToSurface(texture, null, &surface);  // will fail if texture is STATIC
+    SDL_Surface *lockedSurface = null;
+    lockTextureToSurface(texture, null, &lockedSurface);  // will fail if texture is STATIC
+    
     writeln("AFTER LOCK ***************************");
     
-    // /+ 
+     /+ 
     SDL_Rect r = { 0, 0, 900, 900 };
     SDL_FillSurfaceRect(surface, null, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 255, 0));
     SDL_FillSurfaceRect(surface, &r, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 0, 255));
-    // +/
+     +/
     
     //SDL_BlitSurface(twin, null, surface, null);
+    
+    // Blit the surface to the locked texture's surface
+    // if (SDL_BlitSurface(mySurface, NULL, lockedSurface, NULL) != 0) {  from misc code
+    
+    //bool res = SDL_BlitSurface(surface, null, texture, null);
+    
+    // Blit the surface to the locked texture's surface
+    // if (SDL_BlitSurface(mySurface, NULL, lockedSurface, NULL) != 0) {
+    
+    bool res = SDL_BlitSurface(surface, null, lockedSurface, null);
     
     SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
 }
