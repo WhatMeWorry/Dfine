@@ -25,12 +25,14 @@ void ThreeSurfacesAndOneStreamingTexure()
     SDL_Window   *window;
     SDL_Renderer *renderer;
 
-    createWindowAndRenderer("Demo", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("Demo", 2000, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
-    // Texture dimensions are limited to 16384 x 16384
+    // Texture max dimensions are limited to 16384 x 16384
 
-    //SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 16384, 16384);
-    SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 8000, 8000);
+    SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 16384, 16384);
+    
+    SDL_Surface *bigSurface = createSurface(16384, 16384, SDL_PIXELFORMAT_RGBA8888);
+
     displayTextureProperties(texture);
     
     SDL_Surface *one = loadImageToSurface("./images/1.png");
@@ -42,10 +44,12 @@ void ThreeSurfacesAndOneStreamingTexure()
     SDL_Surface *three = loadImageToSurface("./images/3.png");
     displaySurfaceProperties(three);
     
-    SDL_Surface *four = loadImageToSurface("./images/3.png");
+    SDL_Surface *four = loadImageToSurface("./images/4.png");
     displaySurfaceProperties(four);
 
     copySurfaceToTexture(one, null, texture, null);
+    
+    copySurfaceToSurface(one, null, bigSurface, null);
     
     SDL_Rect dst;     // an SDL_Rect has x, y, w, and h
     
@@ -55,6 +59,8 @@ void ThreeSurfacesAndOneStreamingTexure()
     dst.h = two.h;
        
     copySurfaceToTexture(two, null, texture, &dst);
+    
+    copySurfaceToSurface(two, null, bigSurface, &dst);
 
 
     dst.x = 1000;
@@ -64,6 +70,8 @@ void ThreeSurfacesAndOneStreamingTexure()
 
     copySurfaceToTexture(three, null, texture, &dst);
     
+    copySurfaceToSurface(three, null, bigSurface, &dst);
+    
     dst.x = 4000;
     dst.y = 4000;     // a SDL_Surface only has w and h elements (no x and y position)
     dst.w = four.w;
@@ -71,10 +79,28 @@ void ThreeSurfacesAndOneStreamingTexure()
 
     copySurfaceToTexture(four, null, texture, &dst);
     
+    copySurfaceToSurface(four, null, bigSurface, &dst);
 
     SDL_RenderClear(renderer);
         SDL_RenderTexture(renderer, texture, null, null);
     SDL_RenderPresent(renderer);
+    
+    
+    // SDL_Surface *saveSurface = null;  // invalid value for SDL_BlitSurface
+
+    SDL_Surface *saveSurface = createSurface(16384, 16384, SDL_PIXELFORMAT_RGBA8888);
+    
+    writeln("b4 copyTextureToSurface");
+    
+    int w; int h;
+    getWindowMaximumSize(window, &w, &h);
+    
+    copyTextureToSurface(texture, null, saveSurface, null);
+    writeln("after copyTextureToSurface");
+    
+    //saveSurfaceToPNGfile(saveSurface, "./images/saved_from_surface.png");
+    
+    saveSurfaceToPNGfile(bigSurface, "./images/bigSurface.png");
 
     // Keep the window open until the user closes it
     SDL_Event event;

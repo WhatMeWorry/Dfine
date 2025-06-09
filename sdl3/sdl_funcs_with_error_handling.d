@@ -19,6 +19,24 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 
 
 
+
+void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
+{
+    int width;  int height;
+    if (SDL_GetWindowMaximumSize(window, &width, &height) == false)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );
+        exit(-1);
+    }
+    writeln("width = ", width);
+    writeln("height = ", height);
+    
+}
+
+
+
+
 void lockTextureToSurface(SDL_Texture *texture, const SDL_Rect *rect, SDL_Surface **surface)
 {
     bool res = SDL_LockTextureToSurface(texture, rect, surface);
@@ -45,10 +63,11 @@ SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
 void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect, 
                  SDL_Surface *dstSurface, const SDL_Rect *dstRect)
 {
-    bool res = SDL_BlitSurface(srcSurface, srcRect, dstSurface, dstRect);
-    if (res == false)
+    // 
+    if (SDL_BlitSurface(srcSurface, srcRect, dstSurface, dstRect) == false)
     {
-        writeln("SDL_BlitSurface failed: ", to!string(SDL_GetError()));  
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );
         exit(-1);
     }
 }
@@ -83,9 +102,32 @@ void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
 }
 
 
+// experimental
+
+void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
+                          SDL_Surface *surface, const SDL_Rect *surRect)
+{
+    SDL_Surface *lockedSurface = null;
+    
+    lockTextureToSurface(texture, null, &lockedSurface);  // will fail if texture is STATIC
+
+    blitSurface(lockedSurface, texRect, surface, surRect);
+
+    SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
+}
 
 
+void copySurfaceToSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
+                          SDL_Surface *dstSurface, const SDL_Rect *dstRect)
+{
+    //SDL_Surface *lockedSurface = null;
+    
+    //lockTextureToSurface(texture, null, &lockedSurface);  // will fail if texture is STATIC
 
+    blitSurface(srcSurface, srcRect, dstSurface, dstRect);
+
+    //SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
+}
 
 
 SDL_Surface* duplicateSurface(SDL_Surface* source) 
