@@ -121,3 +121,194 @@ void ThreeSurfacesAndOneStreamingTexure()
 }
 
 
+
+/+
+    int dividend = 16377;  // absolute length 
+    int divisor  =  4097;
+    int remainder;
+
+    remainder = dividend % divisor;
+
+    writefln("Remainder: %d\n", remainder);
+    
+    int quotient;
+
+    quotient = dividend / divisor;
+
+    writefln("Quotient: %d\n", quotient); // Output: Quotient: 3
+    
++/
+
+
+
+struct Pane
+{
+    this(int len)
+    {
+        writeln("is this called by new in World");
+        //length = len;   // length of all sides (square) 
+    }
+    int length; // length of all sides (square) 
+    // SDL_Rect panePts { 0, 0, sides, sides };
+    SDL_Rect worldPts;
+}
+
+
+struct World
+{
+    this(int rows, int cols, int sideLength)
+    {
+        rows = rows;
+        cols = cols;
+        panes = new Pane[][](rows,cols);
+        length.w = cols * sideLength;    // set the width and height of the World
+        length.h = rows * sideLength;
+        
+        /+ int[][] matrix = [
+        // [1, 2, 3],
+        // [7, 8, 9]
+        // ];
+
+        // Iterate through the 2D array using nested foreach loops
+        foreach (int[] row; matrix) { // Outer loop iterates through each row (1D array)
+            foreach (int element; row) { // Inner loop iterates through each element in the current row
+                write(element, " "); // Print each element followed by a space
+            }
+            writeln(); // Move to the next line after printing a row
+        }
+        +/
+        
+        foreach (size_t i, Pane[] row; panes) 
+        {
+            foreach (size_t j, Pane element; row) 
+            {
+                write("i,j= ", i, ",", j, "   ");
+                panes[i][j].worldPts.x = i * sideLength;
+                panes[i][j].worldPts.y = j * sideLength;
+                panes[i][j].worldPts.w = panes[i][j].worldPts.x + sideLength;
+                panes[i][j].worldPts.h = panes[i][j].worldPts.y + sideLength;
+                writeln("panes[i][j].worldPts = ", panes[i][j].worldPts);
+            }
+            writeln();
+        }
+    }
+    
+    int rows;
+    int cols;
+    Pane[][] panes;
+    SDL_FRect length;
+}
+
+
+
+
+
+void mosaic()
+{
+    SDL_Window   *window;
+    SDL_Renderer *renderer;
+
+    createWindowAndRenderer("Demo", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    // Texture max dimensions are limited to 16384 x 16384
+
+    SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 16384, 16384);
+
+    SDL_Surface *bigSurface = createSurface(4096, 4096, SDL_PIXELFORMAT_RGBA8888);
+
+    displayTextureProperties(texture);
+
+    SDL_Surface *one   = loadImageToSurface("./images/wach1.png");
+    displaySurfaceProperties(one);
+
+    SDL_Surface *two   = loadImageToSurface("./images/wach2.png");
+    displaySurfaceProperties(two);
+
+    SDL_Surface *three = loadImageToSurface("./images/wach3.png");
+    displaySurfaceProperties(three);
+
+    SDL_Surface *four  = loadImageToSurface("./images/wach4.png");
+    displaySurfaceProperties(four);
+
+    auto world = World(2, 3, 1024); 
+
+    writeln("world = ", world);
+
+/+
+    copySurfaceToTexture(one, null, texture, null);
+    
+    copySurfaceToSurface(one, null, bigSurface, null);
+    
+    SDL_Rect dst;     // an SDL_Rect has x, y, w, and h
+    
+    dst.x = one.w;
+    dst.y = 0;      // a SDL_Surface only has w and h elements (no x and y position)
+    dst.w = two.w;
+    dst.h = two.h;
+       
+    copySurfaceToTexture(two, null, texture, &dst);
+    
+    copySurfaceToSurface(two, null, bigSurface, &dst);
+
+
+    dst.x = 1000;
+    dst.y = 1000;     // a SDL_Surface only has w and h elements (no x and y position)
+    dst.w = three.w;
+    dst.h = three.h;
+
+    copySurfaceToTexture(three, null, texture, &dst);
+    
+    copySurfaceToSurface(three, null, bigSurface, &dst);
+    
+    dst.x = 4000;
+    dst.y = 4000;     // a SDL_Surface only has w and h elements (no x and y position)
+    dst.w = four.w;
+    dst.h = four.h;
+
+    copySurfaceToTexture(four, null, texture, &dst);
+    
+    copySurfaceToSurface(four, null, bigSurface, &dst);
+
+    SDL_RenderClear(renderer);
+        SDL_RenderTexture(renderer, texture, null, null);
+    SDL_RenderPresent(renderer);
+    
+    
+    // SDL_Surface *saveSurface = null;  // invalid value for SDL_BlitSurface
+
+    SDL_Surface *saveSurface = createSurface(16384, 16384, SDL_PIXELFORMAT_RGBA8888);
+    
+    writeln("b4 copyTextureToSurface");
+    
+    int w; int h;
+    getWindowMaximumSize(window, &w, &h);
+    
+    copyTextureToSurface(texture, null, saveSurface, null);
+    writeln("after copyTextureToSurface");
+    
+    //saveSurfaceToPNGfile(saveSurface, "./images/saved_from_surface.png");
+    
+    saveSurfaceToPNGfile(bigSurface, "./images/bigSurface.png");
+    
+    +/
+
+    // Keep the window open until the user closes it
+    SDL_Event event;
+    while (SDL_WaitEvent(&event)) 
+    {
+        if (event.type == SDL_EVENT_KEY_DOWN)
+        {
+            if (event.key.key == SDLK_ESCAPE)
+            {
+                break;
+            }
+        }
+        if (event.type == SDL_EVENT_QUIT) 
+        {
+            break;
+        }
+    }
+}
+
+
+

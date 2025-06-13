@@ -128,6 +128,9 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
+    mosaic();
+    exit(-1);
+    
     //createRealBigSurface();
     ThreeSurfacesAndOneStreamingTexure();
     exit(-1);
