@@ -17,7 +17,7 @@ struct F2 { float w; float h; }
 struct P2 { float x; float y; }
 
 struct Point { int x; int y; }
-struct Sides { int w; int h }
+struct Sides { int w; int h; }
 
 struct Slide
 {
@@ -27,6 +27,7 @@ struct Slide
     int       alpha;  // 0-255
     double    angle;  // 0.0-360.0
 }
+
 
 
 struct Tile

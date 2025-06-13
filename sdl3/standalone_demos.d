@@ -148,9 +148,10 @@ struct Pane
         writeln("is this called by new in World");
         //length = len;   // length of all sides (square) 
     }
-    int length; // length of all sides (square) 
+    int         paneLength; // length of all sides (square) 
     // SDL_Rect panePts { 0, 0, sides, sides };
-    SDL_Rect worldPts;
+    SDL_Rect    worldPts;
+    SDL_Texture texture;
 }
 
 
@@ -158,16 +159,14 @@ struct World
 {
     this(int rows, int cols, int sideLength)
     {
+        paneLength = sideLength;
         rows = rows;
         cols = cols;
         panes = new Pane[][](rows,cols);
-        length.w = cols * sideLength;    // set the width and height of the World
-        length.h = rows * sideLength;
+        worldLength.w = cols * sideLength;    // set the width and height of the World
+        worldLength.h = rows * sideLength;
         
-        /+ int[][] matrix = [
-        // [1, 2, 3],
-        // [7, 8, 9]
-        // ];
+        /+ int[][] matrix = [ [1, 2, 3], [7, 8, 9] ];
 
         // Iterate through the 2D array using nested foreach loops
         foreach (int[] row; matrix) { // Outer loop iterates through each row (1D array)
@@ -177,16 +176,16 @@ struct World
             writeln(); // Move to the next line after printing a row
         }
         +/
-        
-        foreach (size_t i, Pane[] row; panes) 
+        foreach (int i, Pane[] row; panes) 
         {
-            foreach (size_t j, Pane element; row) 
+            foreach (int j, Pane pane; row) 
             {
+                panes[i][j].paneLength = sideLength;
                 write("i,j= ", i, ",", j, "   ");
-                panes[i][j].worldPts.x = i * sideLength;
-                panes[i][j].worldPts.y = j * sideLength;
-                panes[i][j].worldPts.w = panes[i][j].worldPts.x + sideLength;
-                panes[i][j].worldPts.h = panes[i][j].worldPts.y + sideLength;
+                panes[i][j].worldPts.x = (j * panes[i][j].paneLength);
+                panes[i][j].worldPts.y = (i * panes[i][j].paneLength);
+                panes[i][j].worldPts.w = panes[i][j].paneLength;
+                panes[i][j].worldPts.h = panes[i][j].paneLength;
                 writeln("panes[i][j].worldPts = ", panes[i][j].worldPts);
             }
             writeln();
@@ -196,11 +195,51 @@ struct World
     int rows;
     int cols;
     Pane[][] panes;
-    SDL_FRect length;
+    SDL_Rect worldLength; // rectangular so need rect
+    int      paneLength;  // always square so just need one side
 }
 
 
+struct Segment  // pane, offset pait
+{
+    int pane;
+    int offset;
+}
 
+struct Piece
+{
+    SDL_Surface  *surface;  // sub-surface of within pane 
+    SDL_Rect     rect;      // rect of the sub-surface (in pane coordinates)
+    Segment      segment;
+}
+
+struct Object
+{
+    this(SDL_Surface *s, int x, int y, World *world)
+    {
+        this.surface = s;
+        
+        Piece[] pieces;
+        
+        Segment hor;
+        Segment ver;
+        
+        hor.pane = x / world.paneLength;
+        hor.offset = x - (hor.pane * world.paneLength);
+
+        ver.pane = y / world.paneLength;
+        ver.offset = y - (ver.pane * world.paneLength);
+        
+        writeln("hor.pane = ", hor.pane, " within pane ", hor.offset);
+        writeln("ver.pane = ", ver.pane, " within pane ", ver.offset);
+
+    }
+    SDL_Surface *surface;  // each object has an image stored in a surface
+
+    Piece[] pieces;  // The object will be placed on a texture or broken up
+                      // into multiple textures if larger than one pane
+
+}
 
 
 void mosaic()
@@ -217,7 +256,7 @@ void mosaic()
     SDL_Surface *bigSurface = createSurface(4096, 4096, SDL_PIXELFORMAT_RGBA8888);
 
     displayTextureProperties(texture);
-
+/+
     SDL_Surface *one   = loadImageToSurface("./images/wach1.png");
     displaySurfaceProperties(one);
 
@@ -229,10 +268,20 @@ void mosaic()
 
     SDL_Surface *four  = loadImageToSurface("./images/wach4.png");
     displaySurfaceProperties(four);
++/
 
-    auto world = World(2, 3, 1024); 
+
+    SDL_Surface *one   = loadImageToSurface("./images/earth1024x1024.png");
+    displaySurfaceProperties(one);
+
+
+    auto world = World(3, 3, 1024); 
+
+    Object obj1 = Object(one, 2148, 333, &world);
 
     writeln("world = ", world);
+
+    
 
 /+
     copySurfaceToTexture(one, null, texture, null);
