@@ -12,11 +12,12 @@ struct Rects
 } 
 
 struct D2 { int w; int h; }
+struct Dimensions { int w; int h; }
 struct F2 { float w; float h; }
 struct P2 { float x; float y; }
 
 struct Point { int x; int y; }
-
+struct Sides { int w; int h }
 
 struct Slide
 {
