@@ -241,3 +241,9 @@ void displaySurfaceProperties(SDL_Surface* surface)
     writeln("    refcount = ", surface.refcount);
 }
 
+void getSurfaceWidthAndHeight(SDL_Surface* surface, int *w, int *h) 
+{
+    *w = surface.w;
+    *h = surface.h;
+}
+
