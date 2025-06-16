@@ -153,6 +153,7 @@ struct World
         /+ int[][] matrix = [ [1, 2, 3], [7, 8, 9] ];
 
         // Iterate through the 2D array using nested foreach loops
+        
         foreach (int[] row; matrix) { // Outer loop iterates through each row (1D array)
             foreach (int element; row) { // Inner loop iterates through each element in the current row
                 write(element, " "); // Print each element followed by a space
@@ -216,8 +217,38 @@ struct Piece
 {
     SDL_Surface  *surface;  // sub-surface of within pane 
     SDL_Rect     rect;      // rect of the sub-surface (in pane coordinates)
-    Segment      segment;
+    Segment      segment;   // Pane - offset pair
 }
+
+struct BigRect
+{
+    DualPt upLeftPt;
+    DualPt upRightPt;
+    DualPt botRightPt;
+    DualPt botLeftPt;
+}
+
+void allocatePiecesAndSetUpperLeftPoints(BigRect *bigRect, Object *obj)
+{
+    int min_r = bigRect.upLeftPt.low.y.pane; 
+    int max_r = bigRect.botLeftPt.low.y.pane;
+    int min_c = bigRect.upLeftPt.low.x.pane;
+    int max_c = bigRect.upRightPt.low.x.pane;
+
+    obj.pieces = new Piece[][]((max_r-min_r+1),(max_r-min_r+1));
+
+    for (int r = min_r; (r <= max_r); r++) 
+    {
+        for (int c = min_c; (c <= max_c); c++) 
+        {
+            obj.pieces[r][c].segment.pane = 777;
+        }
+        writeln();
+    }
+
+}
+
+
 
 struct Object
 {
@@ -227,46 +258,45 @@ struct Object
 
         Piece[] pieces;
 
-        DualPt upLeftPt;
-        upLeftPt.high.x = x;
-        upLeftPt.high.y = y;
+        BigRect bigRect;
 
-        convertHighPtToLowPt(&upLeftPt, world);
+        bigRect.upLeftPt.high.x = x;
+        bigRect.upLeftPt.high.y = y;
+
+        convertHighPtToLowPt(&bigRect.upLeftPt, world);
 
         int w; int h;
         getSurfaceWidthAndHeight(s, &w, &h);
         writeln("w x h ", w, " x ", h);
 
-        DualPt upRightPt;
-        upRightPt.high.x = upLeftPt.high.x + w;
-        upRightPt.high.y = upLeftPt.high.y;
+        bigRect.upRightPt.high.x = bigRect.upLeftPt.high.x + w;
+        bigRect.upRightPt.high.y = bigRect.upLeftPt.high.y;
         
-        convertHighPtToLowPt(&upRightPt, world);
-        writeln("upRightPt = ", upRightPt);
+        convertHighPtToLowPt(&bigRect.upRightPt, world);
         
-        // columns upLeftPt.low.x.pane ... uupRightPt.low.x.pane
-        writeln("Columns from ",upLeftPt.low.x.pane, " to ", upRightPt.low.x.pane);
+        // columns upLeftPt.low.x.pane ... upRightPt.low.x.pane
+        writeln("Columns from ",bigRect.upLeftPt.low.x.pane, " to ", bigRect.upRightPt.low.x.pane);
         
+        bigRect.botLeftPt.high.x = bigRect.upLeftPt.high.x;
+        bigRect.botLeftPt.high.y = bigRect.upLeftPt.high.y + h;
         
-        DualPt botLeftPt; 
-        botLeftPt.high.x = upLeftPt.high.x;
-        botLeftPt.high.y = upLeftPt.high.y + h;
-        
-        convertHighPtToLowPt(&botLeftPt, world);
+        convertHighPtToLowPt(&bigRect.botLeftPt, world);
         
         // rows upLeftPt.low.y.pane ... botLeftPt.low.y.Pane
-        writeln("rows from ",upLeftPt.low.y.pane, " to ", botLeftPt.low.y.pane);
+        writeln("rows from ", bigRect.upLeftPt.low.y.pane, " to ", bigRect.botLeftPt.low.y.pane);
 
-        //int min_r = upLeftPt.low.y.pane; 
-        int max_r = botLeftPt.low.y.pane;
-        //int min_c = upLeftPt.low.x.pane;
-        int max_c = upRightPt.low.x.pane;
+        allocatePiecesAndSetUpperLeftPoints(&bigRect, &this);
 
-        for (int min_r = upLeftPt.low.y.pane; (min_r <= max_r); min_r++) 
+        int min_r = bigRect.upLeftPt.low.y.pane; 
+        int max_r = bigRect.botLeftPt.low.y.pane;
+        int min_c = bigRect.upLeftPt.low.x.pane;
+        int max_c = bigRect.upRightPt.low.x.pane;
+
+        for (int r = min_r; (r <= max_r); r++) 
         {
-            for (int min_c = upLeftPt.low.x.pane; (min_c <= max_c); min_c++) 
+            for (int c = min_c; (c <= max_c); c++) 
             {
-                write("r,c= ", min_r, ",", min_c, "   ");
+                write("r,c= ", r, ",", c, "   ");
             }
             writeln();
         }
@@ -278,8 +308,8 @@ struct Object
     }
     SDL_Surface *surface;  // each object has an image stored in a surface
 
-    Piece[] pieces;  // The object will be placed on a texture or broken up
-                     // into multiple textures if larger than one pane
+    Piece[][] pieces;  // The object will be placed on a texture or broken up
+                       // into multiple textures if larger than one pane
 
 }
 
@@ -345,9 +375,22 @@ void mosaic()
     displaySurfaceProperties(one);
 
                     // rows, cols, pane size
-    auto world = World(6,    6,    256); 
+    auto world = World(4,    4,    512);
 
-    Object obj1 = Object(one, 128, 128, &world);  // world placement
+    Object obj1 = Object(one, 256, 256, &world);  // world placement
+
+/+ finding 2 dimensional lengths in dynamic array
+arr.length - returns the number of elements in the first dimension of the array. 
+arr[0].length - accesses the first row (at index 0) and then retrieves its length. 
+Since each element in a 2D array is itself an array, this gives the number of (columns)
++/
+
+
+
+    writeln("obj1.pieces.length = ", obj1.pieces.length);
+    writeln("obj1.pieces[0].length = ", obj1.pieces[0].length);
+
+    writeln("obj1 = ", obj1);
 
     writeln("world = ", world);
 
