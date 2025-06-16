@@ -235,19 +235,53 @@ void allocatePiecesAndSetUpperLeftPoints(BigRect *bigRect, Object *obj)
     int min_c = bigRect.upLeftPt.low.x.pane;
     int max_c = bigRect.upRightPt.low.x.pane;
 
+    writeln("(max_r-min_r+1),(max_r-min_r+1) = ", (max_r-min_r+1), ",", (max_r-min_r+1));
     obj.pieces = new Piece[][]((max_r-min_r+1),(max_r-min_r+1));
 
-    for (int r = min_r; (r <= max_r); r++) 
+    int stopR = max_r - min_r;  // shift range to start at zero
+    int stopC = max_c - min_c;  // shift range to start at zero
+    
+    for (int r = 0; (r <= stopR); r++) 
     {
-        for (int c = min_c; (c <= max_c); c++) 
+        for (int c = 0; (c <= stopC); c++) 
         {
+            writeln("r,c = ", r, ",", c);
             obj.pieces[r][c].segment.pane = 777;
         }
         writeln();
     }
 
 }
+/+
 
+        enum crossingX { NONE 0, RIGHT 1, LEFT 2, BOTH 3 }
+        enum crossingY { NONE 0,    UP 1, DOWN 2, BOTH 3 }
+        
+           crossX  (NONE, NONE) means the image lies with one pane
+           crossY
+       +-------------+-------------+-------------+
+       |(0,0)        |(1024,0)     |(2048,0)     |
+       |             |             |             |
+       |    RIGHT    |    BOTH     |    LEFT     |
+       |    DOWN     |    DOWN     |    DOWN     |
+       |          +--|-------------|--+          |  
+       |          |  |             |  |          |  
+       +-------------+-------------+-------------+ 
+       |(0,1024)  |  |(1024,1024)  |(2048,1024)  | 
+       |          |  |             |  |          |
+       |    RIGHT |  |    BOTH     |  | LEFT     |
+       |    BOTH  |  |    BOTH     |  | BOTH     |
+       |          |  |             |  |          |
+       |          |  |             |  |          |
+       +-------------+-------------+-------------+
+       |(0,2048)  |  |(1024,2048)  |  |          |
+       |          +--|-------------|--+          |
+       |             |             |             |
+       |    RIGHT    |    BOTH     |    LEFT     |
+       |    UP       |    UP      |     UP       |
+       |             |             |             |
+       +-------------+-------------+-------------+
++/
 
 
 struct Object
@@ -291,6 +325,7 @@ struct Object
         int max_r = bigRect.botLeftPt.low.y.pane;
         int min_c = bigRect.upLeftPt.low.x.pane;
         int max_c = bigRect.upRightPt.low.x.pane;
+        
 
         for (int r = min_r; (r <= max_r); r++) 
         {
@@ -300,10 +335,58 @@ struct Object
             }
             writeln();
         }
+        writeln("**********************************************************************");
+        // every sub rectangle falls into 
 
-
-
-
+        enum crossingX { NONE, RIGHT, LEFT, BOTH }
+        enum crossingY { NONE, UP, DOWN, BOTH }
+        int crossX; 
+        int crossY;
+        
+        for (int r = min_r; (r <= max_r); r++) 
+        {
+            for (int c = min_c; (c <= max_c); c++)
+            {
+                if (min_r == max_r)  // width is within same pane (no borders crossed)
+                {
+                    crossX = crossingX.NONE;  // 0
+                }
+                else if (r == min_r)      // upper left pane (right border crossed)
+                {
+                    crossX = crossingX.RIGHT; // 1
+                }
+                else if (r == max_r)      // upper right pane (left border crossed)
+                {
+                    crossX = crossingX.LEFT;  // 2
+                }
+                else                 // middle pane (sandwhiched beteen others)
+                {
+                    crossX = crossingX.BOTH;  // 3
+                }
+ 
+                if (min_c == max_c)  // height is within same pane (no borders crossed)
+                {
+                    crossY = crossingY.NONE;
+                }
+                else if (c == min_c)      // upper left pane (right border crossed)
+                {
+                    crossY = crossingY.DOWN;
+                }
+                else if (c == max_c)      // bottom right pane (left border crossed)
+                {
+                    crossY = crossingY.UP;
+                }
+                else                      // middle pane (sandwhiched beteen others)
+                {
+                    crossY = crossingY.BOTH;
+                }
+                
+                writeln("crossX = ", crossX);
+                //writeln("crossY = ", crossY);
+            }
+            
+            
+        }
 
     }
     SDL_Surface *surface;  // each object has an image stored in a surface
@@ -375,7 +458,7 @@ void mosaic()
     displaySurfaceProperties(one);
 
                     // rows, cols, pane size
-    auto world = World(4,    4,    512);
+    auto world = World(3,    3,    512);
 
     Object obj1 = Object(one, 256, 256, &world);  // world placement
 
