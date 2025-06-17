@@ -185,57 +185,55 @@ struct World
 }
 
 
-struct Segment  // pane, offset pait
+
+
+
+void convertWorldToPane(Position *position, int paneLength)
 {
-    Point pane;    // offset in pixels within the world. (2 dimensional array of panes)
-    Point upLeft;  // offest in pixels within the pane
+    position.pane.x   = position.world.x / paneLength;  
+    position.upLeft.x = position.world.x - (position.pane.x * paneLength);
+
+    position.pane.y   = position.world.y / paneLength;
+    position.upLeft.y = position.world.y - (position.pane.y * paneLength);
 }
 
+enum crossingX { NONE, RIGHT, LEFT, BOTH }
+enum crossingY { NONE, UP, DOWN, BOTH }
 
-struct DualPt
+struct Position  // pane, offset pait
 {
-    Point   high;
-    MicroPt low;
+    Point pane;    // Position of pane within the world. (world is 2 dimensional array of panes)
+    Point upLeft;  // offest in pixels within the pane of upper left corner of rectagle
+    Point world;   // Position of (pane,upLeft) pair in world coordinates
 }
 
-
-void convertHighPtToLowPt(DualPt *dualPt, World *world)
-{
-    dualPt.low.x.pane   = dualPt.high.x / world.paneLength;
-    dualPt.low.x.offset = dualPt.high.x - (dualPt.low.x.pane * world.paneLength);
-
-    dualPt.low.y.pane   = dualPt.high.y / world.paneLength;
-    dualPt.low.y.offset = dualPt.high.y - (dualPt.low.y.pane * world.paneLength);
-}
-
-        enum crossingX { NONE, RIGHT, LEFT, BOTH }
-        enum crossingY { NONE, UP, DOWN, BOTH }
 
 struct Piece
 {
-    SDL_Surface  *surface;  // sub-surface of within pane 
+    SDL_Surface  *fragment; // portion of the object's surface within pane 
     SDL_Rect     rect;      // rect of the sub-surface (in pane coordinates)
-    Segment      segment;   // Pane - offset pair
+    Position     position;  // where piece of object resides on world/Pane-Offset coordinates
     crossingX    crossX;    // how many borders are crossed horizontallly
     crossingY    crossY;    // how many borders are crossed vertically
 }
 
 struct BigRect
 {
-    DualPt upLeftPt;
-    DualPt upRightPt;
-    DualPt botRightPt;
-    DualPt botLeftPt;
+    Position upLeftPt;
+    Position upRightPt;
+    Position botRightPt;
+    Position botLeftPt;
 }
 
 void allocatePiecesAndSetUpperLeftPoints(BigRect *bigRect, Object *obj)
 {
-    int min_r = bigRect.upLeftPt.low.y.pane; 
-    int max_r = bigRect.botLeftPt.low.y.pane;
-    int min_c = bigRect.upLeftPt.low.x.pane;
-    int max_c = bigRect.upRightPt.low.x.pane;
+    int min_r = bigRect.upLeftPt.pane.y; 
+    int max_r = bigRect.botLeftPt.pane.y;
+    int min_c = bigRect.upLeftPt.pane.x;
+    int max_c = bigRect.upRightPt.pane.x;
 
     writeln("(max_r-min_r+1),(max_r-min_r+1) = ", (max_r-min_r+1), ",", (max_r-min_r+1));
+    
     obj.pieces = new Piece[][]((max_r-min_r+1),(max_r-min_r+1));
 
     int stopR = max_r - min_r;  // shift range to start at zero
@@ -247,10 +245,9 @@ void allocatePiecesAndSetUpperLeftPoints(BigRect *bigRect, Object *obj)
     {
         for (int c = 0; (c <= stopC); c++) 
         {
-            writeln("r,c = ", r, ",", c);
-            obj.pieces[r][c].segment.pane = min_r;
+            obj.pieces[r][c].position.pane.x = c + min_c;  // alter contents to point to pane
+            obj.pieces[r][c].position.pane.y = r + min_r;  // alter contents to point to pane
         }
-        writeln();
     }
 
 }
@@ -296,37 +293,37 @@ struct Object
 
         BigRect bigRect;
 
-        bigRect.upLeftPt.high.x = x;
-        bigRect.upLeftPt.high.y = y;
+        bigRect.upLeftPt.world.x = x;
+        bigRect.upLeftPt.world.y = y;
 
-        convertHighPtToLowPt(&bigRect.upLeftPt, world);
+        convertWorldToPane(&bigRect.upLeftPt, world.paneLength);
 
         int w; int h;
         getSurfaceWidthAndHeight(s, &w, &h);
         writeln("w x h ", w, " x ", h);
 
-        bigRect.upRightPt.high.x = bigRect.upLeftPt.high.x + w;
-        bigRect.upRightPt.high.y = bigRect.upLeftPt.high.y;
+        bigRect.upRightPt.world.x = bigRect.upLeftPt.world.x + w;
+        bigRect.upRightPt.world.y = bigRect.upLeftPt.world.y;
         
-        convertHighPtToLowPt(&bigRect.upRightPt, world);
+        convertWorldToPane(&bigRect.upRightPt, world.paneLength);
         
-        // columns upLeftPt.low.x.pane ... upRightPt.low.x.pane
-        writeln("Columns from ",bigRect.upLeftPt.low.x.pane, " to ", bigRect.upRightPt.low.x.pane);
+        // columns upLeftPt.pane.x, ... upRightPt.pane.x
+        writeln("Columns from ", bigRect.upLeftPt.pane.x, " to ", bigRect.upRightPt.pane.x);
         
-        bigRect.botLeftPt.high.x = bigRect.upLeftPt.high.x;
-        bigRect.botLeftPt.high.y = bigRect.upLeftPt.high.y + h;
+        bigRect.botLeftPt.world.x = bigRect.upLeftPt.world.x;
+        bigRect.botLeftPt.world.y = bigRect.upLeftPt.world.y + h;
         
-        convertHighPtToLowPt(&bigRect.botLeftPt, world);
+        convertWorldToPane(&bigRect.botLeftPt, world.paneLength);
         
         // rows upLeftPt.low.y.pane ... botLeftPt.low.y.Pane
-        writeln("rows from ", bigRect.upLeftPt.low.y.pane, " to ", bigRect.botLeftPt.low.y.pane);
+        writeln("rows from ", bigRect.upLeftPt.pane.y, " to ", bigRect.botLeftPt.pane.y);
 
         allocatePiecesAndSetUpperLeftPoints(&bigRect, &this);
 
-        int min_r = bigRect.upLeftPt.low.y.pane; 
-        int max_r = bigRect.botLeftPt.low.y.pane;
-        int min_c = bigRect.upLeftPt.low.x.pane;
-        int max_c = bigRect.upRightPt.low.x.pane;
+        int min_r = bigRect.upLeftPt.pane.y; 
+        int max_r = bigRect.botLeftPt.pane.y;
+        int min_c = bigRect.upLeftPt.pane.x;
+        int max_c = bigRect.upRightPt.pane.x;
         
 
         for (int r = min_r; (r <= max_r); r++) 
@@ -338,13 +335,12 @@ struct Object
             writeln();
         }
         writeln("**********************************************************************");
-        // every sub rectangle falls into 
 
         //enum crossingX { NONE, RIGHT, LEFT, BOTH }
         //enum crossingY { NONE, UP, DOWN, BOTH }
         //int crossX; 
         //int crossY;
-        
+        /+
         for (int r = min_r; (r <= max_r); r++) 
         {
             for (int c = min_c; (c <= max_c); c++)
@@ -388,7 +384,7 @@ struct Object
             }
             
             
-        }
+        }+/
 
     }
     SDL_Surface *surface;  // each object has an image stored in a surface
@@ -460,9 +456,12 @@ void mosaic()
     displaySurfaceProperties(one);
 
                     // rows, cols, pane size
-    auto world = World(3,    3,    512);
+    auto world = World(4,    7,    512);
+    
+    writeln("rows = world.panes.length = ",    world.panes.length);    // ROWS
+    writeln("cols = world.panes[0].length = ", world.panes[0].length); // COLUMNS
 
-    Object obj1 = Object(one, 256, 256, &world);  // world placement
+    Object obj1 = Object(one, 768, 768, &world);  // world placement
 
 /+ finding 2 dimensional lengths in dynamic array
 arr.length - returns the number of elements in the first dimension of the array. 
@@ -474,7 +473,9 @@ Since each element in a 2D array is itself an array, this gives the number of (c
 
     writeln("obj1.pieces.length = ", obj1.pieces.length);
     writeln("obj1.pieces[0].length = ", obj1.pieces[0].length);
-
+    
+    writeln("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+    
     writeln("obj1 = ", obj1);
 
     writeln("world = ", world);
