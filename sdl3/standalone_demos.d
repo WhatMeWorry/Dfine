@@ -187,22 +187,17 @@ struct World
 
 struct Segment  // pane, offset pait
 {
-    int pane;
-    int offset;
+    Point pane;    // offset in pixels within the world. (2 dimensional array of panes)
+    Point upLeft;  // offest in pixels within the pane
 }
 
-
-struct MicroPt
-{
-    Segment x;
-    Segment y;
-}
 
 struct DualPt
 {
     Point   high;
     MicroPt low;
 }
+
 
 void convertHighPtToLowPt(DualPt *dualPt, World *world)
 {
@@ -213,11 +208,16 @@ void convertHighPtToLowPt(DualPt *dualPt, World *world)
     dualPt.low.y.offset = dualPt.high.y - (dualPt.low.y.pane * world.paneLength);
 }
 
+        enum crossingX { NONE, RIGHT, LEFT, BOTH }
+        enum crossingY { NONE, UP, DOWN, BOTH }
+
 struct Piece
 {
     SDL_Surface  *surface;  // sub-surface of within pane 
     SDL_Rect     rect;      // rect of the sub-surface (in pane coordinates)
     Segment      segment;   // Pane - offset pair
+    crossingX    crossX;    // how many borders are crossed horizontallly
+    crossingY    crossY;    // how many borders are crossed vertically
 }
 
 struct BigRect
@@ -241,12 +241,14 @@ void allocatePiecesAndSetUpperLeftPoints(BigRect *bigRect, Object *obj)
     int stopR = max_r - min_r;  // shift range to start at zero
     int stopC = max_c - min_c;  // shift range to start at zero
     
-    for (int r = 0; (r <= stopR); r++) 
+    // even though pieces[][] start a [0][0] we will store the actual pane 
+    
+    for (int r = 0; (r <= stopR); r++)    // r and c are for control (traversing) the array
     {
         for (int c = 0; (c <= stopC); c++) 
         {
             writeln("r,c = ", r, ",", c);
-            obj.pieces[r][c].segment.pane = 777;
+            obj.pieces[r][c].segment.pane = min_r;
         }
         writeln();
     }
@@ -338,10 +340,10 @@ struct Object
         writeln("**********************************************************************");
         // every sub rectangle falls into 
 
-        enum crossingX { NONE, RIGHT, LEFT, BOTH }
-        enum crossingY { NONE, UP, DOWN, BOTH }
-        int crossX; 
-        int crossY;
+        //enum crossingX { NONE, RIGHT, LEFT, BOTH }
+        //enum crossingY { NONE, UP, DOWN, BOTH }
+        //int crossX; 
+        //int crossY;
         
         for (int r = min_r; (r <= max_r); r++) 
         {
