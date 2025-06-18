@@ -130,12 +130,10 @@ struct Pane
     this(int len)
     {
         writeln("is this called by new in World");
-        //length = len;   // length of all sides (square) 
+        paneLength = len;
     }
     int         paneLength; // length of all sides (square) 
-    // SDL_Rect panePts { 0, 0, sides, sides };
-    SDL_Rect    worldPts;
-    SDL_Texture texture;
+    SDL_Rect    paneRect;  
 }
 
 
@@ -154,29 +152,31 @@ struct World
 
         // Iterate through the 2D array using nested foreach loops
         
-        foreach (int[] row; matrix) { // Outer loop iterates through each row (1D array)
-            foreach (int element; row) { // Inner loop iterates through each element in the current row
-                write(element, " "); // Print each element followed by a space
+        foreach (int[] row; matrix)      // Outer loop iterates through each row (1D array)
+        {
+            foreach (int element; row)   // Inner loop iterates through each element in the current row
+            { 
+                write(element, " ");     // Print each element followed by a space
             }
             writeln(); // Move to the next line after printing a row
         }
         +/
+        
         foreach (int i, Pane[] row; panes) 
         {
             foreach (int j, Pane pane; row) 
             {
                 panes[i][j].paneLength = sideLength;
                 write("i,j= ", i, ",", j, "   ");
-                panes[i][j].worldPts.x = (j * panes[i][j].paneLength);
-                panes[i][j].worldPts.y = (i * panes[i][j].paneLength);
-                panes[i][j].worldPts.w = panes[i][j].paneLength;
-                panes[i][j].worldPts.h = panes[i][j].paneLength;
-                writeln("panes[i][j].worldPts = ", panes[i][j].worldPts);
+                panes[i][j].paneRect.x = (j * panes[i][j].paneLength);
+                panes[i][j].paneRect.y = (i * panes[i][j].paneLength);
+                panes[i][j].paneRect.w = panes[i][j].paneLength;
+                panes[i][j].paneRect.h = panes[i][j].paneLength;
+                writeln("panes[i][j].worldPts = ", panes[i][j].paneRect);
             }
             writeln();
         }
     }
-    
     int rows;
     int cols;
     Pane[][] panes;
@@ -245,11 +245,22 @@ void allocatePiecesAndSetUpperLeftPoints(BigRect *bigRect, Object *obj)
     {
         for (int c = 0; (c <= stopC); c++) 
         {
-            obj.pieces[r][c].position.pane.x = c + min_c;  // alter contents to point to pane
-            obj.pieces[r][c].position.pane.y = r + min_r;  // alter contents to point to pane
+            obj.pieces[r][c].position.pane.x = r + min_r;  // alter contents to point to pane
+            obj.pieces[r][c].position.pane.y = c + min_c;  // alter contents to point to pane
         }
     }
-
+    writeln("obj.pieces.length-1 = ", obj.pieces.length-1);
+    writeln("obj.pieces[0].length-1 = ", obj.pieces[0].length-1);
+    for (int i = 0; i < obj.pieces.length; i++) 
+    {
+        for (int j = 0; j < obj.pieces[0].length; j++) 
+        {
+            write("pane[",i,",", j, "]= ", obj.pieces[i][j].position.pane.x, ",", obj.pieces[i][j].position.pane.y, "   ");
+        }
+        writeln();
+    }
+    
+    
 }
 /+
 
@@ -456,16 +467,19 @@ void mosaic()
     displaySurfaceProperties(one);
 
                     // rows, cols, pane size
-    auto world = World(4,    7,    512);
+    auto world = World(4,    4,    512);
     
     writeln("rows = world.panes.length = ",    world.panes.length);    // ROWS
     writeln("cols = world.panes[0].length = ", world.panes[0].length); // COLUMNS
 
     Object obj1 = Object(one, 768, 768, &world);  // world placement
 
-/+ finding 2 dimensional lengths in dynamic array
+/+ 
+finding 2 dimensional lengths in dynamic array
+
 arr.length - returns the number of elements in the first dimension of the array. 
 arr[0].length - accesses the first row (at index 0) and then retrieves its length. 
+
 Since each element in a 2D array is itself an array, this gives the number of (columns)
 +/
 
@@ -473,14 +487,13 @@ Since each element in a 2D array is itself an array, this gives the number of (c
 
     writeln("obj1.pieces.length = ", obj1.pieces.length);
     writeln("obj1.pieces[0].length = ", obj1.pieces[0].length);
-    
+
     writeln("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-    
+
     writeln("obj1 = ", obj1);
 
     writeln("world = ", world);
 
-    
 
 /+
     copySurfaceToTexture(one, null, texture, null);
