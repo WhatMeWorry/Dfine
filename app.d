@@ -59,6 +59,7 @@ import bindbc.loader;
 import breakup;
 import magnify;
 import standalone_demos;
+import tutorials;
 
 
 
@@ -127,6 +128,9 @@ int main()
     
     //zoomAnImage;
     //zoom_grok;
+    
+    tutorial_1();
+    exit(-1);
     
     mosaic();
     exit(-1);
