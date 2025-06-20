@@ -365,9 +365,12 @@ void google()
         writeln(SDL_GetError());
         return;
     }
-
-    SDL_Window *window = createWindow("Texture Composition", 1000, 1000, cast(SDL_WindowFlags) 0 );
-
+    //void createWindow(string winName, int w, int h, SDL_WindowFlags flags, SDL_Window **window)
+    
+    //SDL_Window *window = createWindow("Texture Composition", 1000, 1000, cast(SDL_WindowFlags) 0, window );
+    SDL_Window *window;
+    createWindow("Texture Composition", 1000, 1000, cast(SDL_WindowFlags) 0, &window );
+    
     SDL_Renderer *renderer = createRenderer(window, null);
     
     int wi, he;
@@ -467,7 +470,9 @@ void google()
 
 void enlargeAndReduce()
 {
-    SDL_Window *window = createWindow("Texture Composition", 1000, 1000, cast(SDL_WindowFlags) 0 );
+    SDL_Window *window;
+    
+    createWindow("Texture Composition", 1000, 1000, cast(SDL_WindowFlags) 0, &window );
 
     SDL_Renderer *renderer = createRenderer(window, null);
     

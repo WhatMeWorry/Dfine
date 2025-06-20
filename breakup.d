@@ -46,28 +46,6 @@ There isn't a hard limit to the number of SDL surfaces you can create
 +/
 
 
-SDL_Window* createWindow(string winName, int w, int h, SDL_WindowFlags flag)
-{
-    SDL_Window *window = SDL_CreateWindow(winName.toStringz(), w, h, flag);
-    if (window == null)
-    {
-        writeln("SDL_CreateWindow failed: ", to!string(SDL_GetError()) );
-        exit(-1);
-    }
-    return window;
-}
-
-SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
-{
-    import std.utf : toUTFz;
-    SDL_Renderer *renderer =  SDL_CreateRenderer(window, toUTFz!(const(char)*)(rendererName) );
-    if (renderer == null)
-    {
-        writeln("SDL_CreateRenderer failed: ", to!string(SDL_GetError()));
-        exit(-1);
-    }
-    return renderer;
-}
     
  
 
@@ -221,26 +199,7 @@ void blitSurfaceToSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst,
 }
 
 
-void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlags windowFlags, 
-                             SDL_Window **window, SDL_Renderer **renderer)
-{
-    // If you pass 0 for the flags parameter
-    // Essentially, passing 0 results in a standard, visible, non-resizable window with decorations, 
-    // positioned according to the system's default placement (or SDL_WINDOWPOS_UNDEFINED).
 
-    bool result = SDL_CreateWindowAndRenderer(toStringz(title), width, height, 
-                                              windowFlags, window, renderer);
-    if (result == false)
-    {
-        writeln("SDL_CreateWindowAndRenderer failed: ", to!string(SDL_GetError())); 
-        exit(-1);
-    }
-    if ((window == null) || (renderer == null))
-    {
-        writeln("either window or renderer or both were not initialized");
-        exit(-1);
-    }
-}
 
 void getWindowSize(SDL_Window *window, int *w, int *h)
 {
