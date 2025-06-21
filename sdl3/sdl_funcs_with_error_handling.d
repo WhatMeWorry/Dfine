@@ -26,12 +26,8 @@ void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
     if (SDL_GetWindowMaximumSize(window, &width, &height) == false)
     {
         writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );
-        exit(-1);
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
-    writeln("width = ", width);
-    writeln("height = ", height);
-    
 }
 
 
@@ -39,11 +35,10 @@ void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
 
 void lockTextureToSurface(SDL_Texture *texture, const SDL_Rect *rect, SDL_Surface **surface)
 {
-    bool res = SDL_LockTextureToSurface(texture, rect, surface);
-    if (res == false)
+    if (SDL_LockTextureToSurface(texture, rect, surface) == false)
     {
-        writeln("SDL_LockTextureToSurface failed: ", to!string(SDL_GetError()));  
-        exit(-1);
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
 }
 
@@ -53,24 +48,61 @@ SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
     SDL_PropertiesID props = SDL_GetTextureProperties(texture);  // SDL3 only function
     if (props == 0) 
     {
-        writeln("SDL_GetTextureProperties failed: ", to!string(SDL_GetError()));  
-        exit(-1);
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
     return props;
+}
+
+
+SDL_PropertiesID getSurfaceProperties(SDL_Surface *surface)
+{
+    SDL_PropertiesID props = SDL_GetSurfaceProperties(surface);
+    if (props == 0) 
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+    return props;
+}
+
+
+
+
+
+//bool SDL_BlitSurfaceScaled(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, const SDL_Rect *dstrect, SDL_ScaleMode scaleMode);
+void blitSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect, 
+                       SDL_Surface *dstSurface, const SDL_Rect *dstRect, SDL_ScaleMode scaleMode)
+{
+    writeln("srcSurface = ", srcSurface, "  srcRect = ", srcRect, "  dstSurface = ", dstSurface, "   dstRect = ", dstRect);
+    if (SDL_BlitSurfaceScaled(srcSurface, srcRect, dstSurface, dstRect, scaleMode) == false)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
 }
 
 
 void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect, 
                  SDL_Surface *dstSurface, const SDL_Rect *dstRect)
 {
-    // 
     if (SDL_BlitSurface(srcSurface, srcRect, dstSurface, dstRect) == false)
     {
         writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );
-        exit(-1);
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
 }
+
+
+void blitSurfaceToSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst, SDL_Rect *dstRect)
+{
+    if (SDL_BlitSurface(src, srcRect, dst, dstRect) == false)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+}
+
 
 // This is a generalized function of copySurfaceToStreamingTexture
 
@@ -292,17 +324,15 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
     // Essentially, passing 0 results in a standard, visible, non-resizable window with decorations, 
     // positioned according to the system's default placement (or SDL_WINDOWPOS_UNDEFINED).
 
-    bool result = SDL_CreateWindowAndRenderer(toStringz(title), width, height, 
-                                              windowFlags, window, renderer);
-    if (result == false)
+    if (SDL_CreateWindowAndRenderer(toStringz(title), width, height, windowFlags, window, renderer) == false)
     {
-        writeln("SDL_CreateWindowAndRenderer failed: ", to!string(SDL_GetError())); 
-        exit(-1);
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
     if ((window == null) || (renderer == null))
     {
         writeln("either window or renderer or both were not initialized");
-        exit(-1);
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
 }
 
@@ -320,23 +350,73 @@ void loadImageToSurface(string file, SDL_Surface** surface)
 
 
 
-void blitSurfaceToSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst, SDL_Rect *dstRect)
-{
-    bool result = SDL_BlitSurface(src, srcRect, dst, dstRect);  // Note: SDL3's SDL_BlitSurface returns bool
-    if (result == false)
-    {
-        writeln("SDL_BlitSurface failed: ", to!string(SDL_GetError())); 
-        exit(-1);
-    }
-}
 
 
 void updateWindowSurface(SDL_Window *window)
 {
-    bool result = SDL_UpdateWindowSurface(window);
-    if (result == false)
+    if (SDL_UpdateWindowSurface(window) == false)
     {
-        writeln("SDL_UpdateWindowSurface failed: ", to!string(SDL_GetError())); 
-        exit(-1);
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
 }
+
+
+void getPixelFormatDetails(SDL_PixelFormat pixelFormat, SDL_PixelFormatDetails *details)
+{
+    //details = SDL_GetPixelFormatDetails(pixelFormat);
+    //if (pixelFormatDetails != 0)
+    //{
+    //    writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+    //    writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    //}
+}
+
+/+
+
+// Surface >> props >> pixelFormat >> details
+
+void displayPixelFormatDetails(SDL_Surface *surface)
+{
+    SDL_PixelFormat pixelFormat;
+    SDL_PropertiesID props = getSurfaceProperties(surface);
+    
+    pixelFormat = cast (SDL_PixelFormat) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
+
+    //const char *formatName = SDL_GetPixelFormatName(pixelFormat);
+    //printf("    Surface pixel format name: %s\n", formatName);
+    writeln("after SDL_GetNumberProperty and before SDL_GetPixelFormatDetails");
+    const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(pixelFormat);
+    if (!details)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+
+    const char *formatName = SDL_GetPixelFormatName(pixelFormat);
+    printf("     Surface pixel format: %s\n", formatName);
+    writeln("    Bits per Pixel: ", details.bits_per_pixel);
+    writeln("    Bytes per Pixel: ", details.bytes_per_pixel);
+    writefln("   Rmask: 0x%08X, Gmask: 0x%08X, Bmask: 0x%08X, Amask: 0x%08X\n",
+                 details.Rmask, details.Gmask, details.Bmask, details.Amask);
+}
++/
+
+
+/+
+    SDL_PropertiesID SDL_GetSurfaceProperties(SDL_Surface *surface);  // SDL3 only
+    
+    SDL_PropertiesID SDL_GetTextureProperties(SDL_Texture *texture);  // SDL3 only
+    
+    SDL_PropertiesID SDL_GetWindowProperties(SDL_Window *window);
+    
+    typedef Uint32 SDL_PropertiesID;  // SDL3 only
+    
+    In SDL3, SDL_PropertiesID is a data type used to represent a property group.
+    
+    What is a property group?
+    
+    A property group is a collection of variables (properties) that can be created and accessed by name during 
+    rogram execution. Think of it like a dynamic structure where you can add, retrieve, and manage different 
+    types of data without having to pre-define everything in a fixed structure.
++/
