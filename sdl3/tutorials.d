@@ -145,10 +145,14 @@ void tutorial_3()
 
     SDL_FillSurfaceRect(greenSurface, null, fillColor);
 
-    blitSurfaceScaled(greenSurface,null, screenSurface, null, SDL_SCALEMODE_LINEAR);
+     blitSurfaceScaled(greenSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
+    
+    // blitSurface(greenSurface, null, screenSurface, null);  
 
-    blitSurfaceScaled(globeSurface,null, screenSurface, null, SDL_SCALEMODE_LINEAR);
-
+     blitSurfaceScaled(globeSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
+    
+    // blitSurface(globeSurface, null, screenSurface, null);  // if used, globeSurface only takes up quadrant of screen
+                                                              // because no scaling
     updateWindowSurface(window);
     
     bool done = false;
