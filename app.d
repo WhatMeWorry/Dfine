@@ -129,6 +129,9 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
+    tutorial_2();
+    exit(-1);
+    
     tutorial_1();
     exit(-1);
     

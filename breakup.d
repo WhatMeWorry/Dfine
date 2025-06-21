@@ -188,15 +188,7 @@ SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
 }
 
 
-void blitSurfaceToSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst, SDL_Rect *dstRect)
-{
-    bool result = SDL_BlitSurface(src, srcRect, dst, dstRect);
-    if (result == false)
-    {
-        writeln("SDL_BlitSurface failed: ", to!string(SDL_GetError())); 
-        exit(-1);
-    }
-}
+
 
 
 

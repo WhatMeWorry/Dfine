@@ -273,7 +273,18 @@ void createWindow(string winName, int w, int h, SDL_WindowFlags flags, SDL_Windo
 }
 
 
-/+
+
+void getWindowSurface(SDL_Window *window, SDL_Surface** windowSurface)
+{
+    *windowSurface = SDL_GetWindowSurface(window);
+    if (windowSurface == null)
+    {
+        writeln("SDL_GetWindowSurface failed: ", to!string(SDL_GetError()) );
+        exit(-1);
+    }
+}
+
+
 void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlags windowFlags, 
                              SDL_Window **window, SDL_Renderer **renderer)
 {
@@ -294,4 +305,38 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
         exit(-1);
     }
 }
-+/
+
+
+
+void loadImageToSurface(string file, SDL_Surface** surface)
+{
+    *surface = IMG_Load(toStringz(file));  // IMG_Load function supports a wide range of image formats,
+    if (surface == null)                               // including PCX, GIF, JPG, TIF, LBM, and PNG.
+    {
+        writeln("IMG_Load failed with file: ", file, " because ", to!string(SDL_GetError()));
+        exit(-1);    // IMG_Load failed with file: ./images/huge.png because Image too large to decode
+    }                // IMG_Load failed with file: ./images/9.png because Couldn't open ./images/9.png: 
+}
+
+
+
+void blitSurfaceToSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst, SDL_Rect *dstRect)
+{
+    bool result = SDL_BlitSurface(src, srcRect, dst, dstRect);  // Note: SDL3's SDL_BlitSurface returns bool
+    if (result == false)
+    {
+        writeln("SDL_BlitSurface failed: ", to!string(SDL_GetError())); 
+        exit(-1);
+    }
+}
+
+
+void updateWindowSurface(SDL_Window *window)
+{
+    bool result = SDL_UpdateWindowSurface(window);
+    if (result == false)
+    {
+        writeln("SDL_UpdateWindowSurface failed: ", to!string(SDL_GetError())); 
+        exit(-1);
+    }
+}
