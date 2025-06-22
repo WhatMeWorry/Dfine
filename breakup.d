@@ -122,27 +122,7 @@ void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int 
 
 
 
-SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surface)
-{
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (texture == null)
-    {
-        writeln("SDL_CreateTextureFromSurface failed: ", to!string(SDL_GetError()));
-        exit(-1);
-    }
-    return texture;
-}
 
-SDL_Texture* createTexture(SDL_Renderer *renderer, SDL_PixelFormat format, SDL_TextureAccess access, int width, int height)
-{
-    SDL_Texture *texture = SDL_CreateTexture(renderer, format, access, width, height);
-    if (!texture)
-    {
-        writeln("SDL_CreateTextureFromSurface failed: ", to!string(SDL_GetError()));
-        exit(-1);
-    }
-    return texture;
-}
 
 
 void getTextureSizeFloats(SDL_Texture *texture, float *width, float *height)

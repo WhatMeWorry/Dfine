@@ -135,10 +135,13 @@ int main()
     //tutorial_2();
     //exit(-1);
     
-    tutorial_3();
+    //tutorial_3();
     //exit(-1);
     
-    tutorial_4();
+    //tutorial_4();
+    //exit(-1);
+    
+    tutorial_5();
     exit(-1);
     
     mosaic();
