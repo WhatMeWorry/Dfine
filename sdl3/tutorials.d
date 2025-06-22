@@ -131,14 +131,17 @@ void tutorial_3()
 
     getWindowSurface(window, &screenSurface);
     
+    writeln("screenSurface has");
     displaySurfaceProperties(screenSurface);
 
     loadImageToSurface("./images/globe256x256.png", &globeSurface);
 
+    writeln("globeSurface has");
     displaySurfaceProperties(globeSurface);
 
     greenSurface = SDL_CreateSurface(winWidth, winHeight, SDL_PIXELFORMAT_RGBA32); // Using a common format
 
+    writeln("greenSurface created with SDL_PIXELFORMAT_RGBA32 has");
     displaySurfaceProperties(greenSurface);
 
     uint fillColor = SDL_MapSurfaceRGBA(greenSurface, 0, 255, 0, 255);
@@ -170,4 +173,78 @@ void tutorial_3()
     
     
 }
+
+
+
+void tutorial_4()
+{
+    SDL_Window* window = null;
+    SDL_Surface* windowSurface = null;  // one example used display as variable name
+    SDL_Surface* globeSurface = null;
+    SDL_Surface* greenSurface = null;
+    
+    int winWidth = 512; 
+    int winHeight = 512;
+    
+    createWindow("Tutorial 4 - Alpha Blending", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
+
+    getWindowSurface(window, &windowSurface);
+
+    // Create a source surface with alpha channel (RGBA format)
+    
+    
+    SDL_Surface *sourceSurface = SDL_CreateSurface(winWidth, winHeight, SDL_PIXELFORMAT_RGBA32);
+
+/+
+    greenSurface = SDL_CreateSurface(winWidth, winHeight, SDL_PIXELFORMAT_RGBA32); // Using a common format
+    writeln("greenSurface created with SDL_PIXELFORMAT_RGBA32 has");
+    displaySurfaceProperties(greenSurface);
+    uint fillColor = SDL_MapSurfaceRGBA(greenSurface, 0, 255, 0, 255);
+    SDL_FillSurfaceRect(greenSurface, null, fillColor);
+    blitSurfaceScaled(greenSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
++/
+    // Fill the source surface with a semi-transparent color (e.g., red with 50% alpha)
+    
+    uint semiTransparentRed = SDL_MapSurfaceRGBA(sourceSurface, 255, 0, 0, 128); // 128 is ~50% alpha
+    
+    SDL_FillSurfaceRect(sourceSurface, null, semiTransparentRed);
+
+    // Set the blend mode for the source surface to enable alpha blending
+    
+    SDL_SetSurfaceBlendMode(sourceSurface, SDL_BLENDMODE_BLEND);
+
+    // (Optional) Adjust the overall alpha modulation of the source surface
+    
+    // SDL_SetSurfaceAlphaMod(sourceSurface, 192); // Set overall transparency to ~75%
+
+    // Main loop
+    bool running = true;
+    SDL_Event event;
+    while (running) {
+        while (SDL_PollEvent(&event) != 0) {
+            if (event.type == SDL_EVENT_QUIT) {
+                running = false;
+            }
+        }
+
+        // Clear the window surface
+        
+        SDL_FillSurfaceRect(windowSurface, null, SDL_MapSurfaceRGB(windowSurface, 255, 255, 255)); // Fill with white
+
+        // Blit the source surface onto the window surface
+        SDL_Rect destRect = { 100, 100, 200, 200 }; // Destination rectangle
+        SDL_BlitSurface(sourceSurface, null, windowSurface, &destRect);
+
+        // Update the window surface
+        SDL_UpdateWindowSurface(window);
+
+        // Add a small delay
+        SDL_Delay(16); // ~60 fps
+    }
+
+}
+
+
+
+
 

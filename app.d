@@ -129,13 +129,16 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
-    tutorial_2();
+    //tutorial_1();
+    //exit(-1);
+    
+    //tutorial_2();
     //exit(-1);
     
     tutorial_3();
-    exit(-1);
+    //exit(-1);
     
-    tutorial_1();
+    tutorial_4();
     exit(-1);
     
     mosaic();
