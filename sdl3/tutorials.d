@@ -21,7 +21,7 @@ void tutorial_1()  // Creates a white filled 640x480 window that can be closed w
 {
     SDL_Window* window = null;
     SDL_Renderer* renderer = null;
-    bool done = false;
+    bool running = true;
 
     createWindowAndRenderer("tutorial_1", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
     
@@ -29,14 +29,14 @@ void tutorial_1()  // Creates a white filled 640x480 window that can be closed w
     
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
     
-    while (!done)
+    while (running)
     {
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_EVENT_QUIT)
             {
-                done = true;
+                running = false;
             }
         }
 
@@ -57,6 +57,7 @@ void tutorial_1()  // Creates a white filled 640x480 window that can be closed w
 void tutorial_2()
 {
     SDL_Window* window = null;
+    bool running = true;
     
     createWindow("tutorial_2", 512, 512, cast(SDL_WindowFlags) 0, &window);
 
@@ -80,26 +81,36 @@ void tutorial_2()
     //blitSurface(sourceSurface, &srcRect, windowSurface, &dstRect);
     
     blitSurface(sourceSurface, null, windowSurface, null);
- 
-    updateWindowSurface(window);
-    
-    bool done = false;
-    while (!done)
+
+    while (running)
     {
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_EVENT_QUIT)
             {
-                done = true;
+                running = false;
             }
         }
+        updateWindowSurface(window);
     }
 }
 
 /+
-SDL_ScaleMode determines how (surfaces and)??? textures are scaled when their size doesn't perfectly match the 
-destination. It's an enum that defines different scaling algorithms, primarily impacting how 
+
+Different sizes in srcrect and dstrect in SDL3 trigger automatic scaling of the source texture 
+to match the destination's size, controlled by the texture's scale mode. 
+
+Scaling: SDL3 will resize the portion of the source texture defined by srcrect to match the 
+dimensions of the dstrect. This is done automatically as part of the rendering process.
+
+Scaling Mode: The way this scaling is performed can be controlled by the texture's scale mode. By 
+default, it's set to SDL_SCALEMODE_LINEAR (linear filtering), but you can change it to 
+SDL_SCALEMODE_NEAREST (nearest pixel sampling) using SDL_SetTextureScaleMode
+
+
+SDL_ScaleMode determines how (surfaces and)??? textures are scaled when their size doesn't perfectly 
+match the destination. It's an enum that defines different scaling algorithms, primarily impacting how 
 pixel art looks when stretched or shrunk
 
 SDL_SCALEMODE_NEAREST:
@@ -116,18 +127,23 @@ This mode is similar to SDL_SCALEMODE_NEAREST but includes some additional logic
 for pixel art, particularly when scaling by non-integer factors
 +/
 
-void tutorial_3()
+void tutorial_scaling()
 {
 
     SDL_Window* window = null;
+    SDL_Renderer* renderer = null;
     SDL_Surface* screenSurface = null;  // one example used display as variable name
     SDL_Surface* globeSurface = null;
-    SDL_Surface* greenSurface = null;
+    SDL_Surface* redSurface = null;
+    SDL_Rect     globeRect;
+    bool running = true;
     
-    int winWidth = 512; 
-    int winHeight = 512;
+    int winWidth = 1000; 
+    int winHeight = 1000;
     
-    createWindow("tutorial_3", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
+    //createWindow("tutorial_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
+    
+    createWindowAndRenderer("tutorial_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     getWindowSurface(window, &screenSurface);
     
@@ -135,43 +151,70 @@ void tutorial_3()
     displaySurfaceProperties(screenSurface);
 
     loadImageToSurface("./images/globe256x256.png", &globeSurface);
+    
+    globeRect.w = globeSurface.w;  // original size   scale is 1:1
+    globeRect.h = globeSurface.h;
 
     writeln("globeSurface has");
     displaySurfaceProperties(globeSurface);
 
-    greenSurface = SDL_CreateSurface(winWidth, winHeight, SDL_PIXELFORMAT_RGBA32); // Using a common format
+    redSurface = SDL_CreateSurface(winWidth, winHeight, SDL_PIXELFORMAT_RGBA32); // Using a common format
 
-    writeln("greenSurface created with SDL_PIXELFORMAT_RGBA32 has");
-    displaySurfaceProperties(greenSurface);
+    writeln("redSurface created with SDL_PIXELFORMAT_RGBA32 has");
+    displaySurfaceProperties(redSurface);
 
-    uint fillColor = SDL_MapSurfaceRGBA(greenSurface, 0, 255, 0, 255);
+    uint fillColor = SDL_MapSurfaceRGBA(redSurface, 255, 0, 0, 255);
 
-    SDL_FillSurfaceRect(greenSurface, null, fillColor);
+    SDL_FillSurfaceRect(redSurface, null, fillColor);
 
-     blitSurfaceScaled(greenSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
-    
-    // blitSurface(greenSurface, null, screenSurface, null);  
-
-     blitSurfaceScaled(globeSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
-    
-    // blitSurface(globeSurface, null, screenSurface, null);  // if used, globeSurface only takes up quadrant of screen
-                                                              // because no scaling
-    updateWindowSurface(window);
-    
-    bool done = false;
-    while (!done)
+    while (running)
     {
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_EVENT_QUIT)
-            {
-                done = true;
-            }
+           if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+           {
+               running = false;
+           }
         }
+        
+        
+        
+        // blitSurfaceScaled(redSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
+
+        blitSurface(redSurface, null, screenSurface, null);  
+
+        // blitSurfaceScaled(globeSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
+ 
+        blitSurface(globeSurface, null, screenSurface, null);  // if used, globeSurface only takes up quadrant of screen
+                                                               // because no scaling
+                                                               
+        // Surfaces are on the CPU so it's not optimal for you to use them to draw. Instead it's recommended 
+        // to create a Texture, draw with the renderer to it and then convert it back as a Surface if you need.
+
+        
+        //createRenderer(window, "MyRenderer", &renderer);  // create rend when create window
+        //SDL_Texture *screenTexture =  createTextureFromSurface(renderer, screenSurface); Doesn't create a Streaming Texture
+        
+        SDL_Texture *screenTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 
+                                                   screenSurface.w, screenSurface.h);
+                                                   
+        //copySurfaceToTexture(screenSurface, null, screenTexture, null);
+        
+        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // set to blue
+        
+        SDL_RenderRect(renderer, cast(SDL_FRect*) &globeRect);   // draw blue outline of rectangle around globe
+        
+        // cannot pass argument `& globeRect` of type `SDL_Rect*` to parameter `const(SDL_FRect)* rect`
+        //                                                                           Floating Rect
+        
+        // screenTexture and screenSurface are same size screenTextrue exists so we may draw to it.
+        
+        copyTextureToSurface(screenTexture, null, screenSurface, null);
+
+        
+        updateWindowSurface(window);
     }
-    
-    
 }
 
 /+
@@ -191,6 +234,7 @@ void tutorial_4()
     SDL_Surface* windowSurface = null;  // one example used display as variable name
     SDL_Surface* globeSurface = null;
     //SDL_Surface* greenSurface = null;
+    bool running = true;
     
     int winWidth = 1000; 
     int winHeight = 1000;
@@ -232,7 +276,7 @@ void tutorial_4()
     
     // SDL_SetSurfaceAlphaMod(redSurface, 192); // Set overall transparency to ~75%
 
-    bool running = true;
+    
     SDL_Event event;
     while (running) 
     {
@@ -280,6 +324,7 @@ void tutorial_5()
     SDL_Renderer* renderer = null;
     SDL_Surface* redSurface = null;
     SDL_Surface* greenSurface = null;
+    bool running = true;
     
     int winWidth = 1000; 
     int winHeight = 1000;
@@ -332,7 +377,7 @@ void tutorial_5()
     setTextureBlendMode(redTexture, SDL_BLENDMODE_BLEND);
     setTextureBlendMode(greenTexture, SDL_BLENDMODE_BLEND);
 
-    bool running = true;
+
     SDL_Event event;
     while (running) 
     {

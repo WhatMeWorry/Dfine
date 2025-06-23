@@ -344,6 +344,9 @@ void getSurfaceWidthAndHeight(SDL_Surface* surface, int *w, int *h)
 
 
 // Eventually replace with void createRenderer(...) below
+
+// Keeps failing with "Parameter 'renderer' is invalid"
+
 SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
 {
     import std.utf : toUTFz;
