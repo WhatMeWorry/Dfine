@@ -129,13 +129,16 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
-    //tutorial_1();
+    //tutorial_smallest();
     //exit(-1);
     
-    //tutorial_2();
+    //tutorial_no_renderer();
     //exit(-1);
     
-    tutorial_scaling();
+    tutorial_surface_no_implicit_scaling();
+    //exit(-1);
+    
+    tutorial_surface_exlicit_scaling();
     exit(-1);
     
     //tutorial_4();

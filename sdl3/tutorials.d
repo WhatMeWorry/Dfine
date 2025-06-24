@@ -17,29 +17,29 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 
-void tutorial_1()  // Creates a white filled 640x480 window that can be closed with window
+void tutorial_smallest()
 {
     SDL_Window* window = null;
     SDL_Renderer* renderer = null;
     bool running = true;
 
-    createWindowAndRenderer("tutorial_1", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("tutorial_smallest", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
     
-    // defaults to black window if SDL_SetRenderDrawColor is not present
+    // defaults to black window
     
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
-    
+
     while (running)
     {
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_EVENT_QUIT)
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
             {
                 running = false;
             }
         }
-
+        
         SDL_RenderClear(renderer); // Clear the renderer
             // Add your drawing calls here (e.g., SDL_RenderFillRect())
         SDL_RenderPresent(renderer); // Present the rendered content
@@ -48,18 +48,15 @@ void tutorial_1()  // Creates a white filled 640x480 window that can be closed w
 
 
 
-// blitSurface() and updateWindowSurface() allows you to bypass the use of renderers
+// getWindowSurface(), blitSurface() and updateWindowSurface() allows you to bypass the use of renderers
 // and thus SDL_RenderClear and SDL_RenderPresent.
-//
-// At least for blit operations, 
 
-
-void tutorial_2()
+void tutorial_no_renderer()
 {
     SDL_Window* window = null;
     bool running = true;
     
-    createWindow("tutorial_2", 512, 512, cast(SDL_WindowFlags) 0, &window);
+    createWindow("tutorial_no_renderer", 512, 512, cast(SDL_WindowFlags) 0, &window);
 
     SDL_Surface* windowSurface;
 
@@ -80,6 +77,8 @@ void tutorial_2()
     
     //blitSurface(sourceSurface, &srcRect, windowSurface, &dstRect);
     
+    displaySurfaceProperties(sourceSurface);
+    displaySurfaceProperties(windowSurface);
     blitSurface(sourceSurface, null, windowSurface, null);
 
     while (running)
@@ -87,7 +86,7 @@ void tutorial_2()
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_EVENT_QUIT)
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
             {
                 running = false;
             }
@@ -96,8 +95,8 @@ void tutorial_2()
     }
 }
 
-/+
 
+/+
 Different sizes in srcrect and dstrect in SDL3 trigger automatic scaling of the source texture 
 to match the destination's size, controlled by the texture's scale mode. 
 
@@ -127,9 +126,13 @@ This mode is similar to SDL_SCALEMODE_NEAREST but includes some additional logic
 for pixel art, particularly when scaling by non-integer factors
 +/
 
-void tutorial_scaling()
-{
+/+
+Unlike textures, SDL3 has no automatic scaling when source and destination rectagles are blitted.
+thus the sprites will appear shrunken or truncated
++/
 
+void tutorial_surface_no_implicit_scaling()
+{
     SDL_Window* window = null;
     SDL_Renderer* renderer = null;
     SDL_Surface* screenSurface = null;  // one example used display as variable name
@@ -141,9 +144,9 @@ void tutorial_scaling()
     int winWidth = 1000; 
     int winHeight = 1000;
     
-    //createWindow("tutorial_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
+    //createWindow("tutorial_surface_no_implicit_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
     
-    createWindowAndRenderer("tutorial_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("tutorial_surface_no_implicit_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     getWindowSurface(window, &screenSurface);
     
@@ -178,15 +181,106 @@ void tutorial_scaling()
            }
         }
         
-        
-        
         // blitSurfaceScaled(redSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
 
         blitSurface(redSurface, null, screenSurface, null);  
 
         // blitSurfaceScaled(globeSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
- 
+
         blitSurface(globeSurface, null, screenSurface, null);  // if used, globeSurface only takes up quadrant of screen
+                                                               // because no scaling
+                                                               
+        SDL_Rect smaller = { 512, 512, 0, 0 };  // note that when destination < source the entire source is still drawn
+                                                               
+        blitSurface(globeSurface, null, screenSurface, &smaller); 
+                                                               
+        // Surfaces are on the CPU so it's not optimal for you to use them to draw. Instead it's recommended 
+        // to create a Texture, draw with the renderer to it and then convert it back as a Surface if you need.
+
+        
+        //createRenderer(window, "MyRenderer", &renderer);  // create rend when create window
+        //SDL_Texture *screenTexture =  createTextureFromSurface(renderer, screenSurface); Doesn't create a Streaming Texture
+        
+        SDL_Texture *screenTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 
+                                                   screenSurface.w, screenSurface.h);
+                                                   
+        //copySurfaceToTexture(screenSurface, null, screenTexture, null);
+        
+        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // set to blue
+        
+        SDL_RenderRect(renderer, cast(SDL_FRect*) &globeRect);   // draw blue outline of rectangle around globe
+        
+        // cannot pass argument `& globeRect` of type `SDL_Rect*` to parameter `const(SDL_FRect)* rect`
+        //                                                                           Floating Rect
+        
+        // screenTexture and screenSurface are same size screenTextrue exists so we may draw to it.
+        
+        copyTextureToSurface(screenTexture, null, screenSurface, null);
+
+        updateWindowSurface(window);
+    }
+}
+
+
+// if blitting chunks of different sizes, need blitSurfaceScaled(..., SDL_SCALEMODE_LINEAR) to stretch or shrink suface copies
+
+void tutorial_surface_exlicit_scaling()
+{
+    SDL_Window* window = null;
+    SDL_Renderer* renderer = null;
+    SDL_Surface* screenSurface = null;  // one example used display as variable name
+    SDL_Surface* globeSurface = null;
+    SDL_Surface* redSurface = null;
+    SDL_Rect     globeRect;
+    bool running = true;
+    
+    int winWidth = 1000; 
+    int winHeight = 1000;
+    
+    //createWindow("tutorial_surface_exlicit_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
+    
+    createWindowAndRenderer("tutorial_surface_exlicit_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    getWindowSurface(window, &screenSurface);
+    
+    writeln("screenSurface has");
+    displaySurfaceProperties(screenSurface);
+
+    loadImageToSurface("./images/globe256x256.png", &globeSurface);
+    
+    globeRect.w = globeSurface.w;  // original size   scale is 1:1
+    globeRect.h = globeSurface.h;
+
+    writeln("globeSurface has");
+    displaySurfaceProperties(globeSurface);
+
+    redSurface = SDL_CreateSurface(winWidth, winHeight, SDL_PIXELFORMAT_RGBA32); // Using a common format
+
+    writeln("redSurface created with SDL_PIXELFORMAT_RGBA32 has");
+    displaySurfaceProperties(redSurface);
+
+    uint fillColor = SDL_MapSurfaceRGBA(redSurface, 255, 0, 0, 255);
+
+    SDL_FillSurfaceRect(redSurface, null, fillColor);
+
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+           if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+           {
+               running = false;
+           }
+        }
+        
+        blitSurfaceScaled(redSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
+
+        // blitSurface(redSurface, null, screenSurface, null);  
+
+        blitSurfaceScaled(globeSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
+
+        // blitSurface(globeSurface, null, screenSurface, null);  // if used, globeSurface only takes up quadrant of screen
                                                                // because no scaling
                                                                
         // Surfaces are on the CPU so it's not optimal for you to use them to draw. Instead it's recommended 
@@ -212,10 +306,12 @@ void tutorial_scaling()
         
         copyTextureToSurface(screenTexture, null, screenSurface, null);
 
-        
         updateWindowSurface(window);
     }
 }
+
+
+
 
 /+
 In digital displays like computer screens and televisions, the primary colors are red, green, and blue (RGB). 
