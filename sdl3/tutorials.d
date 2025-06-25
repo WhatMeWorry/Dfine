@@ -216,17 +216,17 @@ void surface_explicit_scaling_04()
         blitSurface(solidColorSurface, null, screenSurface, null);
         
         SDL_Rect same = { 0, 0, globeSurface.w, globeSurface.h };
-        
+writeln("1a");        
         blitSurfaceScaled(globeSurface, null, screenSurface, &same, SDL_SCALEMODE_LINEAR);
-
+writeln("1");
         SDL_Rect smaller = { 256, 256, globeSurface.w / 2, globeSurface.h / 2 };
-        
+writeln("2a");        
         blitSurfaceScaled(globeSurface, null, screenSurface, &smaller, SDL_SCALEMODE_LINEAR);
-
+writeln("2");
         SDL_Rect larger = { 512, 512, globeSurface.w * 2, globeSurface.h * 2 };
 
         blitSurfaceScaled(globeSurface, null, screenSurface, &larger, SDL_SCALEMODE_LINEAR); 
-
+writeln("3");
         updateWindowSurface(window);
     }
     SDL_Quit();

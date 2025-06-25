@@ -551,6 +551,53 @@ void displayPixelFormatDetails(SDL_Surface *surface)
     What is a property group?
     
     A property group is a collection of variables (properties) that can be created and accessed by name during 
-    rogram execution. Think of it like a dynamic structure where you can add, retrieve, and manage different 
+    program execution. Think of it like a dynamic structure where you can add, retrieve, and manage different 
     types of data without having to pre-define everything in a fixed structure.
 +/
+
+
+// Renderer Properties (not a complete list but these seem to be the most used
+/+
+SDL_PROP_RENDERER_NAME_STRING: the name of the rendering driver
+SDL_PROP_RENDERER_WINDOW_POINTER: the window where rendering is displayed, if any
+SDL_PROP_RENDERER_SURFACE_POINTER: the surface where rendering is displayed, if this is a software renderer without a window
+SDL_PROP_RENDERER_VSYNC_NUMBER: the current vsync setting
+SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER: the maximum texture width and height
+SDL_PROP_RENDERER_TEXTURE_FORMATS_POINTER: a (const SDL_PixelFormat *) array of pixel formats, terminated with SDL_PIXELFORMAT_UNKNOWN, 
+representing the available texture formats for this renderer.
++/
+
+
+
+SDL_PropertiesID getRendererProperties(SDL_Renderer *renderer)
+{
+    SDL_PropertiesID props = SDL_GetRendererProperties(renderer);
+    if (props == 0)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+    return props;
+}
+
+long getNumberProperty(SDL_PropertiesID props, const char *name, long default_value)
+{
+    long number = SDL_GetNumberProperty(props, name, default_value);
+    if (number == default_value)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln(name, " is not set or not a number property");
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+    return number;
+}
+
+
+
+int getMaxTextureSizeForRenderer(SDL_Renderer *renderer)
+{
+    SDL_PropertiesID props = getRendererProperties(renderer);
+    
+    int maxTextureSize = cast(int) getNumberProperty(props, SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, -1);
+    return maxTextureSize;
+}
