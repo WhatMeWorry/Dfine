@@ -17,13 +17,13 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 
-void tutorial_smallest()
+void smallest_01()
 {
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
     bool running = true;
 
-    createWindowAndRenderer("tutorial_smallest", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("smallest 01", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
     
     // defaults to black window
     
@@ -52,14 +52,14 @@ void tutorial_smallest()
 // getWindowSurface(), blitSurface() and updateWindowSurface() allows you to bypass the use of renderers
 // and thus SDL_RenderClear and SDL_RenderPresent.
 
-void tutorial_no_renderer()
+void no_renderer_02()
 {
     SDL_Window  *window = null;
     SDL_Surface *windowSurface = null;
     SDL_Surface *sourceSurface = null;
     bool running = true;
 
-    createWindow("tutorial_no_renderer", 512, 512, cast(SDL_WindowFlags) 0, &window);
+    createWindow("no_renderer_02", 512, 512, cast(SDL_WindowFlags) 0, &window);
 
     getWindowSurface(window, &windowSurface);
 
@@ -88,11 +88,11 @@ void tutorial_no_renderer()
 
 
 /+
-Unlike textures, SDL3 surfaces have no automatic scaling when source and destination rectagles are blitted.
-thus the sprites will appear shrunken or truncated
+Unlike textures, SDL3 surfaces have no automatic scaling when source and destination rectagles of 
+different sizes are blitted. Thus the sprites will are not?? shrunken or expanded?? truncated??
 +/
 
-void tutorial_surface_no_implicit_scaling()
+void surface_no_implicit_scaling_03()
 {
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
@@ -105,9 +105,9 @@ void tutorial_surface_no_implicit_scaling()
     int winWidth = 1000; 
     int winHeight = 1000;
     
-    //createWindow("tutorial_surface_no_implicit_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
+    //createWindow("surface_no_implicit_scaling_03", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
     
-    createWindowAndRenderer("tutorial_surface_no_implicit_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("surface_no_implicit_scaling_03", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     getWindowSurface(window, &screenSurface);
     
@@ -187,7 +187,7 @@ void tutorial_surface_no_implicit_scaling()
 
 // use blitSurfaceScaled(..., SDL_SCALEMODE_LINEAR) to stretch or shrink suface copies
 
-void tutorial_surface_explicit_scaling()
+void surface_explicit_scaling_04()
 {
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
@@ -200,9 +200,9 @@ void tutorial_surface_explicit_scaling()
     int winWidth = 1000; 
     int winHeight = 1000;
     
-    //createWindow("tutorial_surface_explicit_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
+    //createWindow("surface_explicit_scaling_04", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
     
-    createWindowAndRenderer("tutorial_surface_exlicit_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("surface_exlicit_scaling_04", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     getWindowSurface(window, &screenSurface);
     
@@ -303,7 +303,7 @@ This mode is similar to SDL_SCALEMODE_NEAREST but includes some additional logic
 for pixel art, particularly when scaling by non-integer factors
 +/
 
-void tutorial_texture_implicit_scaling()
+void texture_implicit_scaling_05()
 {
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
@@ -317,7 +317,7 @@ void tutorial_texture_implicit_scaling()
     int winWidth = 1000; 
     int winHeight = 1000;
     
-    createWindowAndRenderer("tutorial_texture_implicit_scaling", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("texture_implicit_scaling_05", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     //getWindowSurface(window, &screenSurface);
 

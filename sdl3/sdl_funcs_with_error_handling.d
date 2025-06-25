@@ -233,6 +233,31 @@ SDL_Surface* duplicateSurface(SDL_Surface* source)
 }
 
 
+
+
+// SDL_TEXTUREACCESS_STATIC: suitable for textures with infrequent updates
+// SDL_TEXTUREACCESS_STREAMING: suitable for textures with frequent updates
+// SDL_TEXTUREACCESS_TARGET: textures are render targets
+
+SDL_TextureAccess getTextureAccess(SDL_Texture* texture)
+{
+    SDL_PropertiesID props = getTextureProperties(texture);  // SDL3 only function
+    
+    SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
+
+    if ((access == SDL_TEXTUREACCESS_STATIC) || (access == SDL_TEXTUREACCESS_STREAMING) ||
+        (access == SDL_TEXTUREACCESS_TARGET))
+    {
+        return access;
+    }
+    else
+    {
+        writeln(__FUNCTION__, " failed: invalid texture access ", access);
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+}
+
+
 void displayTextureProperties(SDL_Texture* texture) 
 {
     writeln("Texture Properties");
