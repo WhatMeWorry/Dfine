@@ -31,6 +31,32 @@ void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
 }
 
 
+
+SDL_Surface* loadImageToSurface(string file)
+{
+    SDL_Surface *surface = IMG_Load(toStringz(file));  // IMG_Load function supports a wide range of image formats,
+    if (surface == null)                               // including PCX, GIF, JPG, TIF, LBM, and PNG.
+    {
+        writeln(__FUNCTION__, " failed with file ",file, " because ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }                
+    return surface;
+}
+
+
+SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
+{
+    SDL_Texture *texture = IMG_LoadTexture(renderer, toStringz(file));  // Some of the supported formats include 
+                                                                        // BMP, GIF, JPG, PNG, TGA, ICO, and CUR
+    if (texture == null) 
+    {
+        writeln(__FUNCTION__, " failed with file ",file, " because ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+    return texture;
+}
+
+
 void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **surface)
 {
     *surface =  SDL_CreateSurface(width, height, format);
@@ -49,6 +75,19 @@ uint mapRGBA(const SDL_PixelFormatDetails *format, const SDL_Palette *palette, u
      uint u =  SDL_MapRGBA(format, palette, r, g, b, a);
 
      return u;
+}
+
+
+
+
+void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int pitch)
+{
+    bool res = SDL_LockTexture(texture, null, pixels, &pitch);
+    if (res == false)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
 }
 
 
@@ -221,6 +260,53 @@ void copySurfaceToSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
 
     //SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
 }
+
+
+
+SDL_Texture* createTextureFromTexture(SDL_Texture *texture)
+{
+    // you can retrieve the renderer associated with a texture using the SDL_GetRenderer function. This 
+    // function takes a SDL_Texture pointer as input and returns a pointer to the SDL_Renderer that was 
+    // used to create the texture. 
+    
+    SDL_Renderer *renderer = SDL_GetRendererFromTexture(texture);  // retrieve the renderer associated with this texture
+    
+    SDL_PropertiesID props = getTextureProperties(texture);  // SDL3 only function  // also get its properties
+
+    SDL_Texture *newTexture = SDL_CreateTextureWithProperties(renderer, props);
+    
+    return newTexture;
+    
+}
+
+// you cannot directly blit (copy) one texture to another texture
+/+
+Create a Target Texture:
+Ensure it has the SDL_TEXTUREACCESS_TARGET access flag when creating it with SDL_CreateTexture
+
+Set the Render Target:
+Use SDL_SetRenderTarget to set the destination texture as the render target for the renderer.
+
+Render the Source Texture
+Use SDL_RenderCopy or SDL_RenderCopyEx to copy the source texture onto the render target (destination texture)
+
+Reset the Render Target
+After rendering, reset the render target to the default (usually the window) using SDL_SetRenderTarget(renderer, NULL)
++/
+
+void copyTextureToTexture(SDL_Texture *srcTexture, const SDL_Rect *srcRect,
+                                 SDL_Texture *dstTexture, const SDL_Rect *dstRect)
+{
+
+
+
+}
+
+
+
+
+
+
 
 
 SDL_Surface* duplicateSurface(SDL_Surface* source) 
@@ -601,3 +687,37 @@ int getMaxTextureSizeForRenderer(SDL_Renderer *renderer)
     int maxTextureSize = cast(int) getNumberProperty(props, SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, -1);
     return maxTextureSize;
 }
+
+
+
+
+
+/+ 
+The function IMG_LoadTexture in SDL2/SDL3 is designed to load an image from a file path and create a GPU texture
+ that is usable by SDL's 2D rendering API. This function is generally intended for static textures which are loaded
+ once and rendered multiple times without frequent modification. 
+ 
+To create a streaming texture in SDL, you would typically follow these steps:
+
+Create a blank texture with SDL_TEXTUREACCESS_STREAMING access mode: Use SDL_CreateTexture and specify 
+SDL_TEXTUREACCESS_STREAMING as the access mode. This creates a texture optimized for frequent updates.
+Load or obtain your image data: You can load an image into an SDL_Surface using functions like IMG_Load() 
+or handle the image data directly from another source (e.g., a video stream).
+Lock the streaming texture: Use SDL_LockTexture to gain access to the raw pixel data buffer of the streaming 
+texture. This function will provide you with a pointer to the pixel data and its pitch (the number of bytes 
+in a row of the texture).
+Copy your image data into the locked texture buffer: Copy the pixel data from your source (e.g., the 
+SDL_Surface you loaded) to the locked texture buffer. Make sure to consider the pixel format and pitch.
+Unlock the streaming texture: Use SDL_UnlockTexture to signal to SDL that you are finished modifying the 
+texture's pixel data. This makes the texture available for rendering.
+Render the streaming texture: Use SDL_RenderCopy to draw the streaming texture onto the screen. 
+
+Important Notes:
+IMG_LoadTexture directly creates a GPU texture, but it is not optimized for streaming.
+Streaming textures are designed for situations where the texture data needs to be updated frequently, 
+like in video playback.
+When using SDL_LockTexture, you are expected to fill the entire locked area with new data, as the buffer
+ may not contain the texture's existing contents. 
+In summary, IMG_LoadTexture is not the way to create a streaming texture. You need to use SDL_CreateTexture 
+with the SDL_TEXTUREACCESS_STREAMING flag and then manage the texture's pixel data using SDL_LockTexture and SDL_UnlockTexture.
++/

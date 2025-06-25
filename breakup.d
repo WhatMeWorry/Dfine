@@ -49,30 +49,6 @@ There isn't a hard limit to the number of SDL surfaces you can create
     
  
 
-SDL_Surface* loadImageToSurface(string file)
-{
-    SDL_Surface *surface = IMG_Load(toStringz(file));  // IMG_Load function supports a wide range of image formats,
-    if (surface == null)                               // including PCX, GIF, JPG, TIF, LBM, and PNG.
-    {
-        writeln("IMG_Load failed with file: ", file, " because ", to!string(SDL_GetError()));
-        exit(-1);    // IMG_Load failed with file: ./images/huge.png because Image too large to decode
-    }                // IMG_Load failed with file: ./images/9.png because Couldn't open ./images/9.png: 
-    return surface;  // The system cannot find the file specified.
-}
-
-
-SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
-{
-    SDL_Texture *texture = IMG_LoadTexture(renderer, toStringz(file));  // Some of the supported formats include 
-                                                                        // BMP, GIF, JPG, PNG, TGA, ICO, and CUR
-    if (texture == null) 
-    {
-        writeln("IMG_LoadTexture failed with file ", file, " : ", to!string(SDL_GetError()));
-        exit(-1);
-    }
-    return texture;
-}
-
 
 void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
 {
@@ -107,19 +83,6 @@ SDL_Surface* createSurfaceFrom(int width, int height, SDL_PixelFormat format, vo
     }
     return surface;
 }
-
-
-
-void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int pitch)
-{
-    bool res = SDL_LockTexture(texture, null, pixels, &pitch);
-    if (res == false)
-    {
-        writeln("SDL_LockTexture failed: ", to!string(SDL_GetError()));  
-        exit(-1);
-    }
-}
-
 
 
 

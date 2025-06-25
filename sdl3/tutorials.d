@@ -47,7 +47,17 @@ void smallest_01()
     SDL_Quit();
 }
 
+/+
+In SDL3, a window does not inherently have a surface. While SDL3 provides the ability to associate a surface 
+with a window (using SDL_GetWindowSurface or SDL_CreateWindowSurface), it's not a default or automatic pairing. 
+A window can be created without a surface, and the surface, if needed, is explicitly created and managed separately. 
 
+SDL3 windows are distinct objects that represent a window on the screen. Surfaces, on the other hand, are areas of 
+memory that can be drawn to. 
+
+SDL_GetWindowSurface: This function retrieves a surface associated with a window, creating one if it doesn't already exist. 
+SDL_CreateWindowSurface: This function explicitly creates a surface for a window. 
++/
 
 // getWindowSurface(), blitSurface() and updateWindowSurface() allows you to bypass the use of renderers
 // and thus SDL_RenderClear and SDL_RenderPresent.
@@ -61,7 +71,7 @@ void no_renderer_02()
 
     createWindow("no_renderer_02", 512, 512, cast(SDL_WindowFlags) 0, &window);
 
-    getWindowSurface(window, &windowSurface);
+    getWindowSurface(window, &windowSurface);  // create a surface since it doesn't already exist
 
     loadImageToSurface("./images/earth1024x1024.png", &sourceSurface);
 
@@ -95,7 +105,6 @@ different sizes are blitted. Thus the sprites will are not?? shrunken or expande
 void surface_no_implicit_scaling_03()
 {
     SDL_Window   *window = null;
-    //SDL_Renderer *renderer = null;
     SDL_Surface  *screenSurface = null;
     SDL_Surface  *globeSurface = null;
     SDL_Surface  *solidColorSurface = null;
@@ -110,9 +119,7 @@ void surface_no_implicit_scaling_03()
     getWindowSurface(window, &screenSurface);
 
     loadImageToSurface("./images/globe256x256.png", &globeSurface);
-    
 
-    
     // maybe make function called fill a solid surface with color?
     solidColorSurface = SDL_CreateSurface(winWidth, winHeight, SDL_PIXELFORMAT_RGBA32); // Using a common format
     uint fillColor = SDL_MapSurfaceRGBA(solidColorSurface, 204, 204, 255, 255);
@@ -128,7 +135,7 @@ void surface_no_implicit_scaling_03()
                running = false;
            }
         }
-        
+
         blitSurface(solidColorSurface, null, screenSurface, null);
         
         SDL_Rect same = { 0, 0, globeSurface.w, globeSurface.h };
@@ -141,28 +148,7 @@ void surface_no_implicit_scaling_03()
 
         SDL_Rect smaller = { 512, 512, globeSurface.w / 2, globeSurface.h / 2 };  // note that when destination < source the entire source is still drawn
 
-        blitSurface(globeSurface, null, screenSurface, &smaller); 
-
-        // Surfaces are on the CPU so it's not optimal for you to use them to draw. Instead it's recommended 
-        // to create a Texture, draw with the renderer to it and then convert it back as a Surface if you need.
-
-        //createRenderer(window, "MyRenderer", &renderer);  // create rend when create window
-        //SDL_Texture *screenTexture =  createTextureFromSurface(renderer, screenSurface); Doesn't create a Streaming Texture
-        
-        //SDL_Texture *screenTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 
-        //                                           screenSurface.w, screenSurface.h);
-
-        //copySurfaceToTexture(screenSurface, null, screenTexture, null);
-
-        //SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // set to blue
-        
-        //SDL_RenderRect(renderer, cast(SDL_FRect*) &globeRect);   // draw blue outline of rectangle around globe
-
-        // cannot pass argument `& globeRect` of type `SDL_Rect*` to parameter `const(SDL_FRect)* rect`
-        //                                                                           Floating Rect
-        // screenTexture and screenSurface are same size screenTextrue exists so we may draw to it.
-
-        //copyTextureToSurface(screenTexture, null, screenSurface, null);
+        blitSurface(globeSurface, null, screenSurface, &smaller);
 
         updateWindowSurface(window);
     }
@@ -181,7 +167,6 @@ void surface_no_implicit_scaling_03()
 void surface_explicit_scaling_04()
 {
     SDL_Window   *window = null;
-    //SDL_Renderer *renderer = null;
     SDL_Surface  *screenSurface = null;
     SDL_Surface  *globeSurface = null;
     SDL_Surface  *solidColorSurface = null;
@@ -216,17 +201,17 @@ void surface_explicit_scaling_04()
         blitSurface(solidColorSurface, null, screenSurface, null);
         
         SDL_Rect same = { 0, 0, globeSurface.w, globeSurface.h };
-writeln("1a");        
+
         blitSurfaceScaled(globeSurface, null, screenSurface, &same, SDL_SCALEMODE_LINEAR);
-writeln("1");
+
         SDL_Rect smaller = { 256, 256, globeSurface.w / 2, globeSurface.h / 2 };
-writeln("2a");        
+
         blitSurfaceScaled(globeSurface, null, screenSurface, &smaller, SDL_SCALEMODE_LINEAR);
-writeln("2");
+
         SDL_Rect larger = { 512, 512, globeSurface.w * 2, globeSurface.h * 2 };
 
         blitSurfaceScaled(globeSurface, null, screenSurface, &larger, SDL_SCALEMODE_LINEAR); 
-writeln("3");
+
         updateWindowSurface(window);
     }
     SDL_Quit();
@@ -237,101 +222,12 @@ writeln("3");
 
 
 
-
-/+
-void surface_explicit_scaling_04()
-{
-    SDL_Window   *window = null;
-    SDL_Renderer *renderer = null;
-    SDL_Surface  *screenSurface = null;  // one example used display as variable name
-    SDL_Surface  *globeSurface = null;
-    SDL_Surface  *redSurface = null;
-    SDL_Rect     globeRect;
-    bool running = true;
-    
-    int winWidth = 1000; 
-    int winHeight = 1000;
-    
-    //createWindow("surface_explicit_scaling_04", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window);
-    
-    createWindowAndRenderer("surface_exlicit_scaling_04", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
-
-    getWindowSurface(window, &screenSurface);
-    
-    writeln("screenSurface has");
-    displaySurfaceProperties(screenSurface);
-
-    loadImageToSurface("./images/globe256x256.png", &globeSurface);
-    
-    globeRect.w = globeSurface.w;  // original size   scale is 1:1
-    globeRect.h = globeSurface.h;
-
-    writeln("globeSurface has");
-    displaySurfaceProperties(globeSurface);
-
-    redSurface = SDL_CreateSurface(winWidth, winHeight, SDL_PIXELFORMAT_RGBA32); // Using a common format
-
-    writeln("redSurface created with SDL_PIXELFORMAT_RGBA32 has");
-    displaySurfaceProperties(redSurface);
-
-    uint fillColor = SDL_MapSurfaceRGBA(redSurface, 255, 0, 0, 255);
-
-    SDL_FillSurfaceRect(redSurface, null, fillColor);
-
-    while (running)
-    {
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-           if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
-           {
-               running = false;
-           }
-        }
-        
-        blitSurfaceScaled(redSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
-
-        // blitSurface(redSurface, null, screenSurface, null);  
-
-        blitSurfaceScaled(globeSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
-
-        // blitSurface(globeSurface, null, screenSurface, null);  // if used, globeSurface only takes up quadrant of screen
-                                                               // because no scaling
-                                                               
-        // Surfaces are on the CPU so it's not optimal for you to use them to draw. Instead it's recommended 
-        // to create a Texture, draw with the renderer to it and then convert it back as a Surface if you need.
-
-        
-        //createRenderer(window, "MyRenderer", &renderer);  // create rend when create window
-        //SDL_Texture *screenTexture =  createTextureFromSurface(renderer, screenSurface); Doesn't create a Streaming Texture
-        
-        SDL_Texture *screenTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 
-                                                   screenSurface.w, screenSurface.h);
-                                                   
-        //copySurfaceToTexture(screenSurface, null, screenTexture, null);
-        
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // set to blue
-        
-        SDL_RenderRect(renderer, cast(SDL_FRect*) &globeRect);   // draw blue outline of rectangle around globe
-        
-        // cannot pass argument `& globeRect` of type `SDL_Rect*` to parameter `const(SDL_FRect)* rect`
-        //                                                                           Floating Rect
-        
-        // screenTexture and screenSurface are same size screenTextrue exists so we may draw to it.
-        
-        copyTextureToSurface(screenTexture, null, screenSurface, null);
-
-        updateWindowSurface(window);
-    }
-}
-+/
-
 /+
 Different sizes in srcRect and dstRect in SDL3 trigger automatic scaling of the source texture 
 to match the destination's size, controlled by the texture's scale mode. 
 
-Scaling: SDL3 will resize the portion of the source texture defined by srcrect to match the 
-dimensions of the dstrect. This is done automatically as part of the rendering process.
+Scaling: SDL3 will resize the portion of the source texture defined by srcRect to match the 
+dimensions of the dstRect. This is done automatically as part of the rendering process.
 
 Scaling Mode: The way this scaling is performed can be controlled by the texture's scale mode. By 
 default, it's set to SDL_SCALEMODE_LINEAR (linear filtering), but you can change it to 
@@ -359,9 +255,9 @@ void texture_implicit_scaling_05()
 {
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
-    SDL_Surface  *screenSurface = null;
+    SDL_Texture  *screenTexture = null;
     SDL_Surface  *globeSurface = null;
-    SDL_Surface  *globeTexture = null;
+    SDL_Texture  *globeTexture = null;
     SDL_Surface  *blueSurface = null;
     SDL_Rect     globeRect;
     bool running = true;
@@ -370,31 +266,15 @@ void texture_implicit_scaling_05()
     int winHeight = 1000;
     
     createWindowAndRenderer("texture_implicit_scaling_05", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
-
-    //getWindowSurface(window, &screenSurface);
-
-    loadImageToSurface("./images/globe256x256.png", &globeSurface);
     
-    SDL_Rect smaller = { globeSurface.w, globeSurface.h, globeSurface.w/2, globeSurface.w/2 };
+    globeTexture = loadImageToTexture(renderer, "./images/globe256x256.png");
     
     
-    //copySurfaceToTexture(
-    
-    
-    globeRect.w = globeSurface.w;  // original size   scale is 1:1
-    globeRect.h = globeSurface.h;
-
-    writeln("globeSurface has");
-    displaySurfaceProperties(globeSurface);
-
-    blueSurface = SDL_CreateSurface(winWidth, winHeight, SDL_PIXELFORMAT_RGBA32); // Using a common format
-
-    writeln("redSurface created with SDL_PIXELFORMAT_RGBA32 has");
-    displaySurfaceProperties(blueSurface);
-
-    uint fillColor = SDL_MapSurfaceRGBA(blueSurface, 0, 0, 255, 255);
-
-    SDL_FillSurfaceRect(blueSurface, null, fillColor);
+    // maybe make this a function
+    SDL_SetRenderTarget(renderer, screenTexture);  // Set the render target to the texture
+    SDL_SetRenderDrawColor(renderer, 119, 252, 3, 255); // Set the color you want to paint with
+    SDL_RenderFillRect(renderer, null);  // Fill the entire texture with the color
+    SDL_SetRenderTarget(renderer, null);  // Reset the render target to the window
 
     while (running)
     {
@@ -407,11 +287,16 @@ void texture_implicit_scaling_05()
            }
         }
         
-        blitSurfaceScaled(blueSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
+        SDL_Texture *duplicateTexture = createTextureFromTexture(globeTexture);
+        
+        displayTextureProperties(globeTexture);
+        displayTextureProperties(duplicateTexture);
+        
+        //blitSurfaceScaled(blueSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
 
         // blitSurface(redSurface, null, screenSurface, null);  
 
-        blitSurfaceScaled(globeSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
+        //blitSurfaceScaled(globeSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
 
         // blitSurface(globeSurface, null, screenSurface, null);  // if used, globeSurface only takes up quadrant of screen
                                                                // because no scaling
@@ -423,23 +308,27 @@ void texture_implicit_scaling_05()
         //createRenderer(window, "MyRenderer", &renderer);  // create rend when create window
         //SDL_Texture *screenTexture =  createTextureFromSurface(renderer, screenSurface); Doesn't create a Streaming Texture
         
-        SDL_Texture *screenTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 
-                                                   screenSurface.w, screenSurface.h);
+        //SDL_Texture *screenTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 
+        //                                           screenSurface.w, screenSurface.h);
                                                    
         //copySurfaceToTexture(screenSurface, null, screenTexture, null);
         
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // set to blue
-        
-        SDL_RenderRect(renderer, cast(SDL_FRect*) &globeRect);   // draw blue outline of rectangle around globe
+       
+        //SDL_RenderRect(renderer, cast(SDL_FRect*) &globeRect);   // draw blue outline of rectangle around globe
         
         // cannot pass argument `& globeRect` of type `SDL_Rect*` to parameter `const(SDL_FRect)* rect`
         //                                                                           Floating Rect
         
         // screenTexture and screenSurface are same size screenTextrue exists so we may draw to it.
         
-        copyTextureToSurface(screenTexture, null, screenSurface, null);
+        //copyTextureToSurface(screenTexture, null, screenSurface, null);
+        
+        //void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
+        //                  SDL_Surface *surface, const SDL_Rect *surRect)
 
-        updateWindowSurface(window);
+        SDL_RenderClear(renderer); // Clear the renderer
+            // Add your drawing calls here (e.g., SDL_RenderFillRect())
+        SDL_RenderPresent(renderer); // Present the rendered content
     }
 }
 
@@ -453,7 +342,7 @@ The secondary colors are cyan, magenta, and yellow. These are created by combini
 is red + green. 
 
 +/
-
+/+
 void tutorial_4()
 {
     SDL_Window* window = null;
@@ -539,11 +428,11 @@ void tutorial_4()
     }
 
 }
++/
 
 
 
-
-
+/+
 void tutorial_5()
 {
     SDL_Window* window = null;
@@ -635,3 +524,4 @@ void tutorial_5()
     }
 
 }
++/
