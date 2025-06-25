@@ -133,11 +133,9 @@ void setTextureBlendMode(SDL_Texture *texture, SDL_BlendMode blendMode)
 
 
 
-//bool SDL_BlitSurfaceScaled(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, const SDL_Rect *dstrect, SDL_ScaleMode scaleMode);
 void blitSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect, 
                        SDL_Surface *dstSurface, const SDL_Rect *dstRect, SDL_ScaleMode scaleMode)
 {
-    writeln("srcSurface = ", srcSurface, "  srcRect = ", srcRect, "  dstSurface = ", dstSurface, "   dstRect = ", dstRect);
     if (SDL_BlitSurfaceScaled(srcSurface, srcRect, dstSurface, dstRect, scaleMode) == false)
     {
         writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
