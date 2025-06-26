@@ -57,6 +57,18 @@ SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
 }
 
 
+SDL_Texture* loadImageToStreamingTexture(SDL_Renderer *renderer, string file)
+{
+    SDL_Surface *surface = IMG_Load(toStringz(file));
+    
+    SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
+
+    copySurfaceToTexture(surface, null, texture, null);
+
+    return texture;
+}
+
+
 void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **surface)
 {
     *surface =  SDL_CreateSurface(width, height, format);
@@ -270,11 +282,11 @@ SDL_Texture* createTextureFromTexture(SDL_Texture *texture)
     // used to create the texture. 
     
     SDL_Renderer *renderer = SDL_GetRendererFromTexture(texture);  // retrieve the renderer associated with this texture
-    
+    writeln("renderer = ", renderer);
     SDL_PropertiesID props = getTextureProperties(texture);  // SDL3 only function  // also get its properties
-
+writeln("props = ", props);
     SDL_Texture *newTexture = SDL_CreateTextureWithProperties(renderer, props);
-    
+writeln("netTexture = ", newTexture);
     return newTexture;
     
 }
@@ -346,6 +358,7 @@ void displayTextureProperties(SDL_Texture* texture)
 {
     writeln("Texture Properties");
     writeln("------------------");
+    writeln("texture = ", texture);
     /+
     https://wiki.libsdl.org/SDL3/README-migration
     

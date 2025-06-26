@@ -267,8 +267,9 @@ void texture_implicit_scaling_05()
     
     createWindowAndRenderer("texture_implicit_scaling_05", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
     
-    globeTexture = loadImageToTexture(renderer, "./images/globe256x256.png");
+    //globeTexture = loadImageToTexture(renderer, "./images/globe256x256.png");
     
+    globeTexture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
     
     // maybe make this a function
     SDL_SetRenderTarget(renderer, screenTexture);  // Set the render target to the texture
@@ -289,7 +290,7 @@ void texture_implicit_scaling_05()
         
         SDL_Texture *duplicateTexture = createTextureFromTexture(globeTexture);
         
-        displayTextureProperties(globeTexture);
+        writeln("duplicateTexture --------------------------");
         displayTextureProperties(duplicateTexture);
         
         //blitSurfaceScaled(blueSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
