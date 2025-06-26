@@ -30,7 +30,17 @@ void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
     }
 }
 
+/+
+void getTextureSize(SDL_Texture *texture, int *w, int *h)
+{
+    if (SDL_GetTextureSize(texture, w, h) == false)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
 
+}
++/
 
 SDL_Surface* loadImageToSurface(string file)
 {
@@ -274,6 +284,59 @@ void copySurfaceToSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
 }
 
 
+SDL_PropertiesID createProperties()
+{
+    SDL_PropertiesID props = SDL_CreateProperties();  // 0 on failure
+    if (props == 0)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+    return props;
+}
+
+
+
+// duplicates textures
+
+void queryTextureSDL3(SDL_Texture *texture, SDL_PixelFormat *format, SDL_TextureAccess  *access, int *w, int *h)
+{
+    //SDL_GetTextureSize(texture, cast(float*) w, cast(float*) h);
+
+    float wf; float hf;
+    SDL_GetTextureSize(texture, &wf, &hf);
+
+    writeln("wf = ", wf);
+    writeln("hf = ", hf);
+    
+    int wi;  int hi;
+    
+    //w = cast(int*) wf;
+
+    wi = cast(int) wf;
+    hi = cast(int) hf;
+    
+    writeln("wi = ", wi);
+    writeln("hi = ", hi);
+    
+    *w = wi;
+    *h = hi;
+
+    SDL_PropertiesID props = getTextureProperties(texture);
+
+    *format = cast(SDL_PixelFormat) getNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, 0);
+
+    if (*format == SDL_PIXELFORMAT_RGBA8888)
+        writeln("format is SDL_PIXELFORMAT_RGBA8888");
+    else
+        writeln("format is NOT SDL_PIXELFORMAT_RGBA8888");
+
+    *access = cast(SDL_TextureAccess) getNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, 0);
+
+    printTextureAccess(*access);
+}
+
+
 
 SDL_Texture* createTextureFromTexture(SDL_Texture *texture)
 {
@@ -282,14 +345,138 @@ SDL_Texture* createTextureFromTexture(SDL_Texture *texture)
     // used to create the texture. 
     
     SDL_Renderer *renderer = SDL_GetRendererFromTexture(texture);  // retrieve the renderer associated with this texture
-    writeln("renderer = ", renderer);
-    SDL_PropertiesID props = getTextureProperties(texture);  // SDL3 only function  // also get its properties
-writeln("props = ", props);
-    SDL_Texture *newTexture = SDL_CreateTextureWithProperties(renderer, props);
-writeln("netTexture = ", newTexture);
+    
+    SDL_PropertiesID texProps = getTextureProperties(texture);  // SDL3 only function
+    
+    SDL_PixelFormat format;  SDL_TextureAccess  access;  int w; int h;
+    
+    queryTextureSDL3(texture, &format, &access, &w, &h);  // SDL_QueryTexture is in SDL2 and was removed from SDL3
+    
+    writeln("texture = ", texture);
+    writeln("format = ", format);
+    writeln("access = ", access);
+    writeln("w = ", w);
+    writeln("h = ", h);
+    
+    SDL_Texture *newTexture = SDL_CreateTexture(renderer, format, access, w, h);  // SDL3 only
+
+    writeln("newTexture = ", newTexture);
     return newTexture;
     
 }
+
+/+
+void QueryTexture(SDL_Texture* texture, Uint32* format, int* access, int* w, int* h) {
+    // Get width and height
+    if (w && h) {
+        if (!SDL_GetTextureSize(texture, w, h)) {
+            printf("SDL_GetTextureSize failed: %s\n", SDL_GetError());
+            return;
+        }
+    }
+
+    // Get format and access from properties
+    if (format || access) {
+        SDL_PropertiesID props = SDL_GetTextureProperties(texture);
+        if (props == 0) {
+            printf("SDL_GetTextureProperties failed: %s\n", SDL_GetError());
+            return;
+        }
+
+        if (format) {
+            *format = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, 0);
+        }
+        if (access) {
+            *access = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, 0);
+        }
+    }
+}
++/
+
+
+
+/+
+
+SDL_Texture* DuplicateTexture(SDL_Renderer* renderer, SDL_Texture* texture) {
+    // Get texture properties
+    Uint32 format;
+    int w, h;
+    SDL_QueryTexture(texture, &format, NULL, &w, &h);  // SDL2 ONLY!
+
+    // Create a new texture with the same properties
+    SDL_Texture* newTexture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, w, h);
+    if (newTexture == NULL) {
+        // Handle error
+        return NULL;
+    }
+
+    // Set the new texture as the render target
+    SDL_Texture* currentRenderTarget = SDL_GetRenderTarget(renderer);
+    SDL_SetRenderTarget(renderer, newTexture);
+
+    // Render the original texture onto the new one
+    SDL_RenderTexture(renderer, texture, NULL, NULL);
+
+    // Restore the previous render target
+    SDL_SetRenderTarget(renderer, currentRenderTarget);
+
+    return newTexture;
+}
++/
+
+/+
+    // Create a properties structure
+    SDL_PropertiesID texture_props = SDL_CreateProperties();
+    if (!texture_props) {
+        SDL_Log("Unable to create properties: %s", SDL_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    // Set properties for the texture
+    SDL_SetNumberProperty(texture_props, SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER, 256);
+    SDL_SetNumberProperty(texture_props, SDL_PROP_TEXTURE_CREATE_HEIGHT_NUMBER, 256);
+    SDL_SetNumberProperty(texture_props, SDL_PROP_TEXTURE_CREATE_FORMAT_NUMBER, SDL_PIXELFORMAT_RGBA8888);
+    SDL_SetNumberProperty(texture_props, SDL_PROP_TEXTURE_CREATE_ACCESS_NUMBER, SDL_TEXTUREACCESS_STATIC);
+
+    // Create the texture with properties
+    SDL_Texture* texture = SDL_CreateTextureWithProperties(renderer, texture_props);
++/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // you cannot directly blit (copy) one texture to another texture
 /+
@@ -354,6 +541,26 @@ SDL_TextureAccess getTextureAccess(SDL_Texture* texture)
 }
 
 
+void printTextureAccess(SDL_TextureAccess access)
+{
+    switch (access) 
+    {
+        case SDL_TEXTUREACCESS_STATIC:
+            writeln("Texture is SDL_TEXTUREACCESS_STATIC. Suitable for infrequent updates");
+            break;
+        case SDL_TEXTUREACCESS_STREAMING:
+            writeln("Texture is SDL_TEXTUREACCESS_STREAMING. Suitable for frequent updates");
+            break;
+        case SDL_TEXTUREACCESS_TARGET:
+            writeln("SDL_TEXTUREACCESS_TARGET. Texture is a render target");
+            break;
+        default:
+            writeln("Unknown texture access mode: ", access);
+            break;
+    }
+}
+
+
 void displayTextureProperties(SDL_Texture* texture) 
 {
     writeln("Texture Properties");
@@ -399,23 +606,7 @@ void displayTextureProperties(SDL_Texture* texture)
 
     SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
 
-    writeln("    access = ", access);
-    
-    switch (access) 
-    {
-        case SDL_TEXTUREACCESS_STATIC:
-            printf("    Texture is SDL_TEXTUREACCESS_STATIC. Suitable for infrequent updates.\n");
-            break;
-        case SDL_TEXTUREACCESS_STREAMING:
-            printf("    Texture is SDL_TEXTUREACCESS_STREAMING. Suitable for frequent updates.\n");
-            break;
-        case SDL_TEXTUREACCESS_TARGET:
-            printf("    SDL_TEXTUREACCESS_TARGET. Texture is a render target.\n");
-            break;
-        default:
-            printf("Unknown texture access mode: %d\n", access);
-            break;
-    }
+    printTextureAccess(access);
 
     // The SDL_GetNumberProperty function, when used with integers in SDL 3, returns a 64-bit integer 
     // instead of a 32-bit int for several reasons related to design and flexibility: Support for Large 
@@ -475,8 +666,8 @@ SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
     SDL_Renderer *renderer =  SDL_CreateRenderer(window, toUTFz!(const(char)*)(rendererName) );
     if (renderer == null)
     {
-        writeln("SDL_CreateRenderer failed: ", to!string(SDL_GetError()));
-        exit(-1);
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
     return renderer;
 }
