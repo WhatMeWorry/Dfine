@@ -301,26 +301,11 @@ SDL_PropertiesID createProperties()
 
 void queryTextureSDL3(SDL_Texture *texture, SDL_PixelFormat *format, SDL_TextureAccess  *access, int *w, int *h)
 {
-    //SDL_GetTextureSize(texture, cast(float*) w, cast(float*) h);
-
     float wf; float hf;
     SDL_GetTextureSize(texture, &wf, &hf);
-
-    writeln("wf = ", wf);
-    writeln("hf = ", hf);
     
-    int wi;  int hi;
-    
-    //w = cast(int*) wf;
-
-    wi = cast(int) wf;
-    hi = cast(int) hf;
-    
-    writeln("wi = ", wi);
-    writeln("hi = ", hi);
-    
-    *w = wi;
-    *h = hi;
+    *w = cast(int) wf;
+    *h = cast(int) hf;
 
     SDL_PropertiesID props = getTextureProperties(texture);
 
@@ -348,7 +333,10 @@ SDL_Texture* createTextureFromTexture(SDL_Texture *texture)
     
     SDL_PropertiesID texProps = getTextureProperties(texture);  // SDL3 only function
     
-    SDL_PixelFormat format;  SDL_TextureAccess  access;  int w; int h;
+    SDL_PixelFormat    format;  
+    SDL_TextureAccess  access;  
+    int w; 
+    int h;
     
     queryTextureSDL3(texture, &format, &access, &w, &h);  // SDL_QueryTexture is in SDL2 and was removed from SDL3
     
@@ -358,117 +346,13 @@ SDL_Texture* createTextureFromTexture(SDL_Texture *texture)
     writeln("w = ", w);
     writeln("h = ", h);
     
+    access = SDL_TEXTUREACCESS_TARGET;
+    
     SDL_Texture *newTexture = SDL_CreateTexture(renderer, format, access, w, h);  // SDL3 only
 
     writeln("newTexture = ", newTexture);
     return newTexture;
-    
 }
-
-/+
-void QueryTexture(SDL_Texture* texture, Uint32* format, int* access, int* w, int* h) {
-    // Get width and height
-    if (w && h) {
-        if (!SDL_GetTextureSize(texture, w, h)) {
-            printf("SDL_GetTextureSize failed: %s\n", SDL_GetError());
-            return;
-        }
-    }
-
-    // Get format and access from properties
-    if (format || access) {
-        SDL_PropertiesID props = SDL_GetTextureProperties(texture);
-        if (props == 0) {
-            printf("SDL_GetTextureProperties failed: %s\n", SDL_GetError());
-            return;
-        }
-
-        if (format) {
-            *format = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, 0);
-        }
-        if (access) {
-            *access = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, 0);
-        }
-    }
-}
-+/
-
-
-
-/+
-
-SDL_Texture* DuplicateTexture(SDL_Renderer* renderer, SDL_Texture* texture) {
-    // Get texture properties
-    Uint32 format;
-    int w, h;
-    SDL_QueryTexture(texture, &format, NULL, &w, &h);  // SDL2 ONLY!
-
-    // Create a new texture with the same properties
-    SDL_Texture* newTexture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_TARGET, w, h);
-    if (newTexture == NULL) {
-        // Handle error
-        return NULL;
-    }
-
-    // Set the new texture as the render target
-    SDL_Texture* currentRenderTarget = SDL_GetRenderTarget(renderer);
-    SDL_SetRenderTarget(renderer, newTexture);
-
-    // Render the original texture onto the new one
-    SDL_RenderTexture(renderer, texture, NULL, NULL);
-
-    // Restore the previous render target
-    SDL_SetRenderTarget(renderer, currentRenderTarget);
-
-    return newTexture;
-}
-+/
-
-/+
-    // Create a properties structure
-    SDL_PropertiesID texture_props = SDL_CreateProperties();
-    if (!texture_props) {
-        SDL_Log("Unable to create properties: %s", SDL_GetError());
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return 1;
-    }
-
-    // Set properties for the texture
-    SDL_SetNumberProperty(texture_props, SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER, 256);
-    SDL_SetNumberProperty(texture_props, SDL_PROP_TEXTURE_CREATE_HEIGHT_NUMBER, 256);
-    SDL_SetNumberProperty(texture_props, SDL_PROP_TEXTURE_CREATE_FORMAT_NUMBER, SDL_PIXELFORMAT_RGBA8888);
-    SDL_SetNumberProperty(texture_props, SDL_PROP_TEXTURE_CREATE_ACCESS_NUMBER, SDL_TEXTUREACCESS_STATIC);
-
-    // Create the texture with properties
-    SDL_Texture* texture = SDL_CreateTextureWithProperties(renderer, texture_props);
-+/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -494,11 +378,28 @@ After rendering, reset the render target to the default (usually the window) usi
 +/
 
 void copyTextureToTexture(SDL_Texture *srcTexture, const SDL_Rect *srcRect,
-                                 SDL_Texture *dstTexture, const SDL_Rect *dstRect)
+                          SDL_Texture *dstTexture, const SDL_Rect *dstRect)
 {
+    // SDL_Texture* sourceTexture = ...; // Assume this is already created and loaded
+    // SDL_Texture* targetTexture = ...; // Assume this is already created
 
+    SDL_Renderer *renderer = SDL_GetRendererFromTexture(srcTexture);
 
+    // Set the target texture as the render target
 
+    SDL_SetRenderTarget(renderer, dstTexture);
+
+    // Copy the source texture onto the target
+
+    // bool SDL_RenderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect);
+    // void renderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect)
+
+    // SDL_RenderCopy(renderer, srcTexture, null, null);       SDL2 only
+
+    renderTexture(renderer, srcTexture, cast(const(SDL_FRect*)) srcRect, cast(const(SDL_FRect*)) dstRect);  // SDL3 only
+
+    // Reset the render target if needed
+    SDL_SetRenderTarget(renderer, null);
 }
 
 
@@ -546,13 +447,13 @@ void printTextureAccess(SDL_TextureAccess access)
     switch (access) 
     {
         case SDL_TEXTUREACCESS_STATIC:
-            writeln("Texture is SDL_TEXTUREACCESS_STATIC. Suitable for infrequent updates");
+            writeln("Texture access is SDL_TEXTUREACCESS_STATIC. Suitable for infrequent updates");
             break;
         case SDL_TEXTUREACCESS_STREAMING:
-            writeln("Texture is SDL_TEXTUREACCESS_STREAMING. Suitable for frequent updates");
+            writeln("Texture access is SDL_TEXTUREACCESS_STREAMING. Suitable for frequent updates");
             break;
         case SDL_TEXTUREACCESS_TARGET:
-            writeln("SDL_TEXTUREACCESS_TARGET. Texture is a render target");
+            writeln("Texture access is SDL_TEXTUREACCESS_TARGET. Texture is a render target");
             break;
         default:
             writeln("Unknown texture access mode: ", access);
@@ -599,10 +500,10 @@ void displayTextureProperties(SDL_Texture* texture)
     writefln("    Rmask: 0x%08X, Gmask: 0x%08X, Bmask: 0x%08X, Amask: 0x%08X\n",
              details.Rmask, details.Gmask, details.Bmask, details.Amask);
 
-    void *pixels;
-    int pitch;
+    //void *pixels;
+    //int pitch;
                 
-    lockTexture(texture, null, &pixels, pitch);  // note: texture must be streaming for locking to work
+    //lockTexture(texture, null, &pixels, pitch);  // note: texture must be streaming for locking to work
 
     SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
 
@@ -870,6 +771,7 @@ SDL_PropertiesID getRendererProperties(SDL_Renderer *renderer)
     return props;
 }
 
+
 long getNumberProperty(SDL_PropertiesID props, const char *name, long default_value)
 {
     long number = SDL_GetNumberProperty(props, name, default_value);
@@ -881,7 +783,6 @@ long getNumberProperty(SDL_PropertiesID props, const char *name, long default_va
     }
     return number;
 }
-
 
 
 int getMaxTextureSizeForRenderer(SDL_Renderer *renderer)

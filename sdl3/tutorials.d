@@ -277,6 +277,23 @@ void texture_implicit_scaling_05()
     SDL_RenderFillRect(renderer, null);  // Fill the entire texture with the color
     SDL_SetRenderTarget(renderer, null);  // Reset the render target to the window
 
+    SDL_Texture *duplicateTexture = createTextureFromTexture(globeTexture);
+
+    writeln("globeTexture --------------------------");
+    displayTextureProperties(globeTexture);
+
+    writeln("duplicateTexture --------------------------");
+    displayTextureProperties(duplicateTexture);
+    
+    
+    copyTextureToTexture(globeTexture, null, duplicateTexture, null);
+    
+    SDL_Renderer *rend1 = SDL_GetRendererFromTexture(globeTexture);
+    SDL_Renderer *rend2 = SDL_GetRendererFromTexture(duplicateTexture);
+    
+    writeln("rend1 = ", rend1);
+    writeln("rend2 = ", rend2);
+
     while (running)
     {
         SDL_Event event;
@@ -287,48 +304,14 @@ void texture_implicit_scaling_05()
                running = false;
            }
         }
-        
-        SDL_Texture *duplicateTexture = createTextureFromTexture(globeTexture);
-        
-        writeln("duplicateTexture --------------------------");
-        displayTextureProperties(duplicateTexture);
-        
-        //blitSurfaceScaled(blueSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
 
-        // blitSurface(redSurface, null, screenSurface, null);  
-
-        //blitSurfaceScaled(globeSurface, null, screenSurface, null, SDL_SCALEMODE_LINEAR);
-
-        // blitSurface(globeSurface, null, screenSurface, null);  // if used, globeSurface only takes up quadrant of screen
-                                                               // because no scaling
-                                                               
-        // Surfaces are on the CPU so it's not optimal for you to use them to draw. Instead it's recommended 
-        // to create a Texture, draw with the renderer to it and then convert it back as a Surface if you need.
-
-        
-        //createRenderer(window, "MyRenderer", &renderer);  // create rend when create window
-        //SDL_Texture *screenTexture =  createTextureFromSurface(renderer, screenSurface); Doesn't create a Streaming Texture
-        
-        //SDL_Texture *screenTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 
-        //                                           screenSurface.w, screenSurface.h);
-                                                   
-        //copySurfaceToTexture(screenSurface, null, screenTexture, null);
-        
-       
-        //SDL_RenderRect(renderer, cast(SDL_FRect*) &globeRect);   // draw blue outline of rectangle around globe
-        
-        // cannot pass argument `& globeRect` of type `SDL_Rect*` to parameter `const(SDL_FRect)* rect`
-        //                                                                           Floating Rect
-        
-        // screenTexture and screenSurface are same size screenTextrue exists so we may draw to it.
-        
-        //copyTextureToSurface(screenTexture, null, screenSurface, null);
-        
-        //void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
-        //                  SDL_Surface *surface, const SDL_Rect *surRect)
+        SDL_FRect rect = {0,0,256,256};
 
         SDL_RenderClear(renderer); // Clear the renderer
-            // Add your drawing calls here (e.g., SDL_RenderFillRect())
+        
+            SDL_RenderTexture(renderer, duplicateTexture, null, null);   
+            SDL_RenderTexture(renderer, globeTexture, null, &rect);
+            
         SDL_RenderPresent(renderer); // Present the rendered content
     }
 }
