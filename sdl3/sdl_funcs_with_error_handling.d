@@ -30,8 +30,55 @@ void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
     }
 }
 
-/+
-void getTextureSize(SDL_Texture *texture, int *w, int *h)
+
+
+void changeTextureAccessTo(SDL_Texture *texture, SDL_TextureAccess newAccess)
+{
+    SDL_Surface *surface;
+    SDL_Texture *newTexture;
+
+    SDL_TextureAccess currentAccess = getTextureAccess(texture);
+    
+    SDL_Renderer *renderer = SDL_GetRendererFromTexture(texture);
+
+    //displayTextureProperties(texture);
+    
+    if (currentAccess == newAccess)
+        return;
+    
+    int w; int h;
+    float wf; float hf;
+    getTextureSize(texture, &wf, &hf);
+    
+    w = cast(int) wf;
+    h = cast(int) hf;
+    
+    
+    //createSurface(int width, int height, SDL_PIXELFORMAT_RGBA32, &surface);
+    writeln("Before copy");
+    
+    copyTextureToSurface(texture, null, surface, null);
+    
+    writeln("Be 4 SDL_DestroyTexture");
+    
+    SDL_DestroyTexture(texture);  // wipe out the old texture memory
+    
+    writeln("Be 4 createTexture");
+    
+    texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, newAccess, w, h);
+    
+    writeln("Be 4 copySurfaceToTexture");
+    
+    copySurfaceToTexture(surface, null, texture, null);
+    
+    
+    
+}
+    
+    
+    
+
+void getTextureSize(SDL_Texture *texture, float *w, float *h)
 {
     if (SDL_GetTextureSize(texture, w, h) == false)
     {
@@ -40,7 +87,7 @@ void getTextureSize(SDL_Texture *texture, int *w, int *h)
     }
 
 }
-+/
+
 
 SDL_Surface* loadImageToSurface(string file)
 {
@@ -263,7 +310,7 @@ void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
 {
     SDL_Surface *lockedSurface = null;
     
-    lockTextureToSurface(texture, null, &lockedSurface);  // will fail if texture is STATIC
+    lockTextureToSurface(texture, null, &lockedSurface);  // only works if texture is STREAMING
 
     blitSurface(lockedSurface, texRect, surface, surRect);
 
@@ -466,6 +513,11 @@ void displayTextureProperties(SDL_Texture* texture)
 {
     writeln("Texture Properties");
     writeln("------------------");
+    if (texture == null)
+    {
+        return;
+    }
+    
     writeln("texture = ", texture);
     /+
     https://wiki.libsdl.org/SDL3/README-migration
@@ -499,11 +551,6 @@ void displayTextureProperties(SDL_Texture* texture)
     writeln("    Bytes per Pixel: ", details.bytes_per_pixel);
     writefln("    Rmask: 0x%08X, Gmask: 0x%08X, Bmask: 0x%08X, Amask: 0x%08X\n",
              details.Rmask, details.Gmask, details.Bmask, details.Amask);
-
-    //void *pixels;
-    //int pitch;
-                
-    //lockTexture(texture, null, &pixels, pitch);  // note: texture must be streaming for locking to work
 
     SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
 

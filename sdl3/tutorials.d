@@ -17,6 +17,48 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 
+
+
+void change_texture_access_00()
+{
+    SDL_Texture *texture;
+    SDL_Window  *window;
+    SDL_Renderer *renderer = null;
+    SDL_Surface *surface;
+    
+    createWindowAndRenderer("change_texture_access_00", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+    
+    createSurface(256, 256, SDL_PIXELFORMAT_RGBA32, &surface);
+ 
+    SDL_Texture *tex1 = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
+
+    // copyTextureToSurface(tex1, null, surface, null);  // texture must be streaming
+    
+    SDL_Texture *tex2 = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
+
+    //copyTextureToSurface(tex2, null, surface, null);   // texture must be streaming
+    
+    SDL_Texture *tex3 = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
+
+    copyTextureToSurface(tex3, null, surface, null);     // WORKS
+
+    writeln("After copyTextureToSurface************************************************");
+    
+    //displayTextureProperties(texture);
+    
+    //writeln("AAAA");
+    
+    //changeTextureAccessTo(texture, SDL_TEXTUREACCESS_STATIC);
+
+    //writeln("BBBB");
+
+    displayTextureProperties(texture);
+    
+    displayTextureProperties(tex1);
+    displayTextureProperties(tex2);
+    displayTextureProperties(tex3);
+}
+
 void smallest_renderer_01()
 {
     SDL_Window   *window = null;

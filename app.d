@@ -129,6 +129,9 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
+    change_texture_access_00();
+    exit(-1);
+    
     smallest_renderer_01();
     //exit(-1);
     
