@@ -303,11 +303,66 @@ void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
 }
 
 
-// experimental
-
 void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
                           SDL_Surface *surface, const SDL_Rect *surRect)
 {
+    SDL_PropertiesID textureAccess = getTextureAccess(texture);
+    
+    if (textureAccess == SDL_TEXTUREACCESS_STREAMING)
+    {
+        copyStreamingTextureToSurface(texture, texRect, surface, surRect);
+        return;
+    }
+
+    // texture access is STATIC
+    
+    int w; int h;
+    float wf; float hf;
+    getTextureSize(texture, &wf, &hf);
+    w = cast(int) wf;
+    h = cast(int) hf;
+    
+    SDL_Renderer *renderer = SDL_GetRendererFromTexture(texture);
+    
+    SDL_Texture *targetTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, w, h);
+
+    displayTextureProperties(texture);
+    displayTextureProperties(targetTexture);
+    
+              //targetTexture, staticTexture 
+    renderTexture(renderer, texture, cast(const(SDL_FRect*)) texRect, cast(const(SDL_FRect*)) surRect);  // SDL3 only
+    
+    // The above command should render (copy) the static texture to a streaming texture
+    
+    // texture should now be Streaming
+    
+    copyStreamingTextureToSurface(targetTexture, null, surface, null);
+    
+    /+
+    Create a new texture with the desired SDL_TEXTUREACCESS_TARGET flag.
+    Copy the content from the original static texture to the new target texture. 
+    This might involve steps like reading pixels from the static texture and then 
+    updating the target texture.
+    Use the new target texture for your rendering operations. 
+    +/
+}
+
+
+
+
+// experimental
+
+void copyStreamingTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
+                                   SDL_Surface *surface, const SDL_Rect *surRect)
+{
+    SDL_PropertiesID textureAccess = getTextureAccess(texture);
+    
+    if (textureAccess != SDL_TEXTUREACCESS_STREAMING)
+    {
+        writeln(__FUNCTION__, " failed texture must be streaming");
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+
     SDL_Surface *lockedSurface = null;
     
     lockTextureToSurface(texture, null, &lockedSurface);  // only works if texture is STREAMING

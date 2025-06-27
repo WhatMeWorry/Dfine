@@ -95,7 +95,7 @@ void ThreeSurfacesAndOneStreamingTexure()
     int w; int h;
     getWindowMaximumSize(window, &w, &h);
     
-    copyTextureToSurface(texture, null, saveSurface, null);
+    copyStreamingTextureToSurface(texture, null, saveSurface, null);
     writeln("after copyTextureToSurface");
     
     //saveSurfaceToPNGfile(saveSurface, "./images/saved_from_surface.png");

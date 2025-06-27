@@ -129,6 +129,8 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
+    exercise_copyTextureToSurface();
+    
     change_texture_access_00();
     exit(-1);
     
