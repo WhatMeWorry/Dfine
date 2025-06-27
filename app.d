@@ -129,10 +129,15 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
-    //smallest_01();
+    smallest_renderer_01();
     //exit(-1);
     
-    //no_renderer_02();
+    smallest_texture_01a();
+    //exit(-1);
+    
+    smallest_texture_01b();
+    
+    no_renderer_02();
     //exit(-1);
     
     //surface_no_implicit_scaling_03();

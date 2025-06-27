@@ -17,7 +17,7 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 
-void smallest_01()
+void smallest_renderer_01()
 {
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
@@ -25,7 +25,35 @@ void smallest_01()
 
     createWindowAndRenderer("smallest 01", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
     
-    // defaults to black window
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+        }
+        
+        SDL_RenderClear(renderer); // defaults to black window
+            // Add your drawing calls here (e.g., SDL_RenderFillRect())
+        SDL_RenderPresent(renderer); // Present the rendered content
+    }
+    SDL_Quit();
+}
+
+
+void smallest_texture_01a()
+{
+    SDL_Window   *window = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture = null;
+    bool running = true;
+
+    createWindowAndRenderer("smallest_texture_01a", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+    
+    texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
     
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
 
@@ -41,7 +69,53 @@ void smallest_01()
         }
         
         SDL_RenderClear(renderer); // Clear the renderer
-            // Add your drawing calls here (e.g., SDL_RenderFillRect())
+        
+        SDL_RenderTexture(renderer, texture, null, null);
+            
+        SDL_RenderPresent(renderer); // Present the rendered content
+    }
+    SDL_Quit();
+}
+
+
+void smallest_texture_01b()
+{
+    SDL_Window   *window = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture = null;
+    bool running = true;
+
+    createWindowAndRenderer("smallest_texture_01b", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+        }
+        
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
+        SDL_RenderClear(renderer); // Clear the renderer
+        
+        SDL_FRect rect = {100.0f, 100.0f, 200.0f, 150.0f}; // x, y, width, height
+        SDL_FRect rect1 = {200.0f, 200.0f, 200.0f, 150.0f};
+        
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // green
+
+        SDL_RenderFillRect(renderer, &rect); // Draw the filled rectangle
+        
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // red
+        
+        SDL_RenderFillRect(renderer, &rect1); // Draw the filled rectangle
+        
+        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // blue
+        
+        SDL_RenderLine(renderer, 0, 0, 640, 480);
+            
         SDL_RenderPresent(renderer); // Present the rendered content
     }
     SDL_Quit();
