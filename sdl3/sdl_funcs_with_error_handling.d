@@ -25,8 +25,7 @@ void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
     int width;  int height;
     if (SDL_GetWindowMaximumSize(window, &width, &height) == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_GetWindowMaximumSize failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -85,6 +84,7 @@ void getTextureSize(SDL_Texture *texture, float *w, float *h)
 }
 +/
 
+/+
 void getTextureSize(SDL_Texture *texture, int *w, int *h)
 {
     if (SDL_GetTextureSize(texture, cast(float*) w, cast(float*) h) == false)
@@ -92,8 +92,38 @@ void getTextureSize(SDL_Texture *texture, int *w, int *h)
         writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
         writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
-
 }
++/
+
+
+void getTextureSize(SDL_Texture *texture, int *w, int *h)
+{
+    float tempWidth;
+    float tempHeight;
+    if (SDL_GetTextureSize(texture, &tempWidth, &tempHeight) == false)
+    {
+        throw new Exception("SDL_GetTextureSize failed: " ~ to!string(SDL_GetError()));
+    }
+    *w = cast(int) tempWidth;
+    *h = cast(int) tempHeight;
+}
+
+/+
+    float tempWidth, tempHeight;
+    if (!SDL_GetTextureSize(texture, &tempWidth, &tempHeight)) 
+    {
+        throw new Exception("SDL_GetTextureSize failed: " ~ to!string(SDL_GetError()));
+    }
+
+    *width = cast(int)tempWidth;
+    *height = cast(int)tempHeight;
++/
+
+
+
+
+
+
 
 
 SDL_Surface* loadImageToSurface(string file)
@@ -101,9 +131,8 @@ SDL_Surface* loadImageToSurface(string file)
     SDL_Surface *surface = IMG_Load(toStringz(file));  // IMG_Load function supports a wide range of image formats,
     if (surface == null)                               // including PCX, GIF, JPG, TIF, LBM, and PNG.
     {
-        writeln(__FUNCTION__, " failed with file ",file, " because ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
-    }                
+        throw new Exception("IMG_Load failed: " ~ to!string(SDL_GetError()));
+    }
     return surface;
 }
 
@@ -114,8 +143,7 @@ SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
                                                                         // BMP, GIF, JPG, PNG, TGA, ICO, and CUR
     if (texture == null) 
     {
-        writeln(__FUNCTION__, " failed with file ",file, " because ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("IMG_LoadTexture failed: " ~ to!string(SDL_GetError()));
     }
     return texture;
 }
@@ -138,8 +166,7 @@ void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **
     *surface =  SDL_CreateSurface(width, height, format);
     if (surface == null)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateSurface failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -149,8 +176,7 @@ SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
     SDL_Surface *surface = SDL_CreateSurface(width, height, pixelFormat);  // SDL3 only
     if (surface == null)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateSurface failed: " ~ to!string(SDL_GetError()));
     }
     return surface;
 }
@@ -161,8 +187,7 @@ SDL_Surface* createSurfaceFrom(int width, int height, SDL_PixelFormat format, vo
     SDL_Surface *surface = SDL_CreateSurfaceFrom(width, height, format, pixels, pitch);  // SDL3 only
     if (surface == null)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateSurfaceFrom failed: " ~ to!string(SDL_GetError()));
     }
     return surface;
 }
@@ -190,8 +215,7 @@ void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int 
     bool res = SDL_LockTexture(texture, null, pixels, &pitch);
     if (res == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_LockTexture failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -201,10 +225,12 @@ void lockTextureToSurface(SDL_Texture *texture, const SDL_Rect *rect, SDL_Surfac
 {
     if (SDL_LockTextureToSurface(texture, rect, surface) == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_LockTextureToSurface failed: " ~ to!string(SDL_GetError()));
     }
 }
+
+
+
 
 
 SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
@@ -212,8 +238,7 @@ SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
     SDL_PropertiesID props = SDL_GetTextureProperties(texture);  // SDL3 only function
     if (props == 0) 
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_GetTextureProperties failed: " ~ to!string(SDL_GetError()));
     }
     return props;
 }
@@ -224,20 +249,17 @@ SDL_PropertiesID getSurfaceProperties(SDL_Surface *surface)
     SDL_PropertiesID props = SDL_GetSurfaceProperties(surface);
     if (props == 0) 
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_GetSurfaceProperties failed: " ~ to!string(SDL_GetError()));
     }
     return props;
 }
-
 
 
 void fillSurfaceRect(SDL_Surface *dst, const SDL_Rect *rect, uint color)
 {
     if (SDL_FillSurfaceRect(dst, rect, color) == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_FillSurfaceRect failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -247,8 +269,7 @@ SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surfa
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (texture == null)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateTextureFromSurface failed: " ~ to!string(SDL_GetError()));
     }
     return texture;
 }
@@ -259,8 +280,7 @@ SDL_Texture* createTexture(SDL_Renderer *renderer, SDL_PixelFormat format, SDL_T
     SDL_Texture *texture = SDL_CreateTexture(renderer, format, access, width, height);
     if (!texture)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateTexture failed: " ~ to!string(SDL_GetError()));
     }
     return texture;
 }
@@ -270,8 +290,7 @@ void setTextureBlendMode(SDL_Texture *texture, SDL_BlendMode blendMode)
 {
     if (SDL_SetTextureBlendMode(texture, blendMode) == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_SetTextureBlendMode failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -282,8 +301,7 @@ void blitSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
 {
     if (SDL_BlitSurfaceScaled(srcSurface, srcRect, dstSurface, dstRect, scaleMode) == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_BlitSurfaceScaled failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -293,22 +311,10 @@ void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
 {
     if (SDL_BlitSurface(srcSurface, srcRect, dstSurface, dstRect) == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_BlitSurface failed: " ~ to!string(SDL_GetError()));
     }
 }
 
-/+
-void blitSurface(SDL_Surface *srcSurface, SDL_Rect *srcRect, 
-                          SDL_Surface *dstSurface, SDL_Rect *dstRect)
-{
-    if (SDL_BlitSurface(srcSurface, srcRect, dstSurface, dstRect) == false)
-    {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
-    }
-}
-+/
 
 // This is a generalized function of copySurfaceToStreamingTexture
 
@@ -420,8 +426,7 @@ SDL_PropertiesID createProperties()
     SDL_PropertiesID props = SDL_CreateProperties();  // 0 on failure
     if (props == 0)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateProperties failed: " ~ to!string(SDL_GetError()));
     }
     return props;
 }
@@ -730,8 +735,7 @@ SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
     SDL_Renderer *renderer =  SDL_CreateRenderer(window, toUTFz!(const(char)*)(rendererName) );
     if (renderer == null)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateRenderer failed: " ~ to!string(SDL_GetError()));
     }
     return renderer;
 }
@@ -743,8 +747,7 @@ void createRenderer(SDL_Window *window, string rendererName, SDL_Renderer **rend
     *renderer =  SDL_CreateRenderer(window, toUTFz!(const(char)*)(rendererName) );
     if (renderer == null)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateRenderer failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -757,8 +760,7 @@ void createWindow(string winName, int w, int h, SDL_WindowFlags flags, SDL_Windo
     *window = SDL_CreateWindow(winName.toStringz(), w, h, flags);
     if (window == null)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateWindow failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -769,8 +771,7 @@ void getWindowSurface(SDL_Window *window, SDL_Surface** windowSurface)
     *windowSurface = SDL_GetWindowSurface(window);
     if (windowSurface == null)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_GetWindowSurface failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -781,8 +782,7 @@ void renderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect
 {
     if (SDL_RenderTexture(renderer, texture, srcRect, dstRect) == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_RenderTexture failed: " ~ to!string(SDL_GetError()));
     }
 
 }
@@ -799,7 +799,7 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
 
     if (SDL_CreateWindowAndRenderer(toStringz(title), width, height, windowFlags, window, renderer) == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        throw new Exception(" failed: " ~ to!string(SDL_GetError()));
         writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
     if ((window == null) || (renderer == null))
@@ -829,8 +829,7 @@ void updateWindowSurface(SDL_Window *window)
 {
     if (SDL_UpdateWindowSurface(window) == false)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_UpdateWindowSurface failed: " ~ to!string(SDL_GetError()));
     }
 }
 
@@ -854,8 +853,7 @@ SDL_PixelFormatDetails* getPixelFormatDetails(SDL_PixelFormat pixelFormat)
     const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(pixelFormat);
     if (details == null)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_GetPixelFormatDetails failed: " ~ to!string(SDL_GetError()));
     }
     return cast(SDL_PixelFormatDetails*) details;  // cast away the constness with cast(SDL_PixelFormatDetails*)
 }
@@ -928,8 +926,7 @@ SDL_PropertiesID getRendererProperties(SDL_Renderer *renderer)
     SDL_PropertiesID props = SDL_GetRendererProperties(renderer);
     if (props == 0)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_GetRendererProperties failed: " ~ to!string(SDL_GetError()));
     }
     return props;
 }
@@ -940,9 +937,7 @@ long getNumberProperty(SDL_PropertiesID props, const char *name, long default_va
     long number = SDL_GetNumberProperty(props, name, default_value);
     if (number == default_value)
     {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln(name, " is not set or not a number property");
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_GetNumberProperty failed: " ~ to!string(SDL_GetError()));
     }
     return number;
 }
