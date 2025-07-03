@@ -28,6 +28,8 @@ void exercise_copyTextureToSurface()
     createSurface(256, 256, SDL_PIXELFORMAT_RGBA32, &surface);
  
     SDL_Texture *tex1 = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
+    
+    displayTextureProperties(tex1); 
 
     // copyTextureToSurface(tex1, null, surface, null);  // texture must be streaming
 

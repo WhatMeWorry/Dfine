@@ -48,9 +48,7 @@ void changeTextureAccessTo(SDL_Texture *texture, SDL_TextureAccess newAccess)
     int w; int h;
     getTextureSize(texture, &w, &h);
     
-    
     //createSurface(int width, int height, SDL_PIXELFORMAT_RGBA32, &surface);
-    writeln("Before copy");
     
     copyTextureToSurface(texture, null, surface, null);
     
@@ -65,35 +63,8 @@ void changeTextureAccessTo(SDL_Texture *texture, SDL_TextureAccess newAccess)
     writeln("Be 4 copySurfaceToTexture");
     
     copySurfaceToTexture(surface, null, texture, null);
-    
-    
-    
 }
-    
-    
-    
-/+
-void getTextureSize(SDL_Texture *texture, float *w, float *h)
-{
-    if (SDL_GetTextureSize(texture, w, h) == false)
-    {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
-    }
 
-}
-+/
-
-/+
-void getTextureSize(SDL_Texture *texture, int *w, int *h)
-{
-    if (SDL_GetTextureSize(texture, cast(float*) w, cast(float*) h) == false)
-    {
-        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
-    }
-}
-+/
 
 
 void getTextureSize(SDL_Texture *texture, int *w, int *h)
@@ -107,22 +78,6 @@ void getTextureSize(SDL_Texture *texture, int *w, int *h)
     *w = cast(int) tempWidth;
     *h = cast(int) tempHeight;
 }
-
-/+
-    float tempWidth, tempHeight;
-    if (!SDL_GetTextureSize(texture, &tempWidth, &tempHeight)) 
-    {
-        throw new Exception("SDL_GetTextureSize failed: " ~ to!string(SDL_GetError()));
-    }
-
-    *width = cast(int)tempWidth;
-    *height = cast(int)tempHeight;
-+/
-
-
-
-
-
 
 
 
@@ -149,6 +104,7 @@ SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
 }
 
 
+
 SDL_Texture* loadImageToStreamingTexture(SDL_Renderer *renderer, string file)
 {
     SDL_Surface *surface = IMG_Load(toStringz(file));
@@ -161,6 +117,7 @@ SDL_Texture* loadImageToStreamingTexture(SDL_Renderer *renderer, string file)
 }
 
 
+
 void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **surface)
 {
     *surface =  SDL_CreateSurface(width, height, format);
@@ -169,6 +126,7 @@ void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **
         throw new Exception("SDL_CreateSurface failed: " ~ to!string(SDL_GetError()));
     }
 }
+
 
 
 SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
@@ -180,6 +138,7 @@ SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
     }
     return surface;
 }
+
 
 
 SDL_Surface* createSurfaceFrom(int width, int height, SDL_PixelFormat format, void *pixels, int pitch)
@@ -194,26 +153,16 @@ SDL_Surface* createSurfaceFrom(int width, int height, SDL_PixelFormat format, vo
 
 
 
-
-
-
-
-// Uint32 SDL_MapRGBA(const SDL_PixelFormatDetails *format, const SDL_Palette *palette, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
-
 uint mapRGBA(const SDL_PixelFormatDetails *format, const SDL_Palette *palette, ubyte  r, ubyte  g, ubyte  b, ubyte  a)
 {
-     uint u =  SDL_MapRGBA(format, palette, r, g, b, a);
-
-     return u;
+     return(SDL_MapRGBA(format, palette, r, g, b, a));
 }
-
 
 
 
 void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int pitch)
 {
-    bool res = SDL_LockTexture(texture, null, pixels, &pitch);
-    if (res == false)
+    if (SDL_LockTexture(texture, null, pixels, &pitch) == false)
     {
         throw new Exception("SDL_LockTexture failed: " ~ to!string(SDL_GetError()));
     }
@@ -231,8 +180,6 @@ void lockTextureToSurface(SDL_Texture *texture, const SDL_Rect *rect, SDL_Surfac
 
 
 
-
-
 SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
 {
     SDL_PropertiesID props = SDL_GetTextureProperties(texture);  // SDL3 only function
@@ -242,6 +189,7 @@ SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
     }
     return props;
 }
+
 
 
 SDL_PropertiesID getSurfaceProperties(SDL_Surface *surface)
@@ -255,6 +203,7 @@ SDL_PropertiesID getSurfaceProperties(SDL_Surface *surface)
 }
 
 
+
 void fillSurfaceRect(SDL_Surface *dst, const SDL_Rect *rect, uint color)
 {
     if (SDL_FillSurfaceRect(dst, rect, color) == false)
@@ -262,6 +211,7 @@ void fillSurfaceRect(SDL_Surface *dst, const SDL_Rect *rect, uint color)
         throw new Exception("SDL_FillSurfaceRect failed: " ~ to!string(SDL_GetError()));
     }
 }
+
 
 
 SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surface)
@@ -275,6 +225,7 @@ SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surfa
 }
 
 
+
 SDL_Texture* createTexture(SDL_Renderer *renderer, SDL_PixelFormat format, SDL_TextureAccess access, int width, int height)
 {
     SDL_Texture *texture = SDL_CreateTexture(renderer, format, access, width, height);
@@ -284,6 +235,7 @@ SDL_Texture* createTexture(SDL_Renderer *renderer, SDL_PixelFormat format, SDL_T
     }
     return texture;
 }
+
 
 
 void setTextureBlendMode(SDL_Texture *texture, SDL_BlendMode blendMode)
@@ -304,6 +256,7 @@ void blitSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
         throw new Exception("SDL_BlitSurfaceScaled failed: " ~ to!string(SDL_GetError()));
     }
 }
+
 
 
 void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect, 
@@ -435,11 +388,7 @@ SDL_PropertiesID createProperties()
 
 void queryTextureSDL3(SDL_Texture *texture, SDL_PixelFormat *format, SDL_TextureAccess  *access, int *w, int *h)
 {
-    float wf; float hf;
-    SDL_GetTextureSize(texture, &wf, &hf);
-    
-    *w = cast(int) wf;
-    *h = cast(int) hf;
+    getTextureSize(texture, w, h);
 
     SDL_PropertiesID props = getTextureProperties(texture);
 
@@ -561,7 +510,7 @@ SDL_TextureAccess getTextureAccess(SDL_Texture* texture)
 {
     SDL_PropertiesID props = getTextureProperties(texture);  // SDL3 only function
     
-    SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
+    SDL_TextureAccess access = cast(SDL_TextureAccess) getNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
 
     if ((access == SDL_TEXTUREACCESS_STATIC) || (access == SDL_TEXTUREACCESS_STREAMING) ||
         (access == SDL_TEXTUREACCESS_TARGET))
@@ -570,10 +519,21 @@ SDL_TextureAccess getTextureAccess(SDL_Texture* texture)
     }
     else
     {
-        writeln(__FUNCTION__, " failed: invalid texture access ", access);
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("getTextureAccess failed: invalid texture access");
     }
 }
+
+
+
+SDL_PixelFormat getTexturePixelFormat(SDL_Texture* texture)
+{
+    SDL_PropertiesID props = getTextureProperties(texture);  // SDL3 only function
+
+    SDL_PixelFormat pixelFormat = cast(SDL_PixelFormat) getNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
+
+    return pixelFormat;
+}
+
 
 
 void printTextureAccess(SDL_TextureAccess access)
@@ -643,26 +603,19 @@ void displayTextureProperties(SDL_Texture* texture)
     A function SDL_GetTextureSize() has been added to get the size of the texture as floating point values.
     +/
 
-    SDL_PixelFormat pixelFormat;
-    
-    SDL_PropertiesID props = getTextureProperties(texture);  // SDL3 only function
+    SDL_PixelFormat pixelFormat = getTexturePixelFormat(texture);
 
-                                         // SDL3 only function
-    pixelFormat = cast (SDL_PixelFormat) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
-        
                           // SDL2 and SDL3 function
     const char *formatName = SDL_GetPixelFormatName(pixelFormat);
     
     printf("    Texture pixel format name: %s\n", formatName);
 
-    const SDL_PixelFormatDetails* details = getPixelFormatDetails(pixelFormat);
+    const SDL_PixelFormatDetails *details = getPixelFormatDetails(pixelFormat);
 
     writeln("    Bits per Pixel: ", details.bits_per_pixel);
     writeln("    Bytes per Pixel: ", details.bytes_per_pixel);
     writefln("    Rmask: 0x%08X, Gmask: 0x%08X, Bmask: 0x%08X, Amask: 0x%08X\n",
                   details.Rmask, details.Gmask, details.Bmask, details.Amask);
-
-  //SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
 
     SDL_TextureAccess access = getTextureAccess(texture);
 
@@ -679,14 +632,7 @@ void displayTextureProperties(SDL_Texture* texture)
 
     writeln("    wide = ", wide);
     writeln("    high = ", high);
-    
-    
-    int w; int h;
-    getTextureSize(texture, &w, &h);
 
-    writeln("w and h = ", w, " and ", h);
-   
-    
 }
 
 /+
@@ -741,6 +687,7 @@ SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
 }
 
 
+
 void createRenderer(SDL_Window *window, string rendererName, SDL_Renderer **renderer)
 {
     import std.utf : toUTFz;
@@ -750,8 +697,6 @@ void createRenderer(SDL_Window *window, string rendererName, SDL_Renderer **rend
         throw new Exception("SDL_CreateRenderer failed: " ~ to!string(SDL_GetError()));
     }
 }
-
-
 
 
 
@@ -776,7 +721,6 @@ void getWindowSurface(SDL_Window *window, SDL_Surface** windowSurface)
 }
 
 
-//bool SDL_RenderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect);
 
 void renderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcRect, const SDL_FRect *dstRect)
 {
@@ -789,7 +733,6 @@ void renderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect
 
 
 
-
 void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlags windowFlags, 
                              SDL_Window **window, SDL_Renderer **renderer)
 {
@@ -799,13 +742,11 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
 
     if (SDL_CreateWindowAndRenderer(toStringz(title), width, height, windowFlags, window, renderer) == false)
     {
-        throw new Exception(" failed: " ~ to!string(SDL_GetError()));
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("SDL_CreateWindowAndRenderer failed: " ~ to!string(SDL_GetError()));
     }
     if ((window == null) || (renderer == null))
     {
-        writeln("either window or renderer or both were not initialized");
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+        throw new Exception("createWindowAndRenderer failed: window and/or renderer is null");
     }
 }
 
@@ -816,9 +757,8 @@ void loadImageToSurface(string file, SDL_Surface** surface)
     *surface = IMG_Load(toStringz(file));  // IMG_Load function supports a wide range of image formats,
     if (surface == null)                               // including PCX, GIF, JPG, TIF, LBM, and PNG.
     {
-        writeln("IMG_Load failed with file: ", file, " because ", to!string(SDL_GetError()));
-        exit(-1);    // IMG_Load failed with file: ./images/huge.png because Image too large to decode
-    }                // IMG_Load failed with file: ./images/9.png because Couldn't open ./images/9.png: 
+        throw new Exception("IMG_Load failed: " ~ to!string(SDL_GetError()));
+    } 
 }
 
 
@@ -934,6 +874,10 @@ SDL_PropertiesID getRendererProperties(SDL_Renderer *renderer)
 
 long getNumberProperty(SDL_PropertiesID props, const char *name, long default_value)
 {
+    // The SDL_GetNumberProperty function, when used with integers in SDL 3, returns a 64-bit integer 
+    // instead of a 32-bit int for several reasons related to design and flexibility: Support for Large 
+    // Values, Consistency Across Properties, Future-Proofing, and Platform Portability
+
     long number = SDL_GetNumberProperty(props, name, default_value);
     if (number == default_value)
     {
