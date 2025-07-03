@@ -47,11 +47,7 @@ void changeTextureAccessTo(SDL_Texture *texture, SDL_TextureAccess newAccess)
         return;
     
     int w; int h;
-    float wf; float hf;
-    getTextureSize(texture, &wf, &hf);
-    
-    w = cast(int) wf;
-    h = cast(int) hf;
+    getTextureSize(texture, &w, &h);
     
     
     //createSurface(int width, int height, SDL_PIXELFORMAT_RGBA32, &surface);
@@ -77,10 +73,21 @@ void changeTextureAccessTo(SDL_Texture *texture, SDL_TextureAccess newAccess)
     
     
     
-
+/+
 void getTextureSize(SDL_Texture *texture, float *w, float *h)
 {
     if (SDL_GetTextureSize(texture, w, h) == false)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+
+}
++/
+
+void getTextureSize(SDL_Texture *texture, int *w, int *h)
+{
+    if (SDL_GetTextureSize(texture, cast(float*) w, cast(float*) h) == false)
     {
         writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
         writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
@@ -135,6 +142,35 @@ void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **
         writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
 }
+
+
+SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
+{
+    SDL_Surface *surface = SDL_CreateSurface(width, height, pixelFormat);  // SDL3 only
+    if (surface == null)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+    return surface;
+}
+
+
+SDL_Surface* createSurfaceFrom(int width, int height, SDL_PixelFormat format, void *pixels, int pitch)
+{
+    SDL_Surface *surface = SDL_CreateSurfaceFrom(width, height, format, pixels, pitch);  // SDL3 only
+    if (surface == null)
+    {
+        writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
+        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
+    }
+    return surface;
+}
+
+
+
+
+
 
 
 // Uint32 SDL_MapRGBA(const SDL_PixelFormatDetails *format, const SDL_Palette *palette, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
@@ -262,16 +298,17 @@ void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
     }
 }
 
-
-void blitSurfaceToSurface(SDL_Surface *src, SDL_Rect *srcRect, SDL_Surface *dst, SDL_Rect *dstRect)
+/+
+void blitSurface(SDL_Surface *srcSurface, SDL_Rect *srcRect, 
+                          SDL_Surface *dstSurface, SDL_Rect *dstRect)
 {
-    if (SDL_BlitSurface(src, srcRect, dst, dstRect) == false)
+    if (SDL_BlitSurface(srcSurface, srcRect, dstSurface, dstRect) == false)
     {
         writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
         writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
     }
 }
-
++/
 
 // This is a generalized function of copySurfaceToStreamingTexture
 
@@ -317,10 +354,8 @@ void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
     // texture access is STATIC
     
     int w; int h;
-    float wf; float hf;
-    getTextureSize(texture, &wf, &hf);
-    w = cast(int) wf;
-    h = cast(int) hf;
+
+    getTextureSize(texture, &w, &h);
     
     SDL_Renderer *renderer = SDL_GetRendererFromTexture(texture);
     
@@ -356,7 +391,7 @@ void copyStreamingTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect
                                    SDL_Surface *surface, const SDL_Rect *surRect)
 {
     SDL_PropertiesID textureAccess = getTextureAccess(texture);
-    
+
     if (textureAccess != SDL_TEXTUREACCESS_STREAMING)
     {
         writeln(__FUNCTION__, " failed texture must be streaming");
@@ -364,7 +399,7 @@ void copyStreamingTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect
     }
 
     SDL_Surface *lockedSurface = null;
-    
+
     lockTextureToSurface(texture, null, &lockedSurface);  // only works if texture is STREAMING
 
     blitSurface(lockedSurface, texRect, surface, surRect);
@@ -376,13 +411,7 @@ void copyStreamingTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect
 void copySurfaceToSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
                           SDL_Surface *dstSurface, const SDL_Rect *dstRect)
 {
-    //SDL_Surface *lockedSurface = null;
-    
-    //lockTextureToSurface(texture, null, &lockedSurface);  // will fail if texture is STATIC
-
     blitSurface(srcSurface, srcRect, dstSurface, dstRect);
-
-    //SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
 }
 
 
@@ -398,8 +427,6 @@ SDL_PropertiesID createProperties()
 }
 
 
-
-// duplicates textures
 
 void queryTextureSDL3(SDL_Texture *texture, SDL_PixelFormat *format, SDL_TextureAccess  *access, int *w, int *h)
 {
@@ -563,21 +590,47 @@ void printTextureAccess(SDL_TextureAccess access)
     }
 }
 
+/+
+typedef struct SDL_PixelFormatDetails
+{
+    SDL_PixelFormat format;
+    Uint8 bits_per_pixel;
+    Uint8 bytes_per_pixel;
+    Uint8 padding[2];
+    masks R G B A
+    bits  R G B A
+    shift R G B A
+}
+
+typedef enum SDL_PixelFormat
+{
+    SDL_PIXELFORMAT_UNKNOWN = 0,
+      o  o  o
+    SDL_PIXELFORMAT_RGBA8888 = 0x16462004u,
+}
+
+struct SDL_Texture
+{
+    SDL_PixelFormat format;  // format of texture, read-only
+    int w;                   // width of texture, read-only
+    int h;                   // height of texture, read-only.
+    int refcount;            // application reference count, used when freeing texture
+}
++/
+
 
 void displayTextureProperties(SDL_Texture* texture) 
 {
-    writeln("Texture Properties");
-    writeln("------------------");
+    writeln("----- Texture Properties ------------------");
     if (texture == null)
     {
         return;
     }
     
-    writeln("texture = ", texture);
     /+
     https://wiki.libsdl.org/SDL3/README-migration
     
-    SDL_QueryTexture() has been removed. The properties of the texture can be queried using 
+    SDL_QueryTexture() has been removed in SDL3. The properties of the texture can be queried using 
         SDL_PROP_TEXTURE_FORMAT_NUMBER, 
         SDL_PROP_TEXTURE_ACCESS_NUMBER, 
         SDL_PROP_TEXTURE_WIDTH_NUMBER, and 
@@ -586,28 +639,27 @@ void displayTextureProperties(SDL_Texture* texture)
     +/
 
     SDL_PixelFormat pixelFormat;
+    
     SDL_PropertiesID props = getTextureProperties(texture);  // SDL3 only function
 
-                                      // SDL3 only function
+                                         // SDL3 only function
     pixelFormat = cast (SDL_PixelFormat) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
         
                           // SDL2 and SDL3 function
     const char *formatName = SDL_GetPixelFormatName(pixelFormat);
+    
     printf("    Texture pixel format name: %s\n", formatName);
 
-                                            // SDL3 only
-    const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(pixelFormat);
-    if (!details)
-    {
-        printf("SDL_GetPixelFormatDetails failed: %s\n", SDL_GetError());
-    }
+    const SDL_PixelFormatDetails* details = getPixelFormatDetails(pixelFormat);
 
     writeln("    Bits per Pixel: ", details.bits_per_pixel);
     writeln("    Bytes per Pixel: ", details.bytes_per_pixel);
     writefln("    Rmask: 0x%08X, Gmask: 0x%08X, Bmask: 0x%08X, Amask: 0x%08X\n",
-             details.Rmask, details.Gmask, details.Bmask, details.Amask);
+                  details.Rmask, details.Gmask, details.Bmask, details.Amask);
 
-    SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
+  //SDL_TextureAccess access = cast(SDL_TextureAccess) SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_ACCESS_NUMBER, -1);
+
+    SDL_TextureAccess access = getTextureAccess(texture);
 
     printTextureAccess(access);
 
@@ -615,12 +667,21 @@ void displayTextureProperties(SDL_Texture* texture)
     // instead of a 32-bit int for several reasons related to design and flexibility: Support for Large 
     // Values, Consistency Across Properties, Future-Proofing, and Platform Portability
 
-    long wide = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_WIDTH_NUMBER, 0);
-    long high = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0);
+    int wide; // = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_WIDTH_NUMBER, 0);
+    int high; // = SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0);
+
+    getTextureSize(texture, &wide, &high);
 
     writeln("    wide = ", wide);
     writeln("    high = ", high);
+    
+    
+    int w; int h;
+    getTextureSize(texture, &w, &h);
 
+    writeln("w and h = ", w, " and ", h);
+   
+    
 }
 
 /+
@@ -635,7 +696,7 @@ struct SDL_Surface
 
     int refcount;               // Application reference count, used when freeing surface
     void *reserved;             // Reserved for internal use
-};
+}
 +/
 
 void displaySurfaceProperties(SDL_Surface* surface) 
@@ -716,9 +777,9 @@ void getWindowSurface(SDL_Window *window, SDL_Surface** windowSurface)
 
 //bool SDL_RenderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect);
 
-void renderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect)
+void renderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcRect, const SDL_FRect *dstRect)
 {
-    if (SDL_RenderTexture(renderer, texture, srcrect, dstrect) == false)
+    if (SDL_RenderTexture(renderer, texture, srcRect, dstRect) == false)
     {
         writeln(__FUNCTION__, " failed: ", to!string(SDL_GetError()));
         writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);

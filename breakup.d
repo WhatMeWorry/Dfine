@@ -59,30 +59,6 @@ void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
     }
 }
 
-// SDL_CreateSurface   SDL3 only
-SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
-{
-    SDL_Surface *surface = SDL_CreateSurface(width, height, pixelFormat);
-    if (surface == null)
-    {
-        writeln("SDL_CreateSurface failed: ", to!string(SDL_GetError()));  
-        exit(-1);
-    }
-    return surface;
-}
-
-
-// SDL_CreateSurfaceFrom   SDL3 only
-SDL_Surface* createSurfaceFrom(int width, int height, SDL_PixelFormat format, void *pixels, int pitch)
-{
-    SDL_Surface *surface = SDL_CreateSurfaceFrom(width, height, format, pixels, pitch);
-    if (surface == null)
-    {
-        writeln("SDL_CreateSurfaceFrom failed: ", to!string(SDL_GetError()));
-        exit(-1);
-    }
-    return surface;
-}
 
 
 
@@ -100,7 +76,6 @@ void getTextureSizeFloats(SDL_Texture *texture, float *width, float *height)
 
 void getTextureSizeInts(SDL_Texture *texture, int *width, int *height)
 {
-
     float *w; 
     float *h;
     if (SDL_GetTextureSize(texture, w, h) == false)  // new for SDL3
@@ -295,11 +270,11 @@ void createRealBigSurface()
         SDL_Rect(26749, 0,  6690, 10594)
     ];
 
-    blitSurfaceToSurface(image0, null, huge, &quads[0]);
-    blitSurfaceToSurface(image1, null, huge, &quads[1]);
-    blitSurfaceToSurface(image2, null, huge, &quads[2]);
-    blitSurfaceToSurface(image3, null, huge, &quads[3]);
-    blitSurfaceToSurface(image4, null, huge, &quads[4]);
+    copySurfaceToSurface(image0, null, huge, &quads[0]);
+    copySurfaceToSurface(image1, null, huge, &quads[1]);
+    copySurfaceToSurface(image2, null, huge, &quads[2]);
+    copySurfaceToSurface(image3, null, huge, &quads[3]);
+    copySurfaceToSurface(image4, null, huge, &quads[4]);
     
     string fileName = "./images/" ~ "huge" ~ ".png";
     if (IMG_SavePNG(huge, toStringz(fileName)) < 0) {
@@ -1218,14 +1193,14 @@ void zoomAnImage()
     smaller portion of the texture to a larger dstRect on the screen.
     +/
 
-    //blitSurfaceToSurface(earth, null, windowSurface, null);  // 1:1
+    //copySurfaceToSurface(earth, null, windowSurface, null);  // 1:1
     
 
     
     //SDL_Rect src = SDL_Rect(cast(int) earth.w*.25, cast(int)earth.h*.25, cast(int)earth.w*.75, cast(int)earth.h*.75);
     //writeln("src = ", src);
     
-    //blitSurfaceToSurface(earth, &src, windowSurface, null);
+    //copySurfaceToSurface(earth, &src, windowSurface, null);
 
     SDL_UpdateWindowSurface(window);
     
@@ -1277,7 +1252,7 @@ void assembleQuadFilesItoOnePNGfile()
         SDL_Rect(width, height, width, height)   // bottom right
     ];
 
-    blitSurfaceToSurface(image, null, combined, &quads[0]);
+    copySurfaceToSurface(image, null, combined, &quads[0]);
 
     //image = loadImageToSurface("./images/CNA_Maps_PNG/quadA1.png");
     //image = loadImageToSurface("./images/CNA_Maps_PNG/quadB1.png");
@@ -1285,7 +1260,7 @@ void assembleQuadFilesItoOnePNGfile()
     //image = loadImageToSurface("./images/CNA_Maps_PNG/quadD1.png");
     image = loadImageToSurface("./images/CNA_Maps_PNG/quadE1.png");
 
-    blitSurfaceToSurface(image, null, combined, &quads[1]);
+    copySurfaceToSurface(image, null, combined, &quads[1]);
 
     //image = loadImageToSurface("./images/CNA_Maps_PNG/quadA2.png");
     //image = loadImageToSurface("./images/CNA_Maps_PNG/quadB2.png");
@@ -1293,7 +1268,7 @@ void assembleQuadFilesItoOnePNGfile()
     //image = loadImageToSurface("./images/CNA_Maps_PNG/quadD2.png");
     image = loadImageToSurface("./images/CNA_Maps_PNG/quadE2.png");
 
-    blitSurfaceToSurface(image, null, combined, &quads[2]);
+    copySurfaceToSurface(image, null, combined, &quads[2]);
 
     //image = loadImageToSurface("./images/CNA_Maps_PNG/quadA3.png");
     //image = loadImageToSurface("./images/CNA_Maps_PNG/quadB3.png");
@@ -1301,7 +1276,7 @@ void assembleQuadFilesItoOnePNGfile()
     //image = loadImageToSurface("./images/CNA_Maps_PNG/quadD3.png");
     image = loadImageToSurface("./images/CNA_Maps_PNG/quadE3.png");
 
-    blitSurfaceToSurface(image, null, combined, &quads[3]);
+    copySurfaceToSurface(image, null, combined, &quads[3]);
 
     // /+ ============================================================
     string fileName = "./images/" ~ "COMBINE" ~ "_E" ~ ".png";
@@ -1313,14 +1288,14 @@ void assembleQuadFilesItoOnePNGfile()
 
     SDL_Surface *dstSurface = SDL_CreateSurface(1500, 1500, image.format);
 
-    // blitSurfaceToSurface(combined, null, dstSurface, null);
+    // copySurfaceToSurface(combined, null, dstSurface, null);
 
     SDL_Surface *windowSurface = SDL_GetWindowSurface(window);
 
     // Blit the image onto the window surface
-    // blitSurfaceToSurface(dstSurface, null, windowSurface, null);
+    // copySurfaceToSurface(dstSurface, null, windowSurface, null);
 
-    blitSurfaceToSurface(combined, &quads[1], windowSurface, null);
+    copySurfaceToSurface(combined, &quads[1], windowSurface, null);
 
     SDL_UpdateWindowSurface(window);
 
@@ -1331,7 +1306,7 @@ void assembleQuadFilesItoOnePNGfile()
 
     auto sRect = SDL_Rect(2000, 2000, width, height);
 
-    blitSurfaceToSurface(combined, &sRect, windowSurface, null);
+    copySurfaceToSurface(combined, &sRect, windowSurface, null);
 
     SDL_UpdateWindowSurface(window);
 
@@ -1341,7 +1316,7 @@ void assembleQuadFilesItoOnePNGfile()
     {
         sRect = SDL_Rect(i*50, i*50, width, height);
 
-        blitSurfaceToSurface(combined, &sRect, windowSurface, null);
+        copySurfaceToSurface(combined, &sRect, windowSurface, null);
 
         SDL_UpdateWindowSurface(window);
 
@@ -1352,7 +1327,7 @@ void assembleQuadFilesItoOnePNGfile()
     /+
     sRect = SDL_Rect(2200, 2200, width, height);
 
-    blitSurfaceToSurface(combined, &sRect, windowSurface, null);
+    copySurfaceToSurface(combined, &sRect, windowSurface, null);
 
     SDL_UpdateWindowSurface(window);
 
