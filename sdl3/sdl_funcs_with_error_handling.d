@@ -748,6 +748,16 @@ void createRenderer(SDL_Window *window, string rendererName, SDL_Renderer **rend
 }
 
 
+SDL_Window* createWindow(string winName, int w, int h, SDL_WindowFlags flags)
+{
+    SDL_Window *window = SDL_CreateWindow(winName.toStringz(), w, h, flags);
+    if (window == null)
+    {
+        throw new Exception("SDL_CreateWindow failed: " ~ to!string(SDL_GetError()));
+    }
+    return window;
+}
+
 
 void createWindow(string winName, int w, int h, SDL_WindowFlags flags, SDL_Window **window)
 {
@@ -759,6 +769,16 @@ void createWindow(string winName, int w, int h, SDL_WindowFlags flags, SDL_Windo
 }
 
 
+SDL_Surface* getWindowSurface(SDL_Window *window)
+{
+    SDL_Surface *windowSurface = SDL_GetWindowSurface(window);
+    if (windowSurface == null)
+    {
+        throw new Exception("SDL_GetWindowSurface failed: " ~ to!string(SDL_GetError()));
+    }
+    return windowSurface;
+}
+
 
 void getWindowSurface(SDL_Window *window, SDL_Surface** windowSurface)
 {
@@ -768,7 +788,6 @@ void getWindowSurface(SDL_Window *window, SDL_Surface** windowSurface)
         throw new Exception("SDL_GetWindowSurface failed: " ~ to!string(SDL_GetError()));
     }
 }
-
 
 
 void renderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcRect, const SDL_FRect *dstRect)

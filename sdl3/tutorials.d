@@ -21,12 +21,13 @@ void exercise_copyTextureToSurface()
     SDL_Texture *texture;
     SDL_Window  *window;
     SDL_Renderer *renderer = null;
-    SDL_Surface *surface;
-    
+
     createWindowAndRenderer("exercise_copyTextureToSurface", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
-    
-    createSurface(256, 256, SDL_PIXELFORMAT_RGBA32, &surface);
- 
+
+    // createSurface(256, 256, SDL_PIXELFORMAT_RGBA32, &surface);
+
+    SDL_Surface *surface = createSurface(256, 256, SDL_PIXELFORMAT_RGBA32);
+
     SDL_Texture *tex1 = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
     
     displayTextureProperties(tex1); 
@@ -212,22 +213,18 @@ SDL_CreateWindowSurface: This function explicitly creates a surface for a window
 
 void no_renderer_02()
 {
-    SDL_Window  *window = null;
-    SDL_Surface *windowSurface = null;
-    SDL_Surface *sourceSurface = null;
-    bool running = true;
+    SDL_Window *window = createWindow("no_renderer_02", 512, 512, cast(SDL_WindowFlags) 0);
 
-    createWindow("no_renderer_02", 512, 512, cast(SDL_WindowFlags) 0, &window);
+    SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
 
-    getWindowSurface(window, &windowSurface);  // create a surface since it doesn't already exist
-
-    loadImageToSurface("./images/earth1024x1024.png", &sourceSurface);
+    SDL_Surface *sourceSurface = loadImageToSurface("./images/earth1024x1024.png");
 
     displaySurfaceProperties(sourceSurface);
     displaySurfaceProperties(windowSurface);
 
-    blitSurface(sourceSurface, null, windowSurface, null);
+    copySurfaceToSurface(sourceSurface, null, windowSurface, null);  // performs blit
 
+    bool running = true;
     while (running)
     {
         SDL_Event event;
