@@ -436,8 +436,8 @@ void texture_implicit_scaling_05()
     
     copyTextureToTexture(globeTexture, null, duplicateTexture, null);
     
-    SDL_Renderer *rend1 = SDL_GetRendererFromTexture(globeTexture);
-    SDL_Renderer *rend2 = SDL_GetRendererFromTexture(duplicateTexture);
+    SDL_Renderer *rend1 = getRendererFromTexture(globeTexture);
+    SDL_Renderer *rend2 = getRendererFromTexture(duplicateTexture);
     
     writeln("rend1 = ", rend1);
     writeln("rend2 = ", rend2);
