@@ -16,28 +16,35 @@ import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
 
+
+/+ 
+load texture > copy texture to intermediate surface > copy intermediate surface to window surface
+we don't need intermediate surface. just here to test out the copyTextureToSurface functionality
++/
+
 void copying_textures_to_surfaces()
 {
     SDL_Window  *window = null;
     SDL_Renderer *renderer = null;
 
-    createWindowAndRenderer("exercise_copyTextureToSurface", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
-    
+    createWindowAndRenderer("exercise_copyTextureToSurface", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+
     SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
 
-    writeln("windowSurface.w = ", windowSurface.w);
-    writeln("windowSurface.h = ", windowSurface.h);
+    SDL_Texture *texture = loadImageToStreamingTexture(renderer, "./images/Wach2.png");
+    displayTextureProperties(texture);
     
     int w; int h;
-    getWindowSize(window, &w, &h);
-
+    getTextureSize(texture, &w, &h);
+    
     SDL_Surface *surface = createSurface(w, h, SDL_PIXELFORMAT_RGBA32);
+    
+    copyTextureToSurface(texture, null, surface, null);
+    displaySurfaceProperties(surface);
 
-    SDL_Texture *texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
+    SDL_Rect surRect = { 0, 0, windowSurface.w, windowSurface.h };
 
-    texture = loadImageToStreamingTexture(renderer, "./images/Wach2.png");
-    displayTextureProperties(texture);
-
+/+
     SDL_Texture *texStatic = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
     SDL_Texture *texTarget = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
     SDL_Texture *texStream = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
@@ -46,16 +53,14 @@ void copying_textures_to_surfaces()
     displayTextureProperties(texTarget); 
     displayTextureProperties(texStream); 
 
-    copyTextureToSurface(texStatic, null, surface, null);  // texture must be streaming
-
-    copyTextureToSurface(texTarget, null, surface, null);   // texture must be streaming
-
+    copyTextureToSurface(texStatic, null, surface, null);
+    copyTextureToSurface(texTarget, null, surface, null);
     copyTextureToSurface(texStream, null, surface, null);
-    
-    copyTextureToSurface(texture, null, surface, null);
-    displaySurfaceProperties(surface);
-    
++/
+
+
     copySurfaceToSurface(surface, null, windowSurface, null);
+    displaySurfaceProperties(windowSurface);
 
     bool running = true;
     while (running)
@@ -67,12 +72,39 @@ void copying_textures_to_surfaces()
             {
                 running = false;
             }
+            if (event.key.key == SDLK_UP) 
+            {
+                surRect.y -= 50;
+                //keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
+            }
+            if (event.key.key == SDLK_DOWN) 
+            {
+                surRect.y += 50;
+                //keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
+            }
+            if (event.key.key == SDLK_LEFT) 
+            {
+                surRect.x -= 50;
+                //keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
+            }
+            if (event.key.key == SDLK_RIGHT) 
+            {
+                surRect.x += 50;
+                //keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
+            }
         }
-        // Do Nothing
+
+        writeln("surRect = ", surRect);
+
+        copySurfaceToSurface(surface, &surRect, windowSurface, null);
+        
         updateWindowSurface(window);
+
+        SDL_Delay(1000);
+
+        
     }
     SDL_Quit();
-
 }
 
 

@@ -378,6 +378,11 @@ void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
 void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
                           SDL_Surface *surface, const SDL_Rect *surRect)
 {
+    if (surface == null)
+    {
+        throw new Exception("copyTextureToSurface failed: surface is null");
+    }
+    
     SDL_PropertiesID textureAccess = getTextureAccess(texture);
 
     if (textureAccess == SDL_TEXTUREACCESS_STREAMING)
@@ -716,8 +721,7 @@ struct SDL_Surface
 
 void displaySurfaceProperties(SDL_Surface* surface) 
 {
-    writeln("Surface Properties");
-    writeln("------------------");
+    writeln("-------- Surface Properties ----------");
     writeln("    surface = ", surface);
     writeln("    flags   = ", surface.flags);
     writeln("    format  = ", surface.format);
