@@ -640,7 +640,7 @@ void copySurfaceToStreamingTexture(SDL_Surface *surface, SDL_Texture *texture)
     +/
 
     SDL_Surface *lockedSurface = null;
-    lockTextureToSurface(texture, null, &lockedSurface);  // will fail if texture is STATIC
+    lockTextureToSurface(texture, null, &lockedSurface);  // only works with streaming textures
 
       
     SDL_Rect r = { 0, 0, 4000, 6000 };
@@ -649,7 +649,7 @@ void copySurfaceToStreamingTexture(SDL_Surface *surface, SDL_Texture *texture)
     SDL_FillSurfaceRect(surface, &r, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 0, 255));
      +/
 
-    blitSurface(surface, &r /+null+/, lockedSurface, &r /+null+/);
+    copySurfaceToSurface(surface, &r /+null+/, lockedSurface, &r /+null+/);
     
     SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
 }

@@ -16,33 +16,43 @@ import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
 
-void exercise_copyTextureToSurface()
+void copying_textures_to_surfaces()
 {
-    SDL_Texture *texture;
     SDL_Window  *window;
     SDL_Renderer *renderer = null;
 
     createWindowAndRenderer("exercise_copyTextureToSurface", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
 
-    // createSurface(256, 256, SDL_PIXELFORMAT_RGBA32, &surface);
-
     SDL_Surface *surface = createSurface(256, 256, SDL_PIXELFORMAT_RGBA32);
 
-    SDL_Texture *tex1 = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
-    
-    displayTextureProperties(tex1); 
+    SDL_Texture *texStatic = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
+    SDL_Texture *texTarget = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
+    SDL_Texture *texStream = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
 
-    // copyTextureToSurface(tex1, null, surface, null);  // texture must be streaming
+    displayTextureProperties(texStatic); 
+    displayTextureProperties(texTarget); 
+    displayTextureProperties(texStream); 
 
-    SDL_Texture *tex2 = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
+    copyTextureToSurface(texStatic, null, surface, null);  // texture must be streaming
 
-    // copyTextureToSurface(tex2, null, surface, null);   // texture must be streaming
+    copyTextureToSurface(texTarget, null, surface, null);   // texture must be streaming
 
-    SDL_Texture *tex3 = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
+    copyTextureToSurface(texStream, null, surface, null);
 
-    copyTextureToSurface(tex3, null, surface, null);     // WORKS
-
-    writeln("Texture must be SDL_TEXTUREACCESS_STREAMING to work");
+    bool running = true;
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+        }
+        // Do Nothing
+    }
+    SDL_Quit();
 
 }
 
@@ -61,8 +71,6 @@ void change_texture_access_00()
     //copyTextureToSurface(tex3, null, surface, null);     // WORKS
 
     //changeTextureAccessTo(texture, SDL_TEXTUREACCESS_STATIC);
-
-    //writeln("BBBB");
 
     displayTextureProperties(texture);
 
@@ -83,8 +91,6 @@ void change_texture_access_00()
     displayTextureProperties(staticTexture);
     displayTextureProperties(targetTexture);
     
-    writeln("BBBB");
-    
     //copyTextureToSurface(staticTexture, null, surface, null);     // WORKS
     
     //bool SDL_RenderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect);
@@ -96,10 +102,10 @@ void smallest_renderer_01()
 {
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
-    bool running = true;
 
     createWindowAndRenderer("smallest 01", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
-    
+
+    bool running = true;
     while (running)
     {
         SDL_Event event;
@@ -281,19 +287,19 @@ void surface_no_implicit_scaling_03()
            }
         }
 
-        blitSurface(solidColorSurface, null, screenSurface, null);
+        copySurfaceToSurface(solidColorSurface, null, screenSurface, null);
         
         SDL_Rect same = { 0, 0, globeSurface.w, globeSurface.h };
         
-        blitSurface(globeSurface, null, screenSurface, &same);
+        copySurfaceToSurface(globeSurface, null, screenSurface, &same);
 
         SDL_Rect larger = { 256, 256, globeSurface.w * 2, globeSurface.h * 2 };
         
-        blitSurface(globeSurface, null, screenSurface, &larger);
+        copySurfaceToSurface(globeSurface, null, screenSurface, &larger);
 
         SDL_Rect smaller = { 512, 512, globeSurface.w / 2, globeSurface.h / 2 };  // note that when destination < source the entire source is still drawn
 
-        blitSurface(globeSurface, null, screenSurface, &smaller);
+        copySurfaceToSurface(globeSurface, null, screenSurface, &smaller);
 
         updateWindowSurface(window);
     }
@@ -343,7 +349,7 @@ void surface_explicit_scaling_04()
            }
         }
 
-        blitSurface(solidColorSurface, null, screenSurface, null);
+        copySurfaceToSurface(solidColorSurface, null, screenSurface, null);
         
         SDL_Rect same = { 0, 0, globeSurface.w, globeSurface.h };
 

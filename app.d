@@ -129,9 +129,12 @@ int main()
     //zoomAnImage;
     //zoom_grok;
     
-    no_renderer_02();
+    // no_renderer_02();
     
-    exercise_copyTextureToSurface();
+    // surface_no_implicit_scaling_03();
+    
+    copying_textures_to_surfaces();
+    exit(-1);
     
     change_texture_access_00();
     exit(-1);

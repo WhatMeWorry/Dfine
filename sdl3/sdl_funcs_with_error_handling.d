@@ -225,6 +225,8 @@ void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int 
 
 
 
+// SDL_LockTextureToSurface() only works with streaming textures
+
 void lockTextureToSurface(SDL_Texture *texture, const SDL_Rect *rect, SDL_Surface **surface)
 {
     if (SDL_LockTextureToSurface(texture, rect, surface) == false)
@@ -341,7 +343,7 @@ void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
     +/
 
     SDL_Surface *lockedSurface = null;
-    lockTextureToSurface(texture, null, &lockedSurface);  // will fail if texture is STATIC
+    lockTextureToSurface(texture, null, &lockedSurface);  // only works if texture is streaming
 
     /+
     SDL_FillSurfaceRect(surface, null, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 255, 0));
@@ -358,60 +360,29 @@ void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
                           SDL_Surface *surface, const SDL_Rect *surRect)
 {
     SDL_PropertiesID textureAccess = getTextureAccess(texture);
-    
+
     if (textureAccess == SDL_TEXTUREACCESS_STREAMING)
     {
         copyStreamingTextureToSurface(texture, texRect, surface, surRect);
         return;
     }
 
-    // texture access is STATIC
+    SDL_Texture *streamTexture = createStreamingTextureFromTexture(texture);
     
-    int w; int h;
+    copyTextureToTexture(texture, null, streamTexture, null);
 
-    getTextureSize(texture, &w, &h);
-    
-    SDL_Renderer *renderer = getRendererFromTexture(texture);
-    
-    SDL_Texture *targetTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, w, h);
+    copyStreamingTextureToSurface(streamTexture, texRect, surface, surRect);
 
-    displayTextureProperties(texture);
-    displayTextureProperties(targetTexture);
-    
-              //targetTexture, staticTexture 
-    renderTexture(renderer, texture, cast(const(SDL_FRect*)) texRect, cast(const(SDL_FRect*)) surRect);  // SDL3 only
-    
-    // The above command should render (copy) the static texture to a streaming texture
-    
-    // texture should now be Streaming
-    
-    copyStreamingTextureToSurface(targetTexture, null, surface, null);
-    
-    /+
-    Create a new texture with the desired SDL_TEXTUREACCESS_TARGET flag.
-    Copy the content from the original static texture to the new target texture. 
-    This might involve steps like reading pixels from the static texture and then 
-    updating the target texture.
-    Use the new target texture for your rendering operations. 
-    +/
+    SDL_DestroyTexture(streamTexture);
 }
 
 
 
-
-// experimental
+// this function should only be clled by copyTextureToSurface()
 
 void copyStreamingTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
                                    SDL_Surface *surface, const SDL_Rect *surRect)
 {
-    SDL_PropertiesID textureAccess = getTextureAccess(texture);
-
-    if (textureAccess != SDL_TEXTUREACCESS_STREAMING)
-    {
-        writeln(__FUNCTION__, " failed texture must be streaming");
-        writeln("in file ",__FILE__, " at line ", __LINE__ );  exit(-1);
-    }
-
     SDL_Surface *lockedSurface = null;
 
     lockTextureToSurface(texture, null, &lockedSurface);  // only works if texture is STREAMING
@@ -443,21 +414,46 @@ SDL_PropertiesID createProperties()
 
 void queryTextureSDL3(SDL_Texture *texture, SDL_PixelFormat *format, SDL_TextureAccess  *access, int *w, int *h)
 {
+    *format = getTexturePixelFormat(texture);
+
+    *access = getTextureAccess(texture);
+    
     getTextureSize(texture, w, h);
-
-    SDL_PropertiesID properties = getTextureProperties(texture);
-
-    *format = cast(SDL_PixelFormat) getNumberProperty(properties, SDL_PROP_TEXTURE_FORMAT_NUMBER, 0);
-
+    
+    /+
     if (*format == SDL_PIXELFORMAT_RGBA8888)
         writeln("format is SDL_PIXELFORMAT_RGBA8888");
     else
         writeln("format is NOT SDL_PIXELFORMAT_RGBA8888");
-
-    *access = cast(SDL_TextureAccess) getNumberProperty(properties, SDL_PROP_TEXTURE_ACCESS_NUMBER, 0);
-
     printTextureAccess(*access);
+    +/
 }
+
+
+
+SDL_Texture* createStreamingTextureFromTexture(SDL_Texture *existingTexture)
+{
+    // you can retrieve the renderer associated with a texture using the SDL_GetRenderer function. This 
+    // function takes a SDL_Texture pointer as input and returns a pointer to the SDL_Renderer that was 
+    // used to create the texture. 
+
+    SDL_Renderer *renderer = getRendererFromTexture(existingTexture);  // retrieve the renderer associated with this texture
+
+    SDL_PixelFormat    format;  
+    SDL_TextureAccess  access;  
+    int w;
+    int h;
+
+    queryTextureSDL3(existingTexture, &format, &access, &w, &h);  // SDL_QueryTexture is in SDL2 and was removed from SDL3
+
+    SDL_Texture *streamTexture = createTexture(renderer, format, SDL_TEXTUREACCESS_STREAMING, w, h);   // SDL3 only
+
+    return streamTexture;
+}
+
+
+
+
 
 
 
@@ -468,8 +464,6 @@ SDL_Texture* createTextureFromTexture(SDL_Texture *texture)
     // used to create the texture. 
     
     SDL_Renderer *renderer = getRendererFromTexture(texture);  // retrieve the renderer associated with this texture
-    
-    SDL_PropertiesID texProps = getTextureProperties(texture);  // SDL3 only function
     
     SDL_PixelFormat    format;  
     SDL_TextureAccess  access;  
