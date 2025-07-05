@@ -18,12 +18,25 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 
 void copying_textures_to_surfaces()
 {
-    SDL_Window  *window;
+    SDL_Window  *window = null;
     SDL_Renderer *renderer = null;
 
     createWindowAndRenderer("exercise_copyTextureToSurface", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+    
+    SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
 
-    SDL_Surface *surface = createSurface(256, 256, SDL_PIXELFORMAT_RGBA32);
+    writeln("windowSurface.w = ", windowSurface.w);
+    writeln("windowSurface.h = ", windowSurface.h);
+    
+    int w; int h;
+    getWindowSize(window, &w, &h);
+
+    SDL_Surface *surface = createSurface(w, h, SDL_PIXELFORMAT_RGBA32);
+
+    SDL_Texture *texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
+
+    texture = loadImageToStreamingTexture(renderer, "./images/Wach2.png");
+    displayTextureProperties(texture);
 
     SDL_Texture *texStatic = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
     SDL_Texture *texTarget = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
@@ -38,6 +51,11 @@ void copying_textures_to_surfaces()
     copyTextureToSurface(texTarget, null, surface, null);   // texture must be streaming
 
     copyTextureToSurface(texStream, null, surface, null);
+    
+    copyTextureToSurface(texture, null, surface, null);
+    displaySurfaceProperties(surface);
+    
+    copySurfaceToSurface(surface, null, windowSurface, null);
 
     bool running = true;
     while (running)
@@ -51,6 +69,7 @@ void copying_textures_to_surfaces()
             }
         }
         // Do Nothing
+        updateWindowSurface(window);
     }
     SDL_Quit();
 
@@ -83,7 +102,7 @@ void change_texture_access_00()
     
     createSurface(256, 256, SDL_PIXELFORMAT_RGBA8888, &surface);
     
-    SDL_Texture   *targetTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
+    SDL_Texture *targetTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
     
     
     copyTextureToTexture(staticTexture, null, targetTexture, null);

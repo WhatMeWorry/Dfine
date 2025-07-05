@@ -49,7 +49,7 @@ There isn't a hard limit to the number of SDL surfaces you can create
     
  
 
-
+/+
 void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
 {
     if (IMG_SavePNG(surface, toStringz(file)) == false)
@@ -58,8 +58,7 @@ void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
         exit(-1);
     }
 }
-
-
++/
 
 
 
@@ -110,15 +109,6 @@ SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
 
 
 
-
-void getWindowSize(SDL_Window *window, int *w, int *h)
-{
-    if (SDL_GetWindowSize(window, w, h) == false)
-    {
-        writeln("SDL_GetWindowSize failed: ", to!string(SDL_GetError()));  
-        exit(-1);
-    }
-}
 
 
 

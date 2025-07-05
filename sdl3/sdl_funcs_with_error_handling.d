@@ -30,6 +30,14 @@ void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
 }
 
 
+void getWindowSize(SDL_Window *window, int *w, int *h)
+{
+    if (SDL_GetWindowSize(window, w, h) == false)
+    {
+        throw new Exception("SDL_GetWindowSize failed: " ~ to!string(SDL_GetError()));
+    }
+}
+
 
 SDL_Renderer* getRendererFromTexture(SDL_Texture *texture)
 {
@@ -169,6 +177,17 @@ SDL_Texture* loadImageToStreamingTexture(SDL_Renderer *renderer, string file)
     copySurfaceToTexture(surface, null, texture, null);
 
     return texture;
+}
+
+
+
+void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
+{
+    if (IMG_SavePNG(surface, toStringz(file)) == false)
+    {
+        throw new Exception("IMG_SavePNG failed: " ~ to!string(SDL_GetError()));
+        exit(-1);
+    }
 }
 
 
