@@ -39,6 +39,8 @@ void copying_textures_to_surfaces()
     
     SDL_Surface *surface = createSurface(w, h, SDL_PIXELFORMAT_RGBA32);
     
+    SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };  // outer boundaries
+    
     copyTextureToSurface(texture, null, surface, null);
     displaySurfaceProperties(surface);
 
@@ -75,22 +77,22 @@ void copying_textures_to_surfaces()
             if (event.key.key == SDLK_UP) 
             {
                 surRect.y -= 50;
-                //keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
             }
             if (event.key.key == SDLK_DOWN) 
             {
                 surRect.y += 50;
-                //keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
             }
             if (event.key.key == SDLK_LEFT) 
             {
                 surRect.x -= 50;
-                //keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
             }
             if (event.key.key == SDLK_RIGHT) 
             {
                 surRect.x += 50;
-                //keepRectWithinBiggerRectArrowMovement(&cameraRect, &texRect);
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
             }
         }
 
@@ -100,9 +102,7 @@ void copying_textures_to_surfaces()
         
         updateWindowSurface(window);
 
-        SDL_Delay(1000);
-
-        
+        //SDL_Delay(1000);
     }
     SDL_Quit();
 }

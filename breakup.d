@@ -46,22 +46,6 @@ There isn't a hard limit to the number of SDL surfaces you can create
 +/
 
 
-    
- 
-
-/+
-void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
-{
-    if (IMG_SavePNG(surface, toStringz(file)) == false)
-    {
-        writeln("IMG_SavePNG failed with file ", file, " : ", to!string(SDL_GetError()));
-        exit(-1);
-    }
-}
-+/
-
-
-
 
 void getTextureSizeFloats(SDL_Texture *texture, float *width, float *height)
 {
@@ -182,6 +166,39 @@ void keepRectWithinBiggerRectArrowMovement(SDL_FRect *inner, SDL_FRect *outer)
         +/
 
     // treat outer as read-only
+
+    if (inner.x < outer.x)
+    {
+        inner.x = outer.x;  // if outside on left, put back in
+    }
+    if (inner.y < outer.y)  // if outside on top, put back in
+    {
+        inner.y = outer.y;
+    }
+    if ((inner.x + inner.w) >= (outer.x + outer.w))
+    {
+        inner.x = (outer.x + outer.w) - inner.w;
+    }
+    if ((inner.y + inner.h) > (outer.y + outer.h))
+    {
+        inner.y = (outer.y + outer.h) - inner.h;
+    }
+
+}
+
+
+void keepRectWithinBiggerRectArrowMovement(SDL_Rect *inner, SDL_Rect *outer)
+{
+        /+
+        +----------------------+ outer
+        |                      |
+        |     +-------+        |
+        |     |       |inner   |
+        |     |       |        |
+        |     |       |        |
+        |     +-------+        |
+        +----------------------+
+        +/
 
     if (inner.x < outer.x)
     {
