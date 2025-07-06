@@ -19,6 +19,7 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 
 /+ 
 load texture > copy texture to intermediate surface > copy intermediate surface to window surface
+
 we don't need intermediate surface. just here to test out the copyTextureToSurface functionality
 +/
 
@@ -107,6 +108,73 @@ void copying_textures_to_surfaces()
     SDL_Quit();
 }
 
+
+
+void two_windows_and_surfaces()
+{
+    SDL_Window *windowMain = createWindow("main", 1000, 1000, cast(SDL_WindowFlags) 0);
+    
+    SDL_Window *windowMini = createWindow("mini", 750, 750, cast(SDL_WindowFlags) 0);
+
+    SDL_Surface *surfaceMain = getWindowSurface(windowMain);  // creates a surface if it does not already exist
+
+    SDL_Surface *surfaceMini = getWindowSurface(windowMini);  // creates a surface if it does not already exist
+
+    SDL_Surface *surface = loadImageToSurface("./images/Wach2.png");
+    displaySurfaceProperties(surface);
+
+    SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };  // outer boundaries
+
+    SDL_Rect surRect = { 0, 0, surfaceMain.w, surfaceMain.h };
+
+    bool running = true;
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+            if (event.key.key == SDLK_UP) 
+            {
+                surRect.y -= 50;
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
+            }
+            if (event.key.key == SDLK_DOWN) 
+            {
+                surRect.y += 50;
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
+            }
+            if (event.key.key == SDLK_LEFT) 
+            {
+                surRect.x -= 50;
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
+            }
+            if (event.key.key == SDLK_RIGHT) 
+            {
+                surRect.x += 50;
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
+            }
+        }
+
+        writeln("surRect = ", surRect);
+
+        copySurfaceToSurface(surface, &surRect, surfaceMain, null);
+        
+        updateWindowSurface(windowMain);
+        
+        //copySurfaceToSurface(surface, &boundsRect, surfaceMini, null);
+        
+        blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_LINEAR);
+        
+        updateWindowSurface(windowMini);
+
+        //SDL_Delay(1000);
+    }
+    SDL_Quit();
+}
 
 
 

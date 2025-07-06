@@ -133,6 +133,9 @@ int main()
     
     // surface_no_implicit_scaling_03();
     
+    two_windows_and_surfaces();
+    exit(-1);
+    
     copying_textures_to_surfaces();
     exit(-1);
     
