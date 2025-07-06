@@ -133,6 +133,9 @@ int main()
     
     // surface_no_implicit_scaling_03();
     
+    smallest_texture_with_rect();
+    exit(-1);
+    
     two_windows_and_surfaces();
     exit(-1);
     

@@ -270,12 +270,59 @@ void smallest_texture_01a()
         
         SDL_RenderClear(renderer); // Clear the renderer
         
-        SDL_RenderTexture(renderer, texture, null, null);
+        SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
             
         SDL_RenderPresent(renderer); // Present the rendered content
     }
     SDL_Quit();
 }
+
+
+void smallest_texture_with_rect()
+{
+    SDL_Window   *window = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture = null;
+
+    createWindowAndRenderer("smallest_texture_with_rect", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
+
+    bool running = true;
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+        }
+
+        SDL_RenderClear(renderer); // Clear the renderer
+
+        SDL_RenderTexture(renderer, texture, null, null);  // FIRST DRAW THE IMAGE
+        
+        SDL_FRect rect = { 50, 50, 400, 400 };             
+        SDL_SetRenderTarget(renderer, texture);
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // red
+        
+        SDL_RenderFillRect(renderer, &rect);               // SECOND DRAW THE RECTANGLE
+        
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white
+        SDL_SetRenderTarget(renderer, null);  // set render target back to the default (window)
+
+        
+        SDL_RenderPresent(renderer); // Present the rendered content of IMAGE and RECTANGLE
+
+    }
+    SDL_Quit();
+}
+
+
 
 
 void smallest_texture_01b()
