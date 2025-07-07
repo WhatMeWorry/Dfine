@@ -407,7 +407,6 @@ void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
 }
 
 
-// This is a generalized function of copySurfaceToStreamingTexture
 
 void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
                           SDL_Texture *texture, const SDL_Rect *texRect)
@@ -428,15 +427,16 @@ void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
         blitSurface(surface, surRect, lockedSurface, texRect);  // lockedSurface is attached to a texture
 
         SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
+        writeln("using locking &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
         return;
     }
     
     // SDL_UpdateTexture is the function to use in SDL3 to replace or modify the pixel content of a texture, but for
     // optimal performance with frequently updated textures, consider using streaming textures and locking/unlocking.
-    
+
     SDL_UpdateTexture(texture, null, surface.pixels, surface.pitch);
     
-    
+    writeln("using update texture ===========================");
 }
 
 
