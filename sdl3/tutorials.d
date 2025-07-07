@@ -177,42 +177,140 @@ void two_windows_and_surfaces()
 }
 
 
+// This function tests the changeTextureAccess() function.  The important lesson of this function is that
+// the SDL_RenderTexture() will only render a Streaming texture.  Target and Static results in a black screen
 
-void change_texture_access_00()
+void change_texture_access()
 {
     SDL_Texture *texture;
     SDL_Window  *window;
     SDL_Renderer *renderer = null;
-    SDL_Surface *surface;
 
-    createWindowAndRenderer("change_texture_access_00", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("change_texture_access", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
 
-    //copyTextureToSurface(tex3, null, surface, null);     // WORKS
+    SDL_Texture *srcStatic = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
+    SDL_Texture *srcTarget = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
+    SDL_Texture *srcStream = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
 
-    //changeTextureAccessTo(texture, SDL_TEXTUREACCESS_STATIC);
+    SDL_Texture *dstStatic = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
+    SDL_Texture *dstTarget = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
+    SDL_Texture *dstStream = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
 
-    displayTextureProperties(texture);
+    copyTextureToTexture(srcStatic, null, dstStatic, null);
+    
+    copyTextureToTexture(srcStatic, null, dstTarget, null);
+    
+    copyTextureToTexture(srcStatic, null, dstStream, null);
+    
+    copyTextureToTexture(srcTarget, null, dstStatic, null);
+    
+    copyTextureToTexture(srcTarget, null, dstTarget, null);
+    
+    copyTextureToTexture(srcTarget, null, dstStream, null);
+    
+    copyTextureToTexture(srcStream, null, dstStatic, null);
+    
+    copyTextureToTexture(srcStream, null, dstTarget, null);
+    
+    copyTextureToTexture(srcStream, null, dstStream, null);
 
     /+
     SDL_PIXELFORMAT_RGBA8888 is more portable because its layout is consistent across all platforms.
     SDL_PIXELFORMAT_RGBA32 may require extra care when handling pixel data across platforms with different endianness.
     +/
     
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STATIC);
+    displayTextureProperties(texture);
+    
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(5000);
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
+    displayTextureProperties(texture);
+    
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(5000);
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+    displayTextureProperties(texture);
+    
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(5000);
+    
+    
+    exit(-1);
+    
+    texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");  // STREAMING
+    //texture = loadImageToTexture(renderer, "./images/globe256x256.png");           // STATIC
+    displayTextureProperties(texture);
+    //displayTextureAccess(texture);
+    
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(3000);
+    
+
+    texture = changeTextureAccessBetter(texture, SDL_TEXTUREACCESS_TARGET);
+
+    displayTextureProperties(texture);
+    //displayTextureAccess(texture);
+
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(3000);
+    
+    texture = changeTextureAccessBetter(texture, SDL_TEXTUREACCESS_STATIC);
+
+    displayTextureProperties(texture);
+    //displayTextureAccess(texture);
+    
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(3000);
+
+    texture = changeTextureAccessBetter(texture, SDL_TEXTUREACCESS_TARGET);
+    
+    displayTextureProperties(texture);
+    //displayTextureAccess(texture);
+    
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(3000);
+    
+    texture = changeTextureAccessBetter(texture, SDL_TEXTUREACCESS_STREAMING);
+    
+    displayTextureProperties(texture);
+    //displayTextureAccess(texture);
+    
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(3000);
+    
+    
+/+
     SDL_Texture *staticTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
-    
+
     createSurface(256, 256, SDL_PIXELFORMAT_RGBA8888, &surface);
-    
+
     SDL_Texture *targetTexture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
-    
-    
+
     copyTextureToTexture(staticTexture, null, targetTexture, null);
-    
+
     displayTextureProperties(staticTexture);
     displayTextureProperties(targetTexture);
-    
-    //copyTextureToSurface(staticTexture, null, surface, null);     // WORKS
-    
-    //bool SDL_RenderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcrect, const SDL_FRect *dstrect);
++/
 }
 
 

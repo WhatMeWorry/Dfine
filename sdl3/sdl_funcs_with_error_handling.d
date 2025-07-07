@@ -50,40 +50,91 @@ SDL_Renderer* getRendererFromTexture(SDL_Texture *texture)
 }
 
 
-
+/+   DOES NOT WORK!!!
 void changeTextureAccessTo(SDL_Texture *texture, SDL_TextureAccess newAccess)
 {
-    SDL_Surface *surface;
-    SDL_Texture *newTexture;
+    SDL_PixelFormat format = getTexturePixelFormat(texture);
 
+    SDL_TextureAccess currentAccess = getTextureAccess(texture);
+
+    SDL_Renderer *renderer = getRendererFromTexture(texture);
+
+    if (currentAccess == newAccess)  // already has requested access
+        return;
+
+    int w; int h;
+    getTextureSize(texture, &w, &h);
+
+    SDL_Texture *newTexture = createTexture(renderer, format, newAccess, w, h);
+
+    writeln("newTexture = ", newTexture);
+
+    copyTextureToTexture(texture, null, newTexture, null);
+
+    SDL_DestroyTexture(texture);  // wipe out the old texture memory
+
+    texture = newTexture;
+    
+    writeln("*************texture**********************");
+    displayTextureProperties(texture);
+    
+    writeln("**************newTexture*********************");
+    displayTextureProperties(newTexture);
++/
+
+
+SDL_Texture* changeTextureAccess(SDL_Texture *texture, SDL_TextureAccess newAccess)
+{
     SDL_TextureAccess currentAccess = getTextureAccess(texture);
     
     SDL_Renderer *renderer = getRendererFromTexture(texture);
 
-    //displayTextureProperties(texture);
-    
-    if (currentAccess == newAccess)
-        return;
-    
+    SDL_PixelFormat format = getTexturePixelFormat(texture);
+
     int w; int h;
     getTextureSize(texture, &w, &h);
-    
-    //createSurface(int width, int height, SDL_PIXELFORMAT_RGBA32, &surface);
-    
-    copyTextureToSurface(texture, null, surface, null);
-    
-    writeln("Be 4 SDL_DestroyTexture");
-    
+
+    SDL_Texture *newTexture = createTexture(renderer, format, newAccess, w, h);
+
+    copyTextureToTexture(texture, null, newTexture, null);
+
     SDL_DestroyTexture(texture);  // wipe out the old texture memory
-    
-    writeln("Be 4 createTexture");
-    
-    texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, newAccess, w, h);
-    
-    writeln("Be 4 copySurfaceToTexture");
-    
-    copySurfaceToTexture(surface, null, texture, null);
+
+    return newTexture;
 }
+
+
+
+SDL_Texture* changeTextureAccessBetter(SDL_Texture *texture, SDL_TextureAccess newAccess)
+{
+    SDL_Renderer *renderer = getRendererFromTexture(texture);  // retrieve the renderer associated with this texture
+    
+    SDL_PixelFormat    format;  
+    SDL_TextureAccess  access;  
+    int w; 
+    int h;
+    
+    queryTextureSDL3(texture, &format, &access, &w, &h);  // SDL_QueryTexture is in SDL2 and was removed from SDL3
+    
+    writeln("texture = ", texture);
+    writeln("format = ", format);
+    writeln("access = ", access);
+    writeln("w = ", w);
+    writeln("h = ", h);
+    
+    access = newAccess;
+    
+    SDL_Texture *newTexture = createTexture(renderer, format, access, w, h);  // SDL3 only
+    
+    copyTextureToTexture(texture, null, newTexture, null);
+    
+    SDL_DestroyTexture(texture);
+
+    return newTexture;
+}
+
+
+
 
 
 
@@ -166,6 +217,17 @@ SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
     return texture;
 }
 
+
+SDL_Texture* loadImageToTextureWithAccess(SDL_Renderer *renderer, string file, SDL_TextureAccess access)
+{
+    SDL_Surface *surface = IMG_Load(toStringz(file));
+    
+    SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, access, surface.w, surface.h);
+
+    copySurfaceToTexture(surface, null, texture, null);
+
+    return texture;
+}
 
 
 SDL_Texture* loadImageToStreamingTexture(SDL_Renderer *renderer, string file)
@@ -350,28 +412,31 @@ void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
 void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
                           SDL_Texture *texture, const SDL_Rect *texRect)
 {
-    /+
-    To update a streaming texture, you need to lock it first. This gets you access to the pixels
-    Note that this is considered a write-only operation: the buffer you get from locking
-    might not acutally have the existing contents of the texture, and you have to write to every
-    locked pixel
+    if (getTextureAccess(texture) == SDL_TEXTUREACCESS_STREAMING)
+    {
+        // To update a streaming texture, you need to lock it first. This gets you access to the pixels
+        // Note, this is considered a write-only operation: the buffer you get from locking might not
+        // acutally have the existing contents of the texture, and you have to write to every locked pixel
 
-    You can use SDL_LockTexture() to get an array of raw pixels, but we're going to use
-    SDL_LockTextureToSurface() here, because it wraps that array in a temporary SDL_Surface,
-    letting us use the surface drawing or blit functions instead of lighting up individual pixels.
-    +/
+        // You can use SDL_LockTexture() to get an array of raw pixels, but we're going to use
+        // SDL_LockTextureToSurface() here, because it wraps that array in a temporary SDL_Surface,
+        // letting us use the surface drawing or blit functions instead of lighting up individual pixels.
 
-    SDL_Surface *lockedSurface = null;
-    lockTextureToSurface(texture, null, &lockedSurface);  // only works if texture is streaming
+        SDL_Surface *lockedSurface = null;
+        lockTextureToSurface(texture, null, &lockedSurface);  // only works if texture is streaming
 
-    /+
-    SDL_FillSurfaceRect(surface, null, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 255, 0));
-    SDL_FillSurfaceRect(surface, &r, SDL_MapRGB(SDL_GetPixelFormatDetails(surface.format), null, 0, 0, 255));
-     +/
+        blitSurface(surface, surRect, lockedSurface, texRect);  // lockedSurface is attached to a texture
 
-    blitSurface(surface, surRect, lockedSurface, texRect);
-
-    SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
+        SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
+        return;
+    }
+    
+    // SDL_UpdateTexture is the function to use in SDL3 to replace or modify the pixel content of a texture, but for
+    // optimal performance with frequently updated textures, consider using streaming textures and locking/unlocking.
+    
+    SDL_UpdateTexture(texture, null, surface.pixels, surface.pitch);
+    
+    
 }
 
 
@@ -402,7 +467,7 @@ void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
 
 
 
-// this function should only be clled by copyTextureToSurface()
+// this function should only be called by copyTextureToSurface()
 
 void copyStreamingTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
                                    SDL_Surface *surface, const SDL_Rect *surRect)
@@ -701,7 +766,21 @@ void displayTextureProperties(SDL_Texture* texture)
 
     writeln("    wide = ", wide);
     writeln("    high = ", high);
+    writeln("-------------------------------------------");
 }
+
+
+
+void displayTextureAccess(SDL_Texture* texture) 
+{
+    writeln("------------ Texture Access ---------- ----");
+    SDL_TextureAccess access = getTextureAccess(texture);
+    printTextureAccess(access);
+    writeln("-------------------------------------------");
+}
+
+
+
 
 /+
 struct SDL_Surface

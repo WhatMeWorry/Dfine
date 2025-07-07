@@ -133,18 +133,19 @@ int main()
     
     // surface_no_implicit_scaling_03();
     
+    change_texture_access();
+    exit(-1);
+    
+    
     smallest_texture_with_rect();
     exit(-1);
     
     two_windows_and_surfaces();
     exit(-1);
     
-    copying_textures_to_surfaces();
-    exit(-1);
+
     
-    change_texture_access_00();
-    exit(-1);
-    
+
     smallest_renderer_01();
     //exit(-1);
     
