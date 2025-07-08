@@ -120,20 +120,13 @@ int main()
     SDL_Initialize();
     
     //breakup1();
-    //trimFileIfPixelsAreNotEven();
-    //hugePNGfileIntoQuadPNGfiles();
+
     
-    //assembleQuadFilesItoOnePNGfile();
-    //exit(-1);
+    //copying_surface_to_surface();
     
-    //zoomAnImage;
-    //zoom_grok;
+    //two_windows_and_surfaces();
     
-    // no_renderer_02();
-    
-    // surface_no_implicit_scaling_03();
-    
-    copying_surface_to_surface();
+    copying_textures_to_surface();
     exit(-1);
     
     change_texture_access();

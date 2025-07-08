@@ -17,6 +17,50 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 
+void copying_textures_to_surface()
+{
+    SDL_Window  *window = null;
+    SDL_Renderer *renderer = null;
+
+    createWindowAndRenderer("copying_surface_to_surface", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
+    displaySurfaceProperties(windowSurface);
+
+    SDL_Texture *texTarget = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+    displayTextureProperties(texTarget);
+    
+    SDL_Surface* surface = ConvertTextureToSurface(texTarget);
+    
+    copySurfaceToSurface(surface, null, windowSurface, null);
+
+    //copyTextureToSurface(texTarget, null, windowSurface, null);
+
+    //SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };   // outer bounds
+
+    //SDL_Rect surRect = { 0, 0, windowSurface.w, windowSurface.h };  // inner bounds
+
+    bool running = true;
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+        }
+
+        copySurfaceToSurface(surface, null, windowSurface, null);
+
+        updateWindowSurface(window);
+    }
+}
+
+
+
+
 
 // tests copySurfaceToSurface() to update a surface attached to the current window. Additionally,
 // the arrow keys my be used to move the viewing window to different parts of the larger image.
@@ -68,18 +112,10 @@ void copying_surface_to_surface()
             }
         }
 
-        writeln("surRect = ", surRect);
-        
- 
-
-
         copySurfaceToSurface(surface, &surRect, windowSurface, null);
-        
-        updateWindowSurface(window);
 
-        //SDL_Delay(1000);
+        updateWindowSurface(window);
     }
-    SDL_Quit();
 }
 
 
@@ -133,8 +169,6 @@ void two_windows_and_surfaces()
             }
         }
 
-        writeln("surRect = ", surRect);
-
         copySurfaceToSurface(surface, &surRect, surfaceMain, null);
         
         updateWindowSurface(windowMain);
@@ -144,11 +178,10 @@ void two_windows_and_surfaces()
         blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_LINEAR);
         
         updateWindowSurface(windowMini);
-
-        //SDL_Delay(1000);
     }
     SDL_Quit();
 }
+
 
 
 // This function tests the changeTextureAccess() function.  The important lesson of this function is that
@@ -188,91 +221,80 @@ void change_texture_access()
     
     copyTextureToTexture(srcStream, null, dstStream, null);
 
-    /+
+/+
     SDL_PIXELFORMAT_RGBA8888 is more portable because its layout is consistent across all platforms.
     SDL_PIXELFORMAT_RGBA32 may require extra care when handling pixel data across platforms with different endianness.
     +/
-    
-    
-
-    
-    
+    /+
     SDL_Texture *texStream = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
-    displayTextureProperties(texStream);
+    displayTextureAccess(texStream);
     
     SDL_RenderClear(renderer); // Clear the renderer
     SDL_RenderTexture(renderer, texStream, null, null);
     SDL_RenderPresent(renderer); // Present the rendered content
-    SDL_Delay(3000);
-    
+    SDL_Delay(2000);
     
     
     SDL_Texture *texStatic = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STATIC);
-    displayTextureProperties(texStatic);
+    displayTextureAccess(texStatic);
     
     SDL_RenderClear(renderer); // Clear the renderer
     SDL_RenderTexture(renderer, texStatic, null, null);
     SDL_RenderPresent(renderer); // Present the rendered content
-    SDL_Delay(3000);
-    
+    SDL_Delay(2000);
     
     
     SDL_Texture *texTarget = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
-    displayTextureProperties(texTarget);
+    displayTextureAccess(texTarget);
     
     SDL_RenderClear(renderer); // Clear the renderer
     SDL_RenderTexture(renderer, texTarget, null, null);
     SDL_RenderPresent(renderer); // Present the rendered content
-    SDL_Delay(3000);
-    
+    SDL_Delay(2000);
++/
 
-    
-    
-    exit(-1);
-    
-    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
-    
-    //texture = loadImageToTexture(renderer, "./images/globe256x256.png");           // STATIC
-    displayTextureProperties(texture);
-    //displayTextureAccess(texture);
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
+
+    displayTextureAccess(texture);
     
     SDL_RenderClear(renderer); // Clear the renderer
-    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderTexture(renderer, texture, null, null);
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(2000);
+
+
+    texture = changeTextureAccess(texture, SDL_TEXTUREACCESS_STATIC);
+
+    displayTextureAccess(texture);
+
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null);
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(2000);
+    
+    texture = changeTextureAccess(texture, SDL_TEXTUREACCESS_TARGET);
+    
+    displayTextureAccess(texture);
+    
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null);
+    SDL_RenderPresent(renderer); // Present the rendered content
+    SDL_Delay(2000);
+
+exit(-1);
+
+    texture = changeTextureAccess(texture, SDL_TEXTUREACCESS_STATIC);
+
+    displayTextureAccess(texture);
+    
+    SDL_RenderClear(renderer); // Clear the renderer
+    SDL_RenderTexture(renderer, texture, null, null);
     SDL_RenderPresent(renderer); // Present the rendered content
     SDL_Delay(3000);
     
-
-    texture = changeTextureAccessBetter(texture, SDL_TEXTUREACCESS_TARGET);
-
-    displayTextureProperties(texture);
-    //displayTextureAccess(texture);
-
-    SDL_RenderClear(renderer); // Clear the renderer
-    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
-    SDL_RenderPresent(renderer); // Present the rendered content
-    SDL_Delay(3000);
+   
     
-    texture = changeTextureAccessBetter(texture, SDL_TEXTUREACCESS_STATIC);
-
-    displayTextureProperties(texture);
-    //displayTextureAccess(texture);
-    
-    SDL_RenderClear(renderer); // Clear the renderer
-    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
-    SDL_RenderPresent(renderer); // Present the rendered content
-    SDL_Delay(3000);
-
-    texture = changeTextureAccessBetter(texture, SDL_TEXTUREACCESS_TARGET);
-    
-    displayTextureProperties(texture);
-    //displayTextureAccess(texture);
-    
-    SDL_RenderClear(renderer); // Clear the renderer
-    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
-    SDL_RenderPresent(renderer); // Present the rendered content
-    SDL_Delay(3000);
-    
-    texture = changeTextureAccessBetter(texture, SDL_TEXTUREACCESS_STREAMING);
+    texture = changeTextureAccess(texture, SDL_TEXTUREACCESS_STREAMING);
     
     displayTextureProperties(texture);
     //displayTextureAccess(texture);
