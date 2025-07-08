@@ -186,7 +186,7 @@ void change_texture_access()
     SDL_Window  *window;
     SDL_Renderer *renderer = null;
 
-    createWindowAndRenderer("change_texture_access", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("change_texture_access", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     SDL_Texture *srcStatic = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
     SDL_Texture *srcTarget = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
@@ -220,29 +220,38 @@ void change_texture_access()
     +/
     
     
-    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STATIC);
-    displayTextureProperties(texture);
+
+    
+    
+    SDL_Texture *texStream = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+    displayTextureProperties(texStream);
     
     SDL_RenderClear(renderer); // Clear the renderer
-    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderTexture(renderer, texStream, null, null);
     SDL_RenderPresent(renderer); // Present the rendered content
-    SDL_Delay(5000);
+    SDL_Delay(3000);
     
-    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
-    displayTextureProperties(texture);
+    
+    
+    SDL_Texture *texStatic = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STATIC);
+    displayTextureProperties(texStatic);
     
     SDL_RenderClear(renderer); // Clear the renderer
-    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderTexture(renderer, texStatic, null, null);
     SDL_RenderPresent(renderer); // Present the rendered content
-    SDL_Delay(5000);
+    SDL_Delay(3000);
     
-    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
-    displayTextureProperties(texture);
+    
+    
+    SDL_Texture *texTarget = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
+    displayTextureProperties(texTarget);
     
     SDL_RenderClear(renderer); // Clear the renderer
-    SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+    SDL_RenderTexture(renderer, texTarget, null, null);
     SDL_RenderPresent(renderer); // Present the rendered content
-    SDL_Delay(5000);
+    SDL_Delay(3000);
+    
+
     
     
     exit(-1);

@@ -222,7 +222,15 @@ SDL_Texture* loadImageToTextureWithAccess(SDL_Renderer *renderer, string file, S
 {
     SDL_Surface *surface = IMG_Load(toStringz(file));
     
-    SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, access, surface.w, surface.h);
+    SDL_PixelFormat pixelFormat = getSurfacePixelFormat(surface);
+    
+    displaySurfaceProperties(surface);
+    writeln("format SDL_PIXELFORMAT_RGBA8888 = ", SDL_PIXELFORMAT_RGBA8888);
+    writeln("format SDL_PIXELFORMAT_ABGR8888 = ", SDL_PIXELFORMAT_ABGR8888);
+    
+    //SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, access, surface.w, surface.h);
+    
+    SDL_Texture *texture = createTexture(renderer, pixelFormat, access, surface.w, surface.h);
 
     copySurfaceToTexture(surface, null, texture, null);
 
@@ -422,22 +430,22 @@ void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
         // letting us use the surface drawing or blit functions instead of lighting up individual pixels.
 
         SDL_Surface *lockedSurface = null;
+        
         lockTextureToSurface(texture, null, &lockedSurface);  // only works if texture is streaming
 
         blitSurface(surface, surRect, lockedSurface, texRect);  // lockedSurface is attached to a texture
 
         SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)
-        writeln("using locking &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+
         return;
     }
-    
+
     // SDL_UpdateTexture is the function to use in SDL3 to replace or modify the pixel content of a texture, but for
     // optimal performance with frequently updated textures, consider using streaming textures and locking/unlocking.
 
     SDL_UpdateTexture(texture, null, surface.pixels, surface.pitch);
-    
-    writeln("using update texture ===========================");
 }
+
 
 
 void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
@@ -671,6 +679,24 @@ SDL_PixelFormat getTexturePixelFormat(SDL_Texture* texture)
     SDL_PixelFormat pixelFormat = cast(SDL_PixelFormat) getNumberProperty(properties, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
 
     return pixelFormat;
+}
+
+
+SDL_PixelFormat getSurfacePixelFormat(SDL_Surface* surface)
+{
+    SDL_PixelFormat format = surface.format;
+    const char* formatName = SDL_GetPixelFormatName(format);
+    writefln("%s", formatName);
+
+/+
+    SDL_PropertiesID properties = getTextureProperties(texture);  // SDL3 only function
+
+    SDL_PixelFormat pixelFormat = cast(SDL_PixelFormat) getNumberProperty(properties, SDL_PROP_TEXTURE_FORMAT_NUMBER, SDL_PIXELFORMAT_UNKNOWN);
++/
+    return format;  
+ 
+    
+    
 }
 
 
