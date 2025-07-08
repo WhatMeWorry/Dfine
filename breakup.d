@@ -1535,7 +1535,7 @@ void breakup1()
 
     m1.renderer = SDL_CreateRenderer(m1.window, "Renderer 1");
 
-    m1.texture = loadImageToTexture(m1.renderer, "./images/1.png");  // file to texture
+    m1.texture = loadImageToTextureWithAccess(m1.renderer, "./images/1.png", SDL_TEXTUREACCESS_STREAMING);
 
     m2 = m1;
 
@@ -1546,7 +1546,7 @@ void breakup1()
 
     m2.renderer = SDL_CreateRenderer(m2.window, "Renderer 2");
 
-    m2.texture = loadImageToTexture(m2.renderer, "./images/2.png");  // file to texture
+    m2.texture = loadImageToTextureWithAccess(m2.renderer, "./images/2.png", SDL_TEXTUREACCESS_STREAMING);
 
     main.win.w = 1000;
     main.win.h = 1000;
@@ -1558,7 +1558,7 @@ void breakup1()
 
     main.renderer = SDL_CreateRenderer(main.window, "Renderer 3");
 
-    main.texture = loadImageToTexture(main.renderer, "./images/2.png");
+    main.texture = loadImageToTextureWithAccess(main.renderer, "./images/2.png", SDL_TEXTUREACCESS_STREAMING);
     
 /+
     main.texture = SDL_CreateTexture(main.renderer,

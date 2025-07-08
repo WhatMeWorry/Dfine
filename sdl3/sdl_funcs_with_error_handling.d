@@ -206,6 +206,7 @@ In summary, IMG_LoadTexture is not the way to create a streaming texture. You ne
 with the SDL_TEXTUREACCESS_STREAMING flag and then manage the texture's pixel data using SDL_LockTexture and SDL_UnlockTexture.
 +/
 
+/+  replaced with loadImageToTextureWithAccess()
 
 SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
 {
@@ -216,27 +217,33 @@ SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
     }
     return texture;
 }
++/
 
-
-SDL_Texture* loadImageToTextureWithAccess(SDL_Renderer *renderer, string file, SDL_TextureAccess access)
+SDL_Texture* loadImageToTextureWithAccess(SDL_Renderer *renderer, string file, SDL_TextureAccess textureAccess)
 {
     SDL_Surface *surface = IMG_Load(toStringz(file));
-    
+    if (surface == null)                                                // BMP, GIF, JPG, PNG, TGA, ICO, and CUR
+    {
+        throw new Exception("IMG_Load failed: " ~ to!string(SDL_GetError()));
+    }
+
     SDL_PixelFormat pixelFormat = getSurfacePixelFormat(surface);
-    
+
     displaySurfaceProperties(surface);
-    writeln("format SDL_PIXELFORMAT_RGBA8888 = ", SDL_PIXELFORMAT_RGBA8888);
-    writeln("format SDL_PIXELFORMAT_ABGR8888 = ", SDL_PIXELFORMAT_ABGR8888);
-    
-    //SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, access, surface.w, surface.h);
-    
-    SDL_Texture *texture = createTexture(renderer, pixelFormat, access, surface.w, surface.h);
+    writeln("format SDL_PIXELFORMAT_RGBA8888 = ", SDL_PIXELFORMAT_RGBA8888);  // format SDL_PIXELFORMAT_RGBA8888 = rgba8888
+    writeln("format SDL_PIXELFORMAT_ABGR8888 = ", SDL_PIXELFORMAT_ABGR8888);  // format SDL_PIXELFORMAT_ABGR8888 = abgr8888
+
+    // except for texture access, set the texture properties to that of the surface (image)
+
+    SDL_Texture *texture = createTexture(renderer, pixelFormat, textureAccess, surface.w, surface.h);
 
     copySurfaceToTexture(surface, null, texture, null);
 
     return texture;
 }
 
+
+/+  replaced with loadImageToTextureWithAccess()
 
 SDL_Texture* loadImageToStreamingTexture(SDL_Renderer *renderer, string file)
 {
@@ -248,7 +255,7 @@ SDL_Texture* loadImageToStreamingTexture(SDL_Renderer *renderer, string file)
 
     return texture;
 }
-
++/
 
 
 void saveSurfaceToPNGfile(SDL_Surface *surface, string file)

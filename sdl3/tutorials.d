@@ -17,53 +17,24 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 
-/+ 
-load texture > copy texture to intermediate surface > copy intermediate surface to window surface
 
-we don't need intermediate surface. just here to test out the copyTextureToSurface functionality
-+/
+// tests copySurfaceToSurface() to update a surface attached to the current window. Additionally,
+// the arrow keys my be used to move the viewing window to different parts of the larger image.
 
-void copying_textures_to_surfaces()
+void copying_surface_to_surface()
 {
     SDL_Window  *window = null;
     SDL_Renderer *renderer = null;
 
-    createWindowAndRenderer("exercise_copyTextureToSurface", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("copying_surface_to_surface", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
 
-    SDL_Texture *texture = loadImageToStreamingTexture(renderer, "./images/Wach2.png");
-    displayTextureProperties(texture);
-    
-    int w; int h;
-    getTextureSize(texture, &w, &h);
-    
-    SDL_Surface *surface = createSurface(w, h, SDL_PIXELFORMAT_RGBA32);
-    
-    SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };  // outer boundaries
-    
-    copyTextureToSurface(texture, null, surface, null);
-    displaySurfaceProperties(surface);
+    SDL_Surface *surface = loadImageToSurface("./images/Wach1.png");
 
-    SDL_Rect surRect = { 0, 0, windowSurface.w, windowSurface.h };
+    SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };   // outer bounds
 
-/+
-    SDL_Texture *texStatic = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
-    SDL_Texture *texTarget = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
-    SDL_Texture *texStream = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
-
-    displayTextureProperties(texStatic); 
-    displayTextureProperties(texTarget); 
-    displayTextureProperties(texStream); 
-
-    copyTextureToSurface(texStatic, null, surface, null);
-    copyTextureToSurface(texTarget, null, surface, null);
-    copyTextureToSurface(texStream, null, surface, null);
-+/
-
-
-    copySurfaceToSurface(surface, null, windowSurface, null);
-    displaySurfaceProperties(windowSurface);
+    SDL_Rect surRect = { 0, 0, windowSurface.w, windowSurface.h };  // inner bounds
 
     bool running = true;
     while (running)
@@ -98,6 +69,9 @@ void copying_textures_to_surfaces()
         }
 
         writeln("surRect = ", surRect);
+        
+ 
+
 
         copySurfaceToSurface(surface, &surRect, windowSurface, null);
         
@@ -256,7 +230,8 @@ void change_texture_access()
     
     exit(-1);
     
-    texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");  // STREAMING
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+    
     //texture = loadImageToTexture(renderer, "./images/globe256x256.png");           // STATIC
     displayTextureProperties(texture);
     //displayTextureAccess(texture);
@@ -360,7 +335,8 @@ void smallest_texture_01a()
 
     createWindowAndRenderer("smallest_texture_01a", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
     
-    texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
+    //texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
     
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
 
@@ -393,7 +369,8 @@ void smallest_texture_with_rect()
 
     createWindowAndRenderer("smallest_texture_with_rect", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
-    texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
+    //texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
 
@@ -690,11 +667,10 @@ void texture_implicit_scaling_05()
     int winHeight = 1000;
     
     createWindowAndRenderer("texture_implicit_scaling_05", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
-    
-    //globeTexture = loadImageToTexture(renderer, "./images/globe256x256.png");
-    
-    globeTexture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
-    
+
+    //globeTexture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
+    globeTexture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+
     // maybe make this a function
     SDL_SetRenderTarget(renderer, screenTexture);  // Set the render target to the texture
     SDL_SetRenderDrawColor(renderer, 119, 252, 3, 255); // Set the color you want to paint with
@@ -708,8 +684,7 @@ void texture_implicit_scaling_05()
 
     writeln("duplicateTexture --------------------------");
     displayTextureProperties(duplicateTexture);
-    
-    
+
     copyTextureToTexture(globeTexture, null, duplicateTexture, null);
     
     SDL_Renderer *rend1 = getRendererFromTexture(globeTexture);

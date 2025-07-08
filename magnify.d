@@ -380,8 +380,8 @@ void google()
 
     //SDL_Texture *texture = loadImageToTexture(renderer, "./images/3.png");
 
-    SDL_Texture *tex1 = loadImageToTexture(renderer, "./images/1.png");
-    SDL_Texture *tex2 = loadImageToTexture(renderer, "./images/2.png");
+    SDL_Texture *tex1 = loadImageToTextureWithAccess(renderer, "./images/1.png", SDL_TEXTUREACCESS_STREAMING);
+    SDL_Texture *tex2 = loadImageToTextureWithAccess(renderer, "./images/2.png", SDL_TEXTUREACCESS_STREAMING);
 
     // Create a new texture to copy into (optional)
     //float w, h;
@@ -481,8 +481,8 @@ void enlargeAndReduce()
     
     SDL_Texture *textureOut = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, wi, he);
 
-    SDL_Texture *tex1 = loadImageToTexture(renderer, "./images/1.png");
-    SDL_Texture *tex2 = loadImageToTexture(renderer, "./images/2.png");
+    SDL_Texture *tex1 = loadImageToTextureWithAccess(renderer, "./images/1.png", SDL_TEXTUREACCESS_STREAMING);
+    SDL_Texture *tex2 = loadImageToTextureWithAccess(renderer, "./images/2.png", SDL_TEXTUREACCESS_STREAMING);
 
     // Example 1: Copy to a new texture
 
@@ -554,19 +554,19 @@ void LightBoard()
     Slide slide;
     float w, h;
 
-    slide.texture = loadImageToTexture(renderer, "./images/1.png");
+    slide.texture = loadImageToTextureWithAccess(renderer, "./images/1.png", SDL_TEXTUREACCESS_STREAMING);
     getTextureSizeFloats(slide.texture, &w, &h);
     slide.size.w = w;  slide.size.h = h;
     slide.position.x = 0;  slide.position.y = 0;
     slides ~= slide;
 
-    slide.texture = loadImageToTexture(renderer, "./images/2.png");
+    slide.texture = loadImageToTextureWithAccess(renderer, "./images/2.png", SDL_TEXTUREACCESS_STREAMING);
     getTextureSizeFloats(slide.texture, &w, &h);
     slide.size.w = w;  slide.size.h = h;
     slide.position.x = 6600;  slide.position.y = 0;
     slides ~= slide;
     
-    slide.texture = loadImageToTexture(renderer, "./images/3.png");
+    slide.texture = loadImageToTextureWithAccess(renderer, "./images/3.png", SDL_TEXTUREACCESS_STREAMING);
     getTextureSizeFloats(slide.texture, &w, &h);
     slide.size.w = w;  slide.size.h = h;
     slide.position.x = 13200;  slide.position.y = 0;
