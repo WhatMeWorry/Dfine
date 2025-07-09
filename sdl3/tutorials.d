@@ -22,34 +22,19 @@ void copying_textures_to_surface()
     SDL_Window  *window = null;
     SDL_Renderer *renderer = null;
 
-    createWindowAndRenderer("copying_surface_to_surface", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("copying_surface_to_surface", 500, 500, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
-    
-    //displaySurfaceProperties(windowSurface);
 
-    SDL_Texture *texTarget = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
-    //displayTextureProperties(texTarget);
+    SDL_Texture *texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+    // SDL_Texture *texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
+    // SDL_Texture *texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STATIC);
+
+    displayTextureProperties(texture);
+
+    SDL_Surface* surface = convertTextureToSurface(texture);
     
-    //SDL_Surface* surface = ConvertTextureToSurface(texTarget);
-    
-    //SDL_Surface* surface = ConvertTextureToSurfaceAGAIN(texTarget);
-    
-    displayTextureProperties(texTarget);
-    //SDL_Surface* surface = TextureToSurfaceMAYBE(renderer, texTarget);
-    SDL_Surface* surface = TextureToSurfaceMAYBE(/+SDL_Renderer* renderer,+/ texTarget);
     displaySurfaceProperties(surface);
-   
-    updateWindowSurface(window);
-    
-    copySurfaceToSurface(surface, null, windowSurface, null);
-
-    //copyTextureToSurface(texTarget, null, windowSurface, null);
-
-    //SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };   // outer bounds
-
-    //SDL_Rect surRect = { 0, 0, windowSurface.w, windowSurface.h };  // inner bounds
-
     bool running = true;
     while (running)
     {
