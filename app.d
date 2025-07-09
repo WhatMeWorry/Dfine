@@ -121,12 +121,12 @@ int main()
     
     //breakup1();
 
-    
-    //copying_surface_to_surface();
-    
-    //two_windows_and_surfaces();
-    
     copying_textures_to_surface();
+    
+    copying_surface_to_surface();
+    
+    two_windows_and_surfaces();
+    
     exit(-1);
     
     change_texture_access();

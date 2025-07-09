@@ -51,6 +51,7 @@ void copying_textures_to_surface()
 
         updateWindowSurface(window);
     }
+    SDL_Quit();
 }
 
 
@@ -111,6 +112,7 @@ void copying_surface_to_surface()
 
         updateWindowSurface(window);
     }
+    SDL_Quit();
 }
 
 
