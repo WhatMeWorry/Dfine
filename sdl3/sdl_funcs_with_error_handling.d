@@ -446,6 +446,28 @@ void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
 
 
 
+SDL_Texture* convertTextureToTextureWithAccess(SDL_Texture* oldTexture, SDL_TextureAccess newAccess)
+{
+    SDL_Surface *tempSurface = convertTextureToSurface(oldTexture);
+    
+    SDL_Renderer *renderer = getRendererFromTexture(oldTexture); 
+    
+    SDL_Texture *newTexture = createTexture(renderer, tempSurface.format, newAccess, tempSurface.w, tempSurface.h);
+
+    copySurfaceToTexture(tempSurface, null, newTexture, null);
+
+    SDL_DestroyTexture(oldTexture);
+    SDL_DestroySurface(tempSurface);
+
+    return newTexture;
+}
+
+
+
+
+
+
+
 
 // Function to convert SDL_Texture to SDL_Surface
 // This function was full tested with all 3 access types of textures.
@@ -458,10 +480,10 @@ SDL_Surface* convertTextureToSurface(SDL_Texture* texture)
     SDL_TextureAccess textureAccess;
     int width, height;
 
-    displayTextureProperties(texture);
+    //displayTextureProperties(texture);
 
     queryTextureSDL3(texture, &pixelFormat, &textureAccess, &width, &height);
-    
+    /+
     writeln("after queryTextureSDL3");
     writeln("pixelFormat = ", pixelFormat);
     writeln("textureAccess = ", textureAccess);
@@ -469,7 +491,7 @@ SDL_Surface* convertTextureToSurface(SDL_Texture* texture)
     // writeln("SDL_TEXTUREACCESS_TARGET = ", SDL_TEXTUREACCESS_TARGET);
     // writeln("SDL_TEXTUREACCESS_STREAMING = ", SDL_TEXTUREACCESS_STREAMING);
     writeln("width x height = ", width, " x ", height);
-
+    +/
     // Create a render target texture to copy the original texture to
     // This allows us to use SDL_RenderReadPixels on it
     

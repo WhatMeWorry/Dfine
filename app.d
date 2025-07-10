@@ -120,6 +120,8 @@ int main()
     SDL_Initialize();
     
     //breakup1();
+    change_texture_access();
+    exit(-1);
 
     copying_textures_to_surface();
     

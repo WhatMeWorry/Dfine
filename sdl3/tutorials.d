@@ -199,7 +199,117 @@ void change_texture_access()
     SDL_Texture *dstStatic = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, 256, 256);
     SDL_Texture *dstTarget = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 256, 256);
     SDL_Texture *dstStream = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 256, 256);
-
+    
+    
+    
+    // SDL_Texture* convertTextureToTextureWithAccess(SDL_Texture* oldTexture, SDL_TextureAccess newAccess)
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STATIC);
+    
+    displayTextureAccess(texture);
+    
+    texture = convertTextureToTextureWithAccess(texture, SDL_TEXTUREACCESS_STREAMING);
+    
+    displayTextureAccess(texture);
+    
+    writeln("====== Should be static and then streaming");
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STATIC);
+    
+    displayTextureAccess(texture);
+    
+    texture = convertTextureToTextureWithAccess(texture, SDL_TEXTUREACCESS_TARGET);
+    
+    displayTextureAccess(texture);
+    
+    writeln("====== Should be static and then target");
+    
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
+    
+    displayTextureAccess(texture);
+    
+    texture = convertTextureToTextureWithAccess(texture, SDL_TEXTUREACCESS_STREAMING);
+    
+    displayTextureAccess(texture);
+    
+    writeln("====== Should be target and then streaming");
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
+    
+    displayTextureAccess(texture);
+    
+    texture = convertTextureToTextureWithAccess(texture, SDL_TEXTUREACCESS_STATIC);
+    
+    displayTextureAccess(texture);
+    
+    writeln("====== Should be target and then static");
+    
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+    
+    displayTextureAccess(texture);
+    
+    texture = convertTextureToTextureWithAccess(texture, SDL_TEXTUREACCESS_STATIC);
+    
+    displayTextureAccess(texture);
+    
+    writeln("====== Should be streaming and then static");
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+    
+    displayTextureAccess(texture);
+    
+    texture = convertTextureToTextureWithAccess(texture, SDL_TEXTUREACCESS_TARGET);
+    
+    displayTextureAccess(texture);
+    
+    writeln("====== Should be streaming and then target");
+    
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+    
+    displayTextureAccess(texture);
+    
+    texture = convertTextureToTextureWithAccess(texture, SDL_TEXTUREACCESS_STREAMING);
+    
+    displayTextureAccess(texture);
+    
+    writeln("====== Should be streaming and then streaming");    
+    
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STATIC);
+    
+    displayTextureAccess(texture);
+    
+    texture = convertTextureToTextureWithAccess(texture, SDL_TEXTUREACCESS_STATIC);
+    
+    displayTextureAccess(texture);
+    
+    writeln("====== Should be static and then static");    
+    
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
+    
+    displayTextureAccess(texture);
+    
+    texture = convertTextureToTextureWithAccess(texture, SDL_TEXTUREACCESS_TARGET);
+    
+    displayTextureAccess(texture);
+    
+    writeln("====== Should be target and then target");    
+    
+    
+    
+    
+    exit(-1);
+    
+    
+    // SDL_Texture *texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_TARGET);
+    // SDL_Texture *texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STATIC);
+    
+    
+    
+/+
     copyTextureToTexture(srcStatic, null, dstStatic, null);
     
     copyTextureToTexture(srcStatic, null, dstTarget, null);
@@ -217,7 +327,7 @@ void change_texture_access()
     copyTextureToTexture(srcStream, null, dstTarget, null);
     
     copyTextureToTexture(srcStream, null, dstStream, null);
-
++/
 /+
     SDL_PIXELFORMAT_RGBA8888 is more portable because its layout is consistent across all platforms.
     SDL_PIXELFORMAT_RGBA32 may require extra care when handling pixel data across platforms with different endianness.
