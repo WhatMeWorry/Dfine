@@ -243,20 +243,7 @@ SDL_Texture* loadImageToTextureWithAccess(SDL_Renderer *renderer, string file, S
     return texture;
 }
 
-// EVENTUALLY DELETE
-/+  replaced with loadImageToTextureWithAccess()
 
-SDL_Texture* loadImageToStreamingTexture(SDL_Renderer *renderer, string file)
-{
-    SDL_Surface *surface = IMG_Load(toStringz(file));
-    
-    SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
-
-    copySurfaceToTexture(surface, null, texture, null);
-
-    return texture;
-}
-+/
 
 
 void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
