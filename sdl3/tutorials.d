@@ -354,7 +354,6 @@ void smallest_texture_01a()
 
     createWindowAndRenderer("smallest_texture_01a", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
     
-    //texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
     texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
     
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
@@ -388,7 +387,6 @@ void smallest_texture_with_rect()
 
     createWindowAndRenderer("smallest_texture_with_rect", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
-    //texture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
     texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
@@ -687,7 +685,6 @@ void texture_implicit_scaling_05()
     
     createWindowAndRenderer("texture_implicit_scaling_05", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
-    //globeTexture = loadImageToStreamingTexture(renderer, "./images/globe256x256.png");
     globeTexture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
 
     // maybe make this a function
