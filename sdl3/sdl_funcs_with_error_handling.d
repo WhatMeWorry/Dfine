@@ -72,66 +72,7 @@ SDL_Renderer* getRendererFromTexture(SDL_Texture *texture)
 }
 
 
-SDL_Texture* changeTextureAccess(SDL_Texture *texture, SDL_TextureAccess newAccess)
-{
-    /+
-    if ((newAccess == SDL_TEXTUREACCESS_STATIC) || (newAccess == SDL_TEXTUREACCESS_TARGET))
-    {
-        SDL_Renderer *renderer = getRendererFromTexture(texture);
 
-        SDL_PixelFormat pixelFormat = getTexturePixelFormat(texture);
-
-        int w; int h;
-        getTextureSize(texture, &w, &h);
-
-        SDL_Texture *newTexture = createTexture(renderer, pixelFormat, newAccess, w, h);
-
-        copyTextureToTexture(texture, null, newTexture, null);
-
-        SDL_DestroyTexture(texture);  // wipe out the old texture memory
-
-        return newTexture;
-    }
-    +/
-    SDL_Texture *streamTexture = createStreamingTextureFromTexture(texture);
-    
-    copyTextureToTexture(texture, null, streamTexture, null);
-    
-    SDL_DestroyTexture(texture);
-    
-    return streamTexture;
-}
-
-
-/+
-SDL_Texture* changeTextureAccessBetter(SDL_Texture *texture, SDL_TextureAccess newAccess)
-{
-    SDL_Renderer *renderer = getRendererFromTexture(texture);  // retrieve the renderer associated with this texture
-    
-    SDL_PixelFormat    format;  
-    SDL_TextureAccess  access;  
-    int w; 
-    int h;
-    
-    queryTextureSDL3(texture, &format, &access, &w, &h);  // SDL_QueryTexture is in SDL2 and was removed from SDL3
-    
-    writeln("texture = ", texture);
-    writeln("format = ", format);
-    writeln("access = ", access);
-    writeln("w = ", w);
-    writeln("h = ", h);
-    
-    access = newAccess;
-    
-    SDL_Texture *newTexture = createTexture(renderer, format, access, w, h);  // SDL3 only
-    
-    copyTextureToTexture(texture, null, newTexture, null);
-    
-    SDL_DestroyTexture(texture);
-
-    return newTexture;
-}
-+/
 
 
 
@@ -444,7 +385,138 @@ void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect,
     SDL_UpdateTexture(texture, null, surface.pixels, surface.pitch);
 }
 
+// Usage: newTexture = duplicateTexture(oldTexture);
 
+SDL_Texture* duplicateTexture(SDL_Texture* existingTexture)
+{
+    SDL_PixelFormat pixelFormat;
+    SDL_TextureAccess textureAccess;
+    int width, height;
+
+    queryTextureSDL3(existingTexture, &pixelFormat, &textureAccess, &width, &height);
+
+    SDL_Renderer *renderer = getRendererFromTexture(existingTexture); 
+    
+    SDL_Texture *newTexture = createTexture(renderer, pixelFormat, textureAccess, width, height);
+    
+    SDL_Surface *tempSurface = convertTextureToSurface(existingTexture);
+
+    copySurfaceToTexture(tempSurface, null, newTexture, null);
+    
+    SDL_DestroySurface(tempSurface);  // we're done with the temporary surface so free up it's memory
+
+    return newTexture;
+}
+
+
+void changeTextureAccess(SDL_Texture **texture, SDL_TextureAccess newAccess)
+{
+    SDL_PixelFormat pixelFormat;
+    SDL_TextureAccess textureAccess;
+    int width, height;
+
+    queryTextureSDL3(*texture, &pixelFormat, &textureAccess, &width, &height);
+    
+    if (textureAccess == newAccess)
+    {
+        writeln("Texture is already set to ", newAccess);
+    }
+    
+    SDL_Surface *tempSurface = convertTextureToSurface(*texture);  // is texture destroyed?
+    
+    SDL_Renderer *renderer = getRendererFromTexture(*texture); 
+    
+    //SDL_DestroyTexture(*texture);  // free up texture's memory that had the old texture access
+
+    *texture = createTexture(renderer, pixelFormat, newAccess, width, height);
+
+    copySurfaceToTexture(tempSurface, null, *texture, null);
+    
+    SDL_DestroySurface(tempSurface);  // we're done with the temporary surface so free up it's memory
+}
+
+    // int num = 10;
+    // int *ptr = &num; // Pointer to an integer
+    // int **ptr_to_ptr = &ptr; // Pointer to a pointer
+
+SDL_Texture* changeTextureAccess(SDL_Texture *texture, SDL_TextureAccess newAccess)
+{
+    SDL_PixelFormat pixelFormat;
+    SDL_TextureAccess textureAccess;
+    int width, height;
+
+    queryTextureSDL3(texture, &pixelFormat, &textureAccess, &width, &height);
+
+    if (textureAccess == newAccess)
+    {
+        writeln("Texture is already set to ", newAccess);
+        return null;
+    }
+
+    SDL_Surface *tempSurface = convertTextureToSurface(texture);  // is texture destroyed?
+    
+    SDL_Renderer *renderer = getRendererFromTexture(texture); 
+
+    // set the existing texture to a new texture with new texture access 
+    
+    SDL_DestroyTexture(texture);  // free up texture's memory that had the old texture access
+
+    texture = createTexture(renderer, pixelFormat, newAccess, width, height);
+
+    copySurfaceToTexture(tempSurface, null, texture, null);
+    
+    SDL_DestroySurface(tempSurface);  // we're done with the temporary surface so free up it's memory
+    
+    return texture;
+}
+
+
+
+
+
+
+
+
+
+/+  DOESN"T WORK
+void changeTextureAccess(SDL_Texture *texture, SDL_TextureAccess newAccess)
+{
+    SDL_PixelFormat pixelFormat;
+    SDL_TextureAccess textureAccess;
+    int width, height;
+
+    queryTextureSDL3(texture, &pixelFormat, &textureAccess, &width, &height);
+
+    if (textureAccess == newAccess)
+    {
+        writeln("Texture is already set to ", newAccess);
+        return;
+    }
+
+    SDL_Surface *tempSurface = convertTextureToSurface(texture);  // is texture destroyed?
+    
+    SDL_Renderer *renderer = getRendererFromTexture(texture); 
+
+    // set the existing texture to a new texture with new texture access 
+    
+    SDL_DestroyTexture(texture);  // free up the old texture's memory that had the old texture access
+
+    texture = createTexture(renderer, pixelFormat, newAccess, width, height);
+
+    writeln("BEFORE displayTextureProperties in changeTextureAccess()");
+    displayTextureProperties(texture);
+    writeln("texture ksjdkldf = ", texture);
+    writeln("AFTER displayTextureProperties in changeTextureAccess()");
+
+    copySurfaceToTexture(tempSurface, null, texture, null);
+    
+    SDL_DestroySurface(tempSurface);  // we're done with the temporary surface so free up it's memory
+    writeln("kljsdfkljasdfklj;sdf ", texture);
+}
++/
+
+
+// THIS MAYBE NOT NEEDED ANYMORE
 
 SDL_Texture* convertTextureToTextureWithAccess(SDL_Texture* oldTexture, SDL_TextureAccess newAccess)
 {
@@ -452,12 +524,13 @@ SDL_Texture* convertTextureToTextureWithAccess(SDL_Texture* oldTexture, SDL_Text
     
     SDL_Renderer *renderer = getRendererFromTexture(oldTexture); 
     
+    SDL_DestroyTexture(oldTexture);   // we're done with the existing texture so free up it's memory
+    
     SDL_Texture *newTexture = createTexture(renderer, tempSurface.format, newAccess, tempSurface.w, tempSurface.h);
 
     copySurfaceToTexture(tempSurface, null, newTexture, null);
-
-    SDL_DestroyTexture(oldTexture);
-    SDL_DestroySurface(tempSurface);
+    
+    SDL_DestroySurface(tempSurface);  // we're done with the temporary surface so free up it's memory
 
     return newTexture;
 }
