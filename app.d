@@ -119,16 +119,13 @@ int main()
     
     SDL_Initialize();
     
-    //breakup1();
-    change_texture_access();
-    exit(-1);
 
-    copying_textures_to_surface();
+
+    //copying_textures_to_surface();
     
-    copying_surface_to_surface();
+    //copying_surface_to_surface();
     
     two_windows_and_surfaces();
-    
     exit(-1);
     
     change_texture_access();
@@ -141,6 +138,8 @@ int main()
     two_windows_and_surfaces();
     exit(-1);
     
+    //breakup1();
+    change_texture_access();
 
     
 

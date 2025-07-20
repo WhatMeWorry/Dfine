@@ -1895,7 +1895,81 @@ int main(int argc, char *argv[]) {
 +/
 
 
+SDL_Surface* assembleHugeSurface()
+{
+    SDL_Window   *window   = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture  = null;
+    SDL_Surface  *surface  = null;
 
+    //int winWidth = 1000;
+    //int winHeight = 1000;
+
+    //createWindowAndRenderer("Real Big Texture", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    //SDL_PropertiesID props = SDL_GetRendererProperties(renderer);
+    //int max_texture_size = cast(int) SDL_GetNumberProperty(props, SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, 0);
+    
+    //writeln("max_texture_size = ", max_texture_size);
+
+    SDL_Surface *image0;
+    SDL_Surface *image1;
+    SDL_Surface *image2;
+    SDL_Surface *image3;
+    SDL_Surface *image4;
+
+    image0 = loadImageToSurface("./images/1.png");
+    image1 = loadImageToSurface("./images/2.png");
+    image2 = loadImageToSurface("./images/3.png");
+    image3 = loadImageToSurface("./images/4.png");
+    image4 = loadImageToSurface("./images/5.png");
+
+    //string pixelFormat = to!string(SDL_GetPixelFormatName(image0.format));
+    //writeln("pixelFormat = ", pixelFormat);
+    //writeln("image.w x h = ", image0.w, " x ", image0.h);
+
+    int width = image0.w;
+    int height = image0.h;
+
+
+    SDL_Surface *surface0 = createSurface(width, height, image0.format);
+    SDL_Surface *surface1 = createSurface(width, height, image1.format);
+    SDL_Surface *surface2 = createSurface(width, height, image2.format);
+    SDL_Surface *surface3 = createSurface(width, height, image3.format);
+    SDL_Surface *surface4 = createSurface(width, height, image4.format);
+
+
+ // SDL_Surface *huge = createSurface(5*6692, 1*10594, image0.format);
+    SDL_Surface *huge = createSurface(5*6692, 1*10594, SDL_PIXELFORMAT_RGBA8888);
+
+    SDL_Rect[5] quads =
+    [
+        SDL_Rect(0,     0,  6680, 10594),
+        SDL_Rect(6681,  0,  6686, 10594),
+        SDL_Rect(13368, 0,  6688, 10594),
+        SDL_Rect(20057, 0,  6692, 10594),
+        SDL_Rect(26749, 0,  6690, 10594)
+    ];
+
+    copySurfaceToSurface(image0, null, huge, &quads[0]);
+    copySurfaceToSurface(image1, null, huge, &quads[1]);
+    copySurfaceToSurface(image2, null, huge, &quads[2]);
+    copySurfaceToSurface(image3, null, huge, &quads[3]);
+    copySurfaceToSurface(image4, null, huge, &quads[4]);
+    
+    /+
+    string fileName = "./images/" ~ "huge" ~ ".png";
+    if (IMG_SavePNG(huge, toStringz(fileName)) < 0) {
+        writefln("IMG_SavePNG failed: %s", SDL_GetError());
+    }
+    else
+    {
+        writeln("IMG_SavePNG succeeded");
+    }
+    +/
+    
+    return huge;
+}
 
 
 

@@ -122,12 +122,16 @@ void two_windows_and_surfaces()
     SDL_Window *windowMain = createWindow("main", 1000, 1000, cast(SDL_WindowFlags) 0);
     
     SDL_Window *windowMini = createWindow("mini", 750, 750, cast(SDL_WindowFlags) 0);
+    SDL_Window *windowMini = createWindow("mini", 1500, 750, cast(SDL_WindowFlags) 0);
 
     SDL_Surface *surfaceMain = getWindowSurface(windowMain);  // creates a surface if it does not already exist
 
     SDL_Surface *surfaceMini = getWindowSurface(windowMini);  // creates a surface if it does not already exist
 
-    SDL_Surface *surface = loadImageToSurface("./images/Wach2.png");
+    //SDL_Surface *surface = loadImageToSurface("./images/Wach2.png");
+    
+    SDL_Surface *surface = assembleHugeSurface();
+    
     displaySurfaceProperties(surface);
 
     SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };  // outer boundaries
@@ -165,16 +169,58 @@ void two_windows_and_surfaces()
                 keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
             }
         }
+/+                  entier loop
+================================================
+while loop took: 2.1436 seconds
+while loop took: 2143.6 milliseconds
+================================================
+while loop took: 2.14894 seconds
+while loop took: 2148.94 milliseconds
+================================================
+while loop took: 2.16236 seconds
+while loop took: 2162.36 milliseconds
+================================================
++/
+
+
 
         copySurfaceToSurface(surface, &surRect, surfaceMain, null);
-        
+
         updateWindowSurface(windowMain);
         
-        //copySurfaceToSurface(surface, &boundsRect, surfaceMini, null);
+
+ 
+
+
+        copySurfaceToSurface(surface, &boundsRect, surfaceMini, null);  //  took: 0.0025443 seconds
+
+ 
+
+        displaySurfaceProperties(surface);
+        displaySurfaceProperties(surfaceMini);
         
-        blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_LINEAR);
+        // blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_LINEAR);  // took: 2.19031 seconds
         
-        updateWindowSurface(windowMini);
+                   // get the current value of the high resolution counter - typically used for profiling
+            ulong start_counter = SDL_GetPerformanceCounter(); // Get the initial timestamp
+        
+        blitSurface(surface, null, surfaceMini, null);  // took: 0.000975 seconds
+        
+                   ulong end_counter = SDL_GetPerformanceCounter(); // Get the timestamp after function execution
+            ulong frequency = SDL_GetPerformanceFrequency(); // Get the number of counter increments per second
+            // Calculate the time taken in seconds and milliseconds
+            double seconds = (double)(end_counter - start_counter) / frequency;
+            double milliseconds = seconds * 1000.0;
+            writeln("while loop took: ", seconds, " seconds");
+            writeln("while loop took: ", milliseconds, " milliseconds");
+            writeln("================================================");
+        
+
+        updateWindowSurface(windowMini);  // took: 0.0015916 seconds
+        
+
+
+        
     }
     SDL_Quit();
 }
