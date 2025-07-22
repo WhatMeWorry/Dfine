@@ -121,7 +121,6 @@ void two_windows_and_surfaces()
 {
     SDL_Window *windowMain = createWindow("main", 1000, 1000, cast(SDL_WindowFlags) 0);
     
-    SDL_Window *windowMini = createWindow("mini", 750, 750, cast(SDL_WindowFlags) 0);
     SDL_Window *windowMini = createWindow("mini", 1500, 750, cast(SDL_WindowFlags) 0);
 
     SDL_Surface *surfaceMain = getWindowSurface(windowMain);  // creates a surface if it does not already exist
@@ -196,15 +195,24 @@ while loop took: 2162.36 milliseconds
 
  
 
-        displaySurfaceProperties(surface);
-        displaySurfaceProperties(surfaceMini);
+        //displaySurfaceProperties(surface);
+        //displaySurfaceProperties(surfaceMini);
         
-        // blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_LINEAR);  // took: 2.19031 seconds
-        
-                   // get the current value of the high resolution counter - typically used for profiling
+                           // get the current value of the high resolution counter - typically used for profiling
             ulong start_counter = SDL_GetPerformanceCounter(); // Get the initial timestamp
         
-        blitSurface(surface, null, surfaceMini, null);  // took: 0.000975 seconds
+        // blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_LINEAR);  // took: 2.19031 seconds
+           blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_NEAREST);  // took: 0.0092878 seconds
+        // blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_PIXELART); // compile error
+
+        /+
+        SDL_ScaleModeNearest (or "nearest" or "0"): Performs nearest-neighbor sampling
+        Nearest (and PixelArt) generally offer the best performance as they are simpler to compute, according to Stack Overflow
+        +/
+        
+
+        
+        //blitSurface(surface, null, surfaceMini, null);  // took: 0.000975 seconds
         
                    ulong end_counter = SDL_GetPerformanceCounter(); // Get the timestamp after function execution
             ulong frequency = SDL_GetPerformanceFrequency(); // Get the number of counter increments per second
