@@ -27,14 +27,11 @@ void splitTooLargeFile(string filename, int widthPieces, int heightPieces )
 {
     SDL_Surface *image;
 
-    image = loadImageToSurface("./images/" ~ filename);
+    image = loadImageToSurface("./images/" ~ filename ~ ".png");
     
     int width = image.w;
     int height = image.h;
-    
-    
 
-    
     writeln(width, " ", height);
     
     int dw = image.w / widthPieces;
@@ -78,7 +75,7 @@ void splitTooLargeFile(string filename, int widthPieces, int heightPieces )
             
             copySurfaceToSurface(image, &panes[i][j], tile, null);
             
-            path = "./images/" ~ "1_" ~ to!string(i) ~ to!string(j) ~ ".png";
+            path = "./images/" ~ filename ~ "_" ~ to!string(i) ~ to!string(j) ~ ".png";
             writeln("path = ", path);
             if (IMG_SavePNG(tile, toStringz(path)) < 0) {
                 writefln("IMG_SavePNG failed: %s", SDL_GetError());
@@ -105,6 +102,66 @@ void splitTooLargeFile(string filename, int widthPieces, int heightPieces )
     
 }
 
+
+SDL_Surface* assembleTilesIntoOneFile(string baseFileName, int widthPieces, int heightPieces )
+{
+    SDL_Surface *tile;
+
+    tile = loadImageToSurface("./images/" ~ baseFileName ~ "00.png");
+    
+    int width = tile.w;
+    int height = tile.h;
+
+    writeln(width, " ", height);
+    
+    SDL_Surface *image = createSurface(width * widthPieces, height * heightPieces, tile.format);
+    
+    
+    auto panes = new SDL_Rect[][](widthPieces, heightPieces);
+    
+    writeln("panes = ", panes);
+    
+    foreach(i; 0..widthPieces)
+    {
+        foreach(j; 0..heightPieces)
+        {
+            panes[i][j].x = i * width;
+            panes[i][j].y = j * height;
+            panes[i][j].w = width;
+            panes[i][j].h = height;
+        }
+        writeln;
+    }
+    
+    
+    
+    string path;
+    foreach(i; 0..widthPieces)
+    {
+        foreach(j; 0..heightPieces)
+        {
+            writeln("panes[", i, "][", j, "] = ", panes[i][j]);
+            writeln("./images/" ~ baseFileName ~ to!string(i) ~ to!string(j) ~ ".png");
+            
+            tile = loadImageToSurface("./images/" ~ baseFileName ~ to!string(i) ~ to!string(j) ~ ".png");
+            
+            copySurfaceToSurface(tile, null, image, &panes[i][j]);
+            
+            //path = "./images/" ~ "1_" ~ to!string(i) ~ to!string(j) ~ ".png";
+            
+        }
+        writeln;
+    }
+    
+    //IMG_SavePNG(huge, toStringz(fileName)) < 0
+    string fileN = "./images/TEST.png";
+    if (IMG_SavePNG(image, toStringz(fileN)) < 0) 
+    {
+        writefln("IMG_SavePNG failed: %s", SDL_GetError());
+    }
+    
+    return image;
+}
 
 
 void createRealBigSurface()

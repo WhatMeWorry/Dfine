@@ -120,8 +120,14 @@ int main()
     
     SDL_Initialize();
     
-    splitTooLargeFile("1.png", 1, 2);
+
+    
+    splitTooLargeFile("5", 1, 2);
     exit(-1);
+    
+    SDL_Surface* kyle = assembleTilesIntoOneFile("1_", 1, 2);
+    exit(-1);
+    
 
     //copying_textures_to_surface();
     
