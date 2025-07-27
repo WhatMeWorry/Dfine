@@ -60,6 +60,7 @@ import breakup;
 import magnify;
 import standalone_demos;
 import tutorials;
+import helper_funcs;
 
 
 
@@ -119,7 +120,8 @@ int main()
     
     SDL_Initialize();
     
-
+    splitTooLargeFile("1.png", 1, 2);
+    exit(-1);
 
     //copying_textures_to_surface();
     
