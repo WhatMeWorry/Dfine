@@ -582,12 +582,12 @@ void smallest_texture_with_rect()
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
     SDL_Texture  *texture = null;
-
-    createWindowAndRenderer("smallest_texture_with_rect", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+                                                         // 1000 1000
+    createWindowAndRenderer("smallest_texture_with_rect", 128, 128, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
+    //SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
 
     bool running = true;
     while (running)
@@ -601,18 +601,21 @@ void smallest_texture_with_rect()
             }
         }
 
-        SDL_RenderClear(renderer); // Clear the renderer
+        //SDL_RenderClear(renderer); // Clear the renderer
+
+        // If renderer is bigger or smaller than texture pixels, the texture will be  
+        // automatically expanded or shrunk accordingly if null values are used.
 
         SDL_RenderTexture(renderer, texture, null, null);  // FIRST DRAW THE IMAGE
         
-        SDL_FRect rect = { 50, 50, 400, 400 };             
-        SDL_SetRenderTarget(renderer, texture);
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // red
+        //SDL_FRect rect = { 50, 50, 400, 400 };             
+        //SDL_SetRenderTarget(renderer, texture);
+        //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // red
         
-        SDL_RenderFillRect(renderer, &rect);               // SECOND DRAW THE RECTANGLE
+        //SDL_RenderFillRect(renderer, &rect);               // SECOND DRAW THE RECTANGLE
         
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white
-        SDL_SetRenderTarget(renderer, null);  // set render target back to the default (window)
+        //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // white
+        //SDL_SetRenderTarget(renderer, null);  // set render target back to the default (window)
 
         
         SDL_RenderPresent(renderer); // Present the rendered content of IMAGE and RECTANGLE
@@ -1108,4 +1111,107 @@ void tutorial_5()
     }
 
 }
++/
+
+
+
+
+
+void mini_and_main_maps()
+{
+    SDL_Window *windowMain = createWindow("main", 1000, 1000, cast(SDL_WindowFlags) 0);
+
+                                              // 33,460 : 10,590 <==> 3.15 : 1
+    //SDL_Window *windowMini = createWindow("mini", 2325, 750, cast(SDL_WindowFlags) 0);
+    SDL_Renderer *renderer;
+    SDL_Window *windowMini;
+    createWindowAndRenderer("mini", 2325, 750, cast(SDL_WindowFlags) 0, &windowMini, &renderer);
+
+    SDL_Surface *surfaceMain = getWindowSurface(windowMain);  // creates a surface if it does not already exist
+
+    SDL_Surface *surfaceMini = getWindowSurface(windowMini);  // creates a surface if it does not already exist
+    
+    writeln("surfaceMini = ", surfaceMini.w, "  ", surfaceMini.h);
+
+    SDL_Surface *surface = assembleTCFNA();
+
+    displaySurfaceProperties(surface);
+
+    SDL_Texture *texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, surfaceMini.w, surfaceMini.h);
+    texture.displayTextureProperties();
+
+    SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };  // outer boundaries
+
+    SDL_Rect surRect = { 0, 0, surfaceMain.w, surfaceMain.h };
+
+    bool running = true;
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+            if (event.key.key == SDLK_UP) 
+            {
+                surRect.y -= 50;
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
+            }
+            if (event.key.key == SDLK_DOWN) 
+            {
+                surRect.y += 50;
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
+            }
+            if (event.key.key == SDLK_LEFT) 
+            {
+                surRect.x -= 50;
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
+            }
+            if (event.key.key == SDLK_RIGHT) 
+            {
+                surRect.x += 50;
+                keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
+            }
+        }
+
+        copySurfaceToSurface(surface, &surRect, surfaceMain, null);
+
+        updateWindowSurface(windowMain);
+
+        //copySurfaceToSurface(surface, &boundsRect, surfaceMini, null);  //  took: 0.0025443 seconds
+        
+        //SDL_RenderClear(renderer);
+        
+        copySurfaceToTexture(surface, null, texture, null);
+        
+        SDL_RenderTexture(renderer, texture, null, null);
+        SDL_RenderPresent(renderer);
+        //copyTextureTo
+
+        //blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_NEAREST);  // took: 0.0092878 seconds
+
+        //updateWindowSurface(windowMini);  // took: 0.0015916 seconds
+
+    }
+    SDL_Quit();
+}
+
+/+
+        SDL_RenderClear(renderer); // Clear the renderer
+                                            // src, dst
+        * SDL_RenderTexture(renderer, texture, null, null);  // FIRST DRAW THE IMAGE
+        
+        SDL_FRect rect = { 50, 50, 400, 400 };             
+        SDL_SetRenderTarget(renderer, texture);
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // red
+        
+        SDL_RenderFillRect(renderer, &rect);               // SECOND DRAW THE RECTANGLE
+        
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white
+        SDL_SetRenderTarget(renderer, null);  // set render target back to the default (window)
+
+        
+        * SDL_RenderPresent(renderer); // Present the rendered content of IMAGE and RECTANGLE
 +/

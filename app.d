@@ -131,11 +131,18 @@ int main()
     //copying_textures_to_surface();
 
     //copying_surface_to_surface();
+    
+    //smallest_texture_with_rect();
+    //exit(-1);
 
-    writeln("*****************************************************");
-
-    two_windows_and_surfaces();
+    mini_and_main_maps();
     exit(-1);
+
+
+    two_windows_and_surfaces();  // done
+    exit(-1);
+    
+    
 
     change_texture_access();
     exit(-1);
