@@ -1,4 +1,65 @@
 
+// void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
+// void getWindowSize(SDL_Window *window, int *w, int *h)
+// void setRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
+// SDL_Surface* renderReadPixels(SDL_Renderer *renderer, const SDL_Rect *rect)
+// SDL_Renderer* getRendererFromTexture(SDL_Texture *texture)
+// void getTextureSize(SDL_Texture *texture, int *w, int *h)
+// SDL_Surface* loadImageToSurface(string file)
+// void loadImageToSurface(string file, SDL_Surface** surface)
+// SDL_Texture* loadImageToTextureWithAccess(SDL_Renderer *renderer, string file, SDL_TextureAccess textureAccess)
+// void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
+// void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **surface)
+// SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
+// uint mapRGBA(const SDL_PixelFormatDetails *format, const SDL_Palette *palette, ubyte  r, ubyte  g, ubyte  b, ubyte  a)
+// void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int *pitch)
+// SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
+// SDL_PropertiesID getSurfaceProperties(SDL_Surface *surface)
+// void fillSurfaceRect(SDL_Surface *dst, const SDL_Rect *rect, uint color)
+// SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surface)
+// SDL_Texture* createTexture(SDL_Renderer *renderer, SDL_PixelFormat format, SDL_TextureAccess access, int width, int height)
+// void setTextureBlendMode(SDL_Texture *texture, SDL_BlendMode blendMode)
+// void blitSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect, SDL_Surface *dstSurface, const SDL_Rect *dstRect, SDL_ScaleMode scaleMode)
+// void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect, SDL_Surface *dstSurface, const SDL_Rect *dstRect)
+// void copySurfaceToTexture(SDL_Surface *surface, const SDL_Rect *surRect, SDL_Texture *texture, const SDL_Rect *texRect)
+// SDL_Texture* duplicateTexture(SDL_Texture* existingTexture)
+// void changeTextureAccess(SDL_Texture **texture, SDL_TextureAccess newAccess)
+// SDL_Texture* changeTextureAccess(SDL_Texture *texture, SDL_TextureAccess newAccess)
+// SDL_Surface* convertTextureToSurface(SDL_Texture* texture) 
+
+// void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect, SDL_Surface *surface, const SDL_Rect *surRect)
+// void copyStreamingTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect, SDL_Surface *surface, const SDL_Rect *surRect)
+// void copySurfaceToSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect, SDL_Surface *dstSurface, const SDL_Rect *dstRect)
+
+// SDL_PropertiesID createProperties()
+// void queryTextureSDL3(SDL_Texture *texture, SDL_PixelFormat *pixelFormat, SDL_TextureAccess  *textureAccess, int *width, int *height)
+// SDL_Texture* createStreamingTextureFromTexture(SDL_Texture *existingTexture)
+// SDL_Texture* createTextureFromTexture(SDL_Texture *texture)
+
+// void copyTextureToTexture(SDL_Texture *srcTexture, const SDL_Rect *srcRect, SDL_Texture *dstTexture, const SDL_Rect *dstRect)
+
+// SDL_Surface* duplicateSurface(SDL_Surface* source)
+// SDL_TextureAccess getTextureAccess(SDL_Texture* texture)
+// SDL_PixelFormat getTexturePixelFormat(SDL_Texture* texture)
+// SDL_PixelFormat getSurfacePixelFormat(SDL_Surface* surface)
+// void displayTextureProperties(SDL_Texture* texture)
+// void displayTextureAccess(SDL_Texture* texture)
+// void displaySurfaceProperties(SDL_Surface* surface)
+// void getSurfaceWidthAndHeight(SDL_Surface* surface, int *w, int *h)
+// SDL_Renderer* createRenderer(SDL_Window *window, string rendererName)
+// void createRenderer(SDL_Window *window, string rendererName, SDL_Renderer **renderer)
+// SDL_Window* createWindow(string winName, int w, int h, SDL_WindowFlags flags)
+// void createWindow(string winName, int w, int h, SDL_WindowFlags flags, SDL_Window **window)
+// SDL_Surface* getWindowSurface(SDL_Window *window)
+// void getWindowSurface(SDL_Window *window, SDL_Surface** windowSurface)
+// void renderTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_FRect *srcRect, const SDL_FRect *dstRect)
+// void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlags windowFlags, SDL_Window **window, SDL_Renderer **renderer)
+// void updateWindowSurface(SDL_Window *window)
+// SDL_PixelFormatDetails* getPixelFormatDetails(SDL_PixelFormat pixelFormat)
+// SDL_PropertiesID getRendererProperties(SDL_Renderer *renderer)
+// long getNumberProperty(SDL_PropertiesID properties, const char *name, long default_value)
+// int getMaxTextureSizeForRenderer(SDL_Renderer *renderer)
+
 module sdl_funcs_with_error_handling;
 
 
@@ -60,7 +121,6 @@ SDL_Surface* renderReadPixels(SDL_Renderer *renderer, const SDL_Rect *rect)
 }
 
 
-
 SDL_Renderer* getRendererFromTexture(SDL_Texture *texture)
 {
     SDL_Renderer *renderer = SDL_GetRendererFromTexture(texture);
@@ -70,13 +130,6 @@ SDL_Renderer* getRendererFromTexture(SDL_Texture *texture)
     }
     return renderer;
 }
-
-
-
-
-
-
-
 
 
 void getTextureSize(SDL_Texture *texture, int *w, int *h)
@@ -92,7 +145,6 @@ void getTextureSize(SDL_Texture *texture, int *w, int *h)
 }
 
 
-
 SDL_Surface* loadImageToSurface(string file)
 {
     SDL_Surface *surface = IMG_Load(toStringz(file));  // IMG_Load function supports a wide range of image formats,
@@ -104,7 +156,6 @@ SDL_Surface* loadImageToSurface(string file)
 }
 
 
-
 void loadImageToSurface(string file, SDL_Surface** surface)
 {
     *surface = IMG_Load(toStringz(file));  // IMG_Load function supports a wide range of image formats,
@@ -113,8 +164,6 @@ void loadImageToSurface(string file, SDL_Surface** surface)
         throw new Exception("IMG_Load failed: " ~ to!string(SDL_GetError()));
     } 
 }
-
-
 
 
 /+ 
@@ -185,8 +234,6 @@ SDL_Texture* loadImageToTextureWithAccess(SDL_Renderer *renderer, string file, S
 }
 
 
-
-
 void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
 {
     if (IMG_SavePNG(surface, toStringz(file)) == false)
@@ -195,7 +242,6 @@ void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
         exit(-1);
     }
 }
-
 
 
 void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **surface)
@@ -241,7 +287,6 @@ uint mapRGBA(const SDL_PixelFormatDetails *format, const SDL_Palette *palette, u
 }
 
 
-
 void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int *pitch)
 {
     if (SDL_LockTexture(texture, null, pixels, pitch) == false)
@@ -249,7 +294,6 @@ void lockTexture(SDL_Texture *texture, const SDL_Rect *rect, void **pixels, int 
         throw new Exception("SDL_LockTexture failed: " ~ to!string(SDL_GetError()));
     }
 }
-
 
 
 // SDL_LockTextureToSurface() only works with streaming textures
@@ -263,7 +307,6 @@ void lockTextureToSurface(SDL_Texture *texture, const SDL_Rect *rect, SDL_Surfac
 }
 
 
-
 SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
 {
     SDL_PropertiesID properties = SDL_GetTextureProperties(texture);  // SDL3 only function
@@ -273,7 +316,6 @@ SDL_PropertiesID getTextureProperties(SDL_Texture *texture)
     }
     return properties;
 }
-
 
 
 SDL_PropertiesID getSurfaceProperties(SDL_Surface *surface)
@@ -287,7 +329,6 @@ SDL_PropertiesID getSurfaceProperties(SDL_Surface *surface)
 }
 
 
-
 void fillSurfaceRect(SDL_Surface *dst, const SDL_Rect *rect, uint color)
 {
     if (SDL_FillSurfaceRect(dst, rect, color) == false)
@@ -295,7 +336,6 @@ void fillSurfaceRect(SDL_Surface *dst, const SDL_Rect *rect, uint color)
         throw new Exception("SDL_FillSurfaceRect failed: " ~ to!string(SDL_GetError()));
     }
 }
-
 
 
 SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surface)
@@ -309,7 +349,6 @@ SDL_Texture* createTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *surfa
 }
 
 
-
 SDL_Texture* createTexture(SDL_Renderer *renderer, SDL_PixelFormat format, SDL_TextureAccess access, int width, int height)
 {
     SDL_Texture *texture = SDL_CreateTexture(renderer, format, access, width, height);
@@ -321,7 +360,6 @@ SDL_Texture* createTexture(SDL_Renderer *renderer, SDL_PixelFormat format, SDL_T
 }
 
 
-
 void setTextureBlendMode(SDL_Texture *texture, SDL_BlendMode blendMode)
 {
     if (SDL_SetTextureBlendMode(texture, blendMode) == false)
@@ -329,7 +367,6 @@ void setTextureBlendMode(SDL_Texture *texture, SDL_BlendMode blendMode)
         throw new Exception("SDL_SetTextureBlendMode failed: " ~ to!string(SDL_GetError()));
     }
 }
-
 
 
 void blitSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect, 
@@ -340,7 +377,6 @@ void blitSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
         throw new Exception("SDL_BlitSurfaceScaled failed: " ~ to!string(SDL_GetError()));
     }
 }
-
 
 
 void blitSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect, 

@@ -1,6 +1,18 @@
 
-module tutorials;
+// void copying_textures_to_surface()
+// void copying_surface_to_surface()
+// void two_windows_and_surfaces()
+// void change_texture_access()
+// void smallest_renderer_01()
+// void smallest_texture_01a()
+// void smallest_texture_with_rect()
+// void smallest_texture_01b()
+// void no_renderer_02()
+// void surface_no_implicit_scaling_03()
+// void surface_explicit_scaling_04()
+// void texture_implicit_scaling_05()
 
+module tutorials;
 
 import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
@@ -12,6 +24,7 @@ import hexmath : isOdd, isEven;
 import breakup;
 import magnify;
 import sdl_funcs_with_error_handling;
+import helper_funcs;
 import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
@@ -53,9 +66,6 @@ void copying_textures_to_surface()
     }
     SDL_Quit();
 }
-
-
-
 
 
 // tests copySurfaceToSurface() to update a surface attached to the current window. Additionally,
@@ -116,7 +126,6 @@ void copying_surface_to_surface()
 }
 
 
-
 void two_windows_and_surfaces()
 {
     SDL_Window *windowMain = createWindow("main", 1000, 1000, cast(SDL_WindowFlags) 0);
@@ -129,8 +138,11 @@ void two_windows_and_surfaces()
 
     //SDL_Surface *surface = loadImageToSurface("./images/Wach2.png");
     
-    SDL_Surface *surface = assembleHugeSurface();
+    //SDL_Surface *surface = assembleHugeSurface();
+    SDL_Surface *surface = assembleTCFNA();
     
+    writeln("AFTER assembleTCFNA");
+
     displaySurfaceProperties(surface);
 
     SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };  // outer boundaries
@@ -232,7 +244,6 @@ while loop took: 2162.36 milliseconds
     }
     SDL_Quit();
 }
-
 
 
 // This function tests the changeTextureAccess() function.  The important lesson of this function is that
@@ -505,7 +516,6 @@ exit(-1);
 }
 
 
-
 void smallest_renderer_01()
 {
     SDL_Window   *window = null;
@@ -612,8 +622,6 @@ void smallest_texture_with_rect()
 }
 
 
-
-
 void smallest_texture_01b()
 {
     SDL_Window   *window = null;
@@ -702,7 +710,6 @@ void no_renderer_02()
 }
 
 
-
 /+
 Unlike textures, SDL3 surfaces have no automatic scaling when source and destination rectagles of 
 different sizes are blitted. Thus the sprites will are not?? shrunken or expanded?? truncated??
@@ -762,12 +769,6 @@ void surface_no_implicit_scaling_03()
 }
 
 
-
-
-
-
-
-
 // use blitSurfaceScaled(..., SDL_SCALEMODE_LINEAR) to stretch or shrink suface copies
 
 void surface_explicit_scaling_04()
@@ -822,10 +823,6 @@ void surface_explicit_scaling_04()
     }
     SDL_Quit();
 }
-
-
-
-
 
 
 /+

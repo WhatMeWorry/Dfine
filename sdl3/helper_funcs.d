@@ -1,5 +1,11 @@
 
-
+// void splitTooLargeFile(string filename, int widthPieces, int heightPieces)
+// SDL_Surface* assembleTilesIntoOneFile(string baseFileName, int widthPieces, int heightPieces )
+// void createRealBigSurface()
+// void assembleQuadFilesItoOnePNGfile()
+// void trimFileIfPixelsAreNotEven()
+// void hugePNGfileIntoQuadPNGfiles()
+// DL_Surface* assembleHugeSurface()
 
 module helper_funcs;
 
@@ -148,7 +154,6 @@ SDL_Surface* assembleTilesIntoOneFile(string baseFileName, int widthPieces, int 
             copySurfaceToSurface(tile, null, image, &panes[i][j]);
             
             //path = "./images/" ~ "1_" ~ to!string(i) ~ to!string(j) ~ ".png";
-            
         }
         writeln;
     }
@@ -235,8 +240,6 @@ void createRealBigSurface()
         writeln("IMG_SavePNG succeeded");
     }
 }
-
-
 
 
 void assembleQuadFilesItoOnePNGfile()
@@ -366,10 +369,6 @@ void assembleQuadFilesItoOnePNGfile()
 }
 
 
-
-
-
-
 void trimFileIfPixelsAreNotEven()
 {
     SDL_Surface *image = loadImageToSurface("./images/quadA0.png");
@@ -471,10 +470,6 @@ void hugePNGfileIntoQuadPNGfiles()
 }
 
 
-
-
-
-
 SDL_Surface* assembleHugeSurface()
 {
     SDL_Window   *window   = null;
@@ -551,6 +546,61 @@ SDL_Surface* assembleHugeSurface()
     return huge;
 }
 
+
+
+
+SDL_Surface* assembleTCFNA()
+{
+    SDL_Window   *window   = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture  = null;
+    SDL_Surface  *surface  = null;
+
+    SDL_Surface * surf0 = assembleTilesIntoOneFile("1_", 1, 2);
+    SDL_Surface * surf1 = assembleTilesIntoOneFile("2_", 1, 2);
+    SDL_Surface * surf2 = assembleTilesIntoOneFile("3_", 1, 2);
+    SDL_Surface * surf3 = assembleTilesIntoOneFile("4_", 1, 2);
+    SDL_Surface * surf4 = assembleTilesIntoOneFile("5_", 1, 2);
+
+    writeln("surf0.w x h = ", surf0.w, " x ", surf0.h);
+    writeln("surf1.w x h = ", surf1.w, " x ", surf1.h);
+    writeln("surf2.w x h = ", surf2.w, " x ", surf2.h);
+    writeln("surf3.w x h = ", surf3.w, " x ", surf3.h);
+    writeln("surf4.w x h = ", surf4.w, " x ", surf4.h);
+
+ // SDL_Surface *huge = createSurface(5*6692, 1*10594, image0.format);
+    SDL_Surface *huge = createSurface(5*6692, 1*10594, SDL_PIXELFORMAT_RGBA8888);
+
+    SDL_Rect[5] quads =   // make dynamic??
+    [
+        SDL_Rect(0,     0,  6680, 10594),
+        SDL_Rect(6681,  0,  6686, 10594),
+        SDL_Rect(13368, 0,  6688, 10594),
+        SDL_Rect(20057, 0,  6692, 10594),
+        SDL_Rect(26749, 0,  6690, 10594)
+    ];
+
+    copySurfaceToSurface(surf0, null, huge, &quads[0]);
+    copySurfaceToSurface(surf1, null, huge, &quads[1]);
+    copySurfaceToSurface(surf2, null, huge, &quads[2]);
+    copySurfaceToSurface(surf3, null, huge, &quads[3]);
+    copySurfaceToSurface(surf4, null, huge, &quads[4]);
+    
+    writeln("AFTER copySurfaces");
+    
+    /+
+    string fileName = "./images/" ~ "huge" ~ ".png";
+    if (IMG_SavePNG(huge, toStringz(fileName)) < 0) {
+        writefln("IMG_SavePNG failed: %s", SDL_GetError());
+    }
+    else
+    {
+        writeln("IMG_SavePNG succeeded");
+    }
+    +/
+    
+    return huge;
+}
 
 
 

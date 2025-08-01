@@ -121,25 +121,26 @@ int main()
     SDL_Initialize();
     
 
-    
+    /+
     splitTooLargeFile("5", 1, 2);
     exit(-1);
     
     SDL_Surface* kyle = assembleTilesIntoOneFile("1_", 1, 2);
     exit(-1);
-    
-
++/
     //copying_textures_to_surface();
-    
+
     //copying_surface_to_surface();
-    
+
+    writeln("*****************************************************");
+
     two_windows_and_surfaces();
     exit(-1);
-    
+
     change_texture_access();
     exit(-1);
-    
-    
+
+
     smallest_texture_with_rect();
     exit(-1);
     
