@@ -130,7 +130,15 @@ void two_windows_and_surfaces()
 {
     SDL_Window *windowMain = createWindow("main", 1000, 1000, cast(SDL_WindowFlags) 0);
     
-    SDL_Window *windowMini = createWindow("mini", 1500, 750, cast(SDL_WindowFlags) 0);
+    SDL_Window *windowMini = createWindow("mini", 1500, 750, cast(SDL_WindowFlags) 0);  // Mini map - Huge map in smaller window
+    
+    SDL_Window   *windowTex;
+    SDL_Renderer *renderer;
+    SDL_Texture  *texture;
+    int w, h;
+    SDL_GetWindowSize(windowMini, &w, &h);
+    createWindowAndRenderer("Texture", w, h, cast(SDL_WindowFlags) 0, &windowTex, &renderer);
+    texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, w, h);
 
     SDL_Surface *surfaceMain = getWindowSurface(windowMain);  // creates a surface if it does not already exist
 
@@ -141,7 +149,7 @@ void two_windows_and_surfaces()
     //SDL_Surface *surface = assembleHugeSurface();
     SDL_Surface *surface = assembleTCFNA();
     
-    writeln("AFTER assembleTCFNA");
+    copySurfaceToTexture(surfaceMini, null, texture, null);  // ***************
 
     displaySurfaceProperties(surface);
 
@@ -238,6 +246,23 @@ while loop took: 2162.36 milliseconds
 
         updateWindowSurface(windowMini);  // took: 0.0015916 seconds
         
+
+        SDL_RenderClear(renderer); // Clear the renderer
+            copySurfaceToTexture(surfaceMini, null, texture, null);
+            
+            SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+            
+        SDL_FRect rect = { 50, 50, 400, 400 };             
+        SDL_SetRenderTarget(renderer, texture);
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // red
+        SDL_RenderFillRect(renderer, &rect);               // SECOND DRAW THE RECTANGLE
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // white
+        SDL_SetRenderTarget(renderer, null);  // set render target back to the default (window)
+            
+            
+            
+        //SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+        SDL_RenderPresent(renderer); // Present the rendered content
 
 
         
@@ -577,6 +602,51 @@ void smallest_texture_01a()
 }
 
 
+void smallest_sdl_texture_program()
+{
+    SDL_Window   *window = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture = null;
+                                                         // 1000 1000 window is larger than texture
+                                                         // 128  128  window is smaller than texture
+                                                         // 256  256  window is same size than texture
+    createWindowAndRenderer("mallest_sdl_texture_program", 512, 512, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    //texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+
+    SDL_Surface *surface = assembleTCFNA();
+    
+    texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
+    
+    copySurfaceToTexture(surface, null, texture, null);
+
+    bool running = true;
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+        }
+        
+        // If renderer is bigger or smaller than texture pixels, the texture will be  
+        // automatically expanded or shrunk accordingly if null values are used.
+
+        SDL_RenderTexture(renderer, texture, null, null);  // FIRST DRAW THE IMAGE
+
+        SDL_RenderPresent(renderer); // Present the rendered content of IMAGE and RECTANGLE
+
+    }
+    SDL_Quit();
+}
+
+
+
+
+
 void smallest_texture_with_rect()
 {
     SDL_Window   *window = null;
@@ -685,7 +755,7 @@ SDL_CreateWindowSurface: This function explicitly creates a surface for a window
 
 void no_renderer_02()
 {
-    SDL_Window *window = createWindow("no_renderer_02", 512, 512, cast(SDL_WindowFlags) 0);
+    SDL_Window *window = createWindow("no_renderer_02", 2048, 2048, cast(SDL_WindowFlags) 0);
 
     SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
 

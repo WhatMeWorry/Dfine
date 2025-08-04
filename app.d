@@ -132,8 +132,17 @@ int main()
 
     //copying_surface_to_surface();
     
-    //smallest_texture_with_rect();
-    //exit(-1);
+    two_windows_and_surfaces();  // done
+    exit(-1);
+
+    smallest_sdl_texture_program();
+    exit(-1);
+    
+    no_renderer_02();
+    exit(-1);
+    
+    smallest_texture_with_rect();
+    exit(-1);
 
     mini_and_main_maps();
     exit(-1);

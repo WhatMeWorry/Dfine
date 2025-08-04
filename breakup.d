@@ -1894,7 +1894,7 @@ int main(int argc, char *argv[]) {
     }
 +/
 
-
+/+
 SDL_Surface* assembleHugeSurface()
 {
     SDL_Window   *window   = null;
@@ -1970,7 +1970,7 @@ SDL_Surface* assembleHugeSurface()
     
     return huge;
 }
-
++/
 
 
 

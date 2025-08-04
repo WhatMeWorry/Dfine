@@ -5,7 +5,7 @@
 // void assembleQuadFilesItoOnePNGfile()
 // void trimFileIfPixelsAreNotEven()
 // void hugePNGfileIntoQuadPNGfiles()
-// DL_Surface* assembleHugeSurface()
+// SDL_Surface* assembleHugeSurface()
 
 module helper_funcs;
 
