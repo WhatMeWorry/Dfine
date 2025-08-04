@@ -135,19 +135,31 @@ void two_windows_and_surfaces()
     SDL_Window   *windowTex;
     SDL_Renderer *renderer;
     SDL_Texture  *texture;
+    
+    int w1, h1;
+    SDL_GetWindowSize(windowMain, &w1, &h1);
+
+    
     int w, h;
     SDL_GetWindowSize(windowMini, &w, &h);
     createWindowAndRenderer("Texture", w, h, cast(SDL_WindowFlags) 0, &windowTex, &renderer);
     texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, w, h);
+    float adjustFactorW = cast(float) w / cast(float) 33460;
+    float adjustFactorH = cast(float) h / cast(float) 10594;
+    
+    writeln("w x h = ", w, " x ", h);
+    writeln("adjustFactorW = ", adjustFactorW);
+    writeln("adjustFactorH = ", adjustFactorH);
+
 
     SDL_Surface *surfaceMain = getWindowSurface(windowMain);  // creates a surface if it does not already exist
 
     SDL_Surface *surfaceMini = getWindowSurface(windowMini);  // creates a surface if it does not already exist
 
-    //SDL_Surface *surface = loadImageToSurface("./images/Wach2.png");
-    
-    //SDL_Surface *surface = assembleHugeSurface();
-    SDL_Surface *surface = assembleTCFNA();
+    //SDL_Surface *surface = loadImageToSurface("./images/HUGE.png");
+    writeln("after loadImageToSurface");
+
+    SDL_Surface *surface = assembleTCFNA();  // Super Slow to load
     
     copySurfaceToTexture(surfaceMini, null, texture, null);  // ***************
 
@@ -239,9 +251,9 @@ while loop took: 2162.36 milliseconds
             // Calculate the time taken in seconds and milliseconds
             double seconds = (double)(end_counter - start_counter) / frequency;
             double milliseconds = seconds * 1000.0;
-            writeln("while loop took: ", seconds, " seconds");
-            writeln("while loop took: ", milliseconds, " milliseconds");
-            writeln("================================================");
+            //writeln("while loop took: ", seconds, " seconds");
+            //writeln("while loop took: ", milliseconds, " milliseconds");
+            //writeln("================================================");
         
 
         updateWindowSurface(windowMini);  // took: 0.0015916 seconds
@@ -252,10 +264,16 @@ while loop took: 2162.36 milliseconds
             
             SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
             
-        SDL_FRect rect = { 50, 50, 400, 400 };             
+            
+        //SDL_FRect rect = { 50, 50, 400, 400 };  
+        SDL_FRect rect = { surRect.x * adjustFactorW, surRect.y * adjustFactorH, w1 * adjustFactorW, h1 * adjustFactorH }; 
+
+
+        
         SDL_SetRenderTarget(renderer, texture);
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // red
-        SDL_RenderFillRect(renderer, &rect);               // SECOND DRAW THE RECTANGLE
+        //SDL_RenderFillRect(renderer, &rect);               // SECOND DRAW THE RECTANGLE
+        SDL_RenderRect(renderer, &rect);
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // white
         SDL_SetRenderTarget(renderer, null);  // set render target back to the default (window)
             
@@ -269,6 +287,28 @@ while loop took: 2162.36 milliseconds
     }
     SDL_Quit();
 }
+
+/+
+void draw_thick_rect(SDL_Renderer *renderer, SDL_FRect *outer, float border_thickness) {
+    // Fill the top border
+    SDL_FRect top_border = {outer->x, outer->y, outer->w, border_thickness};
+    SDL_RenderFillRect(renderer, &top_border);
+
+    // Fill the bottom border
+    SDL_FRect bottom_border = {outer->x, outer->y + outer->h - border_thickness, outer->w, border_thickness};
+    SDL_RenderFillRect(renderer, &bottom_border);
+
+    // Fill the left border (adjust for corners)
+    SDL_FRect left_border = {outer->x, outer->y + border_thickness, border_thickness, outer->h - (2 * border_thickness)};
+    SDL_RenderFillRect(renderer, &left_border);
+
+    // Fill the right border (adjust for corners)
+    SDL_FRect right_border = {outer->x + outer->w - border_thickness, outer->y + border_thickness, border_thickness, outer->h - (2 * border_thickness)};
+    SDL_RenderFillRect(renderer, &right_border);
+}
++/
+
+
 
 
 // This function tests the changeTextureAccess() function.  The important lesson of this function is that
