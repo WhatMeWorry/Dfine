@@ -139,7 +139,6 @@ void two_windows_and_surfaces()
     int w1, h1;
     SDL_GetWindowSize(windowMain, &w1, &h1);
 
-    
     int w, h;
     SDL_GetWindowSize(windowMini, &w, &h);
     createWindowAndRenderer("Texture", w, h, cast(SDL_WindowFlags) 0, &windowTex, &renderer);
@@ -200,113 +199,59 @@ void two_windows_and_surfaces()
                 keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
             }
         }
-/+                  entier loop
-================================================
-while loop took: 2.1436 seconds
-while loop took: 2143.6 milliseconds
-================================================
-while loop took: 2.14894 seconds
-while loop took: 2148.94 milliseconds
-================================================
-while loop took: 2.16236 seconds
-while loop took: 2162.36 milliseconds
-================================================
-+/
-
-
 
         copySurfaceToSurface(surface, &surRect, surfaceMain, null);
 
         updateWindowSurface(windowMain);
-        
-
- 
-
 
         copySurfaceToSurface(surface, &boundsRect, surfaceMini, null);  //  took: 0.0025443 seconds
 
- 
-
         //displaySurfaceProperties(surface);
         //displaySurfaceProperties(surfaceMini);
-        
-                           // get the current value of the high resolution counter - typically used for profiling
-            ulong start_counter = SDL_GetPerformanceCounter(); // Get the initial timestamp
+
+        // get the current value of the high resolution counter - typically used for profiling
+        ulong start_counter = SDL_GetPerformanceCounter(); // Get the initial timestamp
         
         // blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_LINEAR);  // took: 2.19031 seconds
            blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_NEAREST);  // took: 0.0092878 seconds
         // blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_PIXELART); // compile error
 
-        /+
-        SDL_ScaleModeNearest (or "nearest" or "0"): Performs nearest-neighbor sampling
-        Nearest (and PixelArt) generally offer the best performance as they are simpler to compute, according to Stack Overflow
-        +/
-        
-
-        
-        //blitSurface(surface, null, surfaceMini, null);  // took: 0.000975 seconds
-        
-                   ulong end_counter = SDL_GetPerformanceCounter(); // Get the timestamp after function execution
-            ulong frequency = SDL_GetPerformanceFrequency(); // Get the number of counter increments per second
-            // Calculate the time taken in seconds and milliseconds
-            double seconds = (double)(end_counter - start_counter) / frequency;
-            double milliseconds = seconds * 1000.0;
-            //writeln("while loop took: ", seconds, " seconds");
-            //writeln("while loop took: ", milliseconds, " milliseconds");
-            //writeln("================================================");
-        
+        ulong end_counter = SDL_GetPerformanceCounter(); // Get the timestamp after function execution
+        ulong frequency = SDL_GetPerformanceFrequency(); // Get the number of counter increments per second
+        // Calculate the time taken in seconds and milliseconds
+        double seconds = (double)(end_counter - start_counter) / frequency;
+        double milliseconds = seconds * 1000.0;
+        //writeln("while loop took: ", seconds, " seconds");
+        //writeln("while loop took: ", milliseconds, " milliseconds");
 
         updateWindowSurface(windowMini);  // took: 0.0015916 seconds
-        
 
         SDL_RenderClear(renderer); // Clear the renderer
-            copySurfaceToTexture(surfaceMini, null, texture, null);
+        copySurfaceToTexture(surfaceMini, null, texture, null);
             
-            SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
-            
-            
-        //SDL_FRect rect = { 50, 50, 400, 400 };  
+        SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+
         SDL_FRect rect = { surRect.x * adjustFactorW, surRect.y * adjustFactorH, w1 * adjustFactorW, h1 * adjustFactorH }; 
 
-
-        
         SDL_SetRenderTarget(renderer, texture);
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // red
-        //SDL_RenderFillRect(renderer, &rect);               // SECOND DRAW THE RECTANGLE
-        SDL_RenderRect(renderer, &rect);
+
+        // *******************************************************
+        //SDL_RenderRect(renderer, &rect);
+        drawRectWithThickness(renderer, &rect, 2.0); 
+        // *******************************************************
+        
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // white
         SDL_SetRenderTarget(renderer, null);  // set render target back to the default (window)
-            
-            
-            
-        //SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
+
         SDL_RenderPresent(renderer); // Present the rendered content
 
-
-        
     }
     SDL_Quit();
 }
 
-/+
-void draw_thick_rect(SDL_Renderer *renderer, SDL_FRect *outer, float border_thickness) {
-    // Fill the top border
-    SDL_FRect top_border = {outer->x, outer->y, outer->w, border_thickness};
-    SDL_RenderFillRect(renderer, &top_border);
 
-    // Fill the bottom border
-    SDL_FRect bottom_border = {outer->x, outer->y + outer->h - border_thickness, outer->w, border_thickness};
-    SDL_RenderFillRect(renderer, &bottom_border);
 
-    // Fill the left border (adjust for corners)
-    SDL_FRect left_border = {outer->x, outer->y + border_thickness, border_thickness, outer->h - (2 * border_thickness)};
-    SDL_RenderFillRect(renderer, &left_border);
-
-    // Fill the right border (adjust for corners)
-    SDL_FRect right_border = {outer->x + outer->w - border_thickness, outer->y + border_thickness, border_thickness, outer->h - (2 * border_thickness)};
-    SDL_RenderFillRect(renderer, &right_border);
-}
-+/
 
 
 

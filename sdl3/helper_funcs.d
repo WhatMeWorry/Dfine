@@ -25,6 +25,28 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 
+void drawRectWithThickness(SDL_Renderer *renderer, SDL_FRect *outer, float border_thickness) 
+{
+    // Fill the top border
+    SDL_FRect top_border = {outer.x, outer.y, outer.w, border_thickness};
+    SDL_RenderFillRect(renderer, &top_border);
+
+    // Fill the bottom border
+    SDL_FRect bottom_border = {outer.x, outer.y + outer.h - border_thickness, outer.w, border_thickness};
+    SDL_RenderFillRect(renderer, &bottom_border);
+
+    // Fill the left border (adjust for corners)
+    SDL_FRect left_border = {outer.x, outer.y + border_thickness, border_thickness, outer.h - (2 * border_thickness)};
+    SDL_RenderFillRect(renderer, &left_border);
+
+    // Fill the right border (adjust for corners)
+    SDL_FRect right_border = {outer.x + outer.w - border_thickness, outer.y + border_thickness, border_thickness, outer.h - (2 * border_thickness)};
+    SDL_RenderFillRect(renderer, &right_border);
+}
+
+
+
+
 // width and height pieces are number of pieces to break up the image.
 // so 2, 3 would break up the iamge into two equal horizonal breaks and three
 // equal vertical breaks.  1 would mean to keep the existing dimension
@@ -89,8 +111,7 @@ void splitTooLargeFile(string filename, int widthPieces, int heightPieces )
         }
         writeln;
     }
-    
-    
+
     /+ copySurfaceToSurface(image0, null, huge, &quads[0]);
     copySurfaceToSurface(image1, null, huge, &quads[1]);
     copySurfaceToSurface(image2, null, huge, &quads[2]);
@@ -101,11 +122,7 @@ void splitTooLargeFile(string filename, int widthPieces, int heightPieces )
     if (IMG_SavePNG(huge, toStringz(fileName)) < 0) {
         writefln("IMG_SavePNG failed: %s", SDL_GetError());
     } +/
-    
-    
-    
-    
-    
+
 }
 
 
@@ -117,16 +134,11 @@ SDL_Surface* assembleTilesIntoOneFile(string baseFileName, int widthPieces, int 
     
     int width = tile.w;
     int height = tile.h;
-
-    writeln(width, " ", height);
     
     SDL_Surface *image = createSurface(width * widthPieces, height * heightPieces, tile.format);
-    
-    
+
     auto panes = new SDL_Rect[][](widthPieces, heightPieces);
-    
-    writeln("panes = ", panes);
-    
+
     foreach(i; 0..widthPieces)
     {
         foreach(j; 0..heightPieces)
@@ -136,11 +148,8 @@ SDL_Surface* assembleTilesIntoOneFile(string baseFileName, int widthPieces, int 
             panes[i][j].w = width;
             panes[i][j].h = height;
         }
-        writeln;
     }
-    
-    
-    
+
     string path;
     foreach(i; 0..widthPieces)
     {
@@ -157,14 +166,15 @@ SDL_Surface* assembleTilesIntoOneFile(string baseFileName, int widthPieces, int 
         }
         writeln;
     }
-    
-    //IMG_SavePNG(huge, toStringz(fileName)) < 0
+
+    /+
     string fileN = "./images/TEST.png";
     if (IMG_SavePNG(image, toStringz(fileN)) < 0) 
     {
         writefln("IMG_SavePNG failed: %s", SDL_GetError());
     }
-    
+    +/
+
     return image;
 }
 
@@ -205,16 +215,13 @@ void createRealBigSurface()
     int width = image0.w;
     int height = image0.h;
 
-
     SDL_Surface *surface0 = createSurface(width, height, image0.format);
     SDL_Surface *surface1 = createSurface(width, height, image1.format);
     SDL_Surface *surface2 = createSurface(width, height, image2.format);
     SDL_Surface *surface3 = createSurface(width, height, image3.format);
     SDL_Surface *surface4 = createSurface(width, height, image4.format);
 
-
     SDL_Surface *huge = createSurface(5*6692, 1*10594, image0.format);
-
 
     SDL_Rect[5] quads =
     [
