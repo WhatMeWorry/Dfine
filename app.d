@@ -132,6 +132,8 @@ int main()
 
     //copying_surface_to_surface();
     
+    just_a_window();
+    
     two_windows_and_surfaces();  // done
     exit(-1);
 

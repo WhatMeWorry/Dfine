@@ -526,6 +526,30 @@ exit(-1);
 }
 
 
+void just_a_window()
+{
+    SDL_Window* window = createWindow("Just A Window", 640, 480, cast(SDL_WindowFlags) 0);
+
+    bool running = true;
+    SDL_Event event;
+    while (running) 
+    {
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+        }
+        SDL_Delay(16);  // ~60 FPS  (basic render loop placeholder)
+    }
+    SDL_Quit();
+}
+
+
+
+
+
 void smallest_renderer_01()
 {
     SDL_Window   *window = null;
