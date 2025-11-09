@@ -61,7 +61,7 @@ import magnify;
 import standalone_demos;
 import tutorials;
 import helper_funcs;
-
+import cork_board;
 
 
 /+
@@ -120,14 +120,16 @@ int main()
     
     SDL_Initialize();
     
-
-    /+
+    corkboard();  // done
+    exit(-1);
+    
+/+
     splitTooLargeFile("5", 1, 2);
     exit(-1);
     
     SDL_Surface* kyle = assembleTilesIntoOneFile("1_", 1, 2);
     exit(-1);
-+/
+
     //copying_textures_to_surface();
 
     //copying_surface_to_surface();
@@ -149,7 +151,7 @@ int main()
     mini_and_main_maps();
     exit(-1);
 
-
++/
     two_windows_and_surfaces();  // done
     exit(-1);
     
