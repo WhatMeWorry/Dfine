@@ -57,11 +57,7 @@ void corkboard()
     SDL_Texture  *texture;
     SDL_Surface  *surface;
     
-    createWindowAndRenderer("Corkboard", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
-
-    //int w, h;
-    //SDL_GetWindowSize(window, &w, &h);
-    //writeln("window size (WxH) = ", w, " x ", h);
+    createWindowAndRenderer("Corkboard", 3800, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
     
     surface = loadImageToSurface("./images/WachA.png");
     
@@ -79,7 +75,7 @@ void corkboard()
     displayTextureProperties(texture);
     
     // same as above.  Turn into a function?
-    
+    /+
     surface = loadImageToSurface("./images/WachC.png");
     displaySurfaceProperties(surface);
     texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
@@ -89,9 +85,12 @@ void corkboard()
 
     swatch.texture = texture;
     board.pins ~= swatch;
-    
+    +/
     writeln("board = ", board);
-    
+    writeln("board.pins.length = ", board.pins.length);
+
+    SDL_FRect t;  t.x = 100; t.y = 100; t.w = 3312; t.h = 2093;
+
     /+
     createWindowAndRenderer("Texture", w, h, cast(SDL_WindowFlags) 0, &windowTex, &renderer);
     texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, w, h);
@@ -126,31 +125,26 @@ void corkboard()
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            if (event.type == SDL_EVENT_KEY_DOWN) 
             {
-                running = false;
-            }
-            if (event.key.key == SDLK_UP) 
-            {
-                //surRect.y -= 50;
-                //keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
-            }
-            if (event.key.key == SDLK_DOWN) 
-            {
-                //surRect.y += 50;
-                //keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
-            }
-            if (event.key.key == SDLK_LEFT) 
-            {
-                //surRect.x -= 50;
-                //keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
-            }
-            if (event.key.key == SDLK_RIGHT) 
-            {
-                //surRect.x += 50;
-                //keepRectWithinBiggerRectArrowMovement(&surRect, &boundsRect);
+                switch(event.key.key)
+                {
+                    case SDLK_ESCAPE:
+                        running = false;
+                    break;
+                    case SDLK_INSERT:
+                        t.w = t.w + 1.0;
+                        t.h = t.h + 1.0;
+                    break;
+                    case SDLK_DELETE:
+                        t.w = t.w - 1.0;
+                        t.h = t.h - 1.0;
+                    break;
+                    default: // lots of keys are not mapped so not a problem
+                 }
             }
         }
+
 /+
         copySurfaceToSurface(surface, &surRect, surfaceMain, null);
 
@@ -200,13 +194,12 @@ void corkboard()
 +/
         SDL_RenderClear(renderer); // Clear the renderer
         
-        SDL_FRect temp;  temp.x = 0; temp.y = 0; temp.w = texture.w; temp.h = texture.h;
+        //SDL_FRect temp;  temp.x = 0; temp.y = 0; temp.w = texture.w; temp.h = texture.h;
+        //SDL_FRect temp;  temp.x = 0; temp.y = 0; temp.w = 3312; temp.h = 2093;
         
-        SDL_RenderTexture(renderer, texture, null, &temp); // loading the image (above) is not rendering
-            
+        SDL_RenderTexture(renderer, texture, null, &t);
+
         SDL_RenderPresent(renderer); // Present the rendered content
-
-
     }
     SDL_Quit();
 
