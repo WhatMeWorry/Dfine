@@ -56,14 +56,19 @@ void corkboard()
     SDL_Renderer *renderer;
     SDL_Texture  *texture;
     SDL_Surface  *surface;
+	
+	double deltaSize = 0.01;
     
-    createWindowAndRenderer("Corkboard", 3800, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("Corkboard", 1500, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
     
     surface = loadImageToSurface("./images/WachA.png");
     
     displaySurfaceProperties(surface);
     
     texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
+	
+	writeln("texture.w = ", texture.w);
+	writeln("texture.h = ", texture.h);
     
     copySurfaceToTexture(surface, null, texture, null);
     swatch.texture = texture;
@@ -73,6 +78,17 @@ void corkboard()
     SDL_DestroySurface(surface);
     
     displayTextureProperties(texture);
+	
+	
+	// Most scanned textures are not perfect squares but rectangular. When resizing these images
+	// you can't just increase or decrease the width/height by the same amount. 
+	
+    writeln("texture.w = ", texture.w);
+	writeln("texture.h = ", texture.h);
+	double widthToHeightRatio = cast(double) texture.w / cast(double) texture.h;  // widthToHeightRatio == 1.0 means width equals height (square)
+	                                                                              // widthToHeightRatio > 1.0 means width longer than height
+																				  // widthToHeightRatio < 1.0 means height longer than width
+	writeln("widthToHeightRatio = ", widthToHeightRatio);
     
     // same as above.  Turn into a function?
     /+
@@ -89,7 +105,7 @@ void corkboard()
     writeln("board = ", board);
     writeln("board.pins.length = ", board.pins.length);
 
-    SDL_FRect t;  t.x = 100; t.y = 100; t.w = 3312; t.h = 2093;
+    SDL_FRect t;  t.x = 100; t.y = 100; t.w = texture.w; t.h = texture.h;
 
     /+
     createWindowAndRenderer("Texture", w, h, cast(SDL_WindowFlags) 0, &windowTex, &renderer);
@@ -127,19 +143,32 @@ void corkboard()
         {
             if (event.type == SDL_EVENT_KEY_DOWN) 
             {
+			    writeln("Key down Event =====================================");
                 switch(event.key.key)
                 {
                     case SDLK_ESCAPE:
                         running = false;
                     break;
                     case SDLK_INSERT:
-                        t.w = t.w + 1.0;
-                        t.h = t.h + 1.0;
+                        t.w = t.w + (t.w * widthToHeightRatio) * deltaSize;
+                        t.h = t.h + (t.h * widthToHeightRatio) * deltaSize;
                     break;
                     case SDLK_DELETE:
-                        t.w = t.w - 1.0;
-                        t.h = t.h - 1.0;
+                        t.w = t.w - (t.w * widthToHeightRatio) * deltaSize;
+                        t.h = t.h - (t.h * widthToHeightRatio) * deltaSize;
                     break;
+					case SDLK_LEFT:
+                        t.x = t.x - 1.0;
+                    break;					
+					case SDLK_RIGHT:
+                        t.x = t.x + 1.0;
+                    break;								
+					case SDLK_UP:
+                        t.y = t.y - 1.0;
+                    break;							
+					case SDLK_DOWN:
+                        t.y = t.y + 1.0;
+                    break;												
                     default: // lots of keys are not mapped so not a problem
                  }
             }
@@ -196,6 +225,8 @@ void corkboard()
         
         //SDL_FRect temp;  temp.x = 0; temp.y = 0; temp.w = texture.w; temp.h = texture.h;
         //SDL_FRect temp;  temp.x = 0; temp.y = 0; temp.w = 3312; temp.h = 2093;
+		
+		//writeln("t = ", t);
         
         SDL_RenderTexture(renderer, texture, null, &t);
 
