@@ -29,118 +29,102 @@ import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
 
-struct Float2 { float w; float h; }
+struct Position { float x; float y; }
+struct Size { float w; float h; }
 
-struct Pin
+struct Swatch
 {
     SDL_Texture *texture;
-    Float2      position;
-    Float2      size;
-    int         alpha;  // 0-255
-    double      angle;  // 0.0-360.0
+    SDL_FRect   rect;
+    double      angle;       // 0.0-360.0	
+    int         alpha;       // 0-255
+	double      aspectRatio; // ratio of width to height
+	
+	this(SDL_Renderer *renderer, float x, float y, string fileName) 
+	{
+        this.rect.x = x;
+		this.rect.y = y;
+        SDL_Surface *surface = loadImageToSurface(fileName);
+        this.rect.w = surface.w;
+		this.rect.h = surface.h;
+		this.angle = 0.0;
+		this.alpha = 128;
+		this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
+		this.texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
+		               SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
+		copySurfaceToTexture(surface, null, this.texture, null);
+		SDL_DestroySurface(surface);
+    }
 }
 
-struct Pins
+const SDL_FPoint *CENTER = null;
+const SDL_FRect *FULL_TEXTURE = null;
+
+struct CorkBoard
 {
-    uint current; // currently active slide for scale, translation, and rotation
-    Pin[] pins;
+    uint active;  // current swatch for scale, translation, rotation, and opacity
+    Swatch[] swatches;
+	
+	this(SDL_Renderer *renderer, float x, float y)
+	{
+        this.swatches ~= Swatch(renderer, 10, 10, "./images/WachA.png");
+        this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
+        this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");		
+        this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");		
+		this.active = 0;
+	}
+
+	void renderAllSwatches(SDL_Renderer *renderer)
+	{
+        foreach(i, s; this.swatches)
+		{
+            SDL_RenderTextureRotated(renderer, s.texture, FULL_TEXTURE, &s.rect, s.angle, CENTER, SDL_FLIP_NONE);
+			if (active == i)
+			{
+			    writeln("active==i ", active, "==", i);
+				
+                ubyte r, g, b, a;
+                SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);  // save off the current color		
+		
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // set color to red	
+                SDL_RenderRect(renderer, &s.rect);                 // draw rectangular outline
+				
+				SDL_SetRenderDrawColor(renderer, r, g, b, a);      // restore the previous color
+			}
+	    }
+	}
 }
 
 
 void corkboard()
 {
-    Pins board;
-    Pin swatch;
+    //CorkBoard board;
     
     SDL_Window   *window;
     SDL_Renderer *renderer;
-    SDL_Texture  *texture;
-    SDL_Surface  *surface;
 	
 	double deltaSize = 0.01;
     double angleSize = 0.5;
-    
-    double angle = 0.0;
+   
     
     createWindowAndRenderer("Corkboard", 2000, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
     
-    surface = loadImageToSurface("./images/WachA.png");
-    
-    displaySurfaceProperties(surface);
-    
-    texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
-	
-	writeln("texture.w = ", texture.w);
-	writeln("texture.h = ", texture.h);
-    
-    copySurfaceToTexture(surface, null, texture, null);
-    swatch.texture = texture;
-    board.current = 0;
-    board.pins ~= swatch;
-    
-    SDL_DestroySurface(surface);
-    
-    displayTextureProperties(texture);
-	
-	
-	// Most scanned textures are not perfect squares but rectangular. When resizing these images
-	// you can't just increase or decrease the width/height by the same amount. 
-	
-    writeln("texture.w = ", texture.w);
-	writeln("texture.h = ", texture.h);
-	double widthToHeightRatio = cast(double) texture.w / cast(double) texture.h;  // widthToHeightRatio == 1.0 means width equals height (square)
-	                                                                              // widthToHeightRatio > 1.0 means width longer than height
-																				  // widthToHeightRatio < 1.0 means height longer than width
-	writeln("widthToHeightRatio = ", widthToHeightRatio);
-    
-    // same as above.  Turn into a function?
-    /+
-    surface = loadImageToSurface("./images/WachC.png");
-    displaySurfaceProperties(surface);
-    texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
-    copySurfaceToTexture(surface, null, texture, null);
-    SDL_DestroySurface(surface);
-    displayTextureProperties(texture);
+    //Swatch swatch = Swatch(renderer, 10, 10, "./images/WachA.png");
 
-    swatch.texture = texture;
-    board.pins ~= swatch;
-    +/
+    CorkBoard board = CorkBoard(renderer,  10, 10);    
+
     writeln("board = ", board);
-    writeln("board.pins.length = ", board.pins.length);
+	
+    //displayTextureProperties(swatch.texture);
 
-    SDL_FRect t;  t.x = 10; t.y = 10; t.w = texture.w; t.h = texture.h;
 
-    /+
-    createWindowAndRenderer("Texture", w, h, cast(SDL_WindowFlags) 0, &windowTex, &renderer);
-    texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, w, h);
-    
-    float adjustFactorW = cast(float) w / cast(float) 33460;
-    float adjustFactorH = cast(float) h / cast(float) 10594;
-    
-    writeln("w x h = ", w, " x ", h);
-    writeln("adjustFactorW = ", adjustFactorW);
-    writeln("adjustFactorH = ", adjustFactorH);
+    //SDL_FRect t;  t.x = 10; t.y = 10; t.w = texture.w; t.h = texture.h;
 
-    SDL_Surface *surfaceMain = getWindowSurface(windowMain);  // creates a surface if it does not already exist
 
-    SDL_Surface *surfaceMini = getWindowSurface(windowMini);  // creates a surface if it does not already exist
-
-    //SDL_Surface *surface = loadImageToSurface("./images/HUGE.png");
-    writeln("after loadImageToSurface");
-
-    SDL_Surface *surface = assembleTCFNA();  // Super Slow to load
-    
-    copySurfaceToTexture(surfaceMini, null, texture, null);  // ***************
-
-    displaySurfaceProperties(surface);
-
-    SDL_Rect boundsRect = { 0, 0, surface.w, surface.h };  // outer boundaries
-
-    SDL_Rect surRect = { 0, 0, surfaceMain.w, surfaceMain.h };
-    +/
     bool running = true;
     while (running)
     {
+	
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -151,14 +135,32 @@ void corkboard()
                     case SDLK_ESCAPE:
                         running = false;
                     break;
+					case SDLK_TAB:
+					    if (board.active == (board.swatches.length - 1))
+						    board.active = 0;
+                        else
+                            board.active++;
+				    break;
+					
                     case SDLK_INSERT:
-                        t.w = t.w + (t.w * widthToHeightRatio) * deltaSize;
-                        t.h = t.h + (t.h * widthToHeightRatio) * deltaSize;
+					    Swatch t = board.swatches[board.active];
+						t.rect.w = t.rect.w + ((t.rect.w * t.aspectRatio) * deltaSize);
+						t.rect.h = t.rect.h + ((t.rect.h * t.aspectRatio) * deltaSize);
+						board.swatches[board.active] = t;
+					    //b.swatches[b.active].rect.w = b.swatches[b.active].rect.w + (b.swatches[b.active].rect.w * b.aspectRatio) * deltaSize;
+                        //t.w = t.w + (t.w * aspectRatio) * deltaSize;
+                        //t.h = t.h + (t.h * aspectRatio) * deltaSize;
                     break;
                     case SDLK_DELETE:
-                        t.w = t.w - (t.w * widthToHeightRatio) * deltaSize;
-                        t.h = t.h - (t.h * widthToHeightRatio) * deltaSize;
+                        //t.w = t.w - (t.w * aspectRatio) * deltaSize;
+                        //t.h = t.h - (t.h * aspectRatio) * deltaSize;
+					    Swatch t = board.swatches[board.active];
+						t.rect.w = t.rect.w - ((t.rect.w * t.aspectRatio) * deltaSize);
+						t.rect.h = t.rect.h - ((t.rect.h * t.aspectRatio) * deltaSize);
+						board.swatches[board.active] = t;						
+						
                     break;
+					/+
                     case SDLK_LEFT:
                         t.x = t.x - 1.0;
                     break;
@@ -172,63 +174,17 @@ void corkboard()
                         t.y = t.y + 1.0;
                     break;
                     case SDLK_HOME:
-                        angle = angle - angleSize;
+                        swatch.angle = swatch.angle - angleSize;
                     break;
                     case SDLK_END:
-                        angle = angle + angleSize;
+                        swatch.angle = swatch.angle + angleSize;
                     break;
+					+/
                     default: // lots of keys are not mapped so not a problem
                  }
             }
         }
 
-/+
-        copySurfaceToSurface(surface, &surRect, surfaceMain, null);
-
-        updateWindowSurface(windowMain);
-
-        copySurfaceToSurface(surface, &boundsRect, surfaceMini, null);  //  took: 0.0025443 seconds
-
-        //displaySurfaceProperties(surface);
-        //displaySurfaceProperties(surfaceMini);
-
-        // get the current value of the high resolution counter - typically used for profiling
-        ulong start_counter = SDL_GetPerformanceCounter(); // Get the initial timestamp
-        
-        // blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_LINEAR);  // took: 2.19031 seconds
-           blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_NEAREST);  // took: 0.0092878 seconds
-        // blitSurfaceScaled(surface, null, surfaceMini, null, SDL_SCALEMODE_PIXELART); // compile error
-
-        ulong end_counter = SDL_GetPerformanceCounter(); // Get the timestamp after function execution
-        ulong frequency = SDL_GetPerformanceFrequency(); // Get the number of counter increments per second
-        // Calculate the time taken in seconds and milliseconds
-        double seconds = (double)(end_counter - start_counter) / frequency;
-        double milliseconds = seconds * 1000.0;
-        //writeln("while loop took: ", seconds, " seconds");
-        //writeln("while loop took: ", milliseconds, " milliseconds");
-
-        updateWindowSurface(windowMini);  // took: 0.0015916 seconds
-
-        SDL_RenderClear(renderer); // Clear the renderer
-        copySurfaceToTexture(surfaceMini, null, texture, null);
-            
-        SDL_RenderTexture(renderer, texture, null, null); // loading the image (above) is not rendering
-
-        SDL_FRect rect = { surRect.x * adjustFactorW, surRect.y * adjustFactorH, w1 * adjustFactorW, h1 * adjustFactorH }; 
-
-        SDL_SetRenderTarget(renderer, texture);
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // red
-
-        // *******************************************************
-        //SDL_RenderRect(renderer, &rect);
-        drawRectWithThickness(renderer, &rect, 2.0); 
-        // *******************************************************
-        
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // white
-        SDL_SetRenderTarget(renderer, null);  // set render target back to the default (window)
-
-        SDL_RenderPresent(renderer); // Present the rendered content
-+/
         SDL_RenderClear(renderer); // Clear the renderer
         
         //SDL_FRect temp;  temp.x = 0; temp.y = 0; temp.w = texture.w; temp.h = texture.h;
@@ -236,11 +192,13 @@ void corkboard()
 		
 		//writeln("t = ", t);
         
-        SDL_RenderTexture(renderer, texture, null, &t);
+        //SDL_RenderTexture(renderer, texture, null, &t);
         
-        const SDL_FPoint *Center = null;
-        
-        SDL_RenderTextureRotated(renderer, texture, null, &t, angle, Center, SDL_FLIP_NONE);
+		board.renderAllSwatches(renderer);
+		
+        //const SDL_FPoint *CENTER = null;
+        //const SDL_FPoint *FULL_TEXTURE = null;
+        //SDL_RenderTextureRotated(renderer, texture, FULL_TEXTURE, &t, swatch.angle, CENTER, SDL_FLIP_NONE);
 
         SDL_RenderPresent(renderer); // Present the rendered content
     }
