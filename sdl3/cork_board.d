@@ -58,8 +58,11 @@ void corkboard()
     SDL_Surface  *surface;
 	
 	double deltaSize = 0.01;
+    double angleSize = 0.5;
     
-    createWindowAndRenderer("Corkboard", 1500, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
+    double angle = 0.0;
+    
+    createWindowAndRenderer("Corkboard", 2000, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
     
     surface = loadImageToSurface("./images/WachA.png");
     
@@ -105,7 +108,7 @@ void corkboard()
     writeln("board = ", board);
     writeln("board.pins.length = ", board.pins.length);
 
-    SDL_FRect t;  t.x = 100; t.y = 100; t.w = texture.w; t.h = texture.h;
+    SDL_FRect t;  t.x = 10; t.y = 10; t.w = texture.w; t.h = texture.h;
 
     /+
     createWindowAndRenderer("Texture", w, h, cast(SDL_WindowFlags) 0, &windowTex, &renderer);
@@ -143,7 +146,6 @@ void corkboard()
         {
             if (event.type == SDL_EVENT_KEY_DOWN) 
             {
-			    writeln("Key down Event =====================================");
                 switch(event.key.key)
                 {
                     case SDLK_ESCAPE:
@@ -157,18 +159,24 @@ void corkboard()
                         t.w = t.w - (t.w * widthToHeightRatio) * deltaSize;
                         t.h = t.h - (t.h * widthToHeightRatio) * deltaSize;
                     break;
-					case SDLK_LEFT:
+                    case SDLK_LEFT:
                         t.x = t.x - 1.0;
-                    break;					
-					case SDLK_RIGHT:
+                    break;
+                    case SDLK_RIGHT:
                         t.x = t.x + 1.0;
-                    break;								
-					case SDLK_UP:
+                    break;
+                    case SDLK_UP:
                         t.y = t.y - 1.0;
-                    break;							
-					case SDLK_DOWN:
+                    break;
+                    case SDLK_DOWN:
                         t.y = t.y + 1.0;
-                    break;												
+                    break;
+                    case SDLK_HOME:
+                        angle = angle - angleSize;
+                    break;
+                    case SDLK_END:
+                        angle = angle + angleSize;
+                    break;
                     default: // lots of keys are not mapped so not a problem
                  }
             }
@@ -229,6 +237,10 @@ void corkboard()
 		//writeln("t = ", t);
         
         SDL_RenderTexture(renderer, texture, null, &t);
+        
+        const SDL_FPoint *Center = null;
+        
+        SDL_RenderTextureRotated(renderer, texture, null, &t, angle, Center, SDL_FLIP_NONE);
 
         SDL_RenderPresent(renderer); // Present the rendered content
     }
