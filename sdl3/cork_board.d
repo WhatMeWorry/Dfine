@@ -32,12 +32,14 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 struct Position { float x; float y; }
 struct Size { float w; float h; }
 
+
+
 struct Swatch
 {
     SDL_Texture *texture;
     SDL_FRect   rect;
     double      angle;       // 0.0-360.0	
-    int         alpha;       // 0-255
+    ubyte       opacity;     // 0-255
 	double      aspectRatio; // ratio of width to height
 	
 	this(SDL_Renderer *renderer, float x, float y, string fileName) 
@@ -48,14 +50,21 @@ struct Swatch
         this.rect.w = surface.w;
 		this.rect.h = surface.h;
 		this.angle = 0.0;
-		this.alpha = 128;
+		this.opacity = 255;  // completely opaque
 		this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
 		this.texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
 		               SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
+					   
+		// enable blending for the texture once after creation.
+		SDL_SetTextureBlendMode(this.texture, SDL_BLENDMODE_BLEND);					   
+					   
 		copySurfaceToTexture(surface, null, this.texture, null);
+		
 		SDL_DestroySurface(surface);
     }
 }
+
+
 
 struct Delta
 {
@@ -92,7 +101,10 @@ struct CorkBoard
     {
         foreach(i, s; this.swatches)
         {
+		    SDL_SetTextureAlphaMod(s.texture, s.opacity);
+		
             SDL_RenderTextureRotated(renderer, s.texture, FULL_TEXTURE, &s.rect, s.angle, CENTER, SDL_FLIP_NONE);
+			
             if (active == i)
             {
                 ubyte r, g, b, a;
@@ -139,6 +151,20 @@ struct CorkBoard
     {
         s.angle = s.angle - delta.rotate;
     }
+	void moreOpaque(ref Swatch s)
+	{
+	    if (s.opacity < 255)
+		{
+		    s.opacity++;
+        }
+	}
+	void lessOpaque(ref Swatch s)
+	{
+	    if (s.opacity > 0)
+        {
+		    s.opacity--;
+        }
+	}	
 }
 
 
@@ -205,6 +231,14 @@ void corkboard()
                     case SDLK_END:
                         board.rotateCounterClockwise(board.swatches[board.active]);
                     break;
+					
+                    case SDLK_PAGEUP:
+                        board.moreOpaque(board.swatches[board.active]);
+                    break;				
+
+                    case SDLK_PAGEDOWN:
+                        board.lessOpaque(board.swatches[board.active]);
+                    break;								
 
                     default: // lots of keys are not mapped so not a problem
                  }
