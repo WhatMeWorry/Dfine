@@ -160,26 +160,40 @@ void corkboard()
 						board.swatches[board.active] = t;						
 						
                     break;
-					/+
-                    case SDLK_LEFT:
-                        t.x = t.x - 1.0;
+					
+                    case SDLK_LEFT:	
+					    Swatch t = board.swatches[board.active];
+						t.rect.x = t.rect.x - 3.0;
+						board.swatches[board.active] = t;
                     break;
+					
                     case SDLK_RIGHT:
-                        t.x = t.x + 1.0;
+ 					    Swatch t = board.swatches[board.active];
+						t.rect.x = t.rect.x + 3.0;
+						board.swatches[board.active] = t;
                     break;
                     case SDLK_UP:
-                        t.y = t.y - 1.0;
+					    Swatch t = board.swatches[board.active];
+						t.rect.y = t.rect.y - 3.0;
+						board.swatches[board.active] = t;
                     break;
                     case SDLK_DOWN:
-                        t.y = t.y + 1.0;
+					    Swatch t = board.swatches[board.active];
+						t.rect.y = t.rect.y + 3.0;
+						board.swatches[board.active] = t;
                     break;
+					
                     case SDLK_HOME:
-                        swatch.angle = swatch.angle - angleSize;
+					    Swatch t = board.swatches[board.active];
+                        t.angle = t.angle - angleSize;
+						board.swatches[board.active] = t;
                     break;
                     case SDLK_END:
-                        swatch.angle = swatch.angle + angleSize;
+					    Swatch t = board.swatches[board.active];
+                        t.angle = t.angle + angleSize;
+						board.swatches[board.active] = t;
                     break;
-					+/
+					
                     default: // lots of keys are not mapped so not a problem
                  }
             }
