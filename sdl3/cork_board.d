@@ -57,6 +57,15 @@ struct Swatch
     }
 }
 
+struct Delta
+{
+    double scale;
+    double rotate;
+    double translate;
+    double opacity;
+}
+
+
 const SDL_FPoint *CENTER = null;
 const SDL_FRect *FULL_TEXTURE = null;
 
@@ -64,8 +73,7 @@ struct CorkBoard
 {
     uint active;  // current swatch for scale, translation, rotation, and opacity
     Swatch[] swatches;
-    double deltaSize;
-    double angleSize;
+    Delta delta;  
 	
 	this(SDL_Renderer *renderer, float x, float y)
 	{
@@ -74,8 +82,10 @@ struct CorkBoard
         this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
         this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
 		this.active = 0;
-        deltaSize = 0.01;
-        this.angleSize = 0.5;
+        delta.scale = 0.01;
+		delta.translate = 3.0;
+		delta.rotate = 0.5; 
+		delta.opacity = 5;
 	}
 
     void renderAllSwatches(SDL_Renderer *renderer)
@@ -97,37 +107,37 @@ struct CorkBoard
     }
     void enlarge(ref Swatch s)
     {
-        s.rect.w = s.rect.w + ((s.rect.w * s.aspectRatio) * this.deltaSize);
-        s.rect.h = s.rect.h + ((s.rect.h * s.aspectRatio) * this.deltaSize);
+        s.rect.w = s.rect.w + ((s.rect.w * s.aspectRatio) * delta.scale);
+        s.rect.h = s.rect.h + ((s.rect.h * s.aspectRatio) * delta.scale);
     }
     void reduce(ref Swatch s)
     {
-        s.rect.w = s.rect.w - ((s.rect.w * s.aspectRatio) * deltaSize);
-        s.rect.h = s.rect.h - ((s.rect.h * s.aspectRatio) * deltaSize);
+        s.rect.w = s.rect.w - ((s.rect.w * s.aspectRatio) * delta.scale);
+        s.rect.h = s.rect.h - ((s.rect.h * s.aspectRatio) * delta.scale);
     }
     void moveLeft(ref Swatch s)
     {
-        s.rect.x = s.rect.x - 3.0;
+        s.rect.x = s.rect.x - delta.translate;
     }
     void moveRight(ref Swatch s)
     {
-        s.rect.x = s.rect.x + 3.0;
+        s.rect.x = s.rect.x + delta.translate;
     }
     void moveUp(ref Swatch s)
     {
-        s.rect.y = s.rect.y - 3.0;
+        s.rect.y = s.rect.y - delta.translate;
     }
     void moveDown(ref Swatch s)
     {
-        s.rect.y = s.rect.y + 3.0;
+        s.rect.y = s.rect.y + delta.translate;
     }
     void rotateClockwise(ref Swatch s)
     {
-        s.angle = s.angle + angleSize;
+        s.angle = s.angle + delta.rotate;
     }
     void rotateCounterClockwise(ref Swatch s)
     {
-        s.angle = s.angle - angleSize;
+        s.angle = s.angle - delta.rotate;
     }
 }
 
