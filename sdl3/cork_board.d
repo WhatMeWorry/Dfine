@@ -1,17 +1,4 @@
 
-// void copying_textures_to_surface()
-// void copying_surface_to_surface()
-// void two_windows_and_surfaces()
-// void change_texture_access()
-// void smallest_renderer_01()
-// void smallest_texture_01a()
-// void smallest_texture_with_rect()
-// void smallest_texture_01b()
-// void no_renderer_02()
-// void surface_no_implicit_scaling_03()
-// void surface_explicit_scaling_04()
-// void texture_implicit_scaling_05()
-
 module cork_board;
 
 import std.stdio : writeln, write, writefln;
@@ -28,10 +15,6 @@ import helper_funcs;
 import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
-
-struct Position { float x; float y; }
-struct Size { float w; float h; }
-
 
 
 struct Swatch
@@ -54,7 +37,7 @@ struct Swatch
 		this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
 		this.texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
 		               SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
-					   
+
 		// enable blending for the texture once after creation.
 		SDL_SetTextureBlendMode(this.texture, SDL_BLENDMODE_BLEND);					   
 					   
