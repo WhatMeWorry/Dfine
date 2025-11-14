@@ -177,9 +177,6 @@ void corkboard()
 
     CorkBoard board = CorkBoard(renderer,  10, 10);    
 
-    writeln("board = ", board);
-
-
     bool running = true;
     while (running)
     {
