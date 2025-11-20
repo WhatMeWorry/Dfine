@@ -15,7 +15,7 @@ import helper_funcs;
 import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
-
+import debug_window;
 
 struct Swatch
 {
@@ -156,9 +156,11 @@ void corkboard()
     SDL_Window   *window;
     SDL_Renderer *renderer;
 
-    createWindowAndRenderer("Corkboard", 2000, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("Corkboard", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     CorkBoard board = CorkBoard(renderer,  10, 10);    
+	
+	DebugWindow debugWin = DebugWindow(SDL_Rect(25, 25, 800, 800)); 
 
     bool running = true;
     while (running)
@@ -179,6 +181,8 @@ void corkboard()
                             board.active = 0;
                         else
                             board.active++;
+						string s = "Current Swatch: " ~ to!string(board.active);
+						debugWin.debugText(15, 15, s);
                     break;
 
                     case SDLK_INSERT:
