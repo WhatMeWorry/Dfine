@@ -1,6 +1,7 @@
 
 module debug_window;
 
+import cork_board;
 import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
@@ -21,45 +22,30 @@ struct Swatch
 {
     SDL_Texture *texture;
     SDL_FRect   rect;
-    double      angle;       // 0.0-360.0	
+    double      angle;       // 0.0-360.0
     ubyte       opacity;     // 0-255
-	double      aspectRatio; // ratio of width to height
-	
-	this(SDL_Renderer *renderer, float x, float y, string fileName) 
-	{
+    double      aspectRatio; // ratio of width to height
+
+    this(SDL_Renderer *renderer, float x, float y, string fileName) 
+    {
         this.rect.x = x;
-		this.rect.y = y;
+        this.rect.y = y;
         SDL_Surface *surface = loadImageToSurface(fileName);
         this.rect.w = surface.w;
-		this.rect.h = surface.h;
-		this.angle = 0.0;
-		this.opacity = 255;  // completely opaque
-		this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
-		this.texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
-		               SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
+        this.rect.h = surface.h;
+        this.angle = 0.0;
+        this.opacity = 255;  // completely opaque
+        this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
+        this.texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
+                       SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
 
-		// enable blending for the texture once after creation.
-		SDL_SetTextureBlendMode(this.texture, SDL_BLENDMODE_BLEND);					   
-					   
-		copySurfaceToTexture(surface, null, this.texture, null);
-		
-		SDL_DestroySurface(surface);
+        // enable blending for the texture once after creation.
+        SDL_SetTextureBlendMode(this.texture, SDL_BLENDMODE_BLEND);
+        copySurfaceToTexture(surface, null, this.texture, null);
+
+        SDL_DestroySurface(surface);
     }
 }
-
-
-
-struct Delta
-{
-    double scale;
-    double rotate;
-    double translate;
-    double opacity;
-}
-
-
-const SDL_FPoint *CENTER = null;
-const SDL_FRect *FULL_TEXTURE = null;
 +/
 
 
@@ -83,7 +69,7 @@ struct DebugWindow
 
         // Set the text color to white
         SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE);
-    
+
         // Render the debug text
         SDL_RenderDebugText(ren, 50.0f, 50.0f, "Hello, world!");
         SDL_RenderDebugText(ren, 50.0f, 70.0f, "This is some debug text.");
@@ -104,6 +90,29 @@ struct DebugWindow
             SDL_RenderDebugText(ren, 3, 50, "***********************************");
                 SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
         SDL_RenderPresent(ren); // Present the rendered content
+    }
+    
+    void displaySwatch(Swatch s, int i)
+    {
+        writeln("s = ", s);
+        // Set the background clear color to yellow
+        SDL_SetRenderDrawColor(ren, 255, 255, 0, SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(ren); // Clear the renderer
+    
+        // Set the text color to black
+        SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderScale(ren, 3, 3);  // where scale_x and scale_y are values greater than 1.
+        
+        string str = "Current Swatch: " ~ to!string(i);
+        SDL_RenderDebugText(ren, 5, 5, str.toStringz);
+        
+        str = "position (x,y): (" ~ to!string(s.rect.x) ~ "," ~ to!string(s.rect.y) ~ ")";
+        SDL_RenderDebugText(ren, 5, 15, str.toStringz);
+        
+        
+        
+         SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
+         SDL_RenderPresent(ren); // Present the rendered content
     }
 
 }

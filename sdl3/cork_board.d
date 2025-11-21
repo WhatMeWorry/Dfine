@@ -21,29 +21,28 @@ struct Swatch
 {
     SDL_Texture *texture;
     SDL_FRect   rect;
-    double      angle;       // 0.0-360.0	
+    double      angle;       // 0.0-360.0
     ubyte       opacity;     // 0-255
-	double      aspectRatio; // ratio of width to height
-	
-	this(SDL_Renderer *renderer, float x, float y, string fileName) 
-	{
+    double      aspectRatio; // ratio of width to height
+
+    this(SDL_Renderer *renderer, float x, float y, string fileName) 
+{
         this.rect.x = x;
-		this.rect.y = y;
+        this.rect.y = y;
         SDL_Surface *surface = loadImageToSurface(fileName);
         this.rect.w = surface.w;
-		this.rect.h = surface.h;
-		this.angle = 0.0;
-		this.opacity = 255;  // completely opaque
-		this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
-		this.texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
-		               SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
+        this.rect.h = surface.h;
+        this.angle = 0.0;
+        this.opacity = 255;  // completely opaque
+        this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
+        this.texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
+                       SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
 
-		// enable blending for the texture once after creation.
-		SDL_SetTextureBlendMode(this.texture, SDL_BLENDMODE_BLEND);					   
-					   
-		copySurfaceToTexture(surface, null, this.texture, null);
-		
-		SDL_DestroySurface(surface);
+        // enable blending for the texture once after creation.
+        SDL_SetTextureBlendMode(this.texture, SDL_BLENDMODE_BLEND);
+
+        copySurfaceToTexture(surface, null, this.texture, null);
+        SDL_DestroySurface(surface);
     }
 }
 
@@ -66,34 +65,34 @@ struct CorkBoard
     uint active;  // current swatch for scale, translation, rotation, and opacity
     Swatch[] swatches;
     Delta delta;  
-	
-	this(SDL_Renderer *renderer, float x, float y)
-	{
+
+    this(SDL_Renderer *renderer, float x, float y)
+    {
         this.swatches ~= Swatch(renderer, 10, 10, "./images/WachA.png");
         this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
         this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
         this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
-		this.active = 0;
+        this.active = 0;
         delta.scale = 0.01;
-		delta.translate = 3.0;
-		delta.rotate = 0.5; 
-		delta.opacity = 5;
-	}
+        delta.translate = 3.0;
+        delta.rotate = 0.5; 
+        delta.opacity = 5;
+    }
 
     void renderAllSwatches(SDL_Renderer *renderer)
     {
         foreach(i, s; this.swatches)
         {
-		    SDL_SetTextureAlphaMod(s.texture, s.opacity);
-		
+            SDL_SetTextureAlphaMod(s.texture, s.opacity);
+
             SDL_RenderTextureRotated(renderer, s.texture, FULL_TEXTURE, &s.rect, s.angle, CENTER, SDL_FLIP_NONE);
-			
+
             if (active == i)
             {
                 ubyte r, g, b, a;
-                SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);  // save off the current color		
+                SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);  // save off the current color
 
-                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // set color to red	
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // set color to red
                 SDL_RenderRect(renderer, &s.rect);                 // draw rectangular outline
 
                 SDL_SetRenderDrawColor(renderer, r, g, b, a);      // restore the previous color
@@ -134,20 +133,20 @@ struct CorkBoard
     {
         s.angle = s.angle - delta.rotate;
     }
-	void moreOpaque(ref Swatch s)
-	{
-	    if (s.opacity < 255)
-		{
-		    s.opacity++;
-        }
-	}
-	void lessOpaque(ref Swatch s)
-	{
-	    if (s.opacity > 0)
+    void moreOpaque(ref Swatch s)
+    {
+        if (s.opacity < 255)
         {
-		    s.opacity--;
+            s.opacity++;
         }
-	}	
+    }
+    void lessOpaque(ref Swatch s)
+    {
+        if (s.opacity > 0)
+        {
+            s.opacity--;
+        }
+    }
 }
 
 
@@ -158,9 +157,9 @@ void corkboard()
 
     createWindowAndRenderer("Corkboard", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
-    CorkBoard board = CorkBoard(renderer,  10, 10);    
-	
-	DebugWindow debugWin = DebugWindow(SDL_Rect(25, 25, 800, 800)); 
+    CorkBoard board = CorkBoard(renderer,  10, 10);
+
+    DebugWindow debugWin = DebugWindow(SDL_Rect(25, 25, 800, 800)); 
 
     bool running = true;
     while (running)
@@ -175,32 +174,33 @@ void corkboard()
                     case SDLK_ESCAPE:
                         running = false;
                     break;
-                    
+
                     case SDLK_TAB:
                         if (board.active == (board.swatches.length - 1))
                             board.active = 0;
                         else
                             board.active++;
-						string s = "Current Swatch: " ~ to!string(board.active);
-						debugWin.debugText(15, 15, s);
+                        //string s = "Current Swatch: " ~ to!string(board.active);
+                        //debugWin.debugText(15, 15, s);
+                        //debugWin.displaySwatch(board.swatches[board.active], board.active);
                     break;
 
                     case SDLK_INSERT:
                         board.enlarge(board.swatches[board.active]);
                     break;
-                    
+
                     case SDLK_DELETE:
                         board.reduce(board.swatches[board.active]);
                     break;
 
-                    case SDLK_LEFT:	
+                    case SDLK_LEFT:
                         board.moveLeft(board.swatches[board.active]);
                     break;
 
                     case SDLK_RIGHT:
                         board.moveRight(board.swatches[board.active]);
                     break;
-                    
+
                     case SDLK_UP:
                         board.moveUp(board.swatches[board.active]);
                     break;
@@ -211,26 +211,27 @@ void corkboard()
                     case SDLK_HOME:
                         board.rotateClockwise(board.swatches[board.active]);
                     break;
-                    
+
                     case SDLK_END:
                         board.rotateCounterClockwise(board.swatches[board.active]);
                     break;
-					
+
                     case SDLK_PAGEUP:
                         board.moreOpaque(board.swatches[board.active]);
-                    break;				
+                    break;
 
                     case SDLK_PAGEDOWN:
                         board.lessOpaque(board.swatches[board.active]);
-                    break;								
+                    break;
 
                     default: // lots of keys are not mapped so not a problem
                  }
+                 debugWin.displaySwatch(board.swatches[board.active], board.active);
             }
         }
 
         SDL_RenderClear(renderer); // Clear the renderer
-        
+
         board.renderAllSwatches(renderer);
 
         SDL_RenderPresent(renderer); // Present the rendered content
