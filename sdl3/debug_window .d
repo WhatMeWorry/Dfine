@@ -68,38 +68,42 @@ struct DebugWindow
 
     SDL_Window   *win;
     SDL_Renderer *ren;
-	
-	this(SDL_Rect rect)
-	{
+
+    this(SDL_Rect rect)
+    {
         createWindowAndRenderer("Debug Window", rect.w, rect.h, cast(SDL_WindowFlags) 0, &win, &ren);
 
-        SDL_SetWindowPosition(win, rect.x, rect.y); 	
-		
-		SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);  // must be down before SDL_RenderClear
-		
-		// Set the background clear color to blue
+        SDL_SetWindowPosition(win, rect.x, rect.y);
+
+        SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);  // must be down before SDL_RenderClear
+
+        // Set the background clear color to blue
         SDL_SetRenderDrawColor(ren, 0, 0, 128, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(ren);
-		
-        // Set the text color (e.g., white)
+
+        // Set the text color to white
         SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE);
     
         // Render the debug text
         SDL_RenderDebugText(ren, 50.0f, 50.0f, "Hello, world!");
         SDL_RenderDebugText(ren, 50.0f, 70.0f, "This is some debug text.");
-		
+
         SDL_RenderPresent(ren); // Present the rendered content
-	}
+    }
 
     void debugText(int x, int y, string str)
     {
-        writeln("in debugText ", str);
-  
+        // Set the background clear color to green
+        SDL_SetRenderDrawColor(ren, 0, 128, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(ren); // Clear the renderer
+        
+            // Set the text color to black
+            SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
+               SDL_SetRenderScale(ren, 3, 3);  // where scale_x and scale_y are values greater than 1.
             SDL_RenderDebugText(ren, x, y, str.toStringz);
-			SDL_RenderDebugText(ren, 3, 50, "***********************************");
-        SDL_RenderPresent(ren); // Present the rendered content		
-		
+            SDL_RenderDebugText(ren, 3, 50, "***********************************");
+                SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
+        SDL_RenderPresent(ren); // Present the rendered content
     }
 
 }
