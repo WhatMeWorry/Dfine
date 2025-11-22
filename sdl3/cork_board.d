@@ -16,6 +16,7 @@ import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
 import debug_window;
+import menu_window;
 
 struct Swatch
 {
@@ -63,6 +64,7 @@ const SDL_FRect *FULL_TEXTURE = null;
 struct CorkBoard
 {
     uint active;  // current swatch for scale, translation, rotation, and opacity
+	bool borderActive;
     Swatch[] swatches;
     Delta delta;  
 
@@ -77,6 +79,7 @@ struct CorkBoard
         delta.translate = 3.0;
         delta.rotate = 0.5; 
         delta.opacity = 5;
+		borderActive = true;
     }
 
     void renderAllSwatches(SDL_Renderer *renderer)
@@ -87,7 +90,7 @@ struct CorkBoard
 
             SDL_RenderTextureRotated(renderer, s.texture, FULL_TEXTURE, &s.rect, s.angle, CENTER, SDL_FLIP_NONE);
 
-            if (active == i)
+            if ((active == i) & borderActive)
             {
                 ubyte r, g, b, a;
                 SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);  // save off the current color
@@ -197,7 +200,9 @@ void corkboard()
 
     CorkBoard board = CorkBoard(renderer,  10, 10);
 
-    DebugWindow debugWin = DebugWindow(SDL_Rect(25, 25, 1000, 1000)); 
+    DebugWindow debugWin = DebugWindow(SDL_Rect(25, 25, 1000, 1000));
+	
+	MenuWindow menuWin = MenuWindow(SDL_Rect(100, 100, 1000, 1000));
 
     bool running = true;
     while (running)
@@ -281,13 +286,25 @@ void corkboard()
 
                     case SDLK_F6:
                         board.decreaseDeltaOpacity(board.delta.opacity);
-                    break;					
+                    break;
+					
+                    case SDLK_F7:
+                        board.increaseDeltaRotate(board.delta.rotate);
+                    break;
+
+                    case SDLK_F8:
+                        board.decreaseDeltaRotate(board.delta.rotate);
+                    break;						
+					
+                    case SDLK_F9:
+                        board.borderActive = !board.borderActive;
+                    break;										
 					
 					
                     default: // lots of keys are not mapped so not a problem
                  }
-                 //debugWin.displaySwatch(board.swatches[board.active], board.active);
-                 debugWin.displayEntireCorkBoard(board);
+                 debugWin.displaySwatch(board.swatches[board.active], board.active);
+                 //debugWin.displayEntireCorkBoard(board);
             }
         }
 
