@@ -302,9 +302,12 @@ void corkboard()
 					
 					
                     default: // lots of keys are not mapped so not a problem
-                 }
-                 debugWin.displaySwatch(board.swatches[board.active], board.active);
-                 //debugWin.displayEntireCorkBoard(board);
+                }
+                debugWin.displaySwatch(board.swatches[board.active], board.active);
+				 
+                //debugWin.displayEntireCorkBoard(board);
+				 
+				menuWin.displayHelpMenu(board.delta);
             }
         }
 
