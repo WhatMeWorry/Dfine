@@ -159,7 +159,7 @@ void corkboard()
 
     CorkBoard board = CorkBoard(renderer,  10, 10);
 
-    DebugWindow debugWin = DebugWindow(SDL_Rect(25, 25, 800, 800)); 
+    DebugWindow debugWin = DebugWindow(SDL_Rect(25, 25, 1000, 1000)); 
 
     bool running = true;
     while (running)
@@ -180,9 +180,6 @@ void corkboard()
                             board.active = 0;
                         else
                             board.active++;
-                        //string s = "Current Swatch: " ~ to!string(board.active);
-                        //debugWin.debugText(15, 15, s);
-                        //debugWin.displaySwatch(board.swatches[board.active], board.active);
                     break;
 
                     case SDLK_INSERT:

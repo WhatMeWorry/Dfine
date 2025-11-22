@@ -17,41 +17,9 @@ import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
 
-/+
-struct Swatch
-{
-    SDL_Texture *texture;
-    SDL_FRect   rect;
-    double      angle;       // 0.0-360.0
-    ubyte       opacity;     // 0-255
-    double      aspectRatio; // ratio of width to height
-
-    this(SDL_Renderer *renderer, float x, float y, string fileName) 
-    {
-        this.rect.x = x;
-        this.rect.y = y;
-        SDL_Surface *surface = loadImageToSurface(fileName);
-        this.rect.w = surface.w;
-        this.rect.h = surface.h;
-        this.angle = 0.0;
-        this.opacity = 255;  // completely opaque
-        this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
-        this.texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
-                       SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
-
-        // enable blending for the texture once after creation.
-        SDL_SetTextureBlendMode(this.texture, SDL_BLENDMODE_BLEND);
-        copySurfaceToTexture(surface, null, this.texture, null);
-
-        SDL_DestroySurface(surface);
-    }
-}
-+/
-
 
 struct DebugWindow
 {
-
     SDL_Window   *win;
     SDL_Renderer *ren;
 
@@ -91,10 +59,9 @@ struct DebugWindow
                 SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
         SDL_RenderPresent(ren); // Present the rendered content
     }
-    
+
     void displaySwatch(Swatch s, int i)
     {
-        writeln("s = ", s);
         // Set the background clear color to yellow
         SDL_SetRenderDrawColor(ren, 255, 255, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(ren); // Clear the renderer
@@ -109,10 +76,17 @@ struct DebugWindow
         str = "position (x,y): (" ~ to!string(s.rect.x) ~ "," ~ to!string(s.rect.y) ~ ")";
         SDL_RenderDebugText(ren, 5, 15, str.toStringz);
         
+        str = "width x Height: w x h: " ~ to!string(s.rect.w) ~ " x " ~ to!string(s.rect.h) ~ ")";
+        SDL_RenderDebugText(ren, 5, 25, str.toStringz);
         
+        str = "angle: " ~ to!string(s.angle);
+        SDL_RenderDebugText(ren, 5, 35, str.toStringz);
         
-         SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
-         SDL_RenderPresent(ren); // Present the rendered content
+        str = "opacity: " ~ to!string(s.opacity);
+        SDL_RenderDebugText(ren, 5, 45, str.toStringz);
+        
+        SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
+        SDL_RenderPresent(ren); // Present the rendered content
     }
 
 }
