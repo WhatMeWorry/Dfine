@@ -69,10 +69,10 @@ struct CorkBoard
     this(SDL_Renderer *renderer, float x, float y)
     {
         this.swatches ~= Swatch(renderer, 10, 10, "./images/WachA.png");
-        this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
-        this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
-        this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
-        this.active = 0;
+        //this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
+        //this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
+        //this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
+        //this.active = 0;
         delta.scale = 0.01;
         delta.translate = 3.0;
         delta.rotate = 0.5; 
@@ -147,6 +147,44 @@ struct CorkBoard
             s.opacity--;
         }
     }
+	void increaseDeltaScale(ref double dScale)
+    {
+        dScale = dScale * 2.0;
+    }     	
+	void decreaseDeltaScale(ref double dScale)
+    {
+        dScale = dScale / 2.0;
+    }     		
+	void increaseDeltaTranslate(ref double dTrans)
+    {
+        dTrans = dTrans * 2.0;
+    }     	
+	void decreaseDeltaTranslate(ref double dTrans)
+    {
+        dTrans = dTrans / 2.0;
+    } 
+	void increaseDeltaRotate(ref double dRotate)
+    {
+        dRotate = dRotate * 2.0;
+    }     	
+	void decreaseDeltaRotate(ref double dRotate)
+    {
+        dRotate = dRotate / 2.0;
+    } 
+	void increaseDeltaOpacity(ref double dOpacity)
+    {
+        dOpacity = dOpacity * 2.0;
+    }     	
+	void decreaseDeltaOpacity(ref double dOpacity)
+    {
+        dOpacity = dOpacity / 2.0;
+    } 	
+
+
+
+
+
+	
 }
 
 
@@ -221,9 +259,35 @@ void corkboard()
                         board.lessOpaque(board.swatches[board.active]);
                     break;
 
+                    case SDLK_F1:
+                        board.increaseDeltaScale(board.delta.scale);
+                    break;
+
+                    case SDLK_F2:
+                        board.decreaseDeltaScale(board.delta.scale);
+                    break;
+					
+                    case SDLK_F3:
+                        board.increaseDeltaTranslate(board.delta.translate);
+                    break;
+
+                    case SDLK_F4:
+                        board.decreaseDeltaTranslate(board.delta.translate);
+                    break;					
+					
+                    case SDLK_F5:
+                        board.increaseDeltaOpacity(board.delta.opacity);
+                    break;
+
+                    case SDLK_F6:
+                        board.decreaseDeltaOpacity(board.delta.opacity);
+                    break;					
+					
+					
                     default: // lots of keys are not mapped so not a problem
                  }
-                 debugWin.displaySwatch(board.swatches[board.active], board.active);
+                 //debugWin.displaySwatch(board.swatches[board.active], board.active);
+                 debugWin.displayEntireCorkBoard(board);
             }
         }
 

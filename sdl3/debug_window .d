@@ -51,12 +51,12 @@ struct DebugWindow
         SDL_SetRenderDrawColor(ren, 0, 128, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(ren); // Clear the renderer
         
-            // Set the text color to black
-            SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
-               SDL_SetRenderScale(ren, 3, 3);  // where scale_x and scale_y are values greater than 1.
-            SDL_RenderDebugText(ren, x, y, str.toStringz);
-            SDL_RenderDebugText(ren, 3, 50, "***********************************");
-                SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
+        // Set the text color to black
+        SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderScale(ren, 3, 3);  // where scale_x and scale_y are values greater than 1.
+        SDL_RenderDebugText(ren, x, y, str.toStringz);
+		
+        SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
         SDL_RenderPresent(ren); // Present the rendered content
     }
 
@@ -68,7 +68,7 @@ struct DebugWindow
     
         // Set the text color to black
         SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
-        SDL_SetRenderScale(ren, 3, 3);  // where scale_x and scale_y are values greater than 1.
+        SDL_SetRenderScale(ren, 2, 2);  // where scale_x and scale_y are values greater than 1.
         
         string str = "Current Swatch: " ~ to!string(i);
         SDL_RenderDebugText(ren, 5, 5, str.toStringz);
@@ -84,9 +84,43 @@ struct DebugWindow
         
         str = "opacity: " ~ to!string(s.opacity);
         SDL_RenderDebugText(ren, 5, 45, str.toStringz);
-        
+
         SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
         SDL_RenderPresent(ren); // Present the rendered content
     }
+
+
+    void displayEntireCorkBoard(CorkBoard b)
+    {
+        // Set the background clear color to yellow
+        SDL_SetRenderDrawColor(ren, 255, 255, 0, SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(ren); // Clear the renderer
+    
+        // Set the text color to black
+        SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderScale(ren, 2, 2);  // where scale_x and scale_y are values greater than 1.
+
+        string str = "delta.scale: " ~ to!string(b.delta.scale);
+        SDL_RenderDebugText(ren, 5, 5, str.toStringz);
+		
+        str = "delta.translate: " ~ to!string(b.delta.translate);
+        SDL_RenderDebugText(ren, 5, 15, str.toStringz);
+        
+        str = "delta.opacity: " ~ to!string(b.delta.opacity);
+        SDL_RenderDebugText(ren, 5, 25, str.toStringz);
+        
+        str = "delta.rotate: " ~ to!string(b.delta.rotate);
+        SDL_RenderDebugText(ren, 5, 35, str.toStringz);
+        
+        SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
+        SDL_RenderPresent(ren); // Present the rendered content
+    }	
+	
+	
+	
+	
+	
+	
+	
 
 }
