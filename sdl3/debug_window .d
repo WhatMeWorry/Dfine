@@ -106,7 +106,7 @@ struct DebugWindow
         str = "delta.translate: " ~ to!string(b.delta.translate);
         SDL_RenderDebugText(ren, 5, 15, str.toStringz);
         
-        str = "delta.opacity: " ~ to!string(b.delta.opacity);
+        str = "delta.opacity: " ~ to!string(b.delta.opaque);
         SDL_RenderDebugText(ren, 5, 25, str.toStringz);
         
         str = "delta.rotate: " ~ to!string(b.delta.rotate);

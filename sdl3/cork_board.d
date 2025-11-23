@@ -16,7 +16,7 @@ import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
 import debug_window;
-import menu_window;
+import help_window;
 
 struct Swatch
 {
@@ -54,7 +54,7 @@ struct Delta
     double scale;
     double rotate;
     double translate;
-    double opacity;
+    double opaque;
 }
 
 
@@ -78,7 +78,7 @@ struct CorkBoard
         delta.scale = 0.01;
         delta.translate = 3.0;
         delta.rotate = 0.5; 
-        delta.opacity = 5;
+        delta.opaque = 5;
 		borderActive = true;
     }
 
@@ -202,7 +202,7 @@ void corkboard()
 
     DebugWindow debugWin = DebugWindow(SDL_Rect(25, 25, 1000, 1000));
 	
-	MenuWindow menuWin = MenuWindow(SDL_Rect(100, 100, 1000, 1000));
+	HelpWindow helpWin = HelpWindow(SDL_Rect(100, 100, 1000, 1000));
 
     bool running = true;
     while (running)
@@ -281,24 +281,25 @@ void corkboard()
                     break;					
 					
                     case SDLK_F5:
-                        board.increaseDeltaOpacity(board.delta.opacity);
-                    break;
-
-                    case SDLK_F6:
-                        board.decreaseDeltaOpacity(board.delta.opacity);
-                    break;
-					
-                    case SDLK_F7:
                         board.increaseDeltaRotate(board.delta.rotate);
                     break;
-
-                    case SDLK_F8:
+					
+                    case SDLK_F6:
                         board.decreaseDeltaRotate(board.delta.rotate);
                     break;						
+
+                    case SDLK_F7:
+                        board.increaseDeltaOpacity(board.delta.opaque);
+                    break;
+					
+                    case SDLK_F8:
+                        board.decreaseDeltaOpacity(board.delta.opaque);
+                    break;
 					
                     case SDLK_F9:
                         board.borderActive = !board.borderActive;
-                    break;										
+                    break;								
+		
 					
 					
                     default: // lots of keys are not mapped so not a problem
@@ -307,7 +308,7 @@ void corkboard()
 				 
                 //debugWin.displayEntireCorkBoard(board);
 				 
-				menuWin.displayHelpMenu(board.delta);
+				helpWin.displayHelpMenu(board.delta);
             }
         }
 
