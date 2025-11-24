@@ -64,7 +64,7 @@ const SDL_FRect *FULL_TEXTURE = null;
 struct CorkBoard
 {
     uint active;  // current swatch for scale, translation, rotation, and opacity
-	bool borderActive;
+    bool borderActive;
     Swatch[] swatches;
     Delta delta;  
 
@@ -79,7 +79,7 @@ struct CorkBoard
         delta.translate = 3.0;
         delta.rotate = 0.5; 
         delta.opaque = 5;
-		borderActive = true;
+        borderActive = true;
     }
 
     void renderAllSwatches(SDL_Renderer *renderer)
@@ -150,44 +150,39 @@ struct CorkBoard
             s.opacity--;
         }
     }
-	void increaseDeltaScale(ref double dScale)
+    void increaseDeltaScale(ref double dScale)
     {
         dScale = dScale * 2.0;
-    }     	
-	void decreaseDeltaScale(ref double dScale)
+    }
+    void decreaseDeltaScale(ref double dScale)
     {
         dScale = dScale / 2.0;
-    }     		
-	void increaseDeltaTranslate(ref double dTrans)
+    }
+    void increaseDeltaTranslate(ref double dTrans)
     {
         dTrans = dTrans * 2.0;
-    }     	
-	void decreaseDeltaTranslate(ref double dTrans)
+    }
+    void decreaseDeltaTranslate(ref double dTrans)
     {
         dTrans = dTrans / 2.0;
-    } 
-	void increaseDeltaRotate(ref double dRotate)
+    }
+    void increaseDeltaRotate(ref double dRotate)
     {
         dRotate = dRotate * 2.0;
-    }     	
-	void decreaseDeltaRotate(ref double dRotate)
+    }
+    void decreaseDeltaRotate(ref double dRotate)
     {
         dRotate = dRotate / 2.0;
-    } 
-	void increaseDeltaOpacity(ref double dOpacity)
+    }
+    void increaseDeltaOpacity(ref double dOpacity)
     {
         dOpacity = dOpacity * 2.0;
-    }     	
-	void decreaseDeltaOpacity(ref double dOpacity)
+    }
+    void decreaseDeltaOpacity(ref double dOpacity)
     {
         dOpacity = dOpacity / 2.0;
-    } 	
+    } 
 
-
-
-
-
-	
 }
 
 
@@ -201,8 +196,9 @@ void corkboard()
     CorkBoard board = CorkBoard(renderer,  10, 10);
 
     DebugWindow debugWin = DebugWindow(SDL_Rect(25, 25, 1000, 1000));
-	
-	HelpWindow helpWin = HelpWindow(SDL_Rect(100, 100, 1000, 1000));
+
+    HelpWindow helpWin = HelpWindow(SDL_Rect(100, 100, 1000, 1000));
+    helpWin.displayHelpMenu(board.delta);
 
     bool running = true;
     while (running)
@@ -271,44 +267,42 @@ void corkboard()
                     case SDLK_F2:
                         board.decreaseDeltaScale(board.delta.scale);
                     break;
-					
+
                     case SDLK_F3:
                         board.increaseDeltaTranslate(board.delta.translate);
                     break;
 
                     case SDLK_F4:
                         board.decreaseDeltaTranslate(board.delta.translate);
-                    break;					
-					
+                    break;
+
                     case SDLK_F5:
                         board.increaseDeltaRotate(board.delta.rotate);
                     break;
-					
+
                     case SDLK_F6:
                         board.decreaseDeltaRotate(board.delta.rotate);
-                    break;						
+                    break;
 
                     case SDLK_F7:
                         board.increaseDeltaOpacity(board.delta.opaque);
                     break;
-					
+
                     case SDLK_F8:
                         board.decreaseDeltaOpacity(board.delta.opaque);
                     break;
-					
+
                     case SDLK_F9:
                         board.borderActive = !board.borderActive;
-                    break;								
-		
-					
-					
+                    break;
+
                     default: // lots of keys are not mapped so not a problem
                 }
                 debugWin.displaySwatch(board.swatches[board.active], board.active);
-				 
+
                 //debugWin.displayEntireCorkBoard(board);
-				 
-				helpWin.displayHelpMenu(board.delta);
+
+                helpWin.displayHelpMenu(board.delta);
             }
         }
 
