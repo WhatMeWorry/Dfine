@@ -16,6 +16,7 @@ import helper_funcs;
 import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
+import std.conv : roundTo;
 
 
 struct DebugWindow
@@ -90,8 +91,9 @@ struct DebugWindow
     }
 
 
-    void displayEntireCorkBoard(CorkBoard b)
+    void displayAllSwatches(CorkBoard b)
     {
+	    string str;
         // Set the background clear color to yellow
         SDL_SetRenderDrawColor(ren, 255, 255, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(ren); // Clear the renderer
@@ -100,17 +102,34 @@ struct DebugWindow
         SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_SetRenderScale(ren, 2, 2);  // where scale_x and scale_y are values greater than 1.
 
-        string str = "delta.scale: " ~ to!string(b.delta.scale);
-        SDL_RenderDebugText(ren, 5, 5, str.toStringz);
-		
-        str = "delta.translate: " ~ to!string(b.delta.translate);
-        SDL_RenderDebugText(ren, 5, 15, str.toStringz);
+        int v = 0;
+        foreach (int i, s; b.swatches)
+		{
+		    v = i * 50;
+			
+            SDL_RenderDebugText(ren, 5, v+5, toStringz("Swatch: " ~ to!string(i)));
+			
+			if (b.active == i)
+			{
+			    SDL_RenderDebugText(ren, 85, v+5, toStringz("**"));   
+			}
+
+            str = "position (x,y): (" ~ to!string(s.rect.x) ~ "," ~ to!string(s.rect.y) ~ ")";
+            SDL_RenderDebugText(ren, 5, v+15, str.toStringz());
         
-        str = "delta.opacity: " ~ to!string(b.delta.opaque);
-        SDL_RenderDebugText(ren, 5, 25, str.toStringz);
-        
-        str = "delta.rotate: " ~ to!string(b.delta.rotate);
-        SDL_RenderDebugText(ren, 5, 35, str.toStringz);
+            int roundW = roundTo!int(s.rect.w);	
+            int roundH = roundTo!int(s.rect.h);				
+		    str = "width x Height: w x h: " ~ to!string(roundW) ~ "x" ~ to!string(roundH) ~ ")";
+            SDL_RenderDebugText(ren, 5, v+25, str.toStringz);
+			
+		    //str = "opacity (0-255): " ~ to!string(s.opacity);
+		    SDL_RenderDebugText(ren, 5, v+35, toStringz("opacity (0-255): " ~ to!string(s.opacity)));
+			
+			//str = "angle (degrees): " ~ to!string(s.angle);
+			SDL_RenderDebugText(ren, 5, v+45, toStringz("angle (degrees): " ~ to!string(s.angle)));
+
+        }
+
         
         SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
         SDL_RenderPresent(ren); // Present the rendered content

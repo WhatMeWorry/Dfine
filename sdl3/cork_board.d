@@ -71,8 +71,8 @@ struct CorkBoard
     this(SDL_Renderer *renderer, float x, float y)
     {
         this.swatches ~= Swatch(renderer, 10, 10, "./images/WachA.png");
-        //this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
-        //this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
+        this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
+        this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
         //this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
         //this.active = 0;
         delta.scale = 0.01;
@@ -298,9 +298,9 @@ void corkboard()
 
                     default: // lots of keys are not mapped so not a problem
                 }
-                debugWin.displaySwatch(board.swatches[board.active], board.active);
+                //debugWin.displaySwatch(board.swatches[board.active], board.active);
 
-                //debugWin.displayEntireCorkBoard(board);
+                debugWin.displayAllSwatches(board);
 
                 helpWin.displayHelpMenu(board.delta);
             }
