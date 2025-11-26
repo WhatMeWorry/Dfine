@@ -65,6 +65,7 @@ struct CorkBoard
 {
     uint active;  // current swatch for scale, translation, rotation, and opacity
     bool borderActive;
+	bool locked;  // lock all the swatches together so they will me moved as one
     Swatch[] swatches;
     Delta delta;  
 
@@ -72,7 +73,7 @@ struct CorkBoard
     {
         this.swatches ~= Swatch(renderer, 10, 10, "./images/WachA.png");
         this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
-        this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
+        //this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
         //this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
         //this.active = 0;
         delta.scale = 0.01;
@@ -80,6 +81,7 @@ struct CorkBoard
         delta.rotate = 0.5; 
         delta.opaque = 5;
         borderActive = true;
+		locked = false;
     }
 
     void renderAllSwatches(SDL_Renderer *renderer)
@@ -116,18 +118,46 @@ struct CorkBoard
     {
         s.rect.x = s.rect.x - delta.translate;
     }
+    void moveAllSwatchesLeft(ref Swatch[] swatches)
+    {
+        foreach (int i, ref s; swatches)
+		{	
+            s.rect.x = s.rect.x - delta.translate;
+		}
+    }		
     void moveRight(ref Swatch s)
     {
         s.rect.x = s.rect.x + delta.translate;
     }
+    void moveAllSwatchesRight(ref Swatch[] swatches)
+    {
+        foreach (int i, ref s; swatches)
+		{	
+            s.rect.x = s.rect.x + delta.translate;
+		}
+    }	
     void moveUp(ref Swatch s)
     {
         s.rect.y = s.rect.y - delta.translate;
     }
+	void moveAllSwatchesUp(ref Swatch[] swatches)
+    {
+        foreach (int i, ref s; swatches)
+		{	
+            s.rect.y = s.rect.y - delta.translate;
+		}
+    }		
     void moveDown(ref Swatch s)
     {
         s.rect.y = s.rect.y + delta.translate;
     }
+	void moveAllSwatchesDown(ref Swatch[] swatches)
+    {
+        foreach (int i, ref s; swatches)
+		{	
+            s.rect.y = s.rect.y + delta.translate;
+		}
+    }		
     void rotateClockwise(ref Swatch s)
     {
         s.angle = s.angle + delta.rotate;
@@ -191,7 +221,7 @@ void corkboard()
     SDL_Window   *window;
     SDL_Renderer *renderer;
 
-    createWindowAndRenderer("Corkboard", 1000, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("Corkboard", 2500, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     CorkBoard board = CorkBoard(renderer,  10, 10);
 
@@ -230,18 +260,31 @@ void corkboard()
                     break;
 
                     case SDLK_LEFT:
-                        board.moveLeft(board.swatches[board.active]);
+                        if (board.locked)
+                            board.moveAllSwatchesLeft(board.swatches);
+                        else
+                            board.moveLeft(board.swatches[board.active]);
                     break;
 
                     case SDLK_RIGHT:
-                        board.moveRight(board.swatches[board.active]);
+                        if (board.locked)
+                            board.moveAllSwatchesRight(board.swatches);
+                        else
+                            board.moveRight(board.swatches[board.active]);
                     break;
 
                     case SDLK_UP:
-                        board.moveUp(board.swatches[board.active]);
+                        if (board.locked)
+                            board.moveAllSwatchesUp(board.swatches);
+                        else					
+                            board.moveUp(board.swatches[board.active]);
                     break;
+					
                     case SDLK_DOWN:
-                        board.moveDown(board.swatches[board.active]);
+                        if (board.locked)
+                            board.moveAllSwatchesDown(board.swatches);
+                        else										
+                            board.moveDown(board.swatches[board.active]);
                     break;
 
                     case SDLK_HOME:
@@ -295,6 +338,10 @@ void corkboard()
                     case SDLK_F9:
                         board.borderActive = !board.borderActive;
                     break;
+					
+                    case SDLK_F10:
+                        board.locked = !board.locked;
+                    break;					
 
                     default: // lots of keys are not mapped so not a problem
                 }

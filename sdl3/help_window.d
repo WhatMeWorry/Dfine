@@ -70,15 +70,17 @@ struct HelpWindow
 
         SDL_RenderDebugText(ren, 5.0f, 150.0f, "tab = advance to next swatch");
         SDL_RenderDebugText(ren, 5.0f, 160.0f, "F9 = toggle border of current swatch");
+		
+        SDL_RenderDebugText(ren, 5.0f, 170.0f, "F10 = all swatches are locked (Move together)");		
 
-        SDL_RenderDebugText(ren, 5.0f, 180.0f, "F1 = increase delta scale");
-        SDL_RenderDebugText(ren, 5.0f, 190.0f, "F2 = decrease delta scale");
-        SDL_RenderDebugText(ren, 5.0f, 200.0f, "F3 = increase delta translate");
-        SDL_RenderDebugText(ren, 5.0f, 210.0f, "F4 = decrease delta translate");
-        SDL_RenderDebugText(ren, 5.0f, 240.0f, "F5 = increase delta rotation");
-        SDL_RenderDebugText(ren, 5.0f, 250.0f, "F6 = decrease delta rotation");
-        SDL_RenderDebugText(ren, 5.0f, 220.0f, "F7 = increase delta opacity");
-        SDL_RenderDebugText(ren, 5.0f, 230.0f, "F8 = decrease delta opacity");
+        SDL_RenderDebugText(ren, 5.0f, 190.0f, "F1 = increase delta scale");
+        SDL_RenderDebugText(ren, 5.0f, 200.0f, "F2 = decrease delta scale");
+        SDL_RenderDebugText(ren, 5.0f, 210.0f, "F3 = increase delta translate");
+        SDL_RenderDebugText(ren, 5.0f, 220.0f, "F4 = decrease delta translate");
+        SDL_RenderDebugText(ren, 5.0f, 230.0f, "F5 = increase delta rotation");
+        SDL_RenderDebugText(ren, 5.0f, 240.0f, "F6 = decrease delta rotation");
+        SDL_RenderDebugText(ren, 5.0f, 250.0f, "F7 = increase delta opacity");
+        SDL_RenderDebugText(ren, 5.0f, 260.0f, "F8 = decrease delta opacity");
 
         SDL_RenderPresent(ren); // Present the rendered content
     }
