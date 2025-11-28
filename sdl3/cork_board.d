@@ -27,7 +27,7 @@ struct Swatch
     double      aspectRatio; // ratio of width to height
 
     this(SDL_Renderer *renderer, float x, float y, string fileName) 
-{
+    {
         this.rect.x = x;
         this.rect.y = y;
         SDL_Surface *surface = loadImageToSurface(fileName);
@@ -213,7 +213,68 @@ struct CorkBoard
         dOpacity = dOpacity / 2.0;
     } 
 
+    SDL_FRect calculateRectThatEncompassesAllSwatches()
+    {
+        float min_x = swatches[0].rect.x;
+        foreach (s; swatches)
+        {
+            if (s.rect.x < min_x)
+                min_x = s.rect.x;
+        }	
+		
+		float min_y = swatches[0].rect.y;
+        foreach (s; swatches)
+        {
+            if (s.rect.y < min_y)
+                min_y = s.rect.y;
+        }	
+		
+		float max_w = swatches[0].rect.x + swatches[0].rect.w;
+        foreach (s; swatches)
+        {
+            if ((s.rect.x + s.rect.w) > max_w)
+                max_w = s.rect.x + s.rect.w;
+        }			
+		
+		float max_h = swatches[0].rect.y + swatches[0].rect.h;
+        foreach (s; swatches)
+        {
+            if ((s.rect.y + s.rect.h) > max_h)
+            max_h = s.rect.y + s.rect.h;
+        }					
+		
+        writeln("min_x = ", min_x);
+        writeln("min_y = ", min_y);
+        writeln("max_w = ", max_w);
+        writeln("max_h = ", max_h);
+		
+		SDL_FRect rect;
+		
+		rect.x = min_x;
+		rect.y = min_y;
+        rect.w = max_w;
+        rect.h = max_h;
+		
+        return rect;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
 
 
 void corkboard()
@@ -221,7 +282,7 @@ void corkboard()
     SDL_Window   *window;
     SDL_Renderer *renderer;
 
-    createWindowAndRenderer("Corkboard", 2500, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("Corkboard", 3600, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     CorkBoard board = CorkBoard(renderer,  10, 10);
 
@@ -341,8 +402,18 @@ void corkboard()
 					
                     case SDLK_F10:
                         board.locked = !board.locked;
-                    break;					
+                    break;	
 
+                    case SDLK_F12:
+                        SDL_FRect rect = board.calculateRectThatEncompassesAllSwatches();	
+                        writeln("rect = ", rect);
+						int width = cast (int) (rect.w - rect.x);  // rect.w represents the far left side of the rect (not het width)
+						int height = cast (int) (rect.h - rect.y); // rect.h represent the bottom side to the rect (not the height)
+						writeln("width = ", width);
+						writeln("height = ", height);
+						SDL_Surface *bigSurface = createSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
+					break;
+					
                     default: // lots of keys are not mapped so not a problem
                 }
                 //debugWin.displaySwatch(board.swatches[board.active], board.active);
