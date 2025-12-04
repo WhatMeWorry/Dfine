@@ -259,7 +259,16 @@ struct CorkBoard
 	}
 
 
-
+    SDL_Point moveAllSwatchesRelativeToUpperLeftCorner(SDL_FRect rect)
+    {
+        SDL_Point offsetVector;                     // We need to move all swatches relative to (0,0) origin
+        offsetVector.x = cast(int) (0.0 - rect.x);  // when we save the contents. Can't use negative coordinates
+        offsetVector.y = cast(int) (0.0 - rect.y);  // for swatches laying outside of corkboard and not waste space
+        return offsetVector;                        // for swatches inside of the corkboard not on its edges.
+	}	                                            
+	
+	
+	
 
 
 
@@ -405,13 +414,19 @@ void corkboard()
                     break;	
 
                     case SDLK_F12:
-                        SDL_FRect rect = board.calculateRectThatEncompassesAllSwatches();	
+                        SDL_FRect rect = board.calculateRectThatEncompassesAllSwatches();
+						SDL_Point offsetVector = board.moveAllSwatchesRelativeToUpperLeftCorner(rect);
+						
+						writeln("offsetVector = ", offsetVector);
+						
+						/+
                         writeln("rect = ", rect);
 						int width = cast (int) (rect.w - rect.x);  // rect.w represents the far left side of the rect (not het width)
 						int height = cast (int) (rect.h - rect.y); // rect.h represent the bottom side to the rect (not the height)
 						writeln("width = ", width);
 						writeln("height = ", height);
 						SDL_Surface *bigSurface = createSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
+						+/
 					break;
 					
                     default: // lots of keys are not mapped so not a problem
