@@ -77,7 +77,7 @@ struct CorkBoard
         //this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
         //this.active = 0;
         delta.scale = 0.01;
-        delta.translate = 3.0;
+        delta.translate = 1.0;
         delta.rotate = 0.5; 
         delta.opaque = 5;
         borderActive = true;
@@ -180,39 +180,22 @@ struct CorkBoard
             s.opacity--;
         }
     }
-    void increaseDeltaScale(ref double dScale)
+    void increaseOrderOfMagnitude(ref double value)
     {
-        dScale = dScale * 2.0;
+		value *= 10.0;
+    }	
+    void decreaseOrderOfMagnitude(ref double value)
+    {
+		value /= 10.0;
     }
-    void decreaseDeltaScale(ref double dScale)
+    void increaseByDoubling(ref double value)
     {
-        dScale = dScale / 2.0;
-    }
-    void increaseDeltaTranslate(ref double dTrans)
+		value *= 2.0;
+    }	
+    void decreaseByHalving(ref double value)
     {
-        dTrans = dTrans * 2.0;
-    }
-    void decreaseDeltaTranslate(ref double dTrans)
-    {
-        dTrans = dTrans / 2.0;
-    }
-    void increaseDeltaRotate(ref double dRotate)
-    {
-        dRotate = dRotate * 2.0;
-    }
-    void decreaseDeltaRotate(ref double dRotate)
-    {
-        dRotate = dRotate / 2.0;
-    }
-    void increaseDeltaOpacity(ref double dOpacity)
-    {
-        dOpacity = dOpacity * 2.0;
-    }
-    void decreaseDeltaOpacity(ref double dOpacity)
-    {
-        dOpacity = dOpacity / 2.0;
-    } 
-
+		value /= 2.0;
+    }			
     SDL_FRect calculateRectThatEncompassesAllSwatches()
     {
         float min_x = swatches[0].rect.x;
@@ -266,23 +249,8 @@ struct CorkBoard
         offsetVector.y = cast(int) (0.0 - rect.y);  // for swatches laying outside of corkboard and not waste space
         return offsetVector;                        // for swatches inside of the corkboard not on its edges.
 	}	                                            
-	
-	
-	
-
-
-
-
-
-
-
-
 
 }
-
-
-
-
 
 
 
@@ -291,7 +259,7 @@ void corkboard()
     SDL_Window   *window;
     SDL_Renderer *renderer;
 
-    createWindowAndRenderer("Corkboard", 3600, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("Corkboard", 2500, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     CorkBoard board = CorkBoard(renderer,  10, 10);
 
@@ -374,35 +342,43 @@ void corkboard()
                     break;
 
                     case SDLK_F1:
-                        board.increaseDeltaScale(board.delta.scale);
+                        board.increaseByDoubling(board.delta.scale);
+                        //board.increaseDeltaScale(board.delta.scale);
                     break;
 
                     case SDLK_F2:
-                        board.decreaseDeltaScale(board.delta.scale);
+                        board.decreaseByHalving(board.delta.scale);
+                        //board.decreaseDeltaScale(board.delta.scale);
                     break;
 
                     case SDLK_F3:
-                        board.increaseDeltaTranslate(board.delta.translate);
+                        board.increaseOrderOfMagnitude(board.delta.translate);
+                        //board.increaseDeltaTranslate(board.delta.translate);
                     break;
 
                     case SDLK_F4:
-                        board.decreaseDeltaTranslate(board.delta.translate);
+                        board.decreaseOrderOfMagnitude(board.delta.translate);
+                        //board.decreaseDeltaTranslate(board.delta.translate);
                     break;
 
                     case SDLK_F5:
-                        board.increaseDeltaRotate(board.delta.rotate);
+                        board.increaseByDoubling(board.delta.rotate);
+                        //board.increaseDeltaRotate(board.delta.rotate);
                     break;
 
                     case SDLK_F6:
-                        board.decreaseDeltaRotate(board.delta.rotate);
+                        board.decreaseByHalving(board.delta.rotate);
+                        //board.decreaseDeltaRotate(board.delta.rotate);
                     break;
 
                     case SDLK_F7:
-                        board.increaseDeltaOpacity(board.delta.opaque);
+				        board.increaseByDoubling(board.delta.opaque);
+                        //board.increaseDeltaOpacity(board.delta.opaque);
                     break;
 
                     case SDLK_F8:
-                        board.decreaseDeltaOpacity(board.delta.opaque);
+                        board.decreaseByHalving(board.delta.opaque);
+                        //board.decreaseDeltaOpacity(board.delta.opaque);
                     break;
 
                     case SDLK_F9:
@@ -415,18 +391,19 @@ void corkboard()
 
                     case SDLK_F12:
                         SDL_FRect rect = board.calculateRectThatEncompassesAllSwatches();
+						
+						writeln("all encompassing rect = ", rect);
+						
 						SDL_Point offsetVector = board.moveAllSwatchesRelativeToUpperLeftCorner(rect);
 						
 						writeln("offsetVector = ", offsetVector);
 						
-						/+
-                        writeln("rect = ", rect);
 						int width = cast (int) (rect.w - rect.x);  // rect.w represents the far left side of the rect (not het width)
 						int height = cast (int) (rect.h - rect.y); // rect.h represent the bottom side to the rect (not the height)
 						writeln("width = ", width);
 						writeln("height = ", height);
-						SDL_Surface *bigSurface = createSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
-						+/
+						//SDL_Surface *bigSurface = createSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
+						
 					break;
 					
                     default: // lots of keys are not mapped so not a problem
