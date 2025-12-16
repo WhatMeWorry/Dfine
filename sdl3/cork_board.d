@@ -65,7 +65,7 @@ struct CorkBoard
 {
     uint active;  // current swatch for scale, translation, rotation, and opacity
     bool borderActive;
-	bool locked;  // lock all the swatches together so they will me moved as one
+bool locked;  // lock all the swatches together so they will me moved as one
     Swatch[] swatches;
     Delta delta;  
 
@@ -81,7 +81,7 @@ struct CorkBoard
         delta.rotate = 0.5; 
         delta.opaque = 5;
         borderActive = true;
-		locked = false;
+        locked = false;
     }
 
     void renderAllSwatches(SDL_Renderer *renderer)
@@ -121,10 +121,10 @@ struct CorkBoard
     void moveAllSwatchesLeft(ref Swatch[] swatches)
     {
         foreach (int i, ref s; swatches)
-		{	
+        {
             s.rect.x = s.rect.x - delta.translate;
-		}
-    }		
+        }
+    }
     void moveRight(ref Swatch s)
     {
         s.rect.x = s.rect.x + delta.translate;
@@ -221,46 +221,39 @@ struct CorkBoard
     SDL_FRect calculateRectThatEncompassesAllSwatches()
     {
         float min_x = swatches[0].rect.x;
+        float min_y = swatches[0].rect.y;
+        float max_w = swatches[0].rect.x + swatches[0].rect.w;
+        float max_h = swatches[0].rect.y + swatches[0].rect.h;
         foreach (s; swatches)
         {
             if (s.rect.x < min_x)
+            {
                 min_x = s.rect.x;
-        }	
-		
-		float min_y = swatches[0].rect.y;
-        foreach (s; swatches)
-        {
+            }
             if (s.rect.y < min_y)
+            {
                 min_y = s.rect.y;
-        }	
-		
-		float max_w = swatches[0].rect.x + swatches[0].rect.w;
-        foreach (s; swatches)
-        {
+            }
             if ((s.rect.x + s.rect.w) > max_w)
+            {
                 max_w = s.rect.x + s.rect.w;
-        }			
-		
-		float max_h = swatches[0].rect.y + swatches[0].rect.h;
-        foreach (s; swatches)
-        {
+            }
             if ((s.rect.y + s.rect.h) > max_h)
-            max_h = s.rect.y + s.rect.h;
-        }					
-		
-        writeln("min_x = ", min_x);
-        writeln("min_y = ", min_y);
-        writeln("max_w = ", max_w);
-        writeln("max_h = ", max_h);
-		
-		SDL_FRect rect;
-		
-		rect.x = min_x;
-		rect.y = min_y;
-        rect.w = max_w;
-        rect.h = max_h;
-		
-        return rect;
+            {
+                max_h = s.rect.y + s.rect.h;
+            }
+        }
+
+        SDL_FRect boundary;
+
+        boundary.x = min_x;
+        boundary.y = min_y;
+        boundary.w = max_w;
+        boundary.h = max_h;
+
+        writeln("boundary = ", boundary);
+
+        return boundary;
 	}
 
 
@@ -412,20 +405,22 @@ void corkboard()
                     case SDLK_F9:
                         board.borderActive = !board.borderActive;
                     break;
-					
+
                     case SDLK_F10:
                         board.locked = !board.locked;
                     break;	
 
                     case SDLK_F12:
-                        //SDL_FRect rect = board.calculateRectThatEncompassesAllSwatches();
-						//writeln("all encompassing rect = ", rect);
-						
-						SDL_FPoint offset = board.calculateOffsetVector();
-						
-						writeln("offset = ", offset);
-						
+
+                        SDL_FPoint offset = board.calculateOffsetVector();
+
+                        writeln("offset = ", offset);
+
 						board.moveAllSwatchesRelativeToUpperLeftCorner(offset);
+                        
+                        SDL_FRect rect = board.calculateRectThatEncompassesAllSwatches();
+                        
+                        writeln("all encompassing rect = ", rect);
 						
 						//writeln("offsetVector = ", offsetVector);
 						
