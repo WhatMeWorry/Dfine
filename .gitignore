@@ -21,6 +21,9 @@
 *.exe
 !dfine.exe
 
+# ignore dfine.pdb
+define.pdb
+
 # DUB
 .dub
 docs.json
