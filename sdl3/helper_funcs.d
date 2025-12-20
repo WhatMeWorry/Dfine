@@ -21,8 +21,23 @@ import sdl_funcs_with_error_handling;
 
 import std.string : toStringz, fromStringz;  // converts D string to C string
 import std.conv : to;           // to!string(c_string)  converts C string to D string 
+import std.math.rounding : round;
 
 import bindbc.sdl;  // SDL_* all remaining declarations
+
+// The standard way for SDL_FRect to SDL_Rect still involves manual rounding or using a custom 
+// utility function, as the results of the conversion depend on the desired rounding behavior 
+// (e.g., floor, ceil, round, or truncate). 
+
+SDL_Rect SDL_FRectToRect(SDL_FRect f)
+{
+    SDL_Rect r;
+    r.x = cast (int) round(f.x);
+    r.y = cast (int) round(f.y);
+    r.w = cast (int) round(f.w);
+    r.h = cast (int) round(f.h);
+    return r;
+}
 
 
 void drawRectWithThickness(SDL_Renderer *renderer, SDL_FRect *outer, float border_thickness) 

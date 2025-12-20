@@ -65,7 +65,7 @@ struct CorkBoard
 {
     uint active;  // current swatch for scale, translation, rotation, and opacity
     bool borderActive;
-bool locked;  // lock all the swatches together so they will me moved as one
+    bool locked;  // lock all the swatches together so they will me moved as one
     Swatch[] swatches;
     Delta delta;  
 
@@ -421,6 +421,21 @@ void corkboard()
                         SDL_FRect rect = board.calculateRectThatEncompassesAllSwatches();
                         
                         writeln("all encompassing rect = ", rect);
+						
+                        SDL_Surface *bigSurface = createSurface(cast(int) rect.w, cast(int) rect.h, SDL_PIXELFORMAT_RGBA8888);						
+						
+                        //void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
+                        //  SDL_Surface *surface, const SDL_Rect *surRect)						
+						
+                        foreach (int i, s; board.swatches)  // swatches are texture
+                        {
+						    SDL_Rect r = SDL_FRectToRect(s.rect);
+							writeln("r = ", r);
+						    //SDL_Rect r = SDL_FRectToRect(s.rect);
+                            copyTextureToSurface(s.texture, &r, bigSurface, &r);			    
+                        }	
+						
+						
 						
 						//writeln("offsetVector = ", offsetVector);
 						
