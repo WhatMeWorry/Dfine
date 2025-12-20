@@ -22,7 +22,7 @@
 !dfine.exe
 
 # ignore dfine.pdb
-define.pdb
+*.pdb
 
 # DUB
 .dub
