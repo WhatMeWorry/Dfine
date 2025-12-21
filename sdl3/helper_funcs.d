@@ -25,6 +25,7 @@ import std.math.rounding : round;
 
 import bindbc.sdl;  // SDL_* all remaining declarations
 
+
 // The standard way for SDL_FRect to SDL_Rect still involves manual rounding or using a custom 
 // utility function, as the results of the conversion depend on the desired rounding behavior 
 // (e.g., floor, ceil, round, or truncate). 
