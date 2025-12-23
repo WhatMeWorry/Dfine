@@ -72,7 +72,7 @@ struct CorkBoard
     this(SDL_Renderer *renderer, float x, float y)
     {
         this.swatches ~= Swatch(renderer, 10, 10, "./images/WachA.png");
-        this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
+        //this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
         //this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
         //this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
         //this.active = 0;
@@ -220,10 +220,11 @@ struct CorkBoard
 
     SDL_FRect calculateRectThatEncompassesAllSwatches()
     {
-        float min_x = swatches[0].rect.x;
-        float min_y = swatches[0].rect.y;
+        float min_x = swatches[0].rect.x;  // position of swatch
+        float min_y = swatches[0].rect.y;  // position of swatch 
         float max_w = swatches[0].rect.x + swatches[0].rect.w;
         float max_h = swatches[0].rect.y + swatches[0].rect.h;
+		
         foreach (s; swatches)
         {
             if (s.rect.x < min_x)
@@ -410,6 +411,16 @@ void corkboard()
                         board.locked = !board.locked;
                     break;
 
+                    case SDLK_F11:
+
+                        SDL_FPoint offset = board.calculateOffsetVector();
+
+                        writeln("offset = ", offset);
+
+                        board.moveAllSwatchesRelativeToUpperLeftCorner(offset);
+                    break;
+
+
                     case SDLK_F12:
 
                         SDL_FPoint offset = board.calculateOffsetVector();
@@ -418,11 +429,11 @@ void corkboard()
 
                         board.moveAllSwatchesRelativeToUpperLeftCorner(offset);
                         
-                        SDL_FRect rect = board.calculateRectThatEncompassesAllSwatches();
+                        SDL_FRect all = board.calculateRectThatEncompassesAllSwatches();
                         
-                        writeln("all encompassing rect = ", rect);
+                        writeln("all encompassing rect all = ", all);
 
-                        SDL_Surface *bigSurface = createSurface(cast(int) rect.w, cast(int) rect.h, SDL_PIXELFORMAT_RGBA8888);
+                        SDL_Surface *bigSurface = createSurface(cast(int) all.w, cast(int) all.h, SDL_PIXELFORMAT_RGBA8888);
 
                         //void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
                         //  SDL_Surface *surface, const SDL_Rect *surRect)
@@ -435,15 +446,7 @@ void corkboard()
                             copyTextureToSurface(s.texture, &r, bigSurface, &r);
                         }
 
-                        saveSurfaceToPNGfile(bigSurface, "./images/test.png");
-
-                        //writeln("offsetVector = ", offsetVector);
-
-                        //int width = cast (int) (rect.w - rect.x);  // rect.w represents the far left side of the rect (not het width)
-                        //int height = cast (int) (rect.h - rect.y); // rect.h represent the bottom side to the rect (not the height)
-                        //writeln("width = ", width);
-                        //writeln("height = ", height);
-                        //SDL_Surface *bigSurface = createSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
+                        saveSurfaceToPNGfile(bigSurface, "./images/TEST.png");
 
                     break;
 

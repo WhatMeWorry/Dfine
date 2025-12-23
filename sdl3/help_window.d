@@ -71,7 +71,8 @@ struct HelpWindow
         SDL_RenderDebugText(ren, 5.0f, 150.0f, "tab = advance to next swatch");
         SDL_RenderDebugText(ren, 5.0f, 160.0f, "F9 = toggle border of current swatch");
 		
-        SDL_RenderDebugText(ren, 5.0f, 170.0f, "F10 = all swatches are locked (Move together)");		
+        SDL_RenderDebugText(ren, 5.0f, 170.0f, "F10 = all swatches are locked (Move together)");
+        SDL_RenderDebugText(ren, 5.0f, 180.0f, "F11 = move all swatches relative to upper left corner");		
 
         SDL_RenderDebugText(ren, 5.0f, 190.0f, "F1 = increase delta scale");
         SDL_RenderDebugText(ren, 5.0f, 200.0f, "F2 = decrease delta scale");
