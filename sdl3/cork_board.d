@@ -22,6 +22,7 @@ struct Swatch
 {
     SDL_Texture *texture;
     SDL_FRect   rect;
+    SDL_FRect   originalScale;  // remember the orignal size of the loaded image
     double      angle;       // 0.0-360.0
     ubyte       opacity;     // 0-255
     double      aspectRatio; // ratio of width to height
@@ -33,6 +34,7 @@ struct Swatch
         SDL_Surface *surface = loadImageToSurface(fileName);
         this.rect.w = surface.w;
         this.rect.h = surface.h;
+        originalScale = rect;  
         this.angle = 0.0;
         this.opacity = 255;  // completely opaque
         this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
@@ -281,7 +283,7 @@ void corkboard()
     SDL_Window   *window;
     SDL_Renderer *renderer;
 
-    createWindowAndRenderer("Corkboard", 2500, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("Corkboard", 1800, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     CorkBoard board = CorkBoard(renderer,  10, 10);
 
@@ -440,10 +442,13 @@ void corkboard()
 
                         foreach (int i, s; board.swatches)  // swatches are texture
                         {
+                            SDL_Rect original = SDL_FRectToRect(s.originalScale);
+                            writeln("original  ", original);
+                            
                             SDL_Rect r = SDL_FRectToRect(s.rect);
                             writeln("r = ", r);
                             //SDL_Rect r = SDL_FRectToRect(s.rect);
-                            copyTextureToSurface(s.texture, &r, bigSurface, &r);
+                            copyTextureToSurface(s.texture, &original, bigSurface, &r);
                         }
 
                         saveSurfaceToPNGfile(bigSurface, "./images/TEST.png");
