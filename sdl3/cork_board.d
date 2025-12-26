@@ -3,6 +3,8 @@ module cork_board;
 
 import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
+import std.datetime.systime : Clock, SysTime;
+import std.string : replace;
 import core.stdc.stdlib : exit;
 import datatypes;
 import a_star.spot : writeAndPause;
@@ -18,14 +20,15 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 import debug_window;
 import help_window;
 
+
 struct Swatch
 {
     SDL_Texture *texture;
     SDL_FRect   rect;
-    SDL_FRect   originalScale;  // remember the orignal size of the loaded image
-    double      angle;       // 0.0-360.0
-    ubyte       opacity;     // 0-255
-    double      aspectRatio; // ratio of width to height
+    SDL_FRect   originalSize;  // remember the native size of the loaded image
+    double      angle;         // 0.0-360.0
+    ubyte       opacity;       // 0-255
+    double      aspectRatio;   // ratio of width to height
 
     this(SDL_Renderer *renderer, float x, float y, string fileName) 
     {
@@ -34,7 +37,7 @@ struct Swatch
         SDL_Surface *surface = loadImageToSurface(fileName);
         this.rect.w = surface.w;
         this.rect.h = surface.h;
-        originalScale = rect;  
+        originalSize = rect;  
         this.angle = 0.0;
         this.opacity = 255;  // completely opaque
         this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
@@ -283,7 +286,10 @@ void corkboard()
     SDL_Window   *window;
     SDL_Renderer *renderer;
 
-    createWindowAndRenderer("Corkboard", 1800, 1000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    // Home Samsung desktop 3840 x 2160
+	// 
+	
+    createWindowAndRenderer("Corkboard", 3000, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     CorkBoard board = CorkBoard(renderer,  10, 10);
 
@@ -442,16 +448,24 @@ void corkboard()
 
                         foreach (int i, s; board.swatches)  // swatches are texture
                         {
-                            SDL_Rect original = SDL_FRectToRect(s.originalScale);
-                            writeln("original  ", original);
+                            SDL_Rect lifeSize = SDL_FRectToRect(s.originalSize);
+                            writeln("Texture ", i, " original size  ", lifeSize);
                             
-                            SDL_Rect r = SDL_FRectToRect(s.rect);
-                            writeln("r = ", r);
-                            //SDL_Rect r = SDL_FRectToRect(s.rect);
-                            copyTextureToSurface(s.texture, &original, bigSurface, &r);
-                        }
+                            SDL_Rect currentSize = SDL_FRectToRect(s.rect);
+                            writeln("currentSize = ", currentSize);
 
-                        saveSurfaceToPNGfile(bigSurface, "./images/TEST.png");
+                            copyTextureToSurface(s.texture, &lifeSize, bigSurface, &currentSize); // null was &originalSize
+                        }
+                        
+                        SysTime now = Clock.currTime();  // Get the current time in the local time zone
+    
+                        // Convert to a simple, human-readable string (e.g., "YYYY-Mon-DD HH:MM:SS.FFFFFFFTZ")
+                        string simpleString = now.toSimpleString();
+						
+						string noColons = simpleString.replace(":", "-");
+						string noPeriods = noColons.replace(".", "_");
+						
+                        saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noPeriods ~ ".png");
 
                     break;
 

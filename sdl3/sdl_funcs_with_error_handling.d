@@ -79,6 +79,8 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 
 import bindbc.sdl;  // SDL_* all remaining declarations
 
+import helper_funcs : displayRect;
+
 
 
 
@@ -233,6 +235,7 @@ SDL_Texture* loadImageToTextureWithAccess(SDL_Renderer *renderer, string file, S
     return texture;
 }
 
+// If a file already exists, IMG_SavePNG will overwrite it.
 
 void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
 {
@@ -643,6 +646,10 @@ creating a surface with that data and the texture's dimensions and format. Final
 void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
                           SDL_Surface *surface, const SDL_Rect *surRect)
 {
+    writeln("within copyTextureToSurface");
+    displayRect(cast(SDL_Rect*) texRect);  // cast away the const
+	displayRect(cast(SDL_Rect*) surRect);  // cast away the const
+
     if (surface == null)
     {
         throw new Exception("copyTextureToSurface failed: surface is null");
@@ -652,6 +659,8 @@ void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
 
     if (textureAccess == SDL_TEXTUREACCESS_STREAMING)
     {
+	    writeln("textureAccess = SDL_TEXTUREACCESS_STREAMING");
+
         copyStreamingTextureToSurface(texture, texRect, surface, surRect);
         return;
     }
@@ -659,6 +668,8 @@ void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
     SDL_Texture *streamTexture = createStreamingTextureFromTexture(texture);
     
     copyTextureToTexture(texture, null, streamTexture, null);
+
+    writeln("textureAccess = ", textureAccess);
 
     copyStreamingTextureToSurface(streamTexture, texRect, surface, surRect);
 

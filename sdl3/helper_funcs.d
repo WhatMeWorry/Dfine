@@ -40,6 +40,19 @@ SDL_Rect SDL_FRectToRect(SDL_FRect f)
     return r;
 }
 
+void displayRect(SDL_Rect *rect)
+{
+    if (rect == null)
+	{
+	    writeln("rect is null");
+	    return;
+    }
+    writeln("rect.x = ", rect.x);
+    writeln("rect.y = ", rect.y);
+    writeln("rect.w = ", rect.w);
+    writeln("rect.h = ", rect.h);	
+}
+
 
 void drawRectWithThickness(SDL_Renderer *renderer, SDL_FRect *outer, float border_thickness) 
 {
