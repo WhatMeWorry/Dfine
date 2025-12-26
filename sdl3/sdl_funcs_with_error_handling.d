@@ -689,6 +689,15 @@ void copyStreamingTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect
 
     lockTextureToSurface(texture, null, &lockedSurface);  // only works if texture is STREAMING
 
+    // The blit function should not be called on a locked surface.  ????? from Grok
+	
+	/+
+	If the source and destination rectangles in SDL_BlitSurface are different sizes, the 
+	function does not scale the image. The destination rectangle's width and height parameters 
+	re ignored; the blit operation copies the pixels from the source rectangle at a 1:1 ratio, 
+	based on the source rectangle's dimensions, to the specified position in the destination surface
+    +/
+	
     blitSurface(lockedSurface, texRect, surface, surRect);
 
     SDL_UnlockTexture(texture);  // upload the changes (and frees the temporary surface)

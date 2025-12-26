@@ -287,7 +287,7 @@ void corkboard()
     SDL_Renderer *renderer;
 
     // Home Samsung desktop 3840 x 2160
-	// 
+	// Work Lenovo desktop 2560 x 1600
 	
     createWindowAndRenderer("Corkboard", 3000, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
 
@@ -464,8 +464,9 @@ void corkboard()
 						
 						string noColons = simpleString.replace(":", "-");
 						string noPeriods = noColons.replace(".", "_");
-						
-                        saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noPeriods ~ ".png");
+						string noSpaces = noPeriods.replace(" ", "_");
+												
+                        saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noSpaces ~ ".png");
 
                     break;
 
