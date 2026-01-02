@@ -289,7 +289,7 @@ void corkboard()
     // Home Samsung desktop 3840 x 2160
 	// Work Lenovo desktop 2560 x 1600
 	
-    createWindowAndRenderer("Corkboard", 3000, 2000, cast(SDL_WindowFlags) 0, &window, &renderer);
+    createWindowAndRenderer("Corkboard", 2000, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     CorkBoard board = CorkBoard(renderer,  10, 10);
 
@@ -469,6 +469,74 @@ void corkboard()
                         saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noSpaces ~ ".png");
 
                     break;
+					
+                    case SDLK_KP_4:
+                        writeln("Key Pad 4 pressed trim left");
+                    break;
+					
+                    case SDLK_KP_6:
+                        writeln("Key Pad 6 pressed trim right");
+                    break;
+					
+                    case SDLK_KP_8:
+                        writeln("Key Pad 8 pressed trim top");
+
+                        Swatch cS = board.swatches[board.active];  // current swatch
+						
+                        SDL_Texture *smallerTex = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
+                                       SDL_TEXTUREACCESS_STREAMING, cast(int) cS.rect.w, cast(int) (cS.rect.h - 1.0f));
+									   
+                        // Note: Neither Texture nor Swatch have a x and y component. Only w and h. 
+		
+                        SDL_FRect src = { 0.0f, 
+                                          1.0f,                // Start 1 pixel down from the top
+                                          cS.rect.w,
+                                          cS.rect.h - 1.0f };  // Height reduced by 1 pixel
+										  
+                        SDL_FRect dst = { 0.0f, 
+                                          0.0f,
+                                          cS.rect.w,
+                                          cS.rect.h - 1.0f };  // Height reduced by 1 pixel										  
+
+                        copyTextureToTextureF(cS.texture, &src, smallerTex, &dst);
+
+                        SDL_DestroyTexture(cS.texture);
+                        cS.texture = smallerTex;
+
+                        cS.rect.h -= 1;						
+/+						
+    {
+        this.rect.x = x;
+        this.rect.y = y;
+        SDL_Surface *surface = loadImageToSurface(fileName);
+        this.rect.w = surface.w;
+        this.rect.h = surface.h;
+        originalSize = rect;  
+        this.angle = 0.0;
+        this.opacity = 255;  // completely opaque
+        this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
+        this.texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
+                       SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
+
+        // enable blending for the texture once after creation.
+        SDL_SetTextureBlendMode(this.texture, SDL_BLENDMODE_BLEND);
+
+        copySurfaceToTexture(surface, null, this.texture, null);
+        SDL_DestroySurface(surface);
+    }						
++/						
+						
+						
+						
+						
+                    break;
+					
+                    case SDLK_KP_2:
+                        writeln("Key Pad 2 pressed trim bottom");
+                    break;					
+					
+					
+					
 
                     default: // lots of keys are not mapped so not a problem
                 }

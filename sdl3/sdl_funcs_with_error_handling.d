@@ -1,4 +1,28 @@
 
+/+
+SDL_FRect uses float values for x, y, w (width), and h (height). This is the preferred and more modern type for rendering 
+and positioning in SDL3, as it avoids integer rounding issues and allows for sub-pixel accuracy, which is crucial for smooth 
+animations and scaling on modern displays. Most new or updated rendering functions in SDL3 use SDL_FRect (often indicated by 
+an F suffix in the function name, e.g., SDL_RenderDrawRectF vs SDL_RenderDrawRect).
+
+SDL_Rect uses int values for its members. This type is retained for operations that inherently deal with integer-based 
+dimensions or specific hardware-related constraints, such as querying texture dimensions (which are pixel-based). 
+In SDL2, SDL_Rect was the primary type, and the library internally converted integer coordinates to floats for the GPU. 
+By using SDL_FRect directly in SDL3, you bypass these internal conversions, which can be more efficient. 
+
+For interoperability, functions like SDL_RectToFRect are available to convert between the two types. 
+
+In summary:
+
+Use SDL_FRect for general rendering, positioning, and any calculations involving movement, scaling, or rotation where precision is important.\
+
+Use SDL_Rect when interacting with functions that specifically require integer dimensions, such as querying the size of a texture. 
+
++/
+
+
+
+
 // void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
 // void getWindowSize(SDL_Window *window, int *w, int *h)
 // void setRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
@@ -810,11 +834,33 @@ void copyTextureToTexture(SDL_Texture *srcTexture, const SDL_Rect *srcRect,
     SDL_SetRenderTarget(renderer, null);
 }
 
+/+
+Pass-by-reference or pointer: void func(const std::string& s) or void func(const std::string* s): This is critically 
+important. It allows the function to use the original, potentially large, object efficiently (by reference/pointer) 
+without the risk of modifying the caller's data. The compiler enforces that the object pointed/referred to cannot 
+be changed via that pointer/reference. 
 
+Is i call a function with a parameter that is const, does my argument also have to be const?
 
+No, your argument does not have to be const. You can pass a non-const argument to a function that accepts a const 
+parameter. The const keyword in the function signature means that the function promises not to modify the value of 
+that parameter within its own scope. This ensures that a non-const variable passed as an argument remains unchanged 
+by the function call
++/
 
+void copyTextureToTextureF(SDL_Texture *srcTex, const SDL_FRect *srcRect,
+                           SDL_Texture *dstTex, const SDL_FRect *dstRect)
+{
+    SDL_Renderer *renderer = getRendererFromTexture(srcTex);
 
+    SDL_SetRenderTarget(renderer, dstTex);
 
+    // SDL_RenderCopy(renderer, srcTex, null, null);       SDL2 only
+
+    renderTexture(renderer, srcTex, srcRect, dstRect);  // SDL3 only
+
+    SDL_SetRenderTarget(renderer, null);
+}
 
 
 SDL_Surface* duplicateSurface(SDL_Surface* source) 
