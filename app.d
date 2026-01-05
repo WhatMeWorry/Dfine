@@ -120,6 +120,9 @@ int main()
     
     SDL_Initialize();
     
+    trimEdges();
+    exit(-1);
+    
     corkboard();  // done
     exit(-1);
     

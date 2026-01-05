@@ -766,6 +766,9 @@ void no_renderer_02()
 {
     SDL_Window *window = createWindow("no_renderer_02", 2048, 2048, cast(SDL_WindowFlags) 0);
 
+    // Call SDL_GetWindowSurface(window) to get the window's associated SDL_Surface. This provides 
+    // direct access to the window's pixel buffer (software-based)
+
     SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
 
     SDL_Surface *sourceSurface = loadImageToSurface("./images/earth1024x1024.png");
