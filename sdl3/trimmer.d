@@ -20,7 +20,8 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 struct Canvas
 {
     SDL_Surface *surface;
-    SDL_Rect    rect;
+    SDL_Rect rect;       // original size of rect
+	bool borderHighlighted;
 
     this(int x, int y, string fileName) 
     {
@@ -33,23 +34,7 @@ struct Canvas
 }
 
 
-struct CorkBoard
-{
-    uint active;  // current swatch for scale, translation, rotation, and opacity
-    bool borderActive;
-    bool locked;  // lock all the swatches together so they will me moved as one
-
-    this(SDL_Renderer *renderer, float x, float y)
-    {
-        this.swatches ~= Swatch(renderer, 10, 10, "./images/WachA.png");
-        //this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
-        //this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
-        //this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
-        //this.active = 0;
-        borderActive = true;
-        locked = false;
-    }
-
+/+
     void renderAllSwatches(SDL_Renderer *renderer)
     {
         foreach(i, s; this.swatches)
@@ -70,76 +55,35 @@ struct CorkBoard
             }
         }
     }
-    void enlarge(ref Swatch s)
++/	
+	
+    void enlarge(ref Canvas c)
     {
-        s.rect.w = s.rect.w + ((s.rect.w * s.aspectRatio) * delta.scale);
-        s.rect.h = s.rect.h + ((s.rect.h * s.aspectRatio) * delta.scale);
+        c.rect.w += 1;
+        c.rect.h += 1;
     }
-    void reduce(ref Swatch s)
+    void shrink(ref Canvas c)
     {
-        s.rect.w = s.rect.w - ((s.rect.w * s.aspectRatio) * delta.scale);
-        s.rect.h = s.rect.h - ((s.rect.h * s.aspectRatio) * delta.scale);
+        c.rect.w -= 1;
+        c.rect.h -= 1;
     }
-    void moveLeft(ref Swatch s)
+	
+    void moveLeft(ref Canvas c)
     {
-        s.rect.x = s.rect.x - delta.translate;
+        c.rect.x -= 1;
     }
-    void moveAllSwatchesLeft(ref Swatch[] swatches)
+    void moveRight(ref Canvas c)
     {
-        foreach (int i, ref s; swatches)
-        {
-            s.rect.x = s.rect.x - delta.translate;
-        }
+        c.rect.x += 1;
     }
-    void moveRight(ref Swatch s)
+    void moveUp(ref Canvas c)
     {
-        s.rect.x = s.rect.x + delta.translate;
+        c.rect.y -= 1;
     }
-    void moveAllSwatchesRight(ref Swatch[] swatches)
+    void moveDown(ref Canvas c)
     {
-        foreach (int i, ref s; swatches)
-        {
-            s.rect.x = s.rect.x + delta.translate;
-        }
+        c.rect.y += 1;
     }
-    void moveUp(ref Swatch s)
-    {
-        s.rect.y = s.rect.y - delta.translate;
-    }
-    void moveAllSwatchesUp(ref Swatch[] swatches)
-    {
-        foreach (int i, ref s; swatches)
-        {
-            s.rect.y = s.rect.y - delta.translate;
-        }
-    }
-    void moveDown(ref Swatch s)
-    {
-        s.rect.y = s.rect.y + delta.translate;
-    }
-    void moveAllSwatchesDown(ref Swatch[] swatches)
-    {
-        foreach (int i, ref s; swatches)
-        {
-            s.rect.y = s.rect.y + delta.translate;
-        }
-    }
-    void rotateClockwise(ref Swatch s)
-    {
-        s.angle = s.angle + delta.rotate;
-    }
-    void rotateCounterClockwise(ref Swatch s)
-    {
-        s.angle = s.angle - delta.rotate;
-    }
-    void moreOpaque(ref Swatch s)
-    {
-        if (s.opacity < 255)
-        {
-            s.opacity++;
-        }
-    }
-}
 
 
 void trimEdges()
@@ -147,12 +91,12 @@ void trimEdges()
     // Home Samsung desktop 3840 x 2160
     // Work Lenovo desktop 2560 x 1600
     
-    SDL_Window *window = createWindow("Trimmer", 2048, 2048, cast(SDL_WindowFlags) 0);
+    SDL_Window *window = createWindow("Trimmer", 2000, 1400, cast(SDL_WindowFlags) 0);
     
     SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
 
-    HelpWindow helpWin = HelpWindow(SDL_Rect(100, 100, 1000, 1000));
-    helpWin.displayHelpMenu(board.delta);
+    //HelpWindow helpWin = HelpWindow(SDL_Rect(100, 100, 1000, 1000));
+    //helpWin.displayHelpMenu(board.delta);
     
     Canvas canvas = Canvas(100, 200, "./images/WachA.png");
 
@@ -186,84 +130,55 @@ void trimEdges()
                         writeln("Key Pad 2 pressed trim bottom");
                     break;
 
+
+
                     case SDLK_INSERT:
-                        board.enlarge(board.swatches[board.active]);
+                        canvas.enlarge();
                     break;
 
                     case SDLK_DELETE:
-                        board.reduce(board.swatches[board.active]);
+                        canvas.shrink();
                     break;
 
+
+
                     case SDLK_LEFT:
-                        if (board.locked)
-                            board.moveAllSwatchesLeft(board.swatches);
-                        else
-                            board.moveLeft(board.swatches[board.active]);
+                        canvas.moveLeft();
                     break;
 
                     case SDLK_RIGHT:
-                        if (board.locked)
-                            board.moveAllSwatchesRight(board.swatches);
-                        else
-                            board.moveRight(board.swatches[board.active]);
+                        canvas.moveRight();
+                    break;
+					
+                    case SDLK_UP:
+                        canvas.moveUp();
                     break;
 
-                    case SDLK_F1:
-                        board.increaseByDoubling(board.delta.scale);
-                        //board.increaseDeltaScale(board.delta.scale);
-                    break;
-
-                    case SDLK_F2:
-                        board.decreaseByHalving(board.delta.scale);
-                        //board.decreaseDeltaScale(board.delta.scale);
-                    break;
-
-                    case SDLK_F3:
-                        board.increaseOrderOfMagnitude(board.delta.translate);
-                        //board.increaseDeltaTranslate(board.delta.translate);
-                    break;
-
-                    case SDLK_F4:
-                        board.decreaseOrderOfMagnitude(board.delta.translate);
-                        //board.decreaseDeltaTranslate(board.delta.translate);
-                    break;
-
-                    case SDLK_F5:
-                        board.increaseByDoubling(board.delta.rotate);
-                        //board.increaseDeltaRotate(board.delta.rotate);
-                    break;
-
-                    case SDLK_F6:
-                        board.decreaseByHalving(board.delta.rotate);
-                        //board.decreaseDeltaRotate(board.delta.rotate);
-                    break;
-
-                    case SDLK_F7:
-                        board.increaseByDoubling(board.delta.opaque);
-                        //board.increaseDeltaOpacity(board.delta.opaque);
-                    break;
-
-                    case SDLK_F8:
-                        board.decreaseByHalving(board.delta.opaque);
-                        //board.decreaseDeltaOpacity(board.delta.opaque);
+                    case SDLK_DOWN:
+                        canvas.moveDown();
                     break;
 
                     case SDLK_F9:
-                        board.borderActive = !board.borderActive;
+                        canvas.borderHighlighted = !canvas.borderHighlighted;
                     break;
-
-                    case SDLK_F10:
-                        board.locked = !board.locked;
-                    break;
+					
+                    case SDLK_F12:					
+					    //saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noSpaces ~ ".png");
+					break;
+					
+					
 
                     default: // lots of keys are not mapped so not a problem
                 }
 
-                debugWin.displayAllSwatches(board);
+                //debugWin.displayAllSwatches(board);
 
-                helpWin.displayHelpMenu(board.delta);
+                //helpWin.displayHelpMenu(board.delta);
             }
         }
+		
+		//copySurfaceToSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
+        //                        SDL_Surface *dstSurface, const SDL_Rect *dstRect, SDL_ScaleMode scaleMode);
 
         updateWindowSurface(window);
     }

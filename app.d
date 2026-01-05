@@ -62,6 +62,7 @@ import standalone_demos;
 import tutorials;
 import helper_funcs;
 import cork_board;
+import trimmer;
 
 
 /+
@@ -119,6 +120,8 @@ int main()
     load_sdl_libraries(); 
     
     SDL_Initialize();
+
+    no_renderer_02();
     
     trimEdges();
     exit(-1);

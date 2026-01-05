@@ -740,6 +740,14 @@ void copySurfaceToSurface(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
 }
 
 
+void copySurfaceToSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
+                                SDL_Surface *dstSurface, const SDL_Rect *dstRect, SDL_ScaleMode scaleMode)
+{
+    blitSurfaceScaled(srcSurface, srcRect, dstSurface, dstRect, scaleMode);
+}
+
+
+
 SDL_PropertiesID createProperties()
 {
     SDL_PropertiesID properties = SDL_CreateProperties();  // 0 on failure

@@ -764,7 +764,7 @@ SDL_CreateWindowSurface: This function explicitly creates a surface for a window
 
 void no_renderer_02()
 {
-    SDL_Window *window = createWindow("no_renderer_02", 2048, 2048, cast(SDL_WindowFlags) 0);
+    SDL_Window *window = createWindow("no_renderer_02", 1200, 1200, cast(SDL_WindowFlags) 0);
 
     // Call SDL_GetWindowSurface(window) to get the window's associated SDL_Surface. This provides 
     // direct access to the window's pixel buffer (software-based)
@@ -776,8 +776,10 @@ void no_renderer_02()
     displaySurfaceProperties(sourceSurface);
     displaySurfaceProperties(windowSurface);
 
-    copySurfaceToSurface(sourceSurface, null, windowSurface, null);  // performs blit
-
+    SDL_Rect r = { 0,0,2048,2048};
+    //copySurfaceToSurface(sourceSurface, null, windowSurface, null);  // performs blit
+    copySurfaceToSurfaceScaled(sourceSurface, null, windowSurface, &r, SDL_SCALEMODE_LINEAR);  // performs blit
+	
     bool running = true;
     while (running)
     {
