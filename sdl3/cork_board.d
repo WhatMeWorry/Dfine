@@ -25,7 +25,7 @@ struct Swatch
 {
     SDL_Texture *texture;
     SDL_FRect   rect;
-    SDL_FRect   originalSize;  // remember the native size of the loaded image
+    //SDL_FRect   originalSize;  // remember the native size of the loaded image
     double      angle;         // 0.0-360.0
     ubyte       opacity;       // 0-255
     double      aspectRatio;   // ratio of width to height
@@ -37,7 +37,7 @@ struct Swatch
         SDL_Surface *surface = loadImageToSurface(fileName);
         this.rect.w = surface.w;
         this.rect.h = surface.h;
-        originalSize = rect;  
+        //originalSize = rect;  
         this.angle = 0.0;
         this.opacity = 255;  // completely opaque
         this.aspectRatio = cast(double) surface.w / cast(double) surface.h;
@@ -77,7 +77,7 @@ struct CorkBoard
     this(SDL_Renderer *renderer, float x, float y)
     {
         this.swatches ~= Swatch(renderer, 10, 10, "./images/WachA.png");
-        this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
+        //this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
         //this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
         //this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
         //this.active = 0;
@@ -448,13 +448,13 @@ void corkboard()
 
                         foreach (int i, s; board.swatches)  // swatches are texture
                         {
-                            SDL_Rect lifeSize = SDL_FRectToRect(s.originalSize);
-                            writeln("Texture ", i, " original size  ", lifeSize);
+                            //SDL_Rect lifeSize = SDL_FRectToRect(s.originalSize);
+                            //writeln("Texture ", i, " original size  ", lifeSize);
                             
                             SDL_Rect currentSize = SDL_FRectToRect(s.rect);
                             writeln("currentSize = ", currentSize);
 
-                            copyTextureToSurface(s.texture, &lifeSize, bigSurface, &currentSize); // null was &originalSize
+                            //copyTextureToSurface(s.texture, &lifeSize, bigSurface, &currentSize); // null was &originalSize
                         }
                         
                         SysTime now = Clock.currTime();  // Get the current time in the local time zone
@@ -477,33 +477,87 @@ void corkboard()
                     case SDLK_KP_6:
                         writeln("Key Pad 6 pressed trim right");
                     break;
-					
+				
+/+
+struct Swatch
+{
+    SDL_Texture *texture;
+    SDL_FRect   rect;
+    SDL_FRect   originalSize;  // remember the native size of the loaded image
+    double      angle;         // 0.0-360.0
+    ubyte       opacity;       // 0-255
+    double      aspectRatio;   // ratio of width to height
++/
+
+/+
+    void moveAllSwatchesLeft(ref Swatch[] swatches)
+    {
+        foreach (int i, ref s; swatches)
+        {
+            s.rect.x = s.rect.x - delta.translate;
+        }
+    }
++/
+/+
+2. Creating a New, Smaller Texture
+If you genuinely need a new texture with smaller dimensions, you must:
+Maintain a copy of the pixel data in CPU memory (e.g., in an SDL_Surface or a raw pixel buffer).
+Modify this CPU-side data to remove the desired rows.
+Create a new SDL_Texture with the new, reduced dimensions using a function like SDL_CreateTexture or SDL_CreateTextureFromSurface.
+Upload the modified pixel data to the new texture using functions like SDL_UpdateTexture or SDL_LockTexture.
+Destroy the old texture using SDL_DestroyTexture when it is no longer needed. 
++/
+
+				
                     case SDLK_KP_8:
                         writeln("Key Pad 8 pressed trim top");
 
-                        Swatch cS = board.swatches[board.active];  // current swatch
+                        ref Swatch cS = board.swatches[board.active];  // current swatch
+						
+						writeln("swatch cS = ", cS);
+						//writeln("Full Size cS.texture = ", cS.texture);
+						//displayTextureProperties(cS.texture); 
 						
                         SDL_Texture *smallerTex = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
-                                       SDL_TEXTUREACCESS_STREAMING, cast(int) cS.rect.w, cast(int) (cS.rect.h - 1.0f));
+                                       SDL_TEXTUREACCESS_STREAMING, cast(int) cS.rect.w, cast(int) (cS.rect.h - 5.0f));
+						
+                        //writeln("smallerTex = ", smallerTex);						
+			            //displayTextureProperties(smallerTex);
+						
 									   
                         // Note: Neither Texture nor Swatch have a x and y component. Only w and h. 
 		
                         SDL_FRect src = { 0.0f, 
-                                          1.0f,                // Start 1 pixel down from the top
+                                          5.0f,                // Start 1 pixel down from the top
                                           cS.rect.w,
-                                          cS.rect.h - 1.0f };  // Height reduced by 1 pixel
+                                          cS.rect.h - 5.0f };  // Height reduced by 1 pixel
+										  
+                        writeln("src = ", src);
 										  
                         SDL_FRect dst = { 0.0f, 
                                           0.0f,
                                           cS.rect.w,
-                                          cS.rect.h - 1.0f };  // Height reduced by 1 pixel										  
+                                          cS.rect.h - 5.0f };  // Height reduced by 1 pixel										  
+                        writeln("dst = ", dst);
 
                         copyTextureToTextureF(cS.texture, &src, smallerTex, &dst);
+						
+						//writeln("after copyTexToTex");
+						
+						//writeln("smaller size cS = ", smallerTex);
 
-                        SDL_DestroyTexture(cS.texture);
-                        cS.texture = smallerTex;
+                        copyTextureToTextureF(smallerTex, &dst, cS.texture, &dst);
+						
+                        cS.rect.h -= 5;	  // update the height property to reflect the top trim
+						
+                        cS.aspectRatio = dst.w / dst.h;		
 
-                        cS.rect.h -= 1;						
+                        //writeln("cS.aspectRatio =", cS.aspectRatio);	
+
+                        writeln("updated swatch cS = ", cS);
+
+
+						
 /+						
     {
         this.rect.x = x;
