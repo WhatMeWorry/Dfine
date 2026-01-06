@@ -19,17 +19,18 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 
 struct Canvas
 {
-    SDL_Surface *surface;
-    SDL_Rect rect;       // original size of rect
+    SDL_Point position;   // x and y
+    SDL_Surface *surface; // has w and h  (make const)
+           
 	bool borderHighlighted;
 
-    this(int x, int y, string fileName) 
+    this(string fileName) 
     {
-        this.rect.x = x;
-        this.rect.y = y;
+        this.position.x = 0;
+        this.position.y = 0;
         surface = loadImageToSurface(fileName);
-        this.rect.w = surface.w;
-        this.rect.h = surface.h;
+        //this.rect.w = surface.w;
+        //this.rect.h = surface.h;
     }
 }
 
@@ -57,32 +58,32 @@ struct Canvas
     }
 +/	
 	
-    void enlarge(ref Canvas c)
+    void enlarge(SDL_Surface* s)
     {
-        c.rect.w += 1;
-        c.rect.h += 1;
+        s.w += 1;
+        s.h += 1;
     }
-    void shrink(ref Canvas c)
+    void shrink(SDL_Surface* s)
     {
-        c.rect.w -= 1;
-        c.rect.h -= 1;
+        s.w -= 1;
+        s.h -= 1;
     }
 	
     void moveLeft(ref Canvas c)
     {
-        c.rect.x -= 1;
+        c.position.x -= 1;
     }
     void moveRight(ref Canvas c)
     {
-        c.rect.x += 1;
+        c.position.x += 1;
     }
     void moveUp(ref Canvas c)
     {
-        c.rect.y -= 1;
+        c.position.y -= 1;
     }
     void moveDown(ref Canvas c)
     {
-        c.rect.y += 1;
+        c.position.y += 1;
     }
 
 
@@ -93,12 +94,18 @@ void trimEdges()
     
     SDL_Window *window = createWindow("Trimmer", 2000, 1400, cast(SDL_WindowFlags) 0);
     
-    SDL_Surface *windowSurface = getWindowSurface(window);  // creates a surface if it does not already exist
+    SDL_Surface *winSurface = getWindowSurface(window);  // creates a surface if it does not already exist
+	
 
     //HelpWindow helpWin = HelpWindow(SDL_Rect(100, 100, 1000, 1000));
     //helpWin.displayHelpMenu(board.delta);
     
-    Canvas canvas = Canvas(100, 200, "./images/WachA.png");
+    Canvas canvas = Canvas("./images/WachA.png");
+	
+	// winSurface has no data yet
+	
+	winSurface.w = canvas.surface.w;
+	winSurface.h = canvas.surface.h;	
 
     bool running = true;
     while (running)
@@ -131,15 +138,13 @@ void trimEdges()
                     break;
 
 
-
                     case SDLK_INSERT:
-                        canvas.enlarge();
+                        enlarge(winSurface);
                     break;
 
                     case SDLK_DELETE:
-                        canvas.shrink();
+                        shrink(winSurface);
                     break;
-
 
 
                     case SDLK_LEFT:
@@ -179,7 +184,11 @@ void trimEdges()
 		
 		//copySurfaceToSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
         //                        SDL_Surface *dstSurface, const SDL_Rect *dstRect, SDL_ScaleMode scaleMode);
-
+		
+        copySurfaceToSurfaceScaled(sourceSurface, null, winSurface, &r, SDL_SCALEMODE_LINEAR);  // performs blit
+		//                         canvas.surface, canvas.rect, 
+								   
+								   
         updateWindowSurface(window);
     }
     SDL_Quit();
