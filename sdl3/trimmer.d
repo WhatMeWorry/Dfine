@@ -17,20 +17,36 @@ import std.conv : to;           // to!string(c_string)  converts C string to D s
 import bindbc.sdl;  // SDL_* all remaining declarations
 
 
-struct Canvas
+
+struct SrcSurface  // Fixed original size
 {
-    SDL_Point position;   // x and y
-    SDL_Surface *surface; // has w and h  (make const)
-           
-	bool borderHighlighted;
+    SDL_Surface *surface; // surface contains w and h  (make const)
+	
+	SDL_Rect rect;  // not used. Alway use null when needed
 
     this(string fileName) 
     {
+        surface = loadImageToSurface(fileName);
+    }
+}
+
+
+
+struct DstSurface  // changeable size and position
+{
+    SDL_Point position;   // x and y
+    SDL_Surface *surface; // surface contains w and h  (make const)
+    SDL_Rect    rect;     // composed of position's x and y and surface's w and h          
+	bool borderHighlighted;
+
+
+    this(SDL_Window *window) 
+    {
+        this.surface = getWindowSurface(window);  // creates a surface if it does not already exist	
+        writeln("surface.w = ", surface.w);
+        writeln("surface.h = ", surface.h);       		
         this.position.x = 0;
         this.position.y = 0;
-        surface = loadImageToSurface(fileName);
-        //this.rect.w = surface.w;
-        //this.rect.h = surface.h;
     }
 }
 
@@ -58,55 +74,51 @@ struct Canvas
     }
 +/	
 	
-    void enlarge(SDL_Surface* s)
-    {
-        s.w += 1;
-        s.h += 1;
-    }
-    void shrink(SDL_Surface* s)
-    {
-        s.w -= 1;
-        s.h -= 1;
-    }
+void enlarge(ref DstSurface d)
+{
+    d.surface.w += 1;
+    d.surface.h += 1;
+}
+void shrink(ref DstSurface d)
+{
+    d.surface.w -= 1;
+    d.surface.h -= 1;
+}
 	
-    void moveLeft(ref Canvas c)
-    {
-        c.position.x -= 1;
-    }
-    void moveRight(ref Canvas c)
-    {
-        c.position.x += 1;
-    }
-    void moveUp(ref Canvas c)
-    {
-        c.position.y -= 1;
-    }
-    void moveDown(ref Canvas c)
-    {
-        c.position.y += 1;
-    }
+void moveLeft(ref DstSurface d)
+{
+    d.position.x -= 1;
+}
+void moveRight(ref DstSurface d)
+{
+    d.position.x += 1;
+}
+void moveUp(ref DstSurface d)
+{
+    d.position.y -= 1;
+}
+void moveDown(ref DstSurface d)
+{
+    d.position.y += 1;
+}
 
 
 void trimEdges()
 {
     // Home Samsung desktop 3840 x 2160
     // Work Lenovo desktop 2560 x 1600
-    
-    SDL_Window *window = createWindow("Trimmer", 2000, 1400, cast(SDL_WindowFlags) 0);
-    
-    SDL_Surface *winSurface = getWindowSurface(window);  // creates a surface if it does not already exist
+    	
+    SrcSurface srcSurface = SrcSurface("./images/WachA.png");	
 	
-
+    SDL_Window *window = createWindow("Trimmer", 2000, 1400, cast(SDL_WindowFlags) 0);
+  
+    DstSurface winSurface = DstSurface(window);  // the destination will the the window
+	
     //HelpWindow helpWin = HelpWindow(SDL_Rect(100, 100, 1000, 1000));
     //helpWin.displayHelpMenu(board.delta);
-    
-    Canvas canvas = Canvas("./images/WachA.png");
 	
 	// winSurface has no data yet
 	
-	winSurface.w = canvas.surface.w;
-	winSurface.h = canvas.surface.h;	
-
     bool running = true;
     while (running)
     {
@@ -148,23 +160,23 @@ void trimEdges()
 
 
                     case SDLK_LEFT:
-                        canvas.moveLeft();
+                        winSurface.moveLeft();
                     break;
 
                     case SDLK_RIGHT:
-                        canvas.moveRight();
+                        winSurface.moveRight();
                     break;
 					
                     case SDLK_UP:
-                        canvas.moveUp();
+                        winSurface.moveUp();
                     break;
 
                     case SDLK_DOWN:
-                        canvas.moveDown();
+                        winSurface.moveDown();
                     break;
 
                     case SDLK_F9:
-                        canvas.borderHighlighted = !canvas.borderHighlighted;
+                        winSurface.borderHighlighted = !winSurface.borderHighlighted;
                     break;
 					
                     case SDLK_F12:					
@@ -182,10 +194,14 @@ void trimEdges()
             }
         }
 		
-		//copySurfaceToSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
+        //copySurfaceToSurfaceScaled(SDL_Surface *srcSurface, const SDL_Rect *srcRect,
         //                        SDL_Surface *dstSurface, const SDL_Rect *dstRect, SDL_ScaleMode scaleMode);
-		
-        copySurfaceToSurfaceScaled(sourceSurface, null, winSurface, &r, SDL_SCALEMODE_LINEAR);  // performs blit
+        SDL_Rect r;
+        r.x = winSurface.position.x;
+        r.y = winSurface.position.y;
+        r.w = winSurface.surface.w;
+        r.h = winSurface.surface.h;
+        copySurfaceToSurfaceScaled(srcSurface.surface, null, winSurface.surface, &r, SDL_SCALEMODE_LINEAR);  // performs blit
 		//                         canvas.surface, canvas.rect, 
 								   
 								   
