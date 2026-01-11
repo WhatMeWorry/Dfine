@@ -121,7 +121,7 @@ int main()
     
     SDL_Initialize();
 
-    no_renderer_02();  // ESC to exit
+    //no_renderer_02();  // ESC to exit
     
     trimEdges();
     exit(-1);

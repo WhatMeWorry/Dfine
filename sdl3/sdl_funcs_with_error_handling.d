@@ -280,6 +280,14 @@ void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **
     }
 }
 
+void clearSurface(SDL_Surface *surface, float r, float g, float b, float a)
+{
+    bool result = SDL_ClearSurface(surface, r, g, b, a);
+    if (result == false)
+    {
+        throw new Exception("SDL_ClearSurface failed: " ~ to!string(SDL_GetError()));
+    }
+}
 
 // Allocate a new surface with a specific pixel format.
 
