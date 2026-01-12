@@ -232,8 +232,20 @@ void trimEdges()
 
                     break;
 
-                    case SDLK_KP_2:
-                        writeln("Key Pad 2 pressed trim bottom");
+                    case SDLK_L:
+                        writeln("trim right edge");
+                        FixedSurface tempSurface = FixedSurface(true);
+                        tempSurface.surface = createSurface(srcSurface.surface.w-1, 
+                                                            srcSurface.surface.h, 
+                                                            srcSurface.surface.format);
+                        SDL_Rect r;
+                        r.x = 0; 
+                        r.y = 0;
+                        r.w = srcSurface.surface.w-1; // stop copying at the penultimate pixel
+                        r.h = srcSurface.surface.h;
+                        copySurfaceToSurface(srcSurface.surface, &r, tempSurface.surface, null);
+                        destroySurface(srcSurface.surface);
+                        srcSurface.surface = tempSurface.surface;
                     break;
 
 
