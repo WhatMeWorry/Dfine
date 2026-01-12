@@ -198,8 +198,21 @@ void trimEdges()
                         srcSurface.surface = tempSurface.surface;
                     break;
                     
-                    case SDLK_KP_4:
-                        writeln("Key Pad 4 pressed trim left");
+                    case SDLK_U:
+                        writeln("trim bottom");
+                        // shrink surface by one row and allocate a new surface that is one row smaller
+                        FixedSurface tempSurface = FixedSurface(true);
+                        tempSurface.surface = createSurface(srcSurface.surface.w, 
+                                                            srcSurface.surface.h-1, 
+                                                            srcSurface.surface.format);
+                        SDL_Rect r;
+                        r.x = 0;
+                        r.y = 0; // skip 1st row, start copy at 2nd row
+                        r.w = srcSurface.surface.w;
+                        r.h = srcSurface.surface.h-1;  // stop copying before last row
+                        copySurfaceToSurface(srcSurface.surface, &r, tempSurface.surface, null);
+                        destroySurface(srcSurface.surface);
+                        srcSurface.surface = tempSurface.surface;
                     break;
 
                     case SDLK_KP_6:
