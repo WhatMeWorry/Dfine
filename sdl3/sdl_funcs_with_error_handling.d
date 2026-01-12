@@ -301,6 +301,11 @@ SDL_Surface* createSurface(int width, int height, SDL_PixelFormat pixelFormat)
     return surface;
 }
 
+void destroySurface(SDL_Surface *surface)
+{
+    SDL_DestroySurface(surface);
+}
+
 
 // Allocate a new surface with a specific pixel format and EXISTING pixel data
 /+

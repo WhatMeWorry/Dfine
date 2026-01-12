@@ -39,16 +39,20 @@ import bindbc.sdl;  // SDL_* all remaining declarations
     Then destination suface can be be moved and resized so that it is smaller
     or bigger than the source/window surfaces. However, it is critical that only the 	
     intersection of the destination-window surfaces (via SDL_GetRectIntersection) 
-	be displayed on the monitor; otherwise the program will abort with out of bounds error.
-+/	
+    be displayed on the monitor; otherwise the program will abort with out of bounds error.
++/
 
 
 struct FixedSurface  // Fixed original size
 {
     SDL_Surface *surface; // surface contains w and h  (make const)
-	
-	SDL_Rect rect;  // Not really needed since we will always use null
 
+    SDL_Rect rect;  // Not really needed since we will always use null
+
+    this(bool b)
+    {
+        surface = null;
+    }
     this(string fileName) 
     {
         surface = loadImageToSurface(fileName);
@@ -65,16 +69,16 @@ struct ResizeableSurface  // changeable size and position
 {
     SDL_Surface *surface; // surface contains w and h
     SDL_Point   position; // x and y
-	SDL_Point   size;     // w and h  
-	bool        borderHighlighted;
+    SDL_Point   size;     // w and h  
+    bool        borderHighlighted;
 
 
     this(SDL_Surface *s) 
     {
-	    // One Surface per Window: SDL internally manages a single surface per window
+        // One Surface per Window: SDL internally manages a single surface per window
 
         this.surface = createSurface(s.w, s.h, s.format);
-	
+
         size.x = surface.w;
         size.y = surface.h;
 
@@ -106,8 +110,8 @@ struct ResizeableSurface  // changeable size and position
             }
         }
     }
-+/	
-	
++/
+
 void enlarge(ref ResizeableSurface d)
 {
     d.surface.w += 1;
@@ -118,7 +122,7 @@ void shrink(ref ResizeableSurface d)
     d.surface.w -= 1;
     d.surface.h -= 1;
 }
-	
+
 void moveLeft(ref ResizeableSurface d)
 {
     d.position.x -= 10;
@@ -140,9 +144,9 @@ void moveDown(ref ResizeableSurface d)
 SDL_Point mapMoveableToFixed(SDL_Point m)
 {
     SDL_Point f;
-	f.x = 0 - m.x;
-	f.y = 0 - m.y;
-	return f;
+    f.x = 0 - m.x;
+    f.y = 0 - m.y;
+    return f;
 }
 
 void trimEdges()
@@ -150,17 +154,18 @@ void trimEdges()
     // Home Samsung desktop 3840 x 2160
     // Work Lenovo desktop 2560 x 1600
 
-    FixedSurface srcSurface = FixedSurface("./images/WachA.png");	
-	
+    FixedSurface srcSurface = FixedSurface("./images/WachA.png");
+
+    
     ResizeableSurface dstSurface = ResizeableSurface(srcSurface.surface);  // the destination will the the window	
-	
+
     SDL_Window *window = createWindow("Trimmer", 1500, 1500, cast(SDL_WindowFlags) 0); 
     SDL_Surface *winSurface = SDL_GetWindowSurface(window);
 
     //HelpWindow helpWin = HelpWindow(SDL_Rect(100, 100, 1000, 1000));
     //helpWin.displayHelpMenu(board.delta);
 
-	
+
     bool running = true;
     while (running)
     {
@@ -175,8 +180,22 @@ void trimEdges()
                         running = false;
                     break;
                     
-                    case SDLK_KP_8:
+                    case SDLK_T:   // SDLK_KP_8:
                         writeln("Key Pad 8 pressed trim top");
+
+                        // shrink surface by one row and allocate a new surface that is one row smaller
+                        FixedSurface tempSurface = FixedSurface(true);
+                        tempSurface.surface = createSurface(srcSurface.surface.w, 
+                                                            srcSurface.surface.h-1, 
+                                                            srcSurface.surface.format);
+                        SDL_Rect r;
+                        r.x = 0;
+                        r.y = 1; // skip 1st row, start copy at 2nd row
+                        r.w = tempSurface.surface.w;
+                        r.h = tempSurface.surface.h;  // h was reduced by 1 row above
+                        copySurfaceToSurface(srcSurface.surface, &r, tempSurface.surface, null);
+                        destroySurface(srcSurface.surface);
+                        srcSurface.surface = tempSurface.surface;
                     break;
                     
                     case SDLK_KP_4:
@@ -193,12 +212,12 @@ void trimEdges()
 
 
                     case SDLK_INSERT:
-					    //clearSurface(winSurface.surface, 1.0, 0.0, 0.0, 1.0);
+                        //clearSurface(winSurface.surface, 1.0, 0.0, 0.0, 1.0);
                         enlarge(dstSurface);
                     break;
 
                     case SDLK_DELETE:
-					    //clearSurface(winSurface.surface, 1.0, 0.0, 0.0, 1.0);
+                        //clearSurface(winSurface.surface, 1.0, 0.0, 0.0, 1.0);
                         shrink(dstSurface);
                     break;
 
@@ -210,7 +229,7 @@ void trimEdges()
                     case SDLK_RIGHT:
                         dstSurface.moveRight();
                     break;
-					
+
                     case SDLK_UP:
                         dstSurface.moveUp();
                     break;
@@ -222,12 +241,11 @@ void trimEdges()
                     case SDLK_F9:
                         dstSurface.borderHighlighted = !dstSurface.borderHighlighted;
                     break;
-					
-                    case SDLK_F12:					
-					    //saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noSpaces ~ ".png");
-					break;
-					
-					
+
+                    case SDLK_F12:
+                        //saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noSpaces ~ ".png");
+                    break;
+
 
                     default: // lots of keys are not mapped so not a problem
                 }
@@ -240,19 +258,19 @@ void trimEdges()
         clearSurface(winSurface, 0.5, 0.5, 0.5, 1.0);
  
         copySurfaceToSurfaceScaled(srcSurface.surface, null, dstSurface.surface, null, SDL_SCALEMODE_LINEAR);  // performs blit
-			
-		SDL_Point upperLeftPt = mapMoveableToFixed(dstSurface.position);
-		
-		SDL_Rect r;
-		r.x = upperLeftPt.x;
-		r.y = upperLeftPt.y;
-		r.w = winSurface.w;
-		r.h = winSurface.h;
-		
+
+        SDL_Point upperLeftPt = mapMoveableToFixed(dstSurface.position);
+
+        SDL_Rect r;
+        r.x = upperLeftPt.x;
+        r.y = upperLeftPt.y;
+        r.w = winSurface.w;
+        r.h = winSurface.h;
+
         copySurfaceToSurface(dstSurface.surface, &r, winSurface, null);  
-		
+
         updateWindowSurface(window);
-		
+
     }
     SDL_Quit();
 
