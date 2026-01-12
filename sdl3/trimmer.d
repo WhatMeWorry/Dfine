@@ -215,8 +215,21 @@ void trimEdges()
                         srcSurface.surface = tempSurface.surface;
                     break;
 
-                    case SDLK_KP_6:
-                        writeln("Key Pad 6 pressed trim right");
+                    case SDLK_K:
+                        writeln("trim left edge");
+                        FixedSurface tempSurface = FixedSurface(true);
+                        tempSurface.surface = createSurface(srcSurface.surface.w-1, 
+                                                            srcSurface.surface.h, 
+                                                            srcSurface.surface.format);
+                        SDL_Rect r;
+                        r.x = 1; // skip 1st column, start copy at 2nd column
+                        r.y = 0;
+                        r.w = srcSurface.surface.w-1; // since we start at 2nd column, need to end 1 sooner
+                        r.h = srcSurface.surface.h;
+                        copySurfaceToSurface(srcSurface.surface, &r, tempSurface.surface, null);
+                        destroySurface(srcSurface.surface);
+                        srcSurface.surface = tempSurface.surface;
+
                     break;
 
                     case SDLK_KP_2:
