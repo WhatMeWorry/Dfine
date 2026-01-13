@@ -306,7 +306,19 @@ void trimEdges()
         r.h = winSurface.h;
 
         copySurfaceToSurface(dstSurface.surface, &r, winSurface, null);  
-
+		
+		// draw line 
+		
+        int x = 50;
+		
+        writeln("Before each ========");
+        foreach (y; 0..winSurface.h) 
+        {
+		    SDL_WriteSurfacePixel(winSurface, x, y, 255, 0, 0, 250);
+			//SDL_WriteSurfacePixel(winSurface, x, y, 255, 0, 0, 150);
+        }
+        writeln("After each ========");
+		
         updateWindowSurface(window);
 
     }
