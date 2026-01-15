@@ -307,17 +307,52 @@ void trimEdges()
 
         copySurfaceToSurface(dstSurface.surface, &r, winSurface, null);  
 		
+		
+		
+		
+		
 		// draw line 
+		SDL_Surface *horizontalLine = createSurface(winSurface.w, 1, winSurface.format);
+		SDL_Surface   *verticalLine = createSurface(1, winSurface.h, winSurface.format);
 		
         int x = 50;
+		
+		
+		SDL_Rect rect = {100, 100, 200, 150}; // Top-left at (100, 100), 200 wide, 150 high
+
+    // 5. Set the drawing color (Red in this case)
+    // SDL_MapRGB maps RGB values to the surface's pixel format
+	
+    // Allocate an SDL_PixelFormat structure (equivalent to C's SDL_AllocFormat)
+    //SDL_PixelFormat *pixelFormat = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA32);
+	
+	//SDL_PixelFormat pixelFormat;
+    //SDL_GetSurfacePixelFormat(winSurface, &pixelFormat);
+	
+	const SDL_PixelFormatDetails* details = SDL_GetPixelFormatDetails(winSurface.format);
+	
+    uint redColor = SDL_MapRGBA(details, null, 255, 0, 0, 255 );
+
+    // 6. Draw the filled rectangle on the surface
+    // Pass the surface, the rect, and the color
+    SDL_FillSurfaceRect(winSurface, &rect, redColor);
+		
+		
 		
         writeln("Before each ========");
         foreach (y; 0..winSurface.h) 
         {
+		    SDL_Rect hLine = SDL_Rect(0,y,winSurface.w,1);
+            //copySurfaceToSurface(srcSurface.surface, &r, tempSurface.surface, null);
+			
 		    SDL_WriteSurfacePixel(winSurface, x, y, 255, 0, 0, 250);
+			
 			//SDL_WriteSurfacePixel(winSurface, x, y, 255, 0, 0, 150);
         }
         writeln("After each ========");
+		
+		
+		
 		
         updateWindowSurface(window);
 
