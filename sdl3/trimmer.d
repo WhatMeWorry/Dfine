@@ -180,11 +180,11 @@ void trimEdges()
                     case SDLK_ESCAPE:
                         running = false;
                     break;
-					
+
                     case SDLK_L:
                         showLine = !showLine;
                     break;
-					
+
                     case SDLK_W: // trim top edge by 1 pixel 
 
                         // shrink surface by one row and allocate a new surface that is one row smaller
@@ -203,7 +203,7 @@ void trimEdges()
                     break;
                     
                     case SDLK_S: // trim bottom edge by 1 pixel 
-					
+
                         // shrink surface by one row and allocate a new surface that is one row smaller
                         FixedSurface tempSurface = FixedSurface(true);
                         tempSurface.surface = createSurface(srcSurface.surface.w, 
@@ -220,7 +220,7 @@ void trimEdges()
                     break;
 
                     case SDLK_A: // trim left edge by 1 pixel  
-					
+
                         FixedSurface tempSurface = FixedSurface(true);
                         tempSurface.surface = createSurface(srcSurface.surface.w-1, 
                                                             srcSurface.surface.h, 
@@ -310,64 +310,68 @@ void trimEdges()
         r.h = winSurface.h;
 
         copySurfaceToSurface(dstSurface.surface, &r, winSurface, null);  
-		
-		
-	
+
+
         //=================================================================================
         // code snippet to draw a solid red rectangle on window surface 
-			
 
-		
-		// just an arbitrary rectangle
-		
-		SDL_Rect rect = {100, 100, 200, 150}; // Top-left at (100, 100), 200 wide, 150 high
-		
-		SDL_PixelFormatDetails* details = getPixelFormatDetails(winSurface.format);
 
-		uint redColor = mapRGBA(details, null, 255, 0, 0, 255 );
+
+        // just an arbitrary rectangle
+
+        SDL_Rect rect = {100, 100, 200, 150}; // Top-left at (100, 100), 200 wide, 150 high
+
+        SDL_PixelFormatDetails* details = getPixelFormatDetails(winSurface.format);
+
+        uint redColor = mapRGBA(details, null, 255, 0, 0, 255 );
 
         fillSurfaceRect(winSurface, &rect, redColor);
         //=================================================================================		
 
 
-		// lines defined as 1 pixel thick rectangles
-		
-		SDL_Surface *horizontalLine = createSurface(winSurface.w, 1, winSurface.format);
-		SDL_Surface   *verticalLine = createSurface(1, winSurface.h, winSurface.format);
-		
-		SDL_PixelFormatDetails* d = getPixelFormatDetails(winSurface.format);
-		
-		uint greenColor = mapRGBA(d, null, 0, 255, 0, 255 );
-        fillSurfaceRect(horizontalLine, null, greenColor);		
-		
-		uint  blueColor = mapRGBA(d, null, 0, 0, 255, 255 ); 
-        fillSurfaceRect(verticalLine, null, blueColor);	
-		
+        // lines defined as 1 pixel thick rectangles
+
+        SDL_Surface *horizontalLine = createSurface(winSurface.w, 1, winSurface.format);
+        SDL_Surface   *verticalLine = createSurface(1, winSurface.h, winSurface.format);
+
+        int x = 50;
+        int y = 250;
+        
+        SDL_PixelFormatDetails* d = getPixelFormatDetails(winSurface.format);
+
+        SDL_Rect horRect = {0, y, winSurface.w, 1};
+        SDL_Rect verRect = {x, 0, 1, winSurface.h};
+        
+        uint greenColor = mapRGBA(d, null, 0, 255, 0, 255 );
+        fillSurfaceRect(winSurface, &horRect, greenColor);		
+
+        uint  blueColor = mapRGBA(d, null, 0, 0, 255, 255 ); 
+        fillSurfaceRect(winSurface, &verRect, blueColor);	
+
         if (showLine)
-		{ 			
-		    SDL_Rect line = SDL_Rect(0,50,winSurface.w,1);
-		    copySurfaceToSurface(horizontalLine, &line, winSurface, &line);    
-		
+        {
+            SDL_Rect line = SDL_Rect(0,50,winSurface.w,1);
+            //copySurfaceToSurface(horizontalLine, &line, winSurface, &line);    
+
         }
 //copySurfaceToSurfaceScaled(srcSurface.surface, null, dstSurface.surface, null, SDL_SCALEMODE_LINEAR);
 
-	
-		
+
         //=================================================================================
         // code snippet to draw a horizontal and vertical lines 		
 /+
-        int x = 50;		
+        int x = 50;
         writeln("Before each ========");
         foreach (y; 0..winSurface.h) 
         {
-		    SDL_Rect hLine = SDL_Rect(0,y,winSurface.w,1);
+            SDL_Rect hLine = SDL_Rect(0,y,winSurface.w,1);
             //copySurfaceToSurface(srcSurface.surface, &r, tempSurface.surface, null);
-			
-		    SDL_WriteSurfacePixel(winSurface, x, y, 255, 0, 0, 250);
+
+            SDL_WriteSurfacePixel(winSurface, x, y, 255, 0, 0, 250);
         }
         writeln("After each ========");
-+/		
-	
++/
+
         updateWindowSurface(window);
 
     }
