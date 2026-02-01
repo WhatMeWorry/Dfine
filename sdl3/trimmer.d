@@ -166,6 +166,14 @@ void trimEdges()
     //helpWin.displayHelpMenu(board.delta);
 
     bool showLine = false;
+	
+	int x = 50;
+    int y = 250;
+	
+    SDL_Rect horRect = {0, y, winSurface.w, 1};
+    SDL_Rect verRect = {x, 0, 1, winSurface.h};	
+	
+	
 
     bool running = true;
     while (running)
@@ -181,7 +189,25 @@ void trimEdges()
                         running = false;
                     break;
 
+                    case SDLK_I:
+                        //x++;
+						verRect.x++;
+                    break;
+					
+                    case SDLK_K:
+                        //x--;
+						verRect.x--;
+                    break;
+					
+                    case SDLK_J:
+                        horRect.y++;
+                    break;
+					
                     case SDLK_L:
+                        horRect.y--;
+                    break;
+					
+                    case SDLK_Q:
                         showLine = !showLine;
                     break;
 
@@ -334,13 +360,14 @@ void trimEdges()
         SDL_Surface *horizontalLine = createSurface(winSurface.w, 1, winSurface.format);
         SDL_Surface   *verticalLine = createSurface(1, winSurface.h, winSurface.format);
 
-        int x = 50;
-        int y = 250;
+
         
         SDL_PixelFormatDetails* d = getPixelFormatDetails(winSurface.format);
 
-        SDL_Rect horRect = {0, y, winSurface.w, 1};
-        SDL_Rect verRect = {x, 0, 1, winSurface.h};
+
+		
+		
+		writeln("horRect = ", horRect);
         
         uint greenColor = mapRGBA(d, null, 0, 255, 0, 255 );
         fillSurfaceRect(winSurface, &horRect, greenColor);		
