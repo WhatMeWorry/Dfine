@@ -88,30 +88,6 @@ struct ResizeableSurface  // changeable size and position
     }
 }
 
-
-/+
-    void renderAllSwatches(SDL_Renderer *renderer)
-    {
-        foreach(i, s; this.swatches)
-        {
-            SDL_SetTextureAlphaMod(s.texture, s.opacity);
-
-            SDL_RenderTextureRotated(renderer, s.texture, FULL_TEXTURE, &s.rect, s.angle, CENTER, SDL_FLIP_NONE);
-
-            if ((active == i) & borderActive)
-            {
-                ubyte r, g, b, a;
-                SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);  // save off the current color
-
-                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  // set color to red
-                SDL_RenderRect(renderer, &s.rect);                 // draw rectangular outline
-
-                SDL_SetRenderDrawColor(renderer, r, g, b, a);      // restore the previous color
-            }
-        }
-    }
-+/
-
 void enlarge(ref ResizeableSurface d)
 {
     d.surface.w += 1;
@@ -154,9 +130,18 @@ void trimEdges()
     // Home Samsung desktop 3840 x 2160
     // Work Lenovo desktop 2560 x 1600
 
-    FixedSurface srcSurface = FixedSurface("./images/WachA.png");
+	SDL_DisplayID primaryDisplay = SDL_GetPrimaryDisplay();
+	
+    const SDL_DisplayMode* desktopMode = SDL_GetDesktopDisplayMode(primaryDisplay);
 
-    
+    //if (SDL_GetDesktopDisplayMode(displayID, &mode)) 
+    //{
+        writeln("Display Resolution: ", desktopMode.w, "x", desktopMode.h);
+        writeln("Refresh Rate: ", desktopMode.refresh_rate);
+    //}
+
+    FixedSurface srcSurface = FixedSurface("./images/WachA.png");
+  
     ResizeableSurface dstSurface = ResizeableSurface(srcSurface.surface);  // the destination will the the window	
 
     SDL_Window *window = createWindow("Trimmer", 1500, 1500, cast(SDL_WindowFlags) 0); 
@@ -173,8 +158,6 @@ void trimEdges()
     SDL_Rect horRect = {0, y, winSurface.w, 1};
     SDL_Rect verRect = {x, 0, 1, winSurface.h};	
 	
-	
-
     bool running = true;
     while (running)
     {
@@ -189,21 +172,19 @@ void trimEdges()
                         running = false;
                     break;
 
-                    case SDLK_I:
-                        //x++;
+                    case SDLK_L:
 						verRect.x++;
                     break;
 					
-                    case SDLK_K:
-                        //x--;
+                    case SDLK_J:
 						verRect.x--;
                     break;
 					
-                    case SDLK_J:
+                    case SDLK_K:
                         horRect.y++;
                     break;
 					
-                    case SDLK_L:
+                    case SDLK_I:
                         horRect.y--;
                     break;
 					
@@ -337,11 +318,8 @@ void trimEdges()
 
         copySurfaceToSurface(dstSurface.surface, &r, winSurface, null);  
 
-
         //=================================================================================
         // code snippet to draw a solid red rectangle on window surface 
-
-
 
         // just an arbitrary rectangle
 
@@ -359,15 +337,8 @@ void trimEdges()
 
         SDL_Surface *horizontalLine = createSurface(winSurface.w, 1, winSurface.format);
         SDL_Surface   *verticalLine = createSurface(1, winSurface.h, winSurface.format);
-
-
-        
+       
         SDL_PixelFormatDetails* d = getPixelFormatDetails(winSurface.format);
-
-
-		
-		
-		writeln("horRect = ", horRect);
         
         uint greenColor = mapRGBA(d, null, 0, 255, 0, 255 );
         fillSurfaceRect(winSurface, &horRect, greenColor);		
@@ -381,29 +352,10 @@ void trimEdges()
             //copySurfaceToSurface(horizontalLine, &line, winSurface, &line);    
 
         }
-//copySurfaceToSurfaceScaled(srcSurface.surface, null, dstSurface.surface, null, SDL_SCALEMODE_LINEAR);
-
-
-        //=================================================================================
-        // code snippet to draw a horizontal and vertical lines 		
-/+
-        int x = 50;
-        writeln("Before each ========");
-        foreach (y; 0..winSurface.h) 
-        {
-            SDL_Rect hLine = SDL_Rect(0,y,winSurface.w,1);
-            //copySurfaceToSurface(srcSurface.surface, &r, tempSurface.surface, null);
-
-            SDL_WriteSurfacePixel(winSurface, x, y, 255, 0, 0, 250);
-        }
-        writeln("After each ========");
-+/
 
         updateWindowSurface(window);
-
     }
     SDL_Quit();
-
 }
 
 
