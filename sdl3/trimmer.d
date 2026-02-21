@@ -171,21 +171,19 @@ void trimEdges()
                     case SDLK_ESCAPE:
                         running = false;
                     break;
-
-                    case SDLK_L:
-						verRect.x++;
-                    break;
 					
-                    case SDLK_J:
-						verRect.x--;
-                    break;
-					
+                    case SDLK_I:        // move horizontal line up/down
+                        horRect.y--;
+                    break;					
                     case SDLK_K:
                         horRect.y++;
                     break;
 					
-                    case SDLK_I:
-                        horRect.y--;
+                    case SDLK_J:        // move verticalline left/right
+						verRect.x--;
+                    break;					
+                    case SDLK_L:
+						verRect.x++;
                     break;
 					
                     case SDLK_Q:
@@ -259,30 +257,22 @@ void trimEdges()
                         srcSurface.surface = tempSurface.surface;
                     break;
 
-
                     case SDLK_INSERT:
-                        //clearSurface(winSurface.surface, 1.0, 0.0, 0.0, 1.0);
                         enlarge(dstSurface);
                     break;
-
                     case SDLK_DELETE:
-                        //clearSurface(winSurface.surface, 1.0, 0.0, 0.0, 1.0);
                         shrink(dstSurface);
                     break;
-
 
                     case SDLK_LEFT:
                         dstSurface.moveLeft();
                     break;
-
                     case SDLK_RIGHT:
                         dstSurface.moveRight();
                     break;
-
                     case SDLK_UP:
                         dstSurface.moveUp();
                     break;
-
                     case SDLK_DOWN:
                         dstSurface.moveDown();
                     break;
@@ -292,7 +282,20 @@ void trimEdges()
                     break;
 
                     case SDLK_F12:
-                        //saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noSpaces ~ ".png");
+                        import std.datetime.systime : Clock;
+                        import std.stdio : writeln;
+						
+                        auto now = Clock.currTime();
+						
+                        // Example output: "2024-Feb-21 15:50:28.1234567-06:00"
+						
+						string temp = "./images/X" ~ now.toSimpleString() ~ ".png";
+						
+						import std.array : replace;
+						string result = replace(temp, ":", "_");
+						
+						writeln("result = ", result);
+                        saveSurfaceToPNGfile(srcSurface.surface, result);
                     break;
 
 
@@ -322,18 +325,19 @@ void trimEdges()
         // code snippet to draw a solid red rectangle on window surface 
 
         // just an arbitrary rectangle
-
+        
         SDL_Rect rect = {100, 100, 200, 150}; // Top-left at (100, 100), 200 wide, 150 high
 
         SDL_PixelFormatDetails* details = getPixelFormatDetails(winSurface.format);
 
         uint redColor = mapRGBA(details, null, 255, 0, 0, 255 );
 
-        fillSurfaceRect(winSurface, &rect, redColor);
+        //fillSurfaceRect(winSurface, &rect, redColor);
+		
         //=================================================================================		
 
 
-        // lines defined as 1 pixel thick rectangles
+        // lines are actually 1 pixel thick rectangles
 
         SDL_Surface *horizontalLine = createSurface(winSurface.w, 1, winSurface.format);
         SDL_Surface   *verticalLine = createSurface(1, winSurface.h, winSurface.format);
@@ -341,10 +345,10 @@ void trimEdges()
         SDL_PixelFormatDetails* d = getPixelFormatDetails(winSurface.format);
         
         uint greenColor = mapRGBA(d, null, 0, 255, 0, 255 );
-        fillSurfaceRect(winSurface, &horRect, greenColor);		
+        //fillSurfaceRect(winSurface, &horRect, greenColor);		
 
         uint  blueColor = mapRGBA(d, null, 0, 0, 255, 255 ); 
-        fillSurfaceRect(winSurface, &verRect, blueColor);	
+        //fillSurfaceRect(winSurface, &verRect, blueColor);	
 
         if (showLine)
         {

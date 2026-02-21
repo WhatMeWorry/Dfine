@@ -270,7 +270,6 @@ void saveSurfaceToPNGfile(SDL_Surface *surface, string file)
     }
 }
 
-
 void createSurface(int width, int height, SDL_PixelFormat format, SDL_Surface **surface)
 {
     *surface =  SDL_CreateSurface(width, height, format);
