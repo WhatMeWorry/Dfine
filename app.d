@@ -63,6 +63,7 @@ import tutorials;
 import helper_funcs;
 import cork_board;
 import trimmer;
+import quad_tree;
 
 
 /+
@@ -122,6 +123,9 @@ int main()
     SDL_Initialize();
 
     //no_renderer_02();  // ESC to exit
+	
+	quadrophenia();
+	exit(-1);
     
     trimEdges();
     exit(-1);
