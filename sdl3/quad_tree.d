@@ -117,7 +117,7 @@ public:
 		// To convert a range into a concrete array, you must explicitly call a function like .array on it.
 		import std.range : repeat, take;
 		auto indents = "    ".repeat().take(depth);  // Is indents a range?
-		
+		writeln(typeid(typeof(indents)));
 		import std.array : array;
 		auto arrayIndents = indents.array; // convert a range to concrete array, explicitly call a function like .array
 		
