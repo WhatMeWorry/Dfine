@@ -5,23 +5,40 @@ import std.math : abs;
 import std.container : Array;
 import std.stdio : writeln;
 import std.format;
+import std.range : repeat, take;
+import std.array : array, join;
 
-// Simple axis-aligned bounding box
 
-struct AABB
+alias T = int; // uint, float, double or whatever type you want 
+
+struct Center
 {
-    float x, y;     // center
-    float halfW, halfH;
+    T x;
+    T y;
+}
 
-    float left()   const @property { return x - halfW; }
-    float right()  const @property { return x + halfW; }
-    float top()    const @property { return y - halfH; }
-    float bottom() const @property { return y + halfH; }
+struct Half
+{
+    T w;  // width
+    T h;  // height
+}
 
-    bool containsPoint(float px, float py) const
+struct AABB  // Simple axis-aligned bounding box
+{
+	Center center;
+	Half   half;
+
+    T left()   const @property { return center.x - half.w; }
+    T right()  const @property { return center.x + half.w; }
+    T top()    const @property { return center.y - half.h; }
+    T bottom() const @property { return center.y + half.h; }
+
+    bool containsPoint(T px, T py) const
     {
-        return px >= left  && px <= right &&
-               py >= top   && py <= bottom;
+        return px >= left  && 
+		       px <= right && 
+			   py >= top   && 
+			   py <= bottom;
     }
 
     bool intersects(const AABB other) const
@@ -33,21 +50,20 @@ struct AABB
     }
 }
 
-
 // Generic Quadtree node
-// T = your payload type (e.g. GameObject*, size_t, struct, etc.)
+// P = your payload type (e.g. GameObject*, size_t, struct, etc.)
  
-class QuadTree(T)
+class QuadTree(P)
 {
-private:
+  private:
     AABB boundary;
     int capacity;
-    Array!T objects;
+    Array!P objects;
 
-    QuadTree!T nw, ne, sw, se; // children
+    QuadTree!P nw, ne, sw, se; // children
     bool divided = false;
 
-public:
+  public:
     this(AABB boundary, int capacity = 4)
     {
         this.boundary = boundary;
@@ -55,7 +71,7 @@ public:
     }
 
     /// Insert one object with its bounding box
-    bool insert(T item, AABB itemBounds)
+    bool insert(P item, AABB itemBounds)
     {
         // Not in this node?
         if (!boundary.intersects(itemBounds))
@@ -84,14 +100,15 @@ public:
     }
 
     /// Convenience overload when you just have center + radius
-    bool insert(T item, float cx, float cy, float radius)
+    bool insert(P,T)(P item, T x, T y, T radius)
     {
-        AABB box = AABB(cx, cy, radius, radius);
+	  //AABB(Center(c.x - h.w, c.y - h.h), Half( h.w, h.h))
+        AABB box = AABB(Center(x, y), Half(radius, radius));
         return insert(item, box);
     }
 
     /// Retrieve all objects that intersect the query range
-    void query(AABB range, ref Array!T found)
+    void query(AABB range, ref Array!P found)
     {
         if (!boundary.intersects(range))
             return;
@@ -113,26 +130,20 @@ public:
     /// Debugging helper
     void print(int depth = 0)
     {
-        // repeatedIndents is a range!!!
-		// To convert a range into a concrete array, you must explicitly call a function like .array on it.
-		import std.range : repeat, take;
-		auto indents = "    ".repeat().take(depth);  // Is indents a range?
-		writeln(typeid(typeof(indents)));
-		import std.array : array;
-		auto arrayIndents = indents.array; // convert a range to concrete array, explicitly call a function like .array
+		auto indents = "....".repeat().take(depth);  // indents is a range
 		
-		//writeln("arrayIndents = ", arrayIndents);
+		// writeln(typeid(typeof(indents)));
+		// std.range.Take!(std.range.Repeat!(immutable(char)[]).Repeat).Take
+		
+		auto arrayIndents = indents.array; // convert range to a concrete array, with function .array
 	
-        import std.array : join;
-		// Join without any separator
-        string combinedIndents = arrayIndents.join();
+        // writeln("arrayIndents = ", arrayIndents);
+		// arrayIndents = ["....", "...."]
 		
-        //writeln("combinedIndents = ", combinedIndents, "END");
-		
-
+        string stringIndents = arrayIndents.join();  // join without any separator
 	
-        writeln(combinedIndents, "QuadTree at ", boundary.x, ",", boundary.y,
-                " size ", boundary.halfW*2, "x", boundary.halfH*2,
+        writeln(stringIndents, "QuadTree at ", boundary.center.x, ",", boundary.center.y,
+                " size ", boundary.half.w * 2, "x", boundary.half.h * 2,
                 "  objects: ", objects.length);
 
         if (divided)
@@ -147,16 +158,17 @@ public:
 private:
     void subdivide()
     {
-        float halfW = boundary.halfW / 2;
-        float halfH = boundary.halfH / 2;
-        float x = boundary.x;
-        float y = boundary.y;
+	    Half h;
+        h.w = boundary.half.w / 2;
+        h.h = boundary.half.h / 2;
+		Center c;
+        c.x = boundary.center.x;
+        c.y = boundary.center.y;
 
-        nw = new QuadTree!T(AABB(x - halfW, y - halfH, halfW, halfH), capacity);
-        ne = new QuadTree!T(AABB(x + halfW, y - halfH, halfW, halfH), capacity);
-        sw = new QuadTree!T(AABB(x - halfW, y + halfH, halfW, halfH), capacity);
-        se = new QuadTree!T(AABB(x + halfW, y + halfH, halfW, halfH), capacity);
-
+        nw = new QuadTree!P(AABB(Center(c.x - h.w, c.y - h.h), Half( h.w, h.h)), capacity);	
+        ne = new QuadTree!P(AABB(Center(c.x + h.w, c.y - h.h), Half( h.w, h.h)), capacity);		
+		sw = new QuadTree!P(AABB(Center(c.x - h.w, c.y + h.h), Half( h.w, h.h)), capacity);	
+        se = new QuadTree!P(AABB(Center(c.x + h.w, c.y + h.h), Half( h.w, h.h)), capacity);	
         divided = true;
 
         // Redistribute existing objects
@@ -171,7 +183,8 @@ private:
             //   b) ask the object for its current AABB
             // For demo we just re-insert at center with zero size
             // (this is wrong in production!)
-            insert(obj, AABB(0,0,0,0)); // ← placeholder — replace!
+			
+            //insert(obj, AABB(0,0,0,0)); // ← placeholder — replace!
         }
     }
 }
@@ -193,16 +206,17 @@ struct Particle
 
 void quadrophenia()
 {
-    auto qt = new QuadTree!Particle(AABB(0, 0, 200, 200), 4);
+                                    //AABB(Center(c.x - h.w, c.y - h.h), Half( h.w, h.h)),
+    auto qt = new QuadTree!Particle( AABB(Center(x: 0, y: 0), Half(w: 200, h: 200)), 4);
 
     import std.random : uniform;
 
-    foreach (i; 0 .. 30)
+    foreach (i; 0 .. 25000)
     {
         float x = uniform(-180f, 180f);
         float y = uniform(-180f, 180f);
         auto p = Particle(x, y, i);
-        qt.insert(p, x, y, 5);  // small radius
+        qt.insert(p, cast(T) x, cast(T) y, 5);  // small radius
     }
 
     writeln("Quadtree structure:");
@@ -211,8 +225,11 @@ void quadrophenia()
     // Query example
     writeln("\nObjects in region [-50..50, -50..50]:");
     Array!Particle results;
-    qt.query(AABB(0, 0, 50, 50), results);
-
+    //qt.query(AABB(0, 0, 50, 50), results);
+	//AABB(Center(x: 0, y: 0), Half(w: 200, h: 200))
+    qt.query(AABB(Center(x: 0, y: 0), Half(w: 50, h: 50)), results);
+	
     foreach (p; results[])
         writeln("  ", p);
+
 }
