@@ -55,7 +55,7 @@ struct AABB  // Simple axis-aligned bounding box
  
 class QuadTree(P)
 {
-  private:
+    private:
     AABB boundary;
     int capacity;
     Array!P objects;
@@ -63,14 +63,14 @@ class QuadTree(P)
     QuadTree!P nw, ne, sw, se; // children
     bool divided = false;
 
-  public:
+    public:
     this(AABB boundary, int capacity = 4)
     {
         this.boundary = boundary;
         this.capacity = capacity;
     }
 
-    /// Insert one object with its bounding box
+    // Insert one object with its bounding box
     bool insert(P item, AABB itemBounds)
     {
         // Not in this node?
@@ -99,15 +99,14 @@ class QuadTree(P)
         return true;
     }
 
-    /// Convenience overload when you just have center + radius
+    // Convenience overload when you just have center + radius
     bool insert(P,T)(P item, T x, T y, T radius)
     {
-	  //AABB(Center(c.x - h.w, c.y - h.h), Half( h.w, h.h))
         AABB box = AABB(Center(x, y), Half(radius, radius));
         return insert(item, box);
     }
 
-    /// Retrieve all objects that intersect the query range
+    // Retrieve all objects that intersect the query range
     void query(AABB range, ref Array!P found)
     {
         if (!boundary.intersects(range))
@@ -115,7 +114,10 @@ class QuadTree(P)
 
         // Check objects in this node
         foreach (obj; objects[])
+		{
+            writeln("obj = ", obj);
             found.insert(obj);
+        }
 
         // Recurse into children
         if (divided)
@@ -127,7 +129,7 @@ class QuadTree(P)
         }
     }
 
-    /// Debugging helper
+    // Debugging helper
     void print(int depth = 0)
     {
 		auto indents = "....".repeat().take(depth);  // indents is a range
@@ -141,6 +143,9 @@ class QuadTree(P)
 		// arrayIndents = ["....", "...."]
 		
         string stringIndents = arrayIndents.join();  // join without any separator
+		
+		// writeln("stringIndents = ", stringIndents);
+		// stringIndents = ............
 	
         writeln(stringIndents, "QuadTree at ", boundary.center.x, ",", boundary.center.y,
                 " size ", boundary.half.w * 2, "x", boundary.half.h * 2,
@@ -155,7 +160,7 @@ class QuadTree(P)
         }
     }
 
-private:
+    private:
     void subdivide()
     {
 	    Half h;
@@ -171,6 +176,7 @@ private:
         se = new QuadTree!P(AABB(Center(c.x + h.w, c.y + h.h), Half( h.w, h.h)), capacity);	
         divided = true;
 
+        /+
         // Redistribute existing objects
         auto oldObjects = objects.dup;
         objects.clear();
@@ -186,6 +192,7 @@ private:
 			
             //insert(obj, AABB(0,0,0,0)); // ← placeholder — replace!
         }
+		+/
     }
 }
 
@@ -208,10 +215,13 @@ void quadrophenia()
 {
                                     //AABB(Center(c.x - h.w, c.y - h.h), Half( h.w, h.h)),
     auto qt = new QuadTree!Particle( AABB(Center(x: 0, y: 0), Half(w: 200, h: 200)), 4);
-
+	writeln("qt = ", qt);
+	qt.print();
+    writeln("======================");
+	
     import std.random : uniform;
 
-    foreach (i; 0 .. 25000)
+    foreach (i; 0..7)
     {
         float x = uniform(-180f, 180f);
         float y = uniform(-180f, 180f);
@@ -227,9 +237,55 @@ void quadrophenia()
     Array!Particle results;
     //qt.query(AABB(0, 0, 50, 50), results);
 	//AABB(Center(x: 0, y: 0), Half(w: 200, h: 200))
+	
     qt.query(AABB(Center(x: 0, y: 0), Half(w: 50, h: 50)), results);
 	
     foreach (p; results[])
         writeln("  ", p);
 
-}
+    import bindbc.sdl;  // SDL_* declarations
+	import sdl_funcs_with_error_handling;
+
+    SDL_Window   *window = null;
+    SDL_Renderer *renderer = null;
+    SDL_Texture  *texture = null;
+    bool running = true;
+
+    createWindowAndRenderer("QuadTree", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE)
+            {
+                running = false;
+            }
+        }
+        
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
+        SDL_RenderClear(renderer); // Clear the renderer
+        
+        SDL_FRect rect = {100.0f, 100.0f, 200.0f, 150.0f}; // x, y, width, height
+        SDL_FRect rect1 = {200.0f, 200.0f, 200.0f, 150.0f};
+        
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // green
+
+        SDL_RenderFillRect(renderer, &rect); // Draw the filled rectangle
+        
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // red
+        
+        SDL_RenderFillRect(renderer, &rect1); // Draw the filled rectangle
+        
+        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // blue
+        
+        SDL_RenderLine(renderer, 0, 0, 640, 480);
+            
+        SDL_RenderPresent(renderer); // Present the rendered content
+    }
+    SDL_Quit();
+}		
+		
+		
+		
