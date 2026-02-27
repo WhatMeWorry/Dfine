@@ -164,15 +164,40 @@ class QuadTree(P)
     
     void drawBox(SDL_Renderer *renderer, int depth = 0)
     {
-        SDL_FRect rect = {100.0f, 100.0f, 500.0f, 350.0f}; // x, y, width, height
-        //rect.x = boundary.center.x - boundary.half.w;
-        //rect.y = boundary.center.y - boundary.half.h;
-        //rect.w = boundary.half.w * 2;
-        //rect.h = boundary.half.h * 2;
-        writeln("rect = ", rect);
+        SDL_FRect rect; // = {100.0f, 100.0f, 500.0f, 350.0f}; // x, y, width, height
+		//writeln("boundary.center = ", boundary.center);
+		//writeln("boundary.half = ", boundary.half);
+		
+		// convert center of box to SDL3 Rect coordinates
+		
+		struct UpperLeftCorner
+        {
+            T x;
+            T y;
+        }
+		
+		UpperLeftCorner upperLeftCorner;
+		
+		upperLeftCorner.x = boundary.center.x - boundary.half.w;
+		upperLeftCorner.y = boundary.center.y - boundary.half.h;
+		
+        rect.x = upperLeftCorner.x + boundary.half.w;
+        rect.y = upperLeftCorner.y + boundary.half.h;
+        rect.w = boundary.half.w * 2;
+        rect.h = boundary.half.h * 2;
+        //writeln("rect = ", rect);
         SDL_SetRenderDrawColor(renderer, 0, 0, 122, 255); // blue
 
-        SDL_RenderFillRect(renderer, &rect); // Draw the filled rectangle
+        renderRect(renderer, &rect);
+		
+        if (divided)
+        {
+            nw.drawBox(renderer, depth + 1);
+            ne.drawBox(renderer, depth + 1);
+            sw.drawBox(renderer, depth + 1);
+            se.drawBox(renderer, depth + 1);
+        }		
+		
     }
 
     private:
@@ -228,18 +253,17 @@ struct Particle
 
 void quadrophenia()
 {
-                                    //AABB(Center(c.x - h.w, c.y - h.h), Half( h.w, h.h)),
-    auto qt = new QuadTree!Particle( AABB(Center(x: 0, y: 0), Half(w: 500, h: 500)), 4);
-    writeln("qt = ", qt);
-    qt.print();
-    writeln("======================");
+    auto qt = new QuadTree!Particle( AABB(Center(x: 0, y: 0), Half(w: 1000, h: 1000)), 4);
 
     import std.random : uniform;
 
-    foreach (i; 0..7)
+    foreach (i; 0..20)
     {
-        float x = uniform(-180f, 180f);
-        float y = uniform(-180f, 180f);
+        //float x = uniform(-180f, 180f);
+        //float y = uniform(-180f, 180f);
+        float x = uniform(-500f, 500f);
+        float y = uniform(-500f, 500f);		
+		
         auto p = Particle(x, y, i);
         qt.insert(p, cast(T) x, cast(T) y, 5);  // small radius
     }
@@ -257,7 +281,6 @@ void quadrophenia()
 
     foreach (p; results[])
         writeln("  ", p);
-
 
 
     SDL_Window   *window = null;
@@ -279,27 +302,10 @@ void quadrophenia()
                 running = false;
             }
         }
-        
-        
-        
+              
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
         SDL_RenderClear(renderer); // Clear the renderer
         
-        SDL_FRect rect = {100.0f, 100.0f, 200.0f, 150.0f}; // x, y, width, height
-        SDL_FRect rect1 = {200.0f, 200.0f, 200.0f, 150.0f};
-        
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // green
-
-        SDL_RenderFillRect(renderer, &rect); // Draw the filled rectangle
-        
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // red
-        
-        SDL_RenderFillRect(renderer, &rect1); // Draw the filled rectangle
-        
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // blue
-        
-        SDL_RenderLine(renderer, 0, 0, 640, 480);
-
         qt.drawBox(renderer);
             
         SDL_RenderPresent(renderer); // Present the rendered content

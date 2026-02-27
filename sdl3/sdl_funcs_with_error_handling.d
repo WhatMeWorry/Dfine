@@ -108,6 +108,23 @@ import helper_funcs : displayRect;
 
 
 
+void renderFillRect(SDL_Renderer *renderer, const SDL_FRect *rect)
+{
+    if (SDL_RenderFillRect(renderer, rect) == false)
+    {
+        throw new Exception("SDL_RenderFillRect failed: " ~ to!string(SDL_GetError()));
+    }
+}
+    
+
+void renderRect(SDL_Renderer *renderer, const SDL_FRect *rect)
+{
+    if (SDL_RenderRect(renderer, rect) == false)
+    {
+        throw new Exception("SDL_RenderRect failed: " ~ to!string(SDL_GetError()));
+    }
+}
+
 void getWindowMaximumSize(SDL_Window *window, int *w, int *h)
 {
     int width;  int height;
