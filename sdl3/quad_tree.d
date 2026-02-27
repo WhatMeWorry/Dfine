@@ -8,7 +8,9 @@ import std.format;
 import std.range : repeat, take;
 import std.array : array, join;
 
-
+import bindbc.sdl;  // SDL_* declarations
+import sdl_funcs_with_error_handling;
+    
 alias T = int; // uint, float, double or whatever type you want 
 
 struct Center
@@ -159,6 +161,19 @@ class QuadTree(P)
             se.print(depth + 1);
         }
     }
+    
+    void drawBox(SDL_Renderer *renderer, int depth = 0)
+    {
+        SDL_FRect rect = {100.0f, 100.0f, 500.0f, 350.0f}; // x, y, width, height
+        //rect.x = boundary.center.x - boundary.half.w;
+        //rect.y = boundary.center.y - boundary.half.h;
+        //rect.w = boundary.half.w * 2;
+        //rect.h = boundary.half.h * 2;
+        writeln("rect = ", rect);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 122, 255); // blue
+
+        SDL_RenderFillRect(renderer, &rect); // Draw the filled rectangle
+    }
 
     private:
     void subdivide()
@@ -214,11 +229,11 @@ struct Particle
 void quadrophenia()
 {
                                     //AABB(Center(c.x - h.w, c.y - h.h), Half( h.w, h.h)),
-    auto qt = new QuadTree!Particle( AABB(Center(x: 0, y: 0), Half(w: 200, h: 200)), 4);
-	writeln("qt = ", qt);
-	qt.print();
+    auto qt = new QuadTree!Particle( AABB(Center(x: 0, y: 0), Half(w: 500, h: 500)), 4);
+    writeln("qt = ", qt);
+    qt.print();
     writeln("======================");
-	
+
     import std.random : uniform;
 
     foreach (i; 0..7)
@@ -236,22 +251,23 @@ void quadrophenia()
     writeln("\nObjects in region [-50..50, -50..50]:");
     Array!Particle results;
     //qt.query(AABB(0, 0, 50, 50), results);
-	//AABB(Center(x: 0, y: 0), Half(w: 200, h: 200))
-	
+    //AABB(Center(x: 0, y: 0), Half(w: 200, h: 200))
+
     qt.query(AABB(Center(x: 0, y: 0), Half(w: 50, h: 50)), results);
-	
+
     foreach (p; results[])
         writeln("  ", p);
 
-    import bindbc.sdl;  // SDL_* declarations
-	import sdl_funcs_with_error_handling;
+
 
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
     SDL_Texture  *texture = null;
     bool running = true;
 
-    createWindowAndRenderer("QuadTree", 640, 480, cast(SDL_WindowFlags) 0, &window, &renderer);
+    int winWidth = qt.boundary.half.w * 2;
+    int winHeight = qt.boundary.half.h * 2;
+    createWindowAndRenderer("QuadTree", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     while (running)
     {
@@ -263,6 +279,8 @@ void quadrophenia()
                 running = false;
             }
         }
+        
+        
         
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
         SDL_RenderClear(renderer); // Clear the renderer
@@ -281,6 +299,8 @@ void quadrophenia()
         SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // blue
         
         SDL_RenderLine(renderer, 0, 0, 640, 480);
+
+        qt.drawBox(renderer);
             
         SDL_RenderPresent(renderer); // Present the rendered content
     }
