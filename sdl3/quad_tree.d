@@ -27,8 +27,8 @@ struct Half
 
 struct AABB  // Simple axis-aligned bounding box
 {
-	Center center;
-	Half   half;
+    Center center;
+    Half   half;
 
     T left()   const @property { return center.x - half.w; }
     T right()  const @property { return center.x + half.w; }
@@ -38,9 +38,9 @@ struct AABB  // Simple axis-aligned bounding box
     bool containsPoint(T px, T py) const
     {
         return px >= left  && 
-		       px <= right && 
-			   py >= top   && 
-			   py <= bottom;
+               px <= right && 
+               py >= top   && 
+               py <= bottom;
     }
 
     bool intersects(const AABB other) const
@@ -101,12 +101,16 @@ class QuadTree(P)
         return true;
     }
 
+
+
     // Convenience overload when you just have center + radius
     bool insert(P,T)(P item, T x, T y, T radius)
     {
         AABB box = AABB(Center(x, y), Half(radius, radius));
         return insert(item, box);
     }
+
+
 
     // Retrieve all objects that intersect the query range
     void query(AABB range, ref Array!P found)
@@ -116,7 +120,7 @@ class QuadTree(P)
 
         // Check objects in this node
         foreach (obj; objects[])
-		{
+        {
             writeln("obj = ", obj);
             found.insert(obj);
         }
@@ -131,24 +135,51 @@ class QuadTree(P)
         }
     }
 
+
+
+    // Retrieve all objects in quadtree
+    void returnAll(AABB range, ref Array!P found)
+    {
+        if (!boundary.intersects(range))
+            return;
+
+        // Check objects in this node
+        foreach (obj; objects[])
+        {
+            writeln("obj = ", obj);
+            found.insert(obj);
+        }
+
+        // Recurse into children
+        if (divided)
+        {
+            nw.query(range, found);
+            ne.query(range, found);
+            sw.query(range, found);
+            se.query(range, found);
+        }
+    }
+
+
+
     // Debugging helper
     void print(int depth = 0)
     {
-		auto indents = "....".repeat().take(depth);  // indents is a range
-		
-		// writeln(typeid(typeof(indents)));
-		// std.range.Take!(std.range.Repeat!(immutable(char)[]).Repeat).Take
-		
-		auto arrayIndents = indents.array; // convert range to a concrete array, with function .array
-	
+        auto indents = "....".repeat().take(depth);  // indents is a range
+
+        // writeln(typeid(typeof(indents)));
+        // std.range.Take!(std.range.Repeat!(immutable(char)[]).Repeat).Take
+
+        auto arrayIndents = indents.array; // convert range to a concrete array, with function .array
+
         // writeln("arrayIndents = ", arrayIndents);
-		// arrayIndents = ["....", "...."]
-		
+        // arrayIndents = ["....", "...."]
+
         string stringIndents = arrayIndents.join();  // join without any separator
-		
-		// writeln("stringIndents = ", stringIndents);
-		// stringIndents = ............
-	
+
+        // writeln("stringIndents = ", stringIndents);
+        // stringIndents = ............
+
         writeln(stringIndents, "QuadTree at ", boundary.center.x, ",", boundary.center.y,
                 " size ", boundary.half.w * 2, "x", boundary.half.h * 2,
                 "  objects: ", objects.length);
@@ -161,58 +192,59 @@ class QuadTree(P)
             se.print(depth + 1);
         }
     }
+
+
+
     
     void drawBox(SDL_Renderer *renderer, int depth = 0)
     {
         SDL_FRect rect; // = {100.0f, 100.0f, 500.0f, 350.0f}; // x, y, width, height
-		//writeln("boundary.center = ", boundary.center);
-		//writeln("boundary.half = ", boundary.half);
-		
-		// convert center of box to SDL3 Rect coordinates
-		
-		struct UpperLeftCorner
+
+        // convert center of box to SDL3 Rect coordinates
+
+        struct UpperLeftCorner
         {
             T x;
             T y;
         }
-		
-		UpperLeftCorner upperLeftCorner;
-		
-		upperLeftCorner.x = boundary.center.x - boundary.half.w;
-		upperLeftCorner.y = boundary.center.y - boundary.half.h;
-		
+
+        UpperLeftCorner upperLeftCorner;
+
+        upperLeftCorner.x = boundary.center.x - boundary.half.w;
+        upperLeftCorner.y = boundary.center.y - boundary.half.h;
+
         rect.x = upperLeftCorner.x + boundary.half.w;
         rect.y = upperLeftCorner.y + boundary.half.h;
         rect.w = boundary.half.w * 2;
         rect.h = boundary.half.h * 2;
-        //writeln("rect = ", rect);
+
         SDL_SetRenderDrawColor(renderer, 0, 0, 122, 255); // blue
 
         renderRect(renderer, &rect);
-		
+
         if (divided)
         {
             nw.drawBox(renderer, depth + 1);
             ne.drawBox(renderer, depth + 1);
             sw.drawBox(renderer, depth + 1);
             se.drawBox(renderer, depth + 1);
-        }		
-		
+        }
+
     }
 
     private:
     void subdivide()
     {
-	    Half h;
+        Half h;
         h.w = boundary.half.w / 2;
         h.h = boundary.half.h / 2;
-		Center c;
+        Center c;
         c.x = boundary.center.x;
         c.y = boundary.center.y;
 
         nw = new QuadTree!P(AABB(Center(c.x - h.w, c.y - h.h), Half( h.w, h.h)), capacity);	
         ne = new QuadTree!P(AABB(Center(c.x + h.w, c.y - h.h), Half( h.w, h.h)), capacity);		
-		sw = new QuadTree!P(AABB(Center(c.x - h.w, c.y + h.h), Half( h.w, h.h)), capacity);	
+        sw = new QuadTree!P(AABB(Center(c.x - h.w, c.y + h.h), Half( h.w, h.h)), capacity);	
         se = new QuadTree!P(AABB(Center(c.x + h.w, c.y + h.h), Half( h.w, h.h)), capacity);	
         divided = true;
 
@@ -229,10 +261,10 @@ class QuadTree(P)
             //   b) ask the object for its current AABB
             // For demo we just re-insert at center with zero size
             // (this is wrong in production!)
-			
-            //insert(obj, AABB(0,0,0,0)); // ← placeholder — replace!
+            
+            //insert(obj, AABB(0,0,0,0)); // placeholder - replace!
         }
-		+/
+        +/
     }
 }
 
@@ -242,29 +274,49 @@ class QuadTree(P)
 
 struct Particle
 {
-    float x, y;
-    int id;
+    Center  center;
+    T       apothem;  // distance from the center to the midpoint of a side, aka inradius
+    int     id;
+    SDL_Rect rect;
 
     string toString() const
     {
-        return "P%d(%.1f,%.1f)".format(id, x, y);
+        return "P%d(%.1f,%.1f)".format(id, center.x, center.y);
     }
 }
 
+
+
 void quadrophenia()
 {
-    auto qt = new QuadTree!Particle( AABB(Center(x: 0, y: 0), Half(w: 1000, h: 1000)), 4);
+    enum 
+    {
+        halfWidth = 600,
+        halfHeight = 500,
+        inradius = 10
+    }
+    auto qt = new QuadTree!Particle( AABB(Center(x: 0, y: 0), Half(w: halfWidth, h: halfHeight)), 4);
 
     import std.random : uniform;
 
-    foreach (i; 0..20)
+    foreach (i; 0..400)
     {
         //float x = uniform(-180f, 180f);
         //float y = uniform(-180f, 180f);
-        float x = uniform(-500f, 500f);
-        float y = uniform(-500f, 500f);		
-		
-        auto p = Particle(x, y, i);
+        float x = uniform(-halfWidth, halfWidth);
+        float y = uniform(-halfHeight, halfHeight);
+
+        auto p = Particle(Center(x: cast(T) x,
+                                 y: cast(T) y), 
+                          apothem: inradius, 
+                          id: i,
+                          SDL_Rect(x: cast(T) x - inradius,
+                                   y: cast(T) y - inradius,
+                                   w: 2 * inradius,
+                                   h: 2 * inradius)
+                         );
+                                 
+                                 
         qt.insert(p, cast(T) x, cast(T) y, 5);  // small radius
     }
 
@@ -272,12 +324,16 @@ void quadrophenia()
     qt.print();
 
     // Query example
+
     writeln("\nObjects in region [-50..50, -50..50]:");
     Array!Particle results;
+
     //qt.query(AABB(0, 0, 50, 50), results);
     //AABB(Center(x: 0, y: 0), Half(w: 200, h: 200))
 
-    qt.query(AABB(Center(x: 0, y: 0), Half(w: 50, h: 50)), results);
+    //qt.query(AABB(Center(x: 0, y: 0), Half(w: 50, h: 50)), results);
+
+    qt.query(AABB(Center(x: 0, y: 0), Half(w: halfWidth, h: halfHeight)), results);
 
     foreach (p; results[])
         writeln("  ", p);
@@ -290,6 +346,7 @@ void quadrophenia()
 
     int winWidth = qt.boundary.half.w * 2;
     int winHeight = qt.boundary.half.h * 2;
+
     createWindowAndRenderer("QuadTree", winWidth, winHeight, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     while (running)
@@ -307,11 +364,25 @@ void quadrophenia()
         SDL_RenderClear(renderer); // Clear the renderer
         
         qt.drawBox(renderer);
-            
+
+        foreach (p; results[])
+        {
+            SDL_SetRenderDrawColor(renderer, 0, 100, 122, 255); // ???
+            //writeln("p.rect = ", p.rect);
+            SDL_FRect re;
+            re.x = p.rect.x;
+            re.y = p.rect.y;
+            re.w = p.rect.w;
+            re.h = p.rect.h;
+            writeln("re=", re);
+            renderFillRect(renderer, &re);
+        }
+        //SDL_FRect r = SDL_FRect(x:0, y:0, w:300, h:300);
+        //renderFillRect(renderer, &r);
+
         SDL_RenderPresent(renderer); // Present the rendered content
     }
     SDL_Quit();
-}		
-		
-		
-		
+}
+
+

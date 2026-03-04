@@ -333,7 +333,7 @@ void trimEdges()
         uint redColor = mapRGBA(details, null, 255, 0, 0, 255 );
 
         //fillSurfaceRect(winSurface, &rect, redColor);
-		
+
         //=================================================================================		
 
 
