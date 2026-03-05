@@ -7,6 +7,7 @@ import std.stdio : writeln;
 import std.format;
 import std.range : repeat, take;
 import std.array : array, join;
+import core.stdc.stdlib : exit;
 
 import bindbc.sdl;  // SDL_* declarations
 import sdl_funcs_with_error_handling;
@@ -180,7 +181,7 @@ class QuadTree(P)
         // writeln("stringIndents = ", stringIndents);
         // stringIndents = ............
 
-        writeln(stringIndents, "QuadTree at ", boundary.center.x, ",", boundary.center.y,
+        writeln(stringIndents, "QuadTree at center ", boundary.center.x, ",", boundary.center.y,
                 " size ", boundary.half.w * 2, "x", boundary.half.h * 2,
                 "  objects: ", objects.length);
 
@@ -193,8 +194,15 @@ class QuadTree(P)
         }
     }
 
+    // XYWH vs. XYXY: XYWH uses (x, y, width, height), whereas XYXY uses (x1, y1, x2, y2) or top-left and bottom-right corners.
+    // CXCYWH: A variant that uses the center point (cx, cy) instead of the top-left corner.
 
-
+    SDL_FRect convertCXCYWHtoXYWH(SDL_FRect from)
+    {
+        SDL_FRect to;
+        //to.
+        return to;
+    }
     
     void drawBox(SDL_Renderer *renderer, int depth = 0)
     {
@@ -209,16 +217,22 @@ class QuadTree(P)
         }
 
         UpperLeftCorner upperLeftCorner;
+        
+        writeln("boundary.half = ", boundary.half);
 
         upperLeftCorner.x = boundary.center.x - boundary.half.w;
         upperLeftCorner.y = boundary.center.y - boundary.half.h;
+        
+        writeln("upperLeftCorner = ", upperLeftCorner);
 
-        rect.x = upperLeftCorner.x + boundary.half.w;
-        rect.y = upperLeftCorner.y + boundary.half.h;
-        rect.w = boundary.half.w * 2;
-        rect.h = boundary.half.h * 2;
-
+        rect.x = upperLeftCorner.x + boundary.half.w + 1;
+        rect.y = upperLeftCorner.y + boundary.half.h + 1;
+        rect.w = boundary.half.w * 2 - 1;
+        rect.h = boundary.half.h * 2 - 1;
+        writeln("rect = ", rect);
         SDL_SetRenderDrawColor(renderer, 0, 0, 122, 255); // blue
+
+        //SDL_FRect xywh = convertCXCYWHtoXYWH(rect);
 
         renderRect(renderer, &rect);
 
@@ -274,10 +288,10 @@ class QuadTree(P)
 
 struct Particle
 {
-    Center  center;
-    T       apothem;  // distance from the center to the midpoint of a side, aka inradius
-    int     id;
-    SDL_Rect rect;
+    Center    center;
+    T         apothem;  // distance from the center to the midpoint of a side, aka inradius
+    int       id;
+    SDL_FRect rect;
 
     string toString() const
     {
@@ -293,13 +307,14 @@ void quadrophenia()
     {
         halfWidth = 600,
         halfHeight = 500,
-        inradius = 10
+        inradius = 10,
+        numParticles = 25
     }
     auto qt = new QuadTree!Particle( AABB(Center(x: 0, y: 0), Half(w: halfWidth, h: halfHeight)), 4);
 
     import std.random : uniform;
 
-    foreach (i; 0..400)
+    foreach (i; 0..numParticles)
     {
         //float x = uniform(-180f, 180f);
         //float y = uniform(-180f, 180f);
@@ -310,10 +325,10 @@ void quadrophenia()
                                  y: cast(T) y), 
                           apothem: inradius, 
                           id: i,
-                          SDL_Rect(x: cast(T) x - inradius,
-                                   y: cast(T) y - inradius,
-                                   w: 2 * inradius,
-                                   h: 2 * inradius)
+                          SDL_FRect(x: cast(T) x - inradius,
+                                    y: cast(T) y - inradius,
+                                    w: 2 * inradius,
+                                    h: 2 * inradius)
                          );
                                  
                                  
@@ -335,9 +350,10 @@ void quadrophenia()
 
     qt.query(AABB(Center(x: 0, y: 0), Half(w: halfWidth, h: halfHeight)), results);
 
-    foreach (p; results[])
-        writeln("  ", p);
+    foreach (int i, p; results[])
+        writeln("  ", i, "  ", p);
 
+    writeln("results.length = ", results.length);
 
     SDL_Window   *window = null;
     SDL_Renderer *renderer = null;
@@ -359,28 +375,22 @@ void quadrophenia()
                 running = false;
             }
         }
-              
+
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // white screen  
         SDL_RenderClear(renderer); // Clear the renderer
         
         qt.drawBox(renderer);
 
+        
         foreach (p; results[])
         {
             SDL_SetRenderDrawColor(renderer, 0, 100, 122, 255); // ???
-            //writeln("p.rect = ", p.rect);
-            SDL_FRect re;
-            re.x = p.rect.x;
-            re.y = p.rect.y;
-            re.w = p.rect.w;
-            re.h = p.rect.h;
-            writeln("re=", re);
-            renderFillRect(renderer, &re);
+            SDL_FRect r = p.rect;
+            renderFillRect(renderer, &r);
         }
-        //SDL_FRect r = SDL_FRect(x:0, y:0, w:300, h:300);
-        //renderFillRect(renderer, &r);
-
+writeln("results.length = ", results.length);
         SDL_RenderPresent(renderer); // Present the rendered content
+        exit(-1);
     }
     SDL_Quit();
 }
