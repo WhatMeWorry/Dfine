@@ -41,12 +41,6 @@ void load_sdl_libraries()
            SDL_VERSIONNUM_MAJOR(versions.compiled), 
            SDL_VERSIONNUM_MINOR(versions.compiled), 
            SDL_VERSIONNUM_MICRO(versions.compiled));
-           
-    //writefln("Linked SDL version: %d.%d.%d", 
-    //       SDL_VERSIONNUM_MAJOR(versions.linked),
-    //       SDL_VERSIONNUM_MINOR(versions.linked),
-    //       SDL_VERSIONNUM_MICRO(versions.linked));
-
 
     //string appPath = dirName(thisExePath());
 
@@ -61,19 +55,62 @@ void load_sdl_libraries()
     string pathToLibs = parentDirectoryOfThisPath ~ `\` ~ "libraries" ~ `\`;
     writeln("pathToLibs = ", pathToLibs);
 
-    string pathAndFileName = pathToLibs ~ "SDL3.dll";
+    //string pathAndFileName = pathToLibs ~ "SDL3_3_2_10.dll";   // 2,396 KB  version 3.2.10
+    string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";  // 2,725 KB  version 3.4.2
     
     auto sdl = loadSDL(pathAndFileName.toStringz());
     writeln("loadSDL returned: ", sdl);
     
     //SDL_GetVersion(&v);
     //writeln("SDL version loaded is: ", v.major, ".", v.minor, ".", v.patch);
+    
+    // global variable for sdl;
+    LoadMsg ret;
+    
+    version(Windows)
+    {
+        writeln("Searching for SDL on Windows");
+        ret = loadSDL(pathAndFileName.toStringz());
+        if(ret != LoadMsg.success)
+        {
+            writeln("Falling back on Windows to find SDL2.dll");
+        }
+    }
+    version(OSX)
+    {
+        writeln("Searching for SDL on Mac");
+        ret = loadSDL();
+    }
+    version(linux)
+    { 
+        writeln("Searching for SDL on Linux");
+        ret = loadSDL();
+    }
+    
+    // Error if SDL cannot be loaded
+    if(ret == LoadMsg.noLibrary)
+    {
+        writeln("error no library found");    
+    }
+    if(ret == LoadMsg.badLibrary)
+    {
+        writeln("Eror badLibrary, missing symbols, perhaps an older or very new version of SDL is causing the problem?");
+    }
+
+    import std.conv;
+    int sdlversion = SDL_GetVersion();
+    writeln(sdlversion);
+    string msg = "Your SDL version loaded was: " ~
+                 to!string(SDL_VERSIONNUM_MAJOR(sdlversion)) ~ "." ~
+                 to!string(SDL_VERSIONNUM_MINOR(sdlversion)) ~ "." ~
+                 to!string(SDL_VERSIONNUM_MICRO(sdlversion));
+    writeln(msg);  
 
 
     auto sdlInit = SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-    writeln("SDL_Init returned (0 is success): ", sdlInit);
+    writeln("SDL_Init returned (true is success): ", sdlInit);
 
-
+/+
     pathAndFileName = pathToLibs ~ "SDL3_image.dll";
     auto image = loadSDLImage(pathAndFileName.toStringz());
     
@@ -122,4 +159,5 @@ void load_sdl_libraries()
     pathAndFileName = pathToLibs ~ "SDL3_net.dll";
     auto net = loadSDLNet(pathAndFileName.toStringz());
     writeln("loadSDLNet returned: ", net);
++/
 }
