@@ -1,36 +1,36 @@
-name "dfine"
+name "dfine_project"
 description "A minimal D application."
 authors "Kyle Heaser"
 copyright "Copyright © 2024, Kyle Heaser"
 license "Zlib"
 
-//dependency "bindbc-sdl" version="~>1.4.7"
+targetPath "."
+targetType "executable"
+targetName "dfine"        // By default, DUB uses the package name as the executable name.
 
 dependency "bindbc-sdl" version="~>2.2.2" //SDL3
 
+versions "SDL_Image_3_2"
+
+//versions "SDL_Image_3_2" "SDL_3_4" "SDL_Image" "SDL_TTF"
+
+
 //buildRequirements "silenceDeprecations"
-
-//sourceFiles "app.d" "honeycomb.d" "select_hex.d"
-
-
-sourceFiles "apptest.d"
-
-sourcePaths "libraries" // lld-link: error: undefined symbol: _D9libraries18load_sdl_libraries12__ModuleInfoZ
-
-// By default, DUB uses the package name as the executable name.
-
-name "Dfine"
-targetType "executable"
-targetName "dfine"
 
 // sourceFiles is a configuration setting in dub.json or dub.sdl that explicitly lists D source 
 // files (.d files) or D interface files (.di) that should be compiled into your project.
 
 sourceFiles "apptest.d"
 
+
+
 // sourcePaths defines directories containing .d source files to be compiled into 
 // the project (passed to the compiler as files)
 // DUB scans these directories for .d files and compiles them. By default, this is usually source/ or src/
+
+sourcePaths "libraries" // lld-link: error: undefined symbol: _D9libraries18load_sdl_libraries12__ModuleInfoZ
+
+
 
 /*
 sourcePaths "."         // grabs all .d source files in the root folder of Dfine repository C:\...\Dfine

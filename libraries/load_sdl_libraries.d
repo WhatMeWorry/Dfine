@@ -4,26 +4,22 @@
 
 module libraries.load_sdl_libraries;
  
-import bindbc.sdl;
-
-import sdl_ttf;
-import sdl_image;
-import bindbc.loader.sharedlib;
-
-//import bindbc.sdl.ttf;
-//import bindbc.sdl.image;
-
 import std.stdio;
+import std.string;
 import std.file;
 import std.path;
-import std.string;
 
-   struct Version 
-    { 
-        int compiled; 
-        int linked; 
-    } 
-
+import bindbc.sdl;
+import bindbc.loader.sharedlib;
+import loader = bindbc.loader.sharedlib; 
+ 
+import bindbc.loader;
+ 
+struct Version 
+{ 
+    int compiled; 
+    int linked; 
+} 
 
 void load_sdl_libraries()
 {
@@ -38,9 +34,9 @@ void load_sdl_libraries()
     //writeln("versions.linked = SDL_GetVersion");
 
     writefln("Compiled against SDL version: %d.%d.%d", 
-           SDL_VERSIONNUM_MAJOR(versions.compiled), 
-           SDL_VERSIONNUM_MINOR(versions.compiled), 
-           SDL_VERSIONNUM_MICRO(versions.compiled));
+             SDL_VERSIONNUM_MAJOR(versions.compiled), 
+             SDL_VERSIONNUM_MINOR(versions.compiled), 
+             SDL_VERSIONNUM_MICRO(versions.compiled));
 
     //string appPath = dirName(thisExePath());
 
@@ -56,7 +52,9 @@ void load_sdl_libraries()
     writeln("pathToLibs = ", pathToLibs);
 
     //string pathAndFileName = pathToLibs ~ "SDL3_3_2_10.dll";   // 2,396 KB  version 3.2.10
-    string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";  // 2,725 KB  version 3.4.2
+      string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";    // 2,725 KB  version 3.4.2
+    
+    writeln("trying to load SDL3 dynamic link library: ", pathAndFileName);
     
     auto sdl = loadSDL(pathAndFileName.toStringz());
     writeln("loadSDL returned: ", sdl);
@@ -73,7 +71,7 @@ void load_sdl_libraries()
         ret = loadSDL(pathAndFileName.toStringz());
         if(ret != LoadMsg.success)
         {
-            writeln("Falling back on Windows to find SDL2.dll");
+            writeln("loadSDL with ", pathAndFileName, "failed");
         }
     }
     version(OSX)
@@ -110,12 +108,83 @@ void load_sdl_libraries()
     auto sdlInit = SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
     writeln("SDL_Init returned (true is success): ", sdlInit);
 
+
+    //===================================================================================
+    //                       SDL IMAGE LIBRARY
+    //===================================================================================
+
 /+
-    pathAndFileName = pathToLibs ~ "SDL3_image.dll";
-    auto image = loadSDLImage(pathAndFileName.toStringz());
+In the BindBC-SDL library, sdlImageSupport is defined within the sdl_image.d source file 
+(specifically at source/sdl_image.d).  It serves as a global instance or an alias for the 
+SDLImageSupport enum, which tracks the version of the SDL_image library that has been 
+successfully loaded.
+
+// Located in bindbc-sdl/source/bindbc/sdl/image/binddynamic.d or similar
+// depending on the specific version/refactor of the library.
+enum SDLImageSupport {
+    noLibrary,
+    badLibrary,
+    v2_0_0,
+    v2_0_1,
+    // ... higher versions
+}
++/
+
+// Global variable/instance used to check the loaded version
+//SDLImageSupport sdlImageSupport;
+
+
+ 
+
+    //pathAndFileName = pathToLibs ~ "SDL3_image_3_4_0.dll";   // 374 KB  version 3.4.0
+    pathAndFileName = pathToLibs ~ "SDL3_image.dll";          // 15,777 KB
+    //pathAndFileName = pathToLibs ~ "SDL3_image374KB.dll";  // 374 KB  version 3.4.0  
     
-    writeln("loadSDLImage returned: ", image); 
+    import std.file: exists; // Import the file module
+
+    if (exists(pathAndFileName))  // returns true for files or directories
+    {
+        writeln(pathAndFileName);
+        writeln("Path exists for");
+
+        if (isFile(pathAndFileName)) // verify it is actually a file
+        {   
+            writeln("file exists.");
+        }
+    }
+
+
+//   https://code.dlang.org/packages/bindbc-sdl
+
+    loader.LoadMsg imageRet;
+    writeln("trying to load SDL Image library: ", pathAndFileName);
     
+    imageRet = loadSDLImage(pathAndFileName.toStringz());
+    
+    //auto image = loadSDLImage(pathAndFileName.toStringz());
+    //writeln("loadSDLImage returned: ", image); 
+  
+  		if (imageRet != LoadMsg.success)
+		{
+			writeln("error loading SDL_image library");
+			if (imageRet == LoadMsg.noLibrary)
+			{
+				writeln("error no SDL_image library found");
+			}
+			if (imageRet == LoadMsg.badLibrary)
+			{
+				writeln("Error badLibrary for SDL_image, missing symbols, " ~
+						"perhaps an older or very new version is causing the problem?");
+			}
+		}
+		else
+		{
+			writeln("SDL_image loaded successfully");
+		}
+  
+
+//   https://github.com/Nathan5563/quark  
+/+
     //SDL_IMAGE_VERSION(&v);
     //writeln("Image version loaded is: ", v.major, ".", v.minor, ".", v.patch);
     
