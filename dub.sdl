@@ -8,11 +8,9 @@ targetPath "."
 targetType "executable"
 targetName "dfine"        // By default, DUB uses the package name as the executable name.
 
-dependency "bindbc-sdl" version="~>2.2.2" //SDL3
-
-versions "SDL_Image_3_2"
-
-//versions "SDL_Image_3_2" "SDL_3_4" "SDL_Image" "SDL_TTF"
+dependency "bindbc-sdl" version="~>2.3.4"  // latest version
+versions "SDL_3_4_2"                       // latest "Version identifier" in documentation
+versions "SDL_Image_3_2"                   // latest "Version identifier" in documentation
 
 
 //buildRequirements "silenceDeprecations"
@@ -21,7 +19,6 @@ versions "SDL_Image_3_2"
 // files (.d files) or D interface files (.di) that should be compiled into your project.
 
 sourceFiles "apptest.d"
-
 
 
 // sourcePaths defines directories containing .d source files to be compiled into 

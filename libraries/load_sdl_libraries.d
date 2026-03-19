@@ -10,39 +10,23 @@ import std.file;
 import std.path;
 
 import bindbc.sdl;
-import bindbc.loader.sharedlib;
-import loader = bindbc.loader.sharedlib; 
+import bindbc.loader.sharedlib: LoadMsg;
+          //import loader = bindbc.loader.sharedlib; 
+
+import core.stdc.stdlib : exit;
  
-import bindbc.loader;
+          //import bindbc.loader;
+
+           //import bindbc.sdl: SDL_SavePNG;
  
-struct Version 
-{ 
-    int compiled; 
-    int linked; 
-} 
 
 void load_sdl_libraries()
 {
-    Version versions;
-
-    versions.compiled = SDL_VERSION;    // hardcoded version from SDL headers
+    string fullPathCurrentExecutable = thisExePath();  // this is dfi
     
-    writeln("versions.compiled = ", versions.compiled);
-    
-    //versions.linked = SDL_GetVersion(); // version reported by linked library
-    
-    //writeln("versions.linked = SDL_GetVersion");
-
-    writefln("Compiled against SDL version: %d.%d.%d", 
-             SDL_VERSIONNUM_MAJOR(versions.compiled), 
-             SDL_VERSIONNUM_MINOR(versions.compiled), 
-             SDL_VERSIONNUM_MICRO(versions.compiled));
-
-    //string appPath = dirName(thisExePath());
-
-    string fullPathCurrentExecutable = thisExePath();
-
-    writeln("fullPathCurrentExecutable = ", fullPathCurrentExecutable);
+    writeln();
+    writeln("Function: ", __FUNCTION__, " in module ", __MODULE__, " at location ", fullPathCurrentExecutable);
+    writeln();
 
     string parentDirectoryOfThisPath = dirName(fullPathCurrentExecutable);
 
@@ -50,20 +34,42 @@ void load_sdl_libraries()
 
     string pathToLibs = parentDirectoryOfThisPath ~ `\` ~ "libraries" ~ `\`;
     writeln("pathToLibs = ", pathToLibs);
+    
+    string pathToImages = parentDirectoryOfThisPath ~ `\` ~ "images";
+    writeln("pathToImages = ", pathToImages);
 
-    //string pathAndFileName = pathToLibs ~ "SDL3_3_2_10.dll";   // 2,396 KB  version 3.2.10
-      string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";    // 2,725 KB  version 3.4.2
+    string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";    // 2,725 KB  version 3.4.2
     
     writeln("trying to load SDL3 dynamic link library: ", pathAndFileName);
     
     auto sdl = loadSDL(pathAndFileName.toStringz());
     writeln("loadSDL returned: ", sdl);
     
+    SDL_Surface *surface;
+    
+    string pngImage = pathToImages ~ `\` ~ "earth1024x1024.png";
+    
+    string saveImage = pathToImages ~ `\` ~ "TEST.png";
+    
+    writeln("pngImage = ", pngImage);
+    
+    surface = SDL_LoadPNG(pngImage.toStringz);
+    
+    writeln("surface = ", surface);
+    
+    bool rett = SDL_SavePNG(surface, saveImage.toStringz);
+    
+    writeln("After SDL_SavePNG");
+    
+    //exit(-1);
+    
+    // bool SDL_SavePNG(SDL_Surface *surface, const char *file);
+    
     //SDL_GetVersion(&v);
     //writeln("SDL version loaded is: ", v.major, ".", v.minor, ".", v.patch);
     
     // global variable for sdl;
-    LoadMsg ret;
+    LoadMsg ret;   // enum LoadMsg{ success, noLibrary, badLibrary,}  
     
     version(Windows)
     {
@@ -73,16 +79,6 @@ void load_sdl_libraries()
         {
             writeln("loadSDL with ", pathAndFileName, "failed");
         }
-    }
-    version(OSX)
-    {
-        writeln("Searching for SDL on Mac");
-        ret = loadSDL();
-    }
-    version(linux)
-    { 
-        writeln("Searching for SDL on Linux");
-        ret = loadSDL();
     }
     
     // Error if SDL cannot be loaded
@@ -156,6 +152,7 @@ enum SDLImageSupport {
 
 //   https://code.dlang.org/packages/bindbc-sdl
 
+/+
     loader.LoadMsg imageRet;
     writeln("trying to load SDL Image library: ", pathAndFileName);
     
@@ -181,7 +178,7 @@ enum SDLImageSupport {
 		{
 			writeln("SDL_image loaded successfully");
 		}
-  
++/ 
 
 //   https://github.com/Nathan5563/quark  
 /+
