@@ -91,7 +91,7 @@ struct CorkBoard
 
     void renderAllSwatches(SDL_Renderer *renderer)
     {
-        foreach(i, s; this.swatches)
+        foreach(size_t i, s; this.swatches)
         {
             SDL_SetTextureAlphaMod(s.texture, s.opacity);
 
@@ -125,7 +125,7 @@ struct CorkBoard
     }
     void moveAllSwatchesLeft(ref Swatch[] swatches)
     {
-        foreach (int i, ref s; swatches)
+        foreach (size_t i, ref s; swatches)
         {
             s.rect.x = s.rect.x - delta.translate;
         }
@@ -136,7 +136,7 @@ struct CorkBoard
     }
     void moveAllSwatchesRight(ref Swatch[] swatches)
     {
-        foreach (int i, ref s; swatches)
+        foreach (size_t i, ref s; swatches)
         {
             s.rect.x = s.rect.x + delta.translate;
         }
@@ -147,7 +147,7 @@ struct CorkBoard
     }
     void moveAllSwatchesUp(ref Swatch[] swatches)
     {
-        foreach (int i, ref s; swatches)
+        foreach (size_t i, ref s; swatches)
         {
             s.rect.y = s.rect.y - delta.translate;
         }
@@ -158,7 +158,7 @@ struct CorkBoard
     }
     void moveAllSwatchesDown(ref Swatch[] swatches)
     {
-        foreach (int i, ref s; swatches)
+        foreach (size_t i, ref s; swatches)
         {
             s.rect.y = s.rect.y + delta.translate;
         }
@@ -446,7 +446,7 @@ void corkboard()
                         //void copyTextureToSurface(SDL_Texture *texture, const SDL_Rect *texRect,
                         //  SDL_Surface *surface, const SDL_Rect *surRect)
 
-                        foreach (int i, s; board.swatches)  // swatches are texture
+                        foreach (size_t i, s; board.swatches)  // swatches are texture
                         {
                             //SDL_Rect lifeSize = SDL_FRectToRect(s.originalSize);
                             //writeln("Texture ", i, " original size  ", lifeSize);
@@ -492,7 +492,7 @@ struct Swatch
 /+
     void moveAllSwatchesLeft(ref Swatch[] swatches)
     {
-        foreach (int i, ref s; swatches)
+        foreach (size_t i, ref s; swatches)
         {
             s.rect.x = s.rect.x - delta.translate;
         }

@@ -102,8 +102,8 @@ struct DebugWindow
         SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_SetRenderScale(ren, 2, 2);  // where scale_x and scale_y are values greater than 1.
 
-        int v = 0;
-        foreach (int i, s; b.swatches)
+        size_t v = 0;
+        foreach (size_t i, s; b.swatches)
 		{
 		    v = i * 50;
 			

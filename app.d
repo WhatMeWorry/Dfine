@@ -56,13 +56,14 @@ import bindbc.sdl : IMG_SavePNG;
 import bindbc.sdl;  // SDL_* all remaining declarations
 import bindbc.loader;
 
-import breakup;
-import magnify;
-import standalone_demos;
-import tutorials;
-import helper_funcs;
-import cork_board;
-import trimmer;
+
+//import breakup;
+//import magnify;
+//import standalone_demos;
+//import tutorials;
+//import helper_funcs;
+//import cork_board;
+//import trimmer;
 import quad_tree;
 
 
@@ -127,10 +128,10 @@ int main()
 	quadrophenia();
 	exit(-1);
     
-    trimEdges();
+    //trimEdges();
     exit(-1);
     
-    corkboard();  // done
+    //corkboard();  // done
     exit(-1);
     
 /+
@@ -162,35 +163,34 @@ int main()
     exit(-1);
 
 +/
-    two_windows_and_surfaces();  // done
+    //two_windows_and_surfaces();  // done
     exit(-1);
     
     
 
-    change_texture_access();
+    //change_texture_access();
     exit(-1);
 
 
-    smallest_texture_with_rect();
+    //smallest_texture_with_rect();
     exit(-1);
     
-    two_windows_and_surfaces();
+    //two_windows_and_surfaces();
     exit(-1);
     
-    //breakup1();
-    change_texture_access();
+    //change_texture_access();
 
     
 
-    smallest_renderer_01();
+    //smallest_renderer_01();
     //exit(-1);
     
-    smallest_texture_01a();
+    //smallest_texture_01a();
     //exit(-1);
     
-    smallest_texture_01b();
+    //smallest_texture_01b();
     
-    no_renderer_02();
+    //no_renderer_02();
     //exit(-1);
     
     //surface_no_implicit_scaling_03();
@@ -199,7 +199,7 @@ int main()
     //surface_explicit_scaling_04();
     //exit(-1);
     
-    texture_implicit_scaling_05();
+    //texture_implicit_scaling_05();
     exit(-1);
     
     //tutorial_4();
@@ -208,28 +208,27 @@ int main()
     //tutorial_5();
     //exit(-1);
     
-    mosaic();
+    //mosaic();
     exit(-1);
     
-    //createRealBigSurface();
-    ThreeSurfacesAndOneStreamingTexure();
+    //ThreeSurfacesAndOneStreamingTexure();
     exit(-1);
     
-    LightBoard();
+    //LightBoard();
     exit(-1);
 
-    enlargeAndReduce();
+    //enlargeAndReduce();
     exit(-1);
 
-    magnifyImage();
+    //magnifyImage();
     exit(-1);
 
-    composingImage();
+    //composingImage();
     exit(-1);
     
     //trackerCamera();
     
-    rotateAndScale();
+    //rotateAndScale();
     
     //fromGithub();
     exit(-1);

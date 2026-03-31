@@ -18,27 +18,23 @@ versions "SDL_Image_3_2"                   // latest "Version identifier" in doc
 // sourceFiles is a configuration setting in dub.json or dub.sdl that explicitly lists D source 
 // files (.d files) or D interface files (.di) that should be compiled into your project.
 
-sourceFiles "apptest.d"
+//sourceFiles "apptest.d"
+                        // will grab the app.d since dub.sdl is in same directory as app.d
+sourceFiles "app.d"         // grabs all .d source files in the root folder of Dfine repository C:\...\Dfine
+//sourceFiles "quad_tree.d"
+sourcePaths "sdl3"
+importPaths "sdl3"
 
+//sourcePaths "." 
+//sourcePaths "a_star"    // without: app.d(64,8): Error: unable to read module `path_finding`
+//sourcePaths "libraries"
+//sourcePaths "textures"
+//sourcePaths "windows"
+//sourcePaths "sdl3"
 
 // sourcePaths defines directories containing .d source files to be compiled into 
 // the project (passed to the compiler as files)
 // DUB scans these directories for .d files and compiles them. By default, this is usually source/ or src/
-
-sourcePaths "libraries" // lld-link: error: undefined symbol: _D9libraries18load_sdl_libraries12__ModuleInfoZ
-
-
-
-/*
-sourcePaths "."         // grabs all .d source files in the root folder of Dfine repository C:\...\Dfine
-sourcePaths "a_star"    // without: app.d(64,8): Error: unable to read module `path_finding`
-sourcePaths "libraries"
-sourcePaths "textures"
-sourcePaths "windows"
-sourcePaths "sdl3"
-*/
-
-// versions "SDL_3_4" "SDL_Image_3_2" "SDL_Mixer_3_0" "SDL_TTF_3_2" "SDL_Net_3_0"
 
 // importPaths defines directories added to the compiler's search path (-I flag) for finding modules to import. 
 // sourcePaths ensures code is built, whereas importPaths only makes modules available for compilation.
