@@ -8,10 +8,34 @@ targetPath "."
 targetType "executable"
 targetName "dfine"        // By default, DUB uses the package name as the executable name.
 
-dependency "bindbc-sdl" version="~>2.3.4"  // latest version
-versions "SDL_3_4_2"                       // latest "Version identifier" in documentation
-versions "SDL_Image_3_2"                   // latest "Version identifier" in documentation
+/*
+Import Requirement: You must import bindbc.sdl.sdl_image to access loadSDLImage().
+Version Requirement: To enable the SDL_image loader, you must define the SDL_Image version 
+in your DUB configuration (e.g., in dub.sdl: versions "SDL_Image").
+Dynamic Loading: loadSDLImage() is only available when using dynamic bindings (the default) to load the 
+SDL2_image or SDL3_image shared library at runtime.
+*/
 
+
+
+dependency "bindbc-sdl" version="~>2.3.4"  // latest version
+versions "SDL_3_4_2"       // latest "Version identifier" in documentation
+versions "SDL_Image_3_2"
+
+// Key DUB Recursive Glob Features:
+// Wildcard: Used to represent zero or more directories, allowing deep searching of file structures.
+// Recursive Copy: Using "copyFiles": ["source/**/*.png"] in dub.json recursively copies all PNG files 
+// from source and its subdirectories.  d-glob Library: The {Link: d-glob package https://code.dlang.org/packages/d-glob} 
+// provides advanced globbing capabilities in D code, enabling pattern matching like glob("/usr/*/python*").
+// Build Settings: ** ensures that files within nested directories are included in the build or file manipulation processes.
+// *: Matches zero or more characters within a path segment.
+// **: Matches any number of subdirectories (recursive).
+// * for shallow matching and ** for recursive subdirectory searches
+
+// To find a file in Gihub, go to the https://github.com/search/advanced and in the Advanced search field enter:
+// path:**/dub.sdl
+
+mainSourceFile "source/app.d"
 
 //buildRequirements "silenceDeprecations"
 
@@ -20,10 +44,16 @@ versions "SDL_Image_3_2"                   // latest "Version identifier" in doc
 
 //sourceFiles "apptest.d"
                         // will grab the app.d since dub.sdl is in same directory as app.d
-sourceFiles "app.d"         // grabs all .d source files in the root folder of Dfine repository C:\...\Dfine
+
+						
+// sourceFiles "source/**/*.d"  // grabs all .d source files recursively starting at folder "source"
+
 //sourceFiles "quad_tree.d"
-sourcePaths "sdl3"
-importPaths "sdl3"
+
+importPaths "source" "libraries"  // makes modules available for compilation, adds to compiler's search path
+
+sourcePaths "source" "libraries"  // specify code to be built
+
 
 //sourcePaths "." 
 //sourcePaths "a_star"    // without: app.d(64,8): Error: unable to read module `path_finding`

@@ -1,4 +1,5 @@
-   
+
+
 // If absent, the module name is taken to be the same name (stripped of path and
 // extension) of the source file name.
 
@@ -9,16 +10,37 @@ import std.string;
 import std.file;
 import std.path;
 
-import bindbc.sdl;
+import bindbc.sdl: 
+    loadSDL, 
+	loadSDLImage, 
+	SDL_GetVersion, 
+	SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
+	SDL_Init, 
+	SDL_INIT_AUDIO, SDL_INIT_VIDEO, SDL_INIT_EVENTS;
+	
+import bindbc.loader;
 import bindbc.loader.sharedlib: LoadMsg;
-          //import loader = bindbc.loader.sharedlib; 
+
+//import sdl_image: loadSDLImage;
 
 import core.stdc.stdlib : exit;
  
-          //import bindbc.loader;
-
-           //import bindbc.sdl: SDL_SavePNG;
- 
+/+
+import bindbc.sdl :
+    loadSDL,
+    SDL_INIT_VIDEO,
+    SDL_Init,
+    SDL_Quit,
+    sdlSupport,
+    unloadSDL;
+import bindbc.sdl.image :
+    IMG_Init,
+    IMG_INIT_PNG,
+    IMG_Quit,
+    loadSDLImage,
+    sdlImageSupport,
+    unloadSDLImage;
++/
 
 void load_sdl_libraries()
 {
@@ -41,34 +63,27 @@ void load_sdl_libraries()
     string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";    // 2,725 KB  version 3.4.2
     
     writeln("trying to load SDL3 dynamic link library: ", pathAndFileName);
-    
-    auto sdl = loadSDL(pathAndFileName.toStringz());
-    writeln("loadSDL returned: ", sdl);
-    
-    SDL_Surface *surface;
-    
+ 
+/+
+if(loadSDL() < sdlSupport){ /*handle the error*/ }
+if(loadSDL_Image() < sdlImageSupport){ /*handle the error*/ }
+
+//Give SDL_image a chance to load libpng and libjpeg
+auto flags = IMG_INIT_PNG | IMG_INIT_JPEG;
+if(IMG_Init(flags) != flags){ /*handle the error*/ }
++/
+
+    /+   
+    SDL_Surface *surface; 
     string pngImage = pathToImages ~ `\` ~ "earth1024x1024.png";
-    
     string saveImage = pathToImages ~ `\` ~ "TEST.png";
-    
     writeln("pngImage = ", pngImage);
-    
     surface = SDL_LoadPNG(pngImage.toStringz);
-    
     writeln("surface = ", surface);
-    
     bool rett = SDL_SavePNG(surface, saveImage.toStringz);
-    
     writeln("After SDL_SavePNG");
-    
-    //exit(-1);
-    
-    // bool SDL_SavePNG(SDL_Surface *surface, const char *file);
-    
-    //SDL_GetVersion(&v);
-    //writeln("SDL version loaded is: ", v.major, ".", v.minor, ".", v.patch);
-    
-    // global variable for sdl;
+    +/
+	
     LoadMsg ret;   // enum LoadMsg{ success, noLibrary, badLibrary,}  
     
     version(Windows)
@@ -90,6 +105,7 @@ void load_sdl_libraries()
     {
         writeln("Eror badLibrary, missing symbols, perhaps an older or very new version of SDL is causing the problem?");
     }
+
 
     import std.conv;
     int sdlversion = SDL_GetVersion();
@@ -130,11 +146,12 @@ enum SDLImageSupport {
 //SDLImageSupport sdlImageSupport;
 
 
- 
+    pathAndFileName = pathToLibs ~ "SDL3_image.dll";
 
-    //pathAndFileName = pathToLibs ~ "SDL3_image_3_4_0.dll";   // 374 KB  version 3.4.0
-    pathAndFileName = pathToLibs ~ "SDL3_image.dll";          // 15,777 KB
-    //pathAndFileName = pathToLibs ~ "SDL3_image374KB.dll";  // 374 KB  version 3.4.0  
+
+    writeln("SDL Image dll is file: ", pathAndFileName);
+	
+	//writeln("sdlImageSupport = ", sdlImageSupport);
     
     import std.file: exists; // Import the file module
 
@@ -148,6 +165,15 @@ enum SDLImageSupport {
             writeln("file exists.");
         }
     }
+	
+	//SDLImageSupport imageResult = loadSDLImage(pathAndFileName.toStringz());
+	
+    //if (loadSDLImage() < sdlImageSupport)
+	//	writeln("Error loading SDL Image library");	
+	
+	auto imageResult = loadSDLImage(pathAndFileName.toStringz());
+	
+	writeln("imageResult = ", imageResult);
 
 
 //   https://code.dlang.org/packages/bindbc-sdl
