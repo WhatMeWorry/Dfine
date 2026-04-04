@@ -18,9 +18,11 @@ SDL2_image or SDL3_image shared library at runtime.
 
 
 
-dependency "bindbc-sdl" version="~>2.3.4"  // latest version
-versions "SDL_3_4_2"       // latest "Version identifier" in documentation
+dependency "bindbc-sdl" version="~>2.3.4"
+versions "SDL_3_4_2"   //"SDL_Image_3_2"  
 versions "SDL_Image_3_2"
+   
+                   // "SDL_Image_2_8"  Error: module `bindbc.sdl` import `loadSDLImage` not found
 
 // Key DUB Recursive Glob Features:
 // Wildcard: Used to represent zero or more directories, allowing deep searching of file structures.

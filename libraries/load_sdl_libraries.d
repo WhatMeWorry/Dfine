@@ -5,10 +5,12 @@
 
 module libraries.load_sdl_libraries;
  
-import std.stdio;
-import std.string;
-import std.file;
-import std.path;
+import std.stdio: writeln;
+import std.string: toStringz;
+import std.file: exists, thisExePath, isFile;
+import std.path: dirName;
+import std.conv: to;
+import core.stdc.stdlib: exit;
 
 import bindbc.sdl: 
     loadSDL, 
@@ -18,13 +20,9 @@ import bindbc.sdl:
 	SDL_Init, 
 	SDL_INIT_AUDIO, SDL_INIT_VIDEO, SDL_INIT_EVENTS;
 	
-import bindbc.loader;
-import bindbc.loader.sharedlib: LoadMsg;
+import bindbc.loader: LoadMsg;
 
-//import sdl_image: loadSDLImage;
 
-import core.stdc.stdlib : exit;
- 
 /+
 import bindbc.sdl :
     loadSDL,
@@ -47,31 +45,23 @@ void load_sdl_libraries()
     string fullPathCurrentExecutable = thisExePath();  // this is dfi
     
     writeln();
-    writeln("Function: ", __FUNCTION__, " in module ", __MODULE__, " at location ", fullPathCurrentExecutable);
+    //writeln("Function: ", __FUNCTION__, " in module ", __MODULE__, " at location ", fullPathCurrentExecutable);
     writeln();
 
     string parentDirectoryOfThisPath = dirName(fullPathCurrentExecutable);
 
-    writeln("parentDirectoryOfThisPath = ", parentDirectoryOfThisPath);
+    //writeln("parentDirectoryOfThisPath = ", parentDirectoryOfThisPath);
 
     string pathToLibs = parentDirectoryOfThisPath ~ `\` ~ "libraries" ~ `\`;
-    writeln("pathToLibs = ", pathToLibs);
+    //writeln("pathToLibs = ", pathToLibs);
     
-    string pathToImages = parentDirectoryOfThisPath ~ `\` ~ "images";
-    writeln("pathToImages = ", pathToImages);
+    //string pathToImages = parentDirectoryOfThisPath ~ `\` ~ "images";
+    //writeln("pathToImages = ", pathToImages);
 
     string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";    // 2,725 KB  version 3.4.2
     
-    writeln("trying to load SDL3 dynamic link library: ", pathAndFileName);
- 
-/+
-if(loadSDL() < sdlSupport){ /*handle the error*/ }
-if(loadSDL_Image() < sdlImageSupport){ /*handle the error*/ }
+    //writeln("trying to load SDL3 dynamic link library: ", pathAndFileName);
 
-//Give SDL_image a chance to load libpng and libjpeg
-auto flags = IMG_INIT_PNG | IMG_INIT_JPEG;
-if(IMG_Init(flags) != flags){ /*handle the error*/ }
-+/
 
     /+   
     SDL_Surface *surface; 
@@ -84,16 +74,18 @@ if(IMG_Init(flags) != flags){ /*handle the error*/ }
     writeln("After SDL_SavePNG");
     +/
 	
-    LoadMsg ret;   // enum LoadMsg{ success, noLibrary, badLibrary,}  
+    LoadMsg ret;    // enum LoadMsg{ success, noLibrary, badLibrary,}  
     
     version(Windows)
     {
-        writeln("Searching for SDL on Windows");
+        writeln("Loading SDL dll file at:");
+		writeln(pathAndFileName);
         ret = loadSDL(pathAndFileName.toStringz());
         if(ret != LoadMsg.success)
         {
             writeln("loadSDL with ", pathAndFileName, "failed");
         }
+		//writeln("Searching for SDL on Windows");
     }
     
     // Error if SDL cannot be loaded
@@ -103,14 +95,12 @@ if(IMG_Init(flags) != flags){ /*handle the error*/ }
     }
     if(ret == LoadMsg.badLibrary)
     {
-        writeln("Eror badLibrary, missing symbols, perhaps an older or very new version of SDL is causing the problem?");
+        writeln("Error badLibrary, missing symbols, perhaps an older or very new version of SDL is causing the problem?");
     }
 
-
-    import std.conv;
     int sdlversion = SDL_GetVersion();
-    writeln(sdlversion);
-    string msg = "Your SDL version loaded was: " ~
+    //writeln(sdlversion);
+    string msg = "SDL version loaded was: " ~
                  to!string(SDL_VERSIONNUM_MAJOR(sdlversion)) ~ "." ~
                  to!string(SDL_VERSIONNUM_MINOR(sdlversion)) ~ "." ~
                  to!string(SDL_VERSIONNUM_MICRO(sdlversion));
@@ -118,7 +108,14 @@ if(IMG_Init(flags) != flags){ /*handle the error*/ }
 
 
     auto sdlInit = SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-    writeln("SDL_Init returned (true is success): ", sdlInit);
+	if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS))
+    {
+        writeln("SDL_Init was successful: ");
+    }
+    else
+    {
+        writeln("SDL_Init failed");
+    }		
 
 
     //===================================================================================
@@ -144,36 +141,23 @@ enum SDLImageSupport {
 
 // Global variable/instance used to check the loaded version
 //SDLImageSupport sdlImageSupport;
-
+    writeln();
 
     pathAndFileName = pathToLibs ~ "SDL3_image.dll";
-
-
-    writeln("SDL Image dll is file: ", pathAndFileName);
-	
-	//writeln("sdlImageSupport = ", sdlImageSupport);
-    
-    import std.file: exists; // Import the file module
+ 
 
     if (exists(pathAndFileName))  // returns true for files or directories
     {
-        writeln(pathAndFileName);
-        writeln("Path exists for");
-
         if (isFile(pathAndFileName)) // verify it is actually a file
         {   
-            writeln("file exists.");
+            writeln("Found the SDL Image dll file at: ");
+			writeln(pathAndFileName);
         }
     }
 	
-	//SDLImageSupport imageResult = loadSDLImage(pathAndFileName.toStringz());
+	LoadMsg imgRet = loadSDLImage(pathAndFileName.toStringz());
 	
-    //if (loadSDLImage() < sdlImageSupport)
-	//	writeln("Error loading SDL Image library");	
-	
-	auto imageResult = loadSDLImage(pathAndFileName.toStringz());
-	
-	writeln("imageResult = ", imageResult);
+	writeln("imgRet = ", imgRet);
 
 
 //   https://code.dlang.org/packages/bindbc-sdl
