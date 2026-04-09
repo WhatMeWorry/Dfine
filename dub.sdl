@@ -1,3 +1,10 @@
+
+
+// Build only:                // by default debug 
+// dub build --build=release  // compile and link only for release
+// Build and run immediately:
+// dub run --build=release    // compile and link only for release
+
 name "dfine_project"
 description "A minimal D application."
 authors "Kyle Heaser"
@@ -8,37 +15,27 @@ targetType "executable"
 targetName "dfine"        // By default, DUB uses the package name as the executable name.
 
 /*
-Import Requirement: You must import bindbc.sdl.sdl_image to access loadSDLImage().
-Version Requirement: To enable the SDL_image loader, you must define the SDL_Image version 
-in your DUB configuration (e.g., in dub.sdl: versions "SDL_Image").
 Dynamic Loading: loadSDLImage() is only available when using dynamic bindings (the default) to load the 
 SDL2_image or SDL3_image shared library at runtime.
 */
 
+
 mainSourceFile "source/app.d"
 
-//dependency "bindbc-common" version="~>1.0.5"
-// dependency "bindbc-sdl" version="~>2.3.4"
+dependency "bindbc-sdl" version="~>2.3.4"  // most recent version of dub package (not sdl version)
 
+versions "SDL_3_4_2"
 
-dependency "bindbc-sdl" version="~>2.3.4"
-//subConfiguration "bindbc-sdl" "static"
-versions "SDL_3_4_2" "BindSDL_Static"
-libs "SDL3"
+/* 
+Did not bother specifying loader and common because bindbc-sdl pulled them in automatically
+    Fetching bindbc-sdl 2.3.4 (getting selected version)
+    Fetching bindbc-loader 1.1.5 (getting selected version)  // 1.1.5 is most recent version
+    Fetching bindbc-common 1.0.5 (getting selected version)  // 1.0.5 is most recent version
+*/
 
+importPaths "source" "libraries"  // makes modules available for compilation, adds to compiler's search path
+sourcePaths "source" "libraries"  // specify code to be built
 
-//subConfiguration "bindbc-sdl" "staticBC"
-
-//versions "SDL_3_4"
-//libs "SDL3"
-
-sourceFiles "libraries/SDL3.lib" 
-
-/*
-versions "SDL_3_4_2"   //"SDL_Image_3_2"  
-versions "SDL_Image_3_2"
-*/   
-                   // "SDL_Image_2_8"  Error: module `bindbc.sdl` import `loadSDLImage` not found
 
 // Key DUB Recursive Glob Features:
 // Wildcard: Used to represent zero or more directories, allowing deep searching of file structures.
