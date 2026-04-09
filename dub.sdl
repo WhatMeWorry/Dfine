@@ -3,7 +3,6 @@ description "A minimal D application."
 authors "Kyle Heaser"
 copyright "Copyright © 2024, Kyle Heaser"
 license "Zlib"
-
 targetPath "."
 targetType "executable"
 targetName "dfine"        // By default, DUB uses the package name as the executable name.
@@ -16,12 +15,29 @@ Dynamic Loading: loadSDLImage() is only available when using dynamic bindings (t
 SDL2_image or SDL3_image shared library at runtime.
 */
 
+mainSourceFile "source/app.d"
+
+//dependency "bindbc-common" version="~>1.0.5"
+// dependency "bindbc-sdl" version="~>2.3.4"
 
 
 dependency "bindbc-sdl" version="~>2.3.4"
+//subConfiguration "bindbc-sdl" "static"
+versions "SDL_3_4_2" "BindSDL_Static"
+libs "SDL3"
+
+
+//subConfiguration "bindbc-sdl" "staticBC"
+
+//versions "SDL_3_4"
+//libs "SDL3"
+
+sourceFiles "libraries/SDL3.lib" 
+
+/*
 versions "SDL_3_4_2"   //"SDL_Image_3_2"  
 versions "SDL_Image_3_2"
-   
+*/   
                    // "SDL_Image_2_8"  Error: module `bindbc.sdl` import `loadSDLImage` not found
 
 // Key DUB Recursive Glob Features:
@@ -37,7 +53,7 @@ versions "SDL_Image_3_2"
 // To find a file in Gihub, go to the https://github.com/search/advanced and in the Advanced search field enter:
 // path:**/dub.sdl
 
-mainSourceFile "source/app.d"
+//mainSourceFile "source/app.d"
 
 //buildRequirements "silenceDeprecations"
 
@@ -52,9 +68,9 @@ mainSourceFile "source/app.d"
 
 //sourceFiles "quad_tree.d"
 
-importPaths "source" "libraries"  // makes modules available for compilation, adds to compiler's search path
+//importPaths "source" "libraries"  // makes modules available for compilation, adds to compiler's search path
 
-sourcePaths "source" "libraries"  // specify code to be built
+//sourcePaths "source" "libraries"  // specify code to be built
 
 
 //sourcePaths "." 

@@ -14,7 +14,7 @@ import core.stdc.stdlib: exit;
 
 import bindbc.sdl: 
     loadSDL, 
-	loadSDLImage, 
+	//loadSDLImage, 
 	SDL_GetVersion, 
 	SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
 	SDL_Init, 
@@ -155,9 +155,9 @@ enum SDLImageSupport {
         }
     }
 	
-	LoadMsg imgRet = loadSDLImage(pathAndFileName.toStringz());
+	//LoadMsg imgRet = loadSDLImage(pathAndFileName.toStringz());
 	
-	writeln("imgRet = ", imgRet);
+	//writeln("imgRet = ", imgRet);
 
 
 //   https://code.dlang.org/packages/bindbc-sdl
