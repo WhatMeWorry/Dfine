@@ -107,6 +107,27 @@ import helper_funcs : displayRect;
 
 
 
+SDL_Surface* loadPNG(string file)
+{
+    SDL_Surface* surface = SDL_LoadPNG(file.toStringz);   
+    if (surface == null)
+    {
+        throw new Exception("SDL_LoadPNG failed: " ~ to!string(SDL_GetError()));
+    }
+    return surface;
+}
+
+
+bool savePNG(SDL_Surface* surface, string file)
+{
+    if (SDL_SavePNG(surface, file.toStringz))
+        return true;
+	else
+    {
+        throw new Exception("SDL_SavePNG failed: " ~ to!string(SDL_GetError()));
+    }
+}
+
 
 void renderFillRect(SDL_Renderer *renderer, const SDL_FRect *rect)
 {

@@ -12,7 +12,7 @@ import std.path: dirName;
 import std.conv: to;
 import core.stdc.stdlib: exit;
 
-
+import sdl_funcs_with_error_handling;
 
 import bindbc.sdl: 
     loadSDL,
@@ -87,14 +87,16 @@ void load_sdl_libraries()
 
   
     SDL_Surface *surface; 
+
+    string pathToImages = parentDirOfThisPath ~ `\` ~ "images" ~ `\`;
 	
     string pngImage = pathToImages ~ `\` ~ "earth1024x1024.png";
     string saveImage = pathToImages ~ `\` ~ "TEST.png";
     writeln("pngImage = ", pngImage);
-    surface = SDL_LoadPNG(pngImage.toStringz);
+    surface = loadPNG(pngImage);
     writeln("surface = ", surface);
-    bool rett = SDL_SavePNG(surface, saveImage.toStringz);
-    writeln("After SDL_SavePNG");
+    //bool r = savePNG(surface, saveImage);
+    //writeln("SDL_SavePNG returned", r);
   	
 
 

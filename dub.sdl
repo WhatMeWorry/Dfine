@@ -1,9 +1,9 @@
 
 
 // Build only:                // by default debug 
-// dub build --build=release  // compile and link only for release
+// dub build --build=release --compiler=dmd  // compile and link only for release (ldc2, gdc)
 // Build and run immediately:
-// dub run --build=release    // compile and link only for release
+// dub run --build=release --compiler=dmd    // compile, link, and run with release  (ldc2, gdc)
 
 name "dfine_project"
 description "A minimal D application."
@@ -13,6 +13,8 @@ license "Zlib"
 targetPath "."
 targetType "executable"
 targetName "dfine"        // By default, DUB uses the package name as the executable name.
+
+//dflags "-mixin=mixin_code.d"
 
 /*
 Dynamic Loading: loadSDLImage() is only available when using dynamic bindings (the default) to load the 
@@ -24,7 +26,7 @@ mainSourceFile "source/app.d"
 
 dependency "bindbc-sdl" version="~>2.3.4"  // most recent version of dub package (not sdl version)
 
-versions "SDL_3_4_2"
+versions "SDL_3_4_2"  "SDL_Image_3_2"
 
 /* 
 Did not bother specifying loader and common because bindbc-sdl pulled them in automatically
@@ -33,8 +35,8 @@ Did not bother specifying loader and common because bindbc-sdl pulled them in au
     Fetching bindbc-common 1.0.5 (getting selected version)  // 1.0.5 is most recent version
 */
 
-importPaths "source" "libraries"  // makes modules available for compilation, adds to compiler's search path
-sourcePaths "source" "libraries"  // specify code to be built
+importPaths "source" "libraries" "sdl3"  // makes modules available for compilation, adds to compiler's search path
+sourcePaths "source" "libraries" "sdl3" // specify code to be built
 
 
 // Key DUB Recursive Glob Features:
