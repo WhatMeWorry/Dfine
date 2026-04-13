@@ -1,4 +1,6 @@
 
+/+
+
 // void copying_textures_to_surface()
 // void copying_surface_to_surface()
 // void two_windows_and_surfaces()
@@ -1298,4 +1300,7 @@ void mini_and_main_maps()
 
         
         * SDL_RenderPresent(renderer); // Present the rendered content of IMAGE and RECTANGLE
++/
+
+
 +/

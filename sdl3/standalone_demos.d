@@ -1,6 +1,7 @@
 
-module standalone_demos;
+/+
 
+module standalone_demos;
 
 import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
@@ -627,5 +628,5 @@ Since each element in a 2D array is itself an array, this gives the number of (c
     }
 }
 
-
++/
 

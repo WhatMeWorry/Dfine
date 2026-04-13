@@ -5,6 +5,8 @@
 // return the smallest cost node and remove it from the bag. In cases of ties, order 
 // should be considered random.
 
+/+
+
 module bag;
 
 import std.container.rbtree : RedBlackTree;  // template
@@ -275,4 +277,4 @@ close.display;
 
 }
 
-
++/

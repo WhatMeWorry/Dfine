@@ -1,4 +1,5 @@
 
+/+
 
 module distance;
 
@@ -136,3 +137,5 @@ int heuristic(Location a, Location b)
 }
 
 
+
++/

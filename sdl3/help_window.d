@@ -1,4 +1,6 @@
 
+/+
+
 module help_window;
 
 import cork_board;
@@ -94,5 +96,6 @@ struct HelpWindow
 
         SDL_RenderPresent(ren); // Present the rendered content
     }
-
 }
+
++/

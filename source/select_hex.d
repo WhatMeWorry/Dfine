@@ -1,4 +1,6 @@
 
+/+
+
 module select_hex;
 
 import hexboard;
@@ -336,4 +338,7 @@ extern(C) void mouseButtonCallback(GLFWwindow* winMain, int button, int action, 
     {
     }
 }
++/
+
+
 +/

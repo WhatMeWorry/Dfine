@@ -1,4 +1,6 @@
 
+/*
+
 module magnify;
 
 import breakup;
@@ -9,6 +11,8 @@ import std.conv;
 import core.stdc.stdlib : exit, malloc;
 import core.stdc.string : memcpy;
 import sdl_funcs_with_error_handling;
+
+
 /+
 Yes, in SDL3, you can display the same texture to two different renderers. A texture in SDL3 
 is not bound to a specific renderer; it’s a resource that can be used by any renderer, provided
@@ -64,7 +68,6 @@ Creating and maintaining two textures with the same data requires additional mem
 Copying pixel data frequently (e.g., via SDL_RenderReadPixels or SDL_UpdateTexture) can be slow, 
 especially for large textures or real-time applications. If possible, cache the textures and minimize
 updates to optimize performance
-
 +/
 
 /+
@@ -776,20 +779,10 @@ textureToTextureCopy()
 +/
 
 
-
-
-
 /+
-
 https://examples.libsdl.org/SDL3/renderer/07-streaming-textures/#:~:text=07%2Dstreaming%2Dtextures,function%20runs%20once%20at%20startup.
-
-
 +/
 
 
-
-
-
-
-
+*/
 

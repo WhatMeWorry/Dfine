@@ -1,4 +1,6 @@
 
+
+
 /+
 SDL_FRect uses float values for x, y, w (width), and h (height). This is the preferred and more modern type for rendering 
 and positioning in SDL3, as it avoids integer rounding issues and allows for sub-pixel accuracy, which is crucial for smooth 
@@ -92,7 +94,7 @@ import std.range : empty;  // for aa
 import core.stdc.stdlib : exit;
 import core.stdc.string : memcpy;
 import datatypes;
-import a_star.spot : writeAndPause;
+import useful_functions : writeAndPause;
 import core.stdc.stdio : printf;
 import hexmath : isOdd, isEven;
 import breakup;
@@ -1292,4 +1294,5 @@ int getMaxTextureSizeForRenderer(SDL_Renderer *renderer)
     int maxTextureSize = cast(int) getNumberProperty(properties, SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER, -1);
     return maxTextureSize;
 }
+
 

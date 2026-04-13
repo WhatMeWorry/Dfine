@@ -35,8 +35,9 @@ Did not bother specifying loader and common because bindbc-sdl pulled them in au
     Fetching bindbc-common 1.0.5 (getting selected version)  // 1.0.5 is most recent version
 */
 
-importPaths "source" "libraries" "sdl3"  // makes modules available for compilation, adds to compiler's search path
-sourcePaths "source" "libraries" "sdl3" // specify code to be built
+importPaths "source" "libraries" "sdl3" "common"  // makes modules available for compilation, adds to compiler's search path
+sourcePaths "source" "libraries" "sdl3" "common" // specify code to be built
+
 
 
 // Key DUB Recursive Glob Features:

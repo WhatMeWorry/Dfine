@@ -1,6 +1,7 @@
 
-module hexboard;
+/+
 
+module hexboard;
 
 import std.conv: roundTo, to;
 import std.stdio: writeln, readf;
@@ -1027,3 +1028,5 @@ void addNeighbors(HB)(HB h)
 
  
 //}
+
++/

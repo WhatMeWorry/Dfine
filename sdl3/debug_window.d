@@ -1,4 +1,6 @@
 
+/+
+
 module debug_window;
 
 import cork_board;
@@ -127,19 +129,12 @@ struct DebugWindow
 			
 			//str = "angle (degrees): " ~ to!string(s.angle);
 			SDL_RenderDebugText(ren, 5, v+45, toStringz("angle (degrees): " ~ to!string(s.angle)));
-
         }
-
-        
+      
         SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
         SDL_RenderPresent(ren); // Present the rendered content
     }	
-	
-	
-	
-	
-	
-	
-	
-
 }
+
+
++/

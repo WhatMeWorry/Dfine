@@ -1,4 +1,6 @@
 
+
+
 module hexmath;
 
 import std.stdio;
@@ -114,3 +116,5 @@ unittest
     assert(hexWidthToFitWindow(1, 999, Direction.vertical).isClose(2.30947f), "unit test failed");
  
 }
+
+

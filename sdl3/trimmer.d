@@ -1,4 +1,6 @@
 
+/+
+
 module trimmer;
 
 import std.stdio : writeln, write, writefln;
@@ -363,6 +365,6 @@ void trimEdges()
 }
 
 
-
++/
 
 
