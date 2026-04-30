@@ -1,0 +1,12 @@
+
+
+These notes are from 
+
+https://www.youtube.com/watch?v=0beGDPsdnls
+
+Agent 1 - sqlbuilder
+https://github.com/schveiguy/sqlbuilder 
+
+Agent 2 - serverino 
+https://github.com/trikko/serverino 
+
