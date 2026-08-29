@@ -1,0 +1,24 @@
+
+
+pacman -Ql | grep '\.so' | grep 'sdl3'
+
+sdl3 /usr/lib/libSDL3.so
+sdl3 /usr/lib/libSDL3.so.0
+sdl3 /usr/lib/libSDL3.so.0.4.14
+
+pacman -Ql | grep '\.so' | grep 'sdl_image'
+
+sdl_image /usr/lib/libSDL_image-1.2.so.0
+sdl_image /usr/lib/libSDL_image-1.2.so.0.8.4
+sdl_image /usr/lib/libSDL_image.so
+
+libSDL3.so.0.4.14 (The Real File):
+This is the actual physical shared library file containing the compiled code.The numbers at the end 
+represent the exact version: major version 0, minor version 4, and patch version 14.
+
+libSDL3.so.0 (The SONAME Link):
+This is a symbolic link pointing to the real file.
+It defines the SONAME (shared object name). It tells the operating system and running programs which major API version is compatible. 
+Any program compiled against SDL version 0.x.x can safely use this file because major interface changes have not broken compatibility.
+
+libSDL3.so (The Development Link):

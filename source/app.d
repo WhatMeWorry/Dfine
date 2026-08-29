@@ -4,9 +4,9 @@ module app;
 
 import std.stdio;
 
-//import bindbc.sdl;
+import bindbc.sdl;
 
-//import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) below. However, created 
+import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) below. However, created 
                                      // lld-link: error: undefined symbol: _D9libraries18load_sdl_librariesQuFZv 
                                      // (3) sourcePaths "libraries" in dub.sdl solved the problem
 import core.stdc.stdlib : exit;
@@ -16,9 +16,88 @@ int main()
     writeln("Hello New World");
     
 	
-	//SDL_Init(SDL_INIT_VIDEO);
+import std.stdio;
+import bindbc.sdl;
+import bindbc.loader; // Required for error handling and custom loading
+
+void main() 
+{
+    // Pass the exact filename of your shared object
+    string libPath = "libSDL3.so.0.4.14";
+
+    // Load the library
+    SDLSupport ret = loadSDL(libPath.ptr);
+
+    // Handle potential loading errors
+    if (ret != sdlSupport) 
+    {
+        if (ret == SDLSupport.noLibrary) 
+        {
+            writeln("Error: Could not find or open " ~ libPath);
+            // Print the specific loader errors to see why it failed
+            foreach(error; errors()) {
+                writeln("Loader error: ", error.message);
+            }
+            return;
+        } 
+        else if (ret == SDLSupport.badLibrary) 
+        {
+            writeln("Error: Found the library, but one or more expected SDL3 symbols are missing.");
+            return;
+        }
+    }
+
+// If you are using a modern version of BindBC, you should use LoadMsg from the loader
+// library instead of checking against SDLSupport values like noLibrary or badLibrary
+
+import bindbc.loader;
+import bindbc.sdl;
+
+
+    // The load function now returns a LoadMsg enum value in recent versions
+    ret = loadSDL(); 
+    
+    if (ret != LoadMsg.success) {
+        if (ret == LoadMsg.noLibrary) {
+            // The SDL shared library (DLL/SO) could not be found
+        } else if (ret == LoadMsg.badLibrary) {
+            // One or more symbols failed to load (version mismatch)
+        }
+    }
+
+
+
+
+
+
+
+
+    writeln("Successfully loaded " ~ libPath);
+
+    // Now you can safely call SDL3 functions
+    if (SDL_Init(SDL_INIT_VIDEO)) 
+    {
+        writeln("SDL Initialized successfully!");
+        
+        // Your SDL3 code here...
+
+        SDL_Quit();
+    }
+}
+
+
 	
-    //load_sdl_libraries();  // (1) undefined symbol
+	
+	
+	
+	
+	bool ok = SDL_Init(SDL_INIT_VIDEO);
+	if (!ok)
+    {
+	    writeln("SDL_Init failed");
+    }
+	writeln("============");
+    load_sdl_libraries();  // (1) undefined symbol
     
     //SDL_Initialize();
 
