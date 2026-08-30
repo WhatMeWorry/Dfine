@@ -12,67 +12,59 @@ import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) be
 import core.stdc.stdlib : exit;
 
 int main()
-{
-    writeln("Hello New World");
+{   	
+    import std.stdio;
+	import bindbc.loader;
+    import bindbc.sdl;
     
+    // If you are using a modern version of BindBC, you should use LoadMsg from the loader
+    // library instead of checking against SDLSupport values like noLibrary or badLibrary
+    // The load function now returns a LoadMsg enum value
 	
-import std.stdio;
-import bindbc.sdl;
-import bindbc.loader; // Required for error handling and custom loading
+    // https://www.youtube.com/watch?v=GXntBf0Xns8
 
-void main() 
-{
-    // Pass the exact filename of your shared object
-    string libPath = "libSDL3.so.0.4.14";
+    LoadMsg ret;  // shared by all
 
-    // Load the library
-    SDLSupport ret = loadSDL(libPath.ptr);
+    version (linux)
+	{	
+	    //ret = loadSDL();  // default version 
+		
+        // Pass the exact filename of your shared object
+        //string libPath = "/usr/lib/libSDL3.so.0.4.14";  // this works by getting where the linux package mgr installed it
+	
+         //string libPath = "/usr/lib/libSDL3.so";   // this works! ????
+		 
+		 //string libPath = "/usr/lib/libSDL3.so.0";   // this works! ????
+	
+		string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. It's relative 
+		                                                                    // to the root of the project. hence the dot.
+																	
+		
+        ret = loadSDL(libPath.ptr);   // explicit	
+	}
 
-    // Handle potential loading errors
-    if (ret != sdlSupport) 
-    {
-        if (ret == SDLSupport.noLibrary) 
-        {
-            writeln("Error: Could not find or open " ~ libPath);
-            // Print the specific loader errors to see why it failed
-            foreach(error; errors()) {
-                writeln("Loader error: ", error.message);
-            }
-            return;
+    if (ret != LoadMsg.success) 
+	{
+        if (ret == LoadMsg.noLibrary) 
+		{
+            writeln("The SDL3 shared library (.dll or .so) could not be found");
+			exit(-1);
         } 
-        else if (ret == SDLSupport.badLibrary) 
+		else if (ret == LoadMsg.badLibrary) 
         {
-            writeln("Error: Found the library, but one or more expected SDL3 symbols are missing.");
-            return;
-        }
+           writeln("One or more symbols failed to load (version mismatch)");
+           exit(-1);
+        }	
     }
+	writeln("SDL3 shared library successfully loaded");
+		
+    const int linkedVersion = SDL_GetVersion();    // reported by linked SDL library		
+		
+    writeln("SDL3-", SDL_VERSIONNUM_MAJOR(linkedVersion), ".", 
+		                    SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
+			                SDL_VERSIONNUM_MICRO(linkedVersion));
 
-// If you are using a modern version of BindBC, you should use LoadMsg from the loader
-// library instead of checking against SDLSupport values like noLibrary or badLibrary
-
-import bindbc.loader;
-import bindbc.sdl;
-
-
-    // The load function now returns a LoadMsg enum value in recent versions
-    ret = loadSDL(); 
-    
-    if (ret != LoadMsg.success) {
-        if (ret == LoadMsg.noLibrary) {
-            // The SDL shared library (DLL/SO) could not be found
-        } else if (ret == LoadMsg.badLibrary) {
-            // One or more symbols failed to load (version mismatch)
-        }
-    }
-
-
-
-
-
-
-
-
-    writeln("Successfully loaded " ~ libPath);
+    //writeln("Successfully loaded " ~ libPath);
 
     // Now you can safely call SDL3 functions
     if (SDL_Init(SDL_INIT_VIDEO)) 
@@ -83,11 +75,29 @@ import bindbc.sdl;
 
         SDL_Quit();
     }
-}
-
 
 	
+	/+
+Once installed, the shared object files are placed in your system's standard library directory. 
+You can find the exact path to libSDL3.so by running:bash
+find /usr/lib/ -name "libSDL3.so*"	
 	
+find /usr/lib/ -name "libSDL3.so*"
+
+/usr/lib/libSDL3.so.0.4.14
+/usr/lib/libSDL3.so
+/usr/lib/libSDL3.so.0
+	
+    libSDL3.so.0.4.14   is the Real Name (the actual binary file containing the compiled code and data). The numbers 0.4.14 represent 
+                                 the major, minor, and patch release versions of the library.
+
+    libSDL3.so.0   is the SONAME (Shared Object Name). It is typically a symbolic link pointing to the real file 
+	                      (libSDL3.so.0.4.14), used by the system at runtime to guarantee binary interface (ABI) compatibility
+	
+	libSDL3.so  is the Linker Name (or development name). It is a symbolic link without version numbers, used by compilers and linkers 
+	                  (gcc, ld) when you compile a new program.
+	
+	+/
 	
 	
 	
@@ -96,8 +106,8 @@ import bindbc.sdl;
     {
 	    writeln("SDL_Init failed");
     }
-	writeln("============");
-    load_sdl_libraries();  // (1) undefined symbol
+
+//    load_sdl_libraries();  // (1) undefined symbol
     
     //SDL_Initialize();
 

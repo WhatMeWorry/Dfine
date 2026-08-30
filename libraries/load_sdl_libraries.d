@@ -37,19 +37,32 @@ import bindbc.sdl.image :
 
 void load_sdl_libraries()
 {
-    string fullPathCurrentExe = thisExePath();  // this is dfi
+    string fullPathOfExe = thisExePath();  // this executable is by default the same as its package name or else specified by the targetName attribute in dub.sdl 
     
     writeln("Function: ", __FUNCTION__);
     writeln("in module ", __MODULE__);
-    writeln("at location ", fullPathCurrentExe);
+    writeln("at location ", fullPathOfExe);
 
-    string parentDirOfThisPath = dirName(fullPathCurrentExe);
+    string parentDirOfThisPath = dirName(fullPathOfExe);
 
     string pathToLibs = parentDirOfThisPath ~ `\` ~ "libraries" ~ `\`;
   
     string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";    // 2,725 KB  version 3.4.2
 	
     LoadMsg result;    // enum LoadMsg{ success, noLibrary, badLibrary,}  
+  
+    version(Linux)
+    {
+        writeln("Loading SDL3 .so file at:");
+		writeln(pathAndFileName);
+        result = loadSDL(pathAndFileName.toStringz());
+        if(result != LoadMsg.success)
+        {
+            writeln("loadSDL with ", pathAndFileName, "failed");
+			exit(-1);
+        }
+    }
+  
   
     version(Windows)
     {
