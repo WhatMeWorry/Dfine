@@ -12,59 +12,82 @@ import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) be
 import core.stdc.stdlib : exit;
 
 int main()
-{   	
+{
     import std.stdio;
-	import bindbc.loader;
+    import bindbc.loader;
     import bindbc.sdl;
     
     // If you are using a modern version of BindBC, you should use LoadMsg from the loader
     // library instead of checking against SDLSupport values like noLibrary or badLibrary
     // The load function now returns a LoadMsg enum value
-	
+
     // https://www.youtube.com/watch?v=GXntBf0Xns8
 
-    LoadMsg ret;  // shared by all
+    LoadMsg ret = LoadMsg.noLibrary;  // initialized 
 
     version (linux)
-	{	
-	    //ret = loadSDL();  // default version 
-		
+    {
+        //ret = loadSDL();  // default version 
+
         // Pass the exact filename of your shared object
         //string libPath = "/usr/lib/libSDL3.so.0.4.14";  // this works by getting where the linux package mgr installed it
-	
-         //string libPath = "/usr/lib/libSDL3.so";   // this works! ????
-		 
-		 //string libPath = "/usr/lib/libSDL3.so.0";   // this works! ????
-	
-		string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. It's relative 
-		                                                                    // to the root of the project. hence the dot.
-																	
-		
-        ret = loadSDL(libPath.ptr);   // explicit	
-	}
 
-    if (ret != LoadMsg.success) 
-	{
-        if (ret == LoadMsg.noLibrary) 
-		{
-            writeln("The SDL3 shared library (.dll or .so) could not be found");
-			exit(-1);
-        } 
-		else if (ret == LoadMsg.badLibrary) 
-        {
-           writeln("One or more symbols failed to load (version mismatch)");
-           exit(-1);
-        }	
+        //string libPath = "/usr/lib/libSDL3.so";   // this works! ????
+
+        //string libPath = "/usr/lib/libSDL3.so.0";   // this works! ????
+
+        string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. 
+                                                           // It's relative to the root of the project. hence the dot.
+
+        ret = loadSDL(libPath.ptr);   // explicit
     }
-	writeln("SDL3 shared library successfully loaded");
-		
-    const int linkedVersion = SDL_GetVersion();    // reported by linked SDL library		
-		
-    writeln("SDL3-", SDL_VERSIONNUM_MAJOR(linkedVersion), ".", 
-		                    SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
-			                SDL_VERSIONNUM_MICRO(linkedVersion));
+    
+    version (Windows)
+    {
+        import std.file: exists, thisExePath, isFile;
+        string fullPathOfExe = thisExePath();  // this executable is by default the same as its package name 
+                                               // or else specified by the targetName attribute in dub.sdl 
+    
+        writeln("Function: ", __FUNCTION__);
+        writeln("in module ", __MODULE__);
+        writeln("at location ", fullPathOfExe);
 
-    //writeln("Successfully loaded " ~ libPath);
+        import std.path: dirName;
+        string parentDirOfThisPath = dirName(fullPathOfExe);
+
+        string pathToLibs = parentDirOfThisPath ~ `\` ~ "libraries" ~ `\`;
+  
+        string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";    // 2,725 KB  version 3.4.2
+    
+        writeln("pathAndFileName = ", pathAndFileName);
+        import std.string: toStringz;
+        //ret = loadSDL(pathAndFileName.toStringz());
+        ret = loadSDL(pathAndFileName.ptr);
+    }
+   
+
+    if (ret == LoadMsg.success) 
+    {
+        writeln("SDL3 shared library successfully loaded");
+
+        const int linkedVersion = SDL_GetVersion();    // reported by linked SDL library
+
+        writeln("SDL3-", SDL_VERSIONNUM_MAJOR(linkedVersion), ".", 
+                         SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
+                         SDL_VERSIONNUM_MICRO(linkedVersion));
+    }
+    else if (ret == LoadMsg.noLibrary) 
+    {
+        writeln("The SDL3 shared library (.dll or .so) could not be found");
+        exit(-1);
+    } 
+    else if (ret == LoadMsg.badLibrary) 
+    {
+       writeln("One or more symbols failed to load (version mismatch)");
+       exit(-1);
+    }
+
+
 
     // Now you can safely call SDL3 functions
     if (SDL_Init(SDL_INIT_VIDEO)) 
