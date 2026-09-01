@@ -3,8 +3,11 @@
 module app;
 
 import std.stdio;
-
-import bindbc.sdl;
+import bindbc.sdl;  
+// don't need a bindbc.sdl.image import
+    import bindbc.loader;
+    import bindbc.sdl;
+	import bindbc.sdl.mixer;  
 
 import std.string: toStringz;
 import std.file: exists;
@@ -16,9 +19,9 @@ import core.stdc.stdlib : exit;
 
 int main()
 {
-    import std.stdio;
-    import bindbc.loader;
-    import bindbc.sdl;
+
+	
+	//import loader = bindbc.loader.sharedlib;
     
     // If you are using a modern version of BindBC, you should use LoadMsg from the loader
     // library instead of checking against SDLSupport values like noLibrary or badLibrary
@@ -132,13 +135,13 @@ int main()
  
     if (imgStatus == LoadMsg.success) 
     {
-        writeln("SDL_Image shared library successfully loaded");
+        writeln("SDL3_Image shared library successfully loaded");
 
         int  imageVersion = IMG_Version();            // reported by linked SDL Image Library
 		
-        writeln("SDL_Image-", SDL_VERSIONNUM_MAJOR(imageVersion), ".", 
-                         SDL_VERSIONNUM_MINOR(imageVersion), ".", 
-                         SDL_VERSIONNUM_MICRO(imageVersion));
+        writeln("SDL3_Image-", SDL_VERSIONNUM_MAJOR(imageVersion), ".", 
+                                           SDL_VERSIONNUM_MINOR(imageVersion), ".", 
+                                           SDL_VERSIONNUM_MICRO(imageVersion));
     }
     else if (imgStatus == LoadMsg.noLibrary) 
     {
@@ -168,7 +171,56 @@ sudo make install
 +/
 
 
+//===================================================================================
+//                       SDL MIXER LIBRARY
+//===================================================================================
 
+LoadMsg mixStatus = LoadMsg.noLibrary;
+
+version (linux)
+    {
+        //Status = loadSDLMixer();  // get from package manager???  
+		 
+        pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
+		writeln("pathAndFileName = ", pathAndFileName);
+		if (exists(pathAndFileName))
+        {
+		    writeln("FILE EXISTS");
+        }
+		
+        mixStatus = loadSDLmixer(pathAndFileName.toStringz);
+		
+    }
+ 
+ 
+    if (mixStatus == LoadMsg.success) 
+    {
+        writeln("SDL Mixer shared library successfully loaded");		
+	
+        // Get the version running at runtime
+		int mixVersion = MIX_Version();
+		
+        //printf("Running with SDL_mixer version: %d.%d.%d\n", linked->major, linked->minor, linked->patch);
+		
+		writeln("mixVersion = ", mixVersion);		
+		
+        writeln("SDL3_Mixer-", SDL_VERSIONNUM_MAJOR(mixVersion), ".", 
+                                         SDL_VERSIONNUM_MINOR(mixVersion), ".", 
+                                         SDL_VERSIONNUM_MICRO(mixVersion));
+		
+
+
+    }
+    else if (mixStatus == LoadMsg.noLibrary) 
+    {
+        writeln("The SDL3_Image shared library (.dll or .so) could not be found");
+        exit(-1);
+    } 
+    else if (mixStatus == LoadMsg.badLibrary) 
+    {
+       writeln("One or more symbols failed to load (version mismatch)");
+       exit(-1);
+    }
 
 
 

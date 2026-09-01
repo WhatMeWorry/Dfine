@@ -29,6 +29,7 @@ dependency "bindbc-sdl" version="~>2.3.4"  // most recent version of dub package
 
 versions "SDL_3_4_10"          // this is the highest version in bindbc-sdl documentation  
 versions "SDL_Image_3_2"    // this is the highest (actually only) version in documendation
+versions "SDL_Mixer_3_2"  // this is the highest, of the two versions in documendation
 
 /* 
 Did not bother specifying loader and common because bindbc-sdl pulled them in automatically
