@@ -97,7 +97,7 @@ int main()
   
     version (Windows)
 	{
-        pathAndFileName = pathToLibs ~ "SDL3_image_3_3_4.dll";
+        pathAndFileName = pathToLibs ~ "SDL3_image_3_4_4.dll";
  
         if (exists(pathAndFileName))  // returns true for files or directories
         {
@@ -109,7 +109,7 @@ int main()
         }
         writeln("trying to load SDL Image library: ", pathAndFileName);
     
-        ret = loadSDLImage(pathAndFileName.toStringz());
+        ret = loadSDLImage(pathAndFileName.ptr);
     }     
  
     version (linux)
