@@ -108,7 +108,8 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 import helper_funcs : displayRect;
 
 
-
+/+
+convenience function put into SDL3
 SDL_Surface* loadPNG(string file)
 {
     SDL_Surface* surface = SDL_LoadPNG(file.toStringz);   
@@ -129,7 +130,7 @@ bool savePNG(SDL_Surface* surface, string file)
         throw new Exception("SDL_SavePNG failed: " ~ to!string(SDL_GetError()));
     }
 }
-
++/
 
 void renderFillRect(SDL_Renderer *renderer, const SDL_FRect *rect)
 {

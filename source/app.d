@@ -6,6 +6,9 @@ import std.stdio;
 
 import bindbc.sdl;
 
+import std.string: toStringz;
+import std.file: exists;
+
 import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) below. However, created 
                                      // lld-link: error: undefined symbol: _D9libraries18load_sdl_librariesQuFZv 
                                      // (3) sourcePaths "libraries" in dub.sdl solved the problem
@@ -23,23 +26,24 @@ int main()
 
     // https://www.youtube.com/watch?v=GXntBf0Xns8
 
-    LoadMsg ret = LoadMsg.noLibrary;  // initialized       enum LoadMsg{ success, noLibrary, badLibrary} 
+    LoadMsg sdlStatus = LoadMsg.noLibrary;  // initialized       enum LoadMsg{ success, noLibrary, badLibrary} 
 
     version (linux)
     {
-        //ret = loadSDL();  // default version 
+        sdlStatus = loadSDL();  // default version probably from the package manager
 
-        // Pass the exact filename of your shared object
-        //string libPath = "/usr/lib/libSDL3.so.0.4.14";  // this works by getting where the linux package mgr installed it
+        // Pass the explicit filename of your shared library
+		
+        //string libPath = "/usr/lib/libSDL3.so.0.4.14";  // this works! by getting where the linux package mgr installed it
 
-        //string libPath = "/usr/lib/libSDL3.so";   // this works! ????
+        //string libPath = "/usr/lib/libSDL3.so";   // this also works 
 
-        //string libPath = "/usr/lib/libSDL3.so.0";   // this works! ????
+        // string libPath = "/usr/lib/libSDL3.so.0";   // this works too
 
-        string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. 
-                                                           // It's relative to the root of the project. hence the dot.
+        //string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. 
+                                                                            // It's relative to the root of the project. hence the dot.
 
-        ret = loadSDL(libPath.ptr);   // explicit
+        // sdlStatus = loadSDL(libPath.ptr);   // explicit
     }
     
     version (Windows)
@@ -61,12 +65,12 @@ int main()
     
         writeln("pathAndFileName = ", pathAndFileName);
         import std.string: toStringz;
-        //ret = loadSDL(pathAndFileName.toStringz());
-        ret = loadSDL(pathAndFileName.ptr);
+        //sdlStatus = loadSDL(pathAndFileName.toStringz());
+        sdlStatus = loadSDL(pathAndFileName.ptr);
     }
    
 
-    if (ret == LoadMsg.success) 
+    if (sdlStatus == LoadMsg.success) 
     {
         writeln("SDL3 shared library successfully loaded");
 
@@ -76,12 +80,12 @@ int main()
                          SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
                          SDL_VERSIONNUM_MICRO(linkedVersion));
     }
-    else if (ret == LoadMsg.noLibrary) 
+    else if ( sdlStatus == LoadMsg.noLibrary) 
     {
         writeln("The SDL3 shared library (.dll or .so) could not be found");
         exit(-1);
     } 
-    else if (ret == LoadMsg.badLibrary) 
+    else if (sdlStatus == LoadMsg.badLibrary) 
     {
        writeln("One or more symbols failed to load (version mismatch)");
        exit(-1);
@@ -93,7 +97,7 @@ int main()
     //                       SDL IMAGE LIBRARY
     //===================================================================================
   
-    ret = LoadMsg.noLibrary;
+    LoadMsg imgStatus = LoadMsg.noLibrary;
   
     version (Windows)
 	{
@@ -109,39 +113,59 @@ int main()
         }
         writeln("trying to load SDL Image library: ", pathAndFileName);
     
-        ret = loadSDLImage(pathAndFileName.ptr);
+        imgStatus = loadSDLImage(pathAndFileName.ptr);
     }     
  
     version (linux)
     {
-    
+        imgStatus = loadSDLImage();  // get from package manager???  
+		 
+        string pathAndFileName = "./libraries/" ~ "libSDL3_image.so.0.4.4"; 
+		 writeln("pathAndFileName = ", pathAndFileName);
+		 if (exists(pathAndFileName))
+		     writeln("FILE EXISTS");
+		 
+        imgStatus = loadSDLImage(pathAndFileName.toStringz); 
+		
     }
  
  
-    if (ret == LoadMsg.success) 
+    if (imgStatus == LoadMsg.success) 
     {
         writeln("SDL_Image shared library successfully loaded");
 
-        //const int linkedVersion = SDL_GetVersion();    // reported by linked SDL library
-
-        //writeln("SDL3-", SDL_VERSIONNUM_MAJOR(linkedVersion), ".", 
-        //                 SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
-        //                 SDL_VERSIONNUM_MICRO(linkedVersion));
+        int  imageVersion = IMG_Version();            // reported by linked SDL Image Library
+		
+        writeln("SDL_Image-", SDL_VERSIONNUM_MAJOR(imageVersion), ".", 
+                         SDL_VERSIONNUM_MINOR(imageVersion), ".", 
+                         SDL_VERSIONNUM_MICRO(imageVersion));
     }
-    else if (ret == LoadMsg.noLibrary) 
+    else if (imgStatus == LoadMsg.noLibrary) 
     {
         writeln("The SDL3_Image shared library (.dll or .so) could not be found");
         exit(-1);
     } 
-    else if (ret == LoadMsg.badLibrary) 
+    else if (imgStatus == LoadMsg.badLibrary) 
     {
        writeln("One or more symbols failed to load (version mismatch)");
        exit(-1);
     }
-      
+  
 
+/+  
+how to build the libSDL3_image.so
+   
+tar -xf SDL3_image-3.4.4.tar.gz
+cd SDL3_image-3.4.4
+mkdir build && cd build
+cmake .. -DBUILD_SHARED_LIBS=ON
+make
+sudo make install
 
-
+-- Installing: /usr/local/lib/libSDL3_image.so.0.4.4
+-- Installing: /usr/local/lib/libSDL3_image.so.0
+-- Installing: /usr/local/lib/libSDL3_image.so
++/
 
 
 
@@ -161,7 +185,7 @@ int main()
     // Now you can safely call SDL3 functions
     if (SDL_Init(SDL_INIT_VIDEO)) 
     {
-        writeln("SDL Initialized successfully!");
+        writeln("Quitting program");
         
         // Your SDL3 code here...
 

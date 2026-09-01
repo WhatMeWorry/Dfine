@@ -27,7 +27,8 @@ mainSourceFile "source/app.d"
 
 dependency "bindbc-sdl" version="~>2.3.4"  // most recent version of dub package (not sdl version)
 
-versions "SDL_3_4_0"  "SDL_Image_3_2"
+versions "SDL_3_4_10"          // this is the highest version in bindbc-sdl documentation  
+versions "SDL_Image_3_2"    // this is the highest (actually only) version in documendation
 
 /* 
 Did not bother specifying loader and common because bindbc-sdl pulled them in automatically

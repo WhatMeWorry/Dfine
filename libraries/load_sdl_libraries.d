@@ -106,7 +106,7 @@ void load_sdl_libraries()
     string pngImage = pathToImages ~ `\` ~ "earth1024x1024.png";
     string saveImage = pathToImages ~ `\` ~ "TEST.png";
     writeln("pngImage = ", pngImage);
-    surface = loadPNG(pngImage);
+    //surface = loadPNG(pngImage);
     writeln("surface = ", surface);
     //bool r = savePNG(surface, saveImage);
     //writeln("SDL_SavePNG returned", r);
