@@ -49,7 +49,7 @@ void load_sdl_libraries()
   
     string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";    // 2,725 KB  version 3.4.2
 	
-    LoadMsg result;    // enum LoadMsg{ success, noLibrary, badLibrary,}  
+    LoadMsg result;    // enum LoadMsg{ success, noLibrary, badLibrary}  
   
     version(Linux)
     {

@@ -23,7 +23,7 @@ int main()
 
     // https://www.youtube.com/watch?v=GXntBf0Xns8
 
-    LoadMsg ret = LoadMsg.noLibrary;  // initialized 
+    LoadMsg ret = LoadMsg.noLibrary;  // initialized       enum LoadMsg{ success, noLibrary, badLibrary} 
 
     version (linux)
     {
@@ -86,6 +86,75 @@ int main()
        writeln("One or more symbols failed to load (version mismatch)");
        exit(-1);
     }
+
+
+
+    //===================================================================================
+    //                       SDL IMAGE LIBRARY
+    //===================================================================================
+  
+    ret = LoadMsg.noLibrary;
+  
+    version (Windows)
+	{
+        pathAndFileName = pathToLibs ~ "SDL3_image_3_3_4.dll";
+ 
+        if (exists(pathAndFileName))  // returns true for files or directories
+        {
+            if (isFile(pathAndFileName)) // verify it is actually a file
+            {   
+                writeln("Found the SDL Image dll file at: ");
+			    writeln(pathAndFileName);
+            }
+        }
+        writeln("trying to load SDL Image library: ", pathAndFileName);
+    
+        ret = loadSDLImage(pathAndFileName.toStringz());
+    }     
+ 
+    version (linux)
+    {
+    
+    }
+ 
+ 
+    if (ret == LoadMsg.success) 
+    {
+        writeln("SDL_Image shared library successfully loaded");
+
+        //const int linkedVersion = SDL_GetVersion();    // reported by linked SDL library
+
+        //writeln("SDL3-", SDL_VERSIONNUM_MAJOR(linkedVersion), ".", 
+        //                 SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
+        //                 SDL_VERSIONNUM_MICRO(linkedVersion));
+    }
+    else if (ret == LoadMsg.noLibrary) 
+    {
+        writeln("The SDL3_Image shared library (.dll or .so) could not be found");
+        exit(-1);
+    } 
+    else if (ret == LoadMsg.badLibrary) 
+    {
+       writeln("One or more symbols failed to load (version mismatch)");
+       exit(-1);
+    }
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
