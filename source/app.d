@@ -4,10 +4,12 @@ module app;
 
 import std.stdio;
 import bindbc.sdl;  
+import bindbc.loader;
+import loader = bindbc.loader.sharedlib;  // from Mike Shah working repo
+
 // don't need a bindbc.sdl.image import
-    import bindbc.loader;
-    import bindbc.sdl;
-	import bindbc.sdl.mixer;  
+    
+
 
 import std.string: toStringz;
 import std.file: exists;
@@ -175,9 +177,9 @@ sudo make install
 //                       SDL MIXER LIBRARY
 //===================================================================================
 
-LoadMsg mixStatus = LoadMsg.noLibrary;
+    LoadMsg mixStatus = LoadMsg.noLibrary;
 
-version (linux)
+    version (linux)
     {
         //Status = loadSDLMixer();  // get from package manager???  
 		 
@@ -188,9 +190,35 @@ version (linux)
 		    writeln("FILE EXISTS");
         }
 		
-        mixStatus = loadSDLmixer(pathAndFileName.toStringz);
+        mixStatus = loadSDLMixer(pathAndFileName.toStringz);
 		
     }
+ 
+    version (Windows)
+    {
+        //Status = loadSDLMixer();  // get from package manager???  
+		 
+        pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
+		writeln("pathAndFileName = ", pathAndFileName);
+		if (exists(pathAndFileName))
+        {
+		    writeln("FILE EXISTS");
+        }
+		
+        mixStatus = loadSDLMixer(pathAndFileName.toStringz);
+		
+    }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
  
     if (mixStatus == LoadMsg.success) 
@@ -198,15 +226,16 @@ version (linux)
         writeln("SDL Mixer shared library successfully loaded");		
 	
         // Get the version running at runtime
-		int mixVersion = MIX_Version();
+		//int mixVersion = MIX_Version();
 		
         //printf("Running with SDL_mixer version: %d.%d.%d\n", linked->major, linked->minor, linked->patch);
 		
-		writeln("mixVersion = ", mixVersion);		
+		//writeln("mixVersion = ", mixVersion);		
 		
+		/+
         writeln("SDL3_Mixer-", SDL_VERSIONNUM_MAJOR(mixVersion), ".", 
-                                         SDL_VERSIONNUM_MINOR(mixVersion), ".", 
-                                         SDL_VERSIONNUM_MICRO(mixVersion));
+                               SDL_VERSIONNUM_MINOR(mixVersion), ".", 
+                               SDL_VERSIONNUM_MICRO(mixVersion));   +/
 		
 
 
