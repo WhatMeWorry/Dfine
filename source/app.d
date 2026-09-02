@@ -11,7 +11,7 @@ import loader = bindbc.loader.sharedlib;  // from Mike Shah working repo
     
 
 
-import std.string: toStringz;
+import std.string: toStringz, fromStringz;
 import std.file: exists;
 
 import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) below. However, created 
@@ -106,7 +106,7 @@ int main()
   
     version (Windows)
 	{
-        pathAndFileName = pathToLibs ~ "SDL3_image_3_4_4.dll";
+        pathAndFileName = pathToLibs ~ "SDL3_image.dll";
  
         if (exists(pathAndFileName))  // returns true for files or directories
         {
@@ -242,6 +242,10 @@ sudo make install
     }
     else if (mixStatus == LoadMsg.noLibrary) 
     {
+        foreach (error; bindbc.loader.errors) 
+        {
+            writeln("  - Error: ", error.message.fromStringz);
+        }
         writeln("The SDL3_Image shared library (.dll or .so) could not be found");
         exit(-1);
     } 
