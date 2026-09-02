@@ -32,10 +32,16 @@ int main()
     // https://www.youtube.com/watch?v=GXntBf0Xns8
 
     LoadMsg sdlStatus = LoadMsg.noLibrary;  // initialized       enum LoadMsg{ success, noLibrary, badLibrary} 
+	
+	//===================================================================================
+    writeln("========== SDL LIBRARY ==========");
+    //===================================================================================
+
+    
 
     version (linux)
     {
-        sdlStatus = loadSDL();  // default version probably from the package manager
+        //sdlStatus = loadSDL();  // default version probably from the package manager
 
         // Pass the explicit filename of your shared library
 		
@@ -45,10 +51,10 @@ int main()
 
         // string libPath = "/usr/lib/libSDL3.so.0";   // this works too
 
-        //string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. 
+        string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. 
                                                                             // It's relative to the root of the project. hence the dot.
 
-        // sdlStatus = loadSDL(libPath.ptr);   // explicit
+        sdlStatus = loadSDL(libPath.ptr);   // explicit
     }
     
     version (Windows)
@@ -99,8 +105,9 @@ int main()
 
 
     //===================================================================================
-    //                       SDL IMAGE LIBRARY
+    writeln("========== SDL IMAGE LIBRARY ==========");
     //===================================================================================
+  
   
     LoadMsg imgStatus = LoadMsg.noLibrary;
   
@@ -174,7 +181,7 @@ sudo make install
 
 
 //===================================================================================
-//                       SDL MIXER LIBRARY
+writeln("========== SDL MIXER LIBRARY ==========");
 //===================================================================================
 
     LoadMsg mixStatus = LoadMsg.noLibrary;
@@ -209,36 +216,16 @@ sudo make install
 		
     }
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
     if (mixStatus == LoadMsg.success) 
     {
         writeln("SDL Mixer shared library successfully loaded");		
-	
-        // Get the version running at runtime
-		//int mixVersion = MIX_Version();
 		
-        //printf("Running with SDL_mixer version: %d.%d.%d\n", linked->major, linked->minor, linked->patch);
+		int mixVersion = MIX_Version();  // this gets the version loaded and running at runtime
 		
-		//writeln("mixVersion = ", mixVersion);		
-		
-		/+
+			
         writeln("SDL3_Mixer-", SDL_VERSIONNUM_MAJOR(mixVersion), ".", 
-                               SDL_VERSIONNUM_MINOR(mixVersion), ".", 
-                               SDL_VERSIONNUM_MICRO(mixVersion));   +/
-		
-
-
+                                         SDL_VERSIONNUM_MINOR(mixVersion), ".", 
+                                         SDL_VERSIONNUM_MICRO(mixVersion)); 
     }
     else if (mixStatus == LoadMsg.noLibrary) 
     {
@@ -257,13 +244,77 @@ sudo make install
 
 
 
+//===================================================================================
+writeln("========== SDL TTF LIBRARY ==========");
+//===================================================================================
+
+    LoadMsg ttfStatus = LoadMsg.noLibrary;
+
+    version (linux)
+    {
+        pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
+		writeln("pathAndFileName = ", pathAndFileName);
+		if (exists(pathAndFileName))
+        {
+		    writeln("FILE EXISTS");
+        }
+		
+        ttfStatus = loadSDLTTF(pathAndFileName.toStringz);
+		
+		writeln("ttfStatus = ", ttfStatus);
+    }
+
+   if (ttfStatus == LoadMsg.success) 
+    {
+        writeln("SDL TTF shared library successfully loaded");		
+		
+		int ttfVersion = MIX_Version();  // this gets the version loaded and running at runtime
+		
+			
+        writeln("SDL3_TTF-", SDL_VERSIONNUM_MAJOR(ttfVersion), ".", 
+                                        SDL_VERSIONNUM_MINOR(ttfVersion), ".", 
+                                        SDL_VERSIONNUM_MICRO(ttfVersion)); 
+    }
+    else if (ttfStatus == LoadMsg.noLibrary) 
+    {
+        writeln("The SDL3_TTF shared library (.dll or .so) could not be found");
+        exit(-1);
+    } 
+    else if (ttfStatus == LoadMsg.badLibrary) 
+    {
+       writeln("One or more symbols failed to load (version mismatch)");
+       exit(-1);
+    }
+
+/+
+//===================================================================================
+writeln("========== SDL NET LIBRARY ==========");
+//===================================================================================
+
+    NOT FULLY AVAILABLE ON ARCH or CACHYOS DISTROS
+	
+	>paru -S sdl3_net
+	error: could not find all required packages:
+         sdl3_net (target)
 
 
+    LoadMsg netStatus = LoadMsg.noLibrary;
 
+    version (linux)
+    {
+        pathAndFileName = "./libraries/" ~ "libSDL3_net.so.0.2.2"; 
+		writeln("pathAndFileName = ", pathAndFileName);
+		if (exists(pathAndFileName))
+        {
+		    writeln("FILE EXISTS");
+        }
+		
+        netStatus = loadNETTTF(pathAndFileName.toStringz);
+		
+		writeln("netStatus = ", netStatus);
+    }
 
-
-
-
++/
 
 
 
@@ -300,21 +351,7 @@ find /usr/lib/ -name "libSDL3.so*"
 	
 	+/
 	
-	
-	
-	bool ok = SDL_Init(SDL_INIT_VIDEO);
-	if (!ok)
-    {
-	    writeln("SDL_Init failed");
-    }
 
-//    load_sdl_libraries();  // (1) undefined symbol
-    
-    //SDL_Initialize();
-
-    //exit(-1);
-	
- 	//SDL_Quit();
 
     return 0;
 }

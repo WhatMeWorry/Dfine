@@ -25,16 +25,20 @@ SDL2_image or SDL3_image shared library at runtime.
 
 mainSourceFile "source/app.d"
 
-dependency "bindbc-loader" version="~>1.1.5"
+//dependency "bindbc-loader" version="~>1.1.5"
+
 dependency "bindbc-sdl"    version="~>2.4.2"  // most recent version of dub package (not sdl version)
 
 
-versions "SDL_3_4_10"       // this is the highest version in bindbc-sdl documentation  
-versions "SDL_Image_3_2"    // this is the highest (actually only) version in documendation
-versions "SDL_Mixer_3_2_2"  // this is the highest, of the two versions in documendation
+versions "SDL_3_4_10"          // this is the highest version in bindbc-sdl documentation  
+versions "SDL_Image_3_2"    // highest version
+versions "SDL_Mixer_3_2_2"  // highest version
+versions "SDL_TTF_3_2"       // highest version
+//versions "SDL_Net_3_2"        // highest version (not ready for prime time)
 
-// libs "SDL3"             // these entries caused link errors since these are for static libraries
+// libs "SDL3"                 // these entries caused link errors since these are for static libraries
 // libs "SDL3_mixer"       // which embeds its code directly into a program during compilation
+
 /* 
 Did not bother specifying loader and common because bindbc-sdl pulled them in automatically
     Fetching bindbc-sdl 2.3.4 (getting selected version)
