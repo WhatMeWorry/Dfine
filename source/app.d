@@ -20,18 +20,14 @@ import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) be
 import core.stdc.stdlib : exit;
 
 int main()
-{
-
-	
-	//import loader = bindbc.loader.sharedlib;
-    
+{   
     // If you are using a modern version of BindBC, you should use LoadMsg from the loader
     // library instead of checking against SDLSupport values like noLibrary or badLibrary
     // The load function now returns a LoadMsg enum value
 
     // https://www.youtube.com/watch?v=GXntBf0Xns8
 
-    LoadMsg sdlStatus = LoadMsg.noLibrary;  // initialized       enum LoadMsg{ success, noLibrary, badLibrary} 
+    LoadMsg sdlStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
 	
 	//===================================================================================
     writeln("========== SDL LIBRARY ==========");
@@ -52,7 +48,7 @@ int main()
         // string libPath = "/usr/lib/libSDL3.so.0";   // this works too
 
         string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. 
-                                                                            // It's relative to the root of the project. hence the dot.
+                                                           // It's relative to the root of the project. hence the dot.
 
         sdlStatus = loadSDL(libPath.ptr);   // explicit
     }
@@ -107,13 +103,12 @@ int main()
     //===================================================================================
     writeln("========== SDL IMAGE LIBRARY ==========");
     //===================================================================================
-  
-  
-    LoadMsg imgStatus = LoadMsg.noLibrary;
+   
+    LoadMsg imgStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives 
   
     version (Windows)
 	{
-        pathAndFileName = pathToLibs ~ "SDL3_image.dll";
+        pathAndFileName = pathToLibs ~ "SDL3_image_3_2.dll";
  
         if (exists(pathAndFileName))  // returns true for files or directories
         {
@@ -126,6 +121,17 @@ int main()
         writeln("trying to load SDL Image library: ", pathAndFileName);
     
         imgStatus = loadSDLImage(pathAndFileName.ptr);
+		
+        foreach(info; loader.errors)
+        {
+            // Note that `info.error` and `info.message` are null-terminated 
+            // `const(char)*`, not `string`.
+			
+            writeln("info.error = ", fromStringz(info.error));
+            writeln("info.message = ", fromStringz(info.message));
+        }		    
+		
+		
     }     
  
     version (linux)
@@ -137,8 +143,7 @@ int main()
 		 if (exists(pathAndFileName))
 		     writeln("FILE EXISTS");
 		 
-        imgStatus = loadSDLImage(pathAndFileName.toStringz); 
-		
+        imgStatus = loadSDLimage(pathAndFileName.toStringz); 	
     }
  
  
@@ -155,41 +160,24 @@ int main()
     else if (imgStatus == LoadMsg.noLibrary) 
     {
         writeln("The SDL3_Image shared library (.dll or .so) could not be found");
-        exit(-1);
+        //exit(-1);
     } 
     else if (imgStatus == LoadMsg.badLibrary) 
     {
        writeln("One or more symbols failed to load (version mismatch)");
-       exit(-1);
+       //exit(-1);
     }
   
-
-/+  
-how to build the libSDL3_image.so
-   
-tar -xf SDL3_image-3.4.4.tar.gz
-cd SDL3_image-3.4.4
-mkdir build && cd build
-cmake .. -DBUILD_SHARED_LIBS=ON
-make
-sudo make install
-
--- Installing: /usr/local/lib/libSDL3_image.so.0.4.4
--- Installing: /usr/local/lib/libSDL3_image.so.0
--- Installing: /usr/local/lib/libSDL3_image.so
-+/
 
 
 //===================================================================================
 writeln("========== SDL MIXER LIBRARY ==========");
 //===================================================================================
 
-    LoadMsg mixStatus = LoadMsg.noLibrary;
+    LoadMsg mixStatus = LoadMsg.noLibrary; // LoadMsg default initializes to success which give false positives
 
     version (linux)
-    {
-        //Status = loadSDLMixer();  // get from package manager???  
-		 
+    {	 
         pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
 		writeln("pathAndFileName = ", pathAndFileName);
 		if (exists(pathAndFileName))
@@ -197,15 +185,12 @@ writeln("========== SDL MIXER LIBRARY ==========");
 		    writeln("FILE EXISTS");
         }
 		
-        mixStatus = loadSDLMixer(pathAndFileName.toStringz);
-		
+        mixStatus = loadSDLMixer(pathAndFileName.toStringz);	
     }
  
     version (Windows)
     {
-        //Status = loadSDLMixer();  // get from package manager???  
-		 
-        pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
+        pathAndFileName = pathToLibs ~ "SDL3_mixer.dll"; 
 		writeln("pathAndFileName = ", pathAndFileName);
 		if (exists(pathAndFileName))
         {
@@ -214,32 +199,35 @@ writeln("========== SDL MIXER LIBRARY ==========");
 		
         mixStatus = loadSDLMixer(pathAndFileName.toStringz);
 		
+	    foreach(info; loader.errors)
+        {
+            // Note that `info.error` and `info.message` are null-terminated 
+            // `const(char)*`, not `string`.
+			
+            writeln("info.error = ", fromStringz(info.error));
+            writeln("info.message = ", fromStringz(info.message));
+        }		    	
     }
  
     if (mixStatus == LoadMsg.success) 
     {
         writeln("SDL Mixer shared library successfully loaded");		
 		
-		int mixVersion = MIX_Version();  // this gets the version loaded and running at runtime
-		
-			
+		int mixVersion = MIX_Version();  // this gets the version loaded at runtime
+					
         writeln("SDL3_Mixer-", SDL_VERSIONNUM_MAJOR(mixVersion), ".", 
                                          SDL_VERSIONNUM_MINOR(mixVersion), ".", 
                                          SDL_VERSIONNUM_MICRO(mixVersion)); 
     }
     else if (mixStatus == LoadMsg.noLibrary) 
     {
-        foreach (error; bindbc.loader.errors) 
-        {
-            writeln("  - Error: ", error.message.fromStringz);
-        }
         writeln("The SDL3_Image shared library (.dll or .so) could not be found");
-        exit(-1);
+        //exit(-1);
     } 
     else if (mixStatus == LoadMsg.badLibrary) 
     {
        writeln("One or more symbols failed to load (version mismatch)");
-       exit(-1);
+       //exit(-1);
     }
 
 
@@ -248,7 +236,7 @@ writeln("========== SDL MIXER LIBRARY ==========");
 writeln("========== SDL TTF LIBRARY ==========");
 //===================================================================================
 
-    LoadMsg ttfStatus = LoadMsg.noLibrary;
+    LoadMsg ttfStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
 
     version (linux)
     {
@@ -264,7 +252,31 @@ writeln("========== SDL TTF LIBRARY ==========");
 		writeln("ttfStatus = ", ttfStatus);
     }
 
-   if (ttfStatus == LoadMsg.success) 
+
+    version (Windows)
+    {
+        pathAndFileName = pathToLibs ~ "SDL3_ttf.dll"; 
+		writeln("pathAndFileName = ", pathAndFileName);
+		if (exists(pathAndFileName))
+        {
+		    writeln("FILE EXISTS");
+        }
+		
+        mixStatus = loadSDLTTF(pathAndFileName.toStringz);
+		
+	    foreach(info; loader.errors)
+        {
+            // Note that `info.error` and `info.message` are null-terminated 
+            // `const(char)*`, not `string`.
+			
+            writeln("info.error = ", fromStringz(info.error));
+            writeln("info.message = ", fromStringz(info.message));
+        }		    	
+    }
+
+
+
+    if (ttfStatus == LoadMsg.success) 
     {
         writeln("SDL TTF shared library successfully loaded");		
 		
@@ -272,8 +284,8 @@ writeln("========== SDL TTF LIBRARY ==========");
 		
 			
         writeln("SDL3_TTF-", SDL_VERSIONNUM_MAJOR(ttfVersion), ".", 
-                                        SDL_VERSIONNUM_MINOR(ttfVersion), ".", 
-                                        SDL_VERSIONNUM_MICRO(ttfVersion)); 
+                             SDL_VERSIONNUM_MINOR(ttfVersion), ".", 
+                             SDL_VERSIONNUM_MICRO(ttfVersion)); 
     }
     else if (ttfStatus == LoadMsg.noLibrary) 
     {
