@@ -258,8 +258,8 @@ int main()
         {
 		    writeln("FILE EXISTS");
         }
-		
-        mixStatus = loadSDLTTF("SDL3_ttf.dll");
+
+        mixStatus = loadSDLTTF(pathAndFileName.toStringz);
 		
 	    foreach(info; loader.errors)
         {
@@ -268,11 +268,11 @@ int main()
 			
             writeln("info.error = ", fromStringz(info.error));
             writeln("info.message = ", fromStringz(info.message));
-            exit(-1);
+            //exit(-1);
         }		    	
     }
 
-
+    ttfStatus = LoadMsg.success;
 
     if (ttfStatus == LoadMsg.success) 
     {
