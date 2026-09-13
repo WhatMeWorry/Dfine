@@ -56,10 +56,10 @@ sourcePaths "source" "libraries" "sdl3" "common" // specify code to be built
 
 // A list of matching files or directories to be copied to targetPath (see above)
 
-copyFiles "libraries/SDL3.dll"        platform="windows-x86_64"
-copyFiles "libraries/SDL3_image.dll"  platform="windows-x86_64"
-copyFiles "libraries/SDL3_mixer.dll"  platform="windows-x86_64"
-copyFiles "libraries/SDL3_ttf.dll"    platform="windows-x86_64"
+//copyFiles "libraries/SDL3.dll"        platform="windows-x86_64"
+//copyFiles "libraries/SDL3_image.dll"  platform="windows-x86_64"
+//copyFiles "libraries/SDL3_mixer.dll"  platform="windows-x86_64"
+//copyFiles "libraries/SDL3_ttf.dll"    platform="windows-x86_64"
 
 // Key DUB Recursive Glob Features:
 // Wildcard: Used to represent zero or more directories, allowing deep searching of file structures.

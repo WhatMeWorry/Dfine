@@ -26,6 +26,46 @@ int main()
     // The load function now returns a LoadMsg enum value
 
     // https://www.youtube.com/watch?v=GXntBf0Xns8
+    
+    
+    import std.stdio;
+    import std.process;
+
+    version (Windows)
+    {
+    string pathToLibs;
+    string pathAndFileName;
+    string parentDirOfThisPath;
+        import std.file: exists, thisExePath, isFile;
+        string fullPathOfExe = thisExePath();  // this executable is by default the same as its package name 
+                                               // or else specified by the targetName attribute in dub.sdl 
+    
+        writeln("Function: ", __FUNCTION__);
+        writeln("in module ", __MODULE__);
+        writeln("at location ", fullPathOfExe);
+
+        import std.path: dirName;
+        parentDirOfThisPath = dirName(fullPathOfExe);
+
+        pathToLibs = parentDirOfThisPath ~ `\` ~ "libraries";
+        
+        
+        import std.stdio;
+        import std.process;
+        // 1. Specify the temporary folder you want to add
+        string temporaryPath = pathToLibs;
+
+        // 2. Fetch the existing PATH variable
+        string currentPath = environment.get("PATH");
+
+        // 3. Append the new directory, ensuring the Windows semicolon delimiter is used
+        environment["PATH"] = currentPath ~ temporaryPath;
+
+        // --- Verification & Usage ---
+        writeln("Updated temporary PATH for this process:");
+        writeln(environment.get("PATH"));
+    }
+    
 
     LoadMsg sdlStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
 
@@ -54,24 +94,17 @@ int main()
     version (Windows)
     {
         import std.file: exists, thisExePath, isFile;
-        string fullPathOfExe = thisExePath();  // this executable is by default the same as its package name 
-                                               // or else specified by the targetName attribute in dub.sdl 
+        fullPathOfExe = thisExePath();  // this executable is by default the same as its package name 
+                                        // or else specified by the targetName attribute in dub.sdl 
     
-        writeln("Function: ", __FUNCTION__);
-        writeln("in module ", __MODULE__);
-        writeln("at location ", fullPathOfExe);
+        //writeln("Function: ", __FUNCTION__);
+        //writeln("in module ", __MODULE__);
+        //writeln("at location ", fullPathOfExe);
 
         import std.path: dirName;
-        string parentDirOfThisPath = dirName(fullPathOfExe);
-
-        string pathToLibs = parentDirOfThisPath ~ `\` ~ "libraries" ~ `\`;
-  
-        string pathAndFileName = pathToLibs ~ "SDL3_3_4_2.dll";    // 2,725 KB  version 3.4.2
+        parentDirOfThisPath = dirName(fullPathOfExe);
     
-        writeln("pathAndFileName = ", pathAndFileName);
-        import std.string: toStringz;
-        //sdlStatus = loadSDL(pathAndFileName.toStringz());
-        sdlStatus = loadSDL(pathAndFileName.ptr);
+        sdlStatus = loadSDL("SDL3.dll");
     }
    
 
@@ -106,42 +139,24 @@ int main()
   
     version (Windows)
     {
-        pathAndFileName = pathToLibs ~ "SDL3_image.dll";
-
-        writeln("pathToLibs = ", pathToLibs);
- 
-        if (exists(pathAndFileName))  // returns true for files or directories
-        {
-            if (isFile(pathAndFileName)) // verify it is actually a file
-            {   
-                writeln("Found the SDL Image dll file at: ");
-                writeln(pathAndFileName);
-            }
-        }
-        writeln("trying to load SDL Image library: ", pathAndFileName);
-    
-        imgStatus = loadSDLImage(pathAndFileName.toStringz);
+        imgStatus = loadSDLImage("SDL3_image.dll");
 
         foreach(info; loader.errors)
         {
-            // Note that `info.error` and `info.message` are null-terminated 
-            // `const(char)*`, not `string`.
-
-            writeln("info.error = ", fromStringz(info.error));
-            writeln("info.message = ", fromStringz(info.message));
+            writeln("info.error = ", fromStringz(info.error), " info.message = ", fromStringz(info.message));
         }
     }     
  
     version (linux)
     {
-        imgStatus = loadSDLImage();  
+        //imgStatus = loadSDLImage();  
 
         string pathAndFileName = "./libraries/" ~ "libSDL3_image.so.0.4.4"; 
         writeln("pathAndFileName = ", pathAndFileName);
         if (exists(pathAndFileName))
             writeln("FILE EXISTS");
 
-        imgStatus = loadSDLimage(pathAndFileName.toStringz);
+        imgStatus = loadSDLImage(pathAndFileName.toStringz);
     }
  
  
@@ -187,22 +202,12 @@ int main()
  
     version (Windows)
     {
-        pathAndFileName = pathToLibs ~ "SDL3_mixer.dll"; 
-        writeln("pathAndFileName = ", pathAndFileName);
-        if (exists(pathAndFileName))
-        {
-            writeln("FILE EXISTS");
-        }
-
-        mixStatus = loadSDLMixer(pathAndFileName.toStringz);
+        mixStatus = loadSDLMixer("SDL3_mixer.dll");
 
         foreach(info; loader.errors)
         {
-            // Note that `info.error` and `info.message` are null-terminated 
-            // `const(char)*`, not `string`.
-
-            writeln("info.error = ", fromStringz(info.error));
-            writeln("info.message = ", fromStringz(info.message));
+            // Note info.error and info.message are null-terminated const(char)*, not string
+            writeln("info.error = ", fromStringz(info.error), " info.message = ", fromStringz(info.message));
         }
     }
  
@@ -252,24 +257,14 @@ int main()
 
     version (Windows)
     {
-        pathAndFileName = pathToLibs ~ "SDL3_ttf.dll"; 
-        writeln("pathAndFileName = ", pathAndFileName);
-		if (exists(pathAndFileName))
+        mixStatus = loadSDLTTF("SDL3_ttf.dll");
+        
+        foreach(info; loader.errors)
         {
-		    writeln("FILE EXISTS");
+            // Note info.error and info.message are null-terminated const(char)*, not string
+            writeln("info.error = ", fromStringz(info.error), " info.message = ", fromStringz(info.message));
+            //exit1);
         }
-
-        mixStatus = loadSDLTTF(pathAndFileName.toStringz);
-		
-	    foreach(info; loader.errors)
-        {
-            // Note that `info.error` and `info.message` are null-terminated 
-            // `const(char)*`, not `string`.
-			
-            writeln("info.error = ", fromStringz(info.error));
-            writeln("info.message = ", fromStringz(info.message));
-            //exit(-1);
-        }		    	
     }
 
     ttfStatus = LoadMsg.success;
@@ -277,10 +272,9 @@ int main()
     if (ttfStatus == LoadMsg.success) 
     {
         writeln("SDL TTF shared library successfully loaded");		
-		
-		int ttfVersion = TTF_Version();  // this gets the version loaded and running at runtime
-		
-			
+
+        int ttfVersion = TTF_Version();  // this gets the version loaded and running at runtime
+
         writeln("SDL3_TTF-", SDL_VERSIONNUM_MAJOR(ttfVersion), ".", 
                              SDL_VERSIONNUM_MINOR(ttfVersion), ".", 
                              SDL_VERSIONNUM_MICRO(ttfVersion)); 
