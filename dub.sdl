@@ -11,9 +11,10 @@ authors "Kyle Heaser"
 copyright "Copyright © 2024, Kyle Heaser"
 license "Zlib"
 
-targetType "executable"
+
 targetName "dfine"        // By default, DUB uses the package name as the executable name. Just being redundant.
-targetPath "."                // by default DUB uses root of project to place the executable in. This is redundant
+targetPath "."            // by default DUB uses root of project to place the executable in. This is redundant
+targetType "executable"   // [ autodetect, none, library, sourceLibrary, staticLibrary, dynamicLibrary ]
 
 //dflags "-mixin=mixin_code.d"
 
@@ -27,17 +28,18 @@ mainSourceFile "source/app.d"
 
 //dependency "bindbc-loader" version="~>1.1.5"
 
-dependency "bindbc-sdl"    version="~>2.4.2"  // most recent version of dub package (not sdl version)
+dependency "bindbc-sdl"    version="~>2.3.4"  // to match dagon2
 
 
-versions "SDL_3_4_10"          // this is the highest version in bindbc-sdl documentation  
-versions "SDL_Image_3_2"    // highest version
-versions "SDL_Mixer_3_2_2"  // highest version
-versions "SDL_TTF_3_2"       // highest version
-//versions "SDL_Net_3_2"        // highest version (not ready for prime time)
+versions "SDL_3_4_0"         // this is the highest version in bindbc-sdl documentation  
+versions "SDL_Image_3_2"     // highest version
 
-// libs "SDL3"                 // these entries caused link errors since these are for static libraries
-// libs "SDL3_mixer"       // which embeds its code directly into a program during compilation
+//versions "SDL_Mixer_3_2_2" // highest version
+//versions "SDL_TTF_3_2"     // highest version
+//versions "SDL_Net_3_2"     // highest version (not ready for prime time)
+
+// libs "SDL3"               // these entries caused link errors since these are for static libraries
+// libs "SDL3_mixer"         // which embeds its code directly into a program during compilation
 
 /* 
 Did not bother specifying loader and common because bindbc-sdl pulled them in automatically
@@ -49,6 +51,11 @@ Did not bother specifying loader and common because bindbc-sdl pulled them in au
 importPaths "source" "libraries" "sdl3" "common"  // makes modules available for compilation, adds to compiler's search path
 sourcePaths "source" "libraries" "sdl3" "common" // specify code to be built
 
+
+// A list of matching files or directories to be copied to targetPath (see above)
+
+copyFiles "libraries/SDL3.dll"        platform="windows-x86_64"
+copyFiles "libraries/SDL3_image.dll"  platform="windows-x86_64"
 
 
 // Key DUB Recursive Glob Features:

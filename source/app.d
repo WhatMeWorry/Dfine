@@ -108,7 +108,17 @@ int main()
   
     version (Windows)
 	{
-        pathAndFileName = pathToLibs ~ "SDL3_image_3_2.dll";
+        pathAndFileName = pathToLibs ~ "SDL3_image.dll";
+		
+		writeln("pathToLibs = ", pathToLibs);
+
+        import bindbc.loader : setCustomLoaderSearchPath;
+		
+		setCustomLoaderSearchPath(pathToLibs.toStringz);
+		
+		setCustomLoaderSearchPath("libraries");
+		
+		setCustomLoaderSearchPath(".\\libraries");
  
         if (exists(pathAndFileName))  // returns true for files or directories
         {
@@ -121,6 +131,8 @@ int main()
         writeln("trying to load SDL Image library: ", pathAndFileName);
     
         imgStatus = loadSDLImage(pathAndFileName.ptr);
+		
+		//imgStatus = loadSDLImage("SDL3_image_3_2.dll");
 		
         foreach(info; loader.errors)
         {
@@ -168,7 +180,7 @@ int main()
        //exit(-1);
     }
   
-
+/+  ********************************************************
 
 //===================================================================================
 writeln("========== SDL MIXER LIBRARY ==========");
@@ -325,10 +337,9 @@ writeln("========== SDL NET LIBRARY ==========");
 		
 		writeln("netStatus = ", netStatus);
     }
-
 +/
 
-
++/
 
     // Now you can safely call SDL3 functions
     if (SDL_Init(SDL_INIT_VIDEO)) 
