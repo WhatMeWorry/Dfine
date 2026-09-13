@@ -35,6 +35,9 @@ versions "SDL_Image_3_2"     // highest version
 versions "SDL_Mixer_3_2"   // highest version
 versions "SDL_TTF_3_2"     // highest version
 
+// 3.2.0	SDL_Mixer_3_2
+// 3.2.2	SDL_Mixer_3_2_2
+
 //versions "SDL_Net_3_2"     // highest version (not ready for prime time)
 
 // libs "SDL3"               // these entries caused link errors since these are for static libraries

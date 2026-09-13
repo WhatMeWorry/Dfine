@@ -253,13 +253,13 @@ int main()
     version (Windows)
     {
         pathAndFileName = pathToLibs ~ "SDL3_ttf.dll"; 
-		writeln("pathAndFileName = ", pathAndFileName);
+        writeln("pathAndFileName = ", pathAndFileName);
 		if (exists(pathAndFileName))
         {
 		    writeln("FILE EXISTS");
         }
 		
-        mixStatus = loadSDLTTF(pathAndFileName.toStringz);
+        mixStatus = loadSDLTTF("SDL3_ttf.dll");
 		
 	    foreach(info; loader.errors)
         {
@@ -268,6 +268,7 @@ int main()
 			
             writeln("info.error = ", fromStringz(info.error));
             writeln("info.message = ", fromStringz(info.message));
+            exit(-1);
         }		    	
     }
 
