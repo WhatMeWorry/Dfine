@@ -2,10 +2,16 @@
 
 module app;
 
-import std.stdio;
-import bindbc.sdl;  
+import std.stdio : writeln;
+import bindbc.sdl : loadSDL, loadSDLImage, loadSDLMixer, loadSDLTTF, //loadSDLNet,
+                    SDL_GetVersion, IMG_Version, MIX_Version, TTF_Version,
+                    SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
+                    SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
+                    
 import bindbc.loader;
 import loader = bindbc.loader.sharedlib;  // from Mike Shah working repo
+
+
 
 // don't need a bindbc.sdl.image import
     
@@ -25,17 +31,14 @@ int main()
     // library instead of checking against SDLSupport values like noLibrary or badLibrary
     // The load function now returns a LoadMsg enum value
 
-    // https://www.youtube.com/watch?v=GXntBf0Xns8
-    
-    
-    import std.stdio;
     import std.process;
 
     version (Windows)
     {
-    string pathToLibs;
-    string pathAndFileName;
-    string parentDirOfThisPath;
+        string pathToLibs;
+        string pathAndFileName;
+        string parentDirOfThisPath;
+        
         import std.file: exists, thisExePath, isFile;
         string fullPathOfExe = thisExePath();  // this executable is by default the same as its package name 
                                                // or else specified by the targetName attribute in dub.sdl 
@@ -49,8 +52,6 @@ int main()
 
         pathToLibs = parentDirOfThisPath ~ `\` ~ "libraries";
         
-        
-        import std.stdio;
         import std.process;
         // 1. Specify the temporary folder you want to add
         string temporaryPath = pathToLibs;
@@ -70,13 +71,9 @@ int main()
     LoadMsg sdlStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
 
     //===================================================================================
-    writeln("========== SDL LIBRARY ==========");
-    //===================================================================================
 
     version (linux)
     {
-        //sdlStatus = loadSDL();  // default version probably from the package manager
-
         // Pass the explicit filename of your shared library
 
         //string libPath = "/usr/lib/libSDL3.so.0.4.14";  // this works! by getting where the linux package mgr installed it
@@ -110,13 +107,13 @@ int main()
 
     if (sdlStatus == LoadMsg.success) 
     {
-        writeln("SDL3 shared library successfully loaded");
-
+        // const int compiled = SDL_VERSION;           // hardcoded number from SDL headers
         const int linkedVersion = SDL_GetVersion();    // reported by linked SDL library
 
-        writeln("SDL3-", SDL_VERSIONNUM_MAJOR(linkedVersion), ".", 
-                         SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
-                         SDL_VERSIONNUM_MICRO(linkedVersion));
+        writeln("SDL3 version: ", SDL_VERSIONNUM_MAJOR(linkedVersion), ".", 
+                                  SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
+                                  SDL_VERSIONNUM_MICRO(linkedVersion),
+                                  " shared library (.dll) successfully loaded");
     }
     else if ( sdlStatus == LoadMsg.noLibrary) 
     {
@@ -131,8 +128,6 @@ int main()
 
 
 
-    //===================================================================================
-    writeln("========== SDL IMAGE LIBRARY ==========");
     //===================================================================================
 
     LoadMsg imgStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives 
@@ -149,8 +144,6 @@ int main()
  
     version (linux)
     {
-        //imgStatus = loadSDLImage();  
-
         string pathAndFileName = "./libraries/" ~ "libSDL3_image.so.0.4.4"; 
         writeln("pathAndFileName = ", pathAndFileName);
         if (exists(pathAndFileName))
@@ -162,13 +155,12 @@ int main()
  
     if (imgStatus == LoadMsg.success) 
     {
-        writeln("SDL3_Image shared library successfully loaded");
-
         int imageVersion = IMG_Version();  // reported by linked SDL Image Library
 
-        writeln("SDL3_Image-", SDL_VERSIONNUM_MAJOR(imageVersion), ".", 
-                               SDL_VERSIONNUM_MINOR(imageVersion), ".", 
-                               SDL_VERSIONNUM_MICRO(imageVersion));
+        writeln("SDL3_Image version ", SDL_VERSIONNUM_MAJOR(imageVersion), ".", 
+                                       SDL_VERSIONNUM_MINOR(imageVersion), ".", 
+                                       SDL_VERSIONNUM_MICRO(imageVersion),
+                                       " shared library (.dll) successfully loaded");
     }
     else if (imgStatus == LoadMsg.noLibrary) 
     {
@@ -182,8 +174,6 @@ int main()
     }
 
 
-    //===================================================================================
-    writeln("========== SDL MIXER LIBRARY ==========");
     //===================================================================================
 
     LoadMsg mixStatus = LoadMsg.noLibrary;
@@ -213,13 +203,12 @@ int main()
  
     if (mixStatus == LoadMsg.success) 
     {
-        writeln("SDL Mixer shared library successfully loaded");
-
         int mixVersion = MIX_Version();  // this gets the version loaded at runtime
 
-        writeln("SDL3_Mixer-", SDL_VERSIONNUM_MAJOR(mixVersion), ".", 
-                               SDL_VERSIONNUM_MINOR(mixVersion), ".", 
-                               SDL_VERSIONNUM_MICRO(mixVersion)); 
+        writeln("SDL3_Mixer version ", SDL_VERSIONNUM_MAJOR(mixVersion), ".", 
+                                       SDL_VERSIONNUM_MINOR(mixVersion), ".", 
+                                       SDL_VERSIONNUM_MICRO(mixVersion),
+                                       " shared library (.dll) successfully loaded");
     }
     else if (mixStatus == LoadMsg.noLibrary) 
     {
@@ -234,8 +223,6 @@ int main()
 
 
 
-    //===================================================================================
-    writeln("========== SDL TTF LIBRARY ==========");
     //===================================================================================
 
     LoadMsg ttfStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
@@ -271,13 +258,12 @@ int main()
 
     if (ttfStatus == LoadMsg.success) 
     {
-        writeln("SDL TTF shared library successfully loaded");		
-
         int ttfVersion = TTF_Version();  // this gets the version loaded and running at runtime
 
-        writeln("SDL3_TTF-", SDL_VERSIONNUM_MAJOR(ttfVersion), ".", 
-                             SDL_VERSIONNUM_MINOR(ttfVersion), ".", 
-                             SDL_VERSIONNUM_MICRO(ttfVersion)); 
+        writeln("SDL3_TTF version ", SDL_VERSIONNUM_MAJOR(ttfVersion), ".", 
+                                     SDL_VERSIONNUM_MINOR(ttfVersion), ".", 
+                                     SDL_VERSIONNUM_MICRO(ttfVersion),
+                                     " shared library (.dll) successfully loaded"); 
     }
     else if (ttfStatus == LoadMsg.noLibrary) 
     {
@@ -290,34 +276,95 @@ int main()
        exit(-1);
     }
 
-/+
-//===================================================================================
-writeln("========== SDL NET LIBRARY ==========");
-//===================================================================================
 
-    NOT FULLY AVAILABLE ON ARCH or CACHYOS DISTROS
-	
-	>paru -S sdl3_net
-	error: could not find all required packages:
-         sdl3_net (target)
+    //===================================================================================
 
+    LoadMsg netStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
 
-    LoadMsg netStatus = LoadMsg.noLibrary;
-
+    
     version (linux)
     {
-        pathAndFileName = "./libraries/" ~ "libSDL3_net.so.0.2.2"; 
-		writeln("pathAndFileName = ", pathAndFileName);
-		if (exists(pathAndFileName))
+        pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
+        writeln("pathAndFileName = ", pathAndFileName);
+        if (exists(pathAndFileName))
         {
-		    writeln("FILE EXISTS");
+            writeln("FILE EXISTS");
         }
-		
-        netStatus = loadNETTTF(pathAndFileName.toStringz);
-		
-		writeln("netStatus = ", netStatus);
+
+        netStatus = loadSDLNet(pathAndFileName.toStringz);
+
+        writeln("netStatus = ", netStatus);
     }
-+/
+
+
+    version (Windows)
+    {
+        netStatus = loadSDLNet("SDL3_net.dll");
+        
+        foreach(info; loader.errors)
+        {
+            // Note info.error and info.message are null-terminated const(char)*, not string
+            writeln("info.error = ", fromStringz(info.error), " info.message = ", fromStringz(info.message));
+            //exit1);
+        }
+    }
+
+    netStatus = LoadMsg.success;
+
+    if (netStatus == LoadMsg.success) 
+    {
+        int netVersion = NET_Version();  // this gets the version loaded and running at runtime
+
+        writeln("SDL3_NET version ", SDL_VERSIONNUM_MAJOR(netVersion), ".", 
+                                     SDL_VERSIONNUM_MINOR(netVersion), ".", 
+                                     SDL_VERSIONNUM_MICRO(netVersion),
+                                     " shared library (.dll) successfully loaded"); 
+    }
+    else if (netStatus == LoadMsg.noLibrary) 
+    {
+        writeln("The SDL3_NET shared library (.dll or .so) could not be found");
+        exit(-1);
+    } 
+    else if (netStatus == LoadMsg.badLibrary) 
+    {
+       writeln("One or more symbols failed to load (version mismatch)");
+       exit(-1);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // Now you can safely call SDL3 functions
@@ -330,7 +377,7 @@ writeln("========== SDL NET LIBRARY ==========");
         SDL_Quit();
     }
 
-	
+
 	/+
 Once installed, the shared object files are placed in your system's standard library directory. 
 You can find the exact path to libSDL3.so by running:bash

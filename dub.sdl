@@ -17,11 +17,6 @@ targetPath "."            // by default DUB uses root of project to place the ex
 targetType "executable"   // [ autodetect, none, library, sourceLibrary, staticLibrary, dynamicLibrary ]
 
 
-/*
-Dynamic Loading: loadSDLImage() is only available when using dynamic bindings (the default) to load the 
-SDL2_image or SDL3_image shared library at runtime.
-*/
-
 
 mainSourceFile "source/app.d"
 
@@ -34,11 +29,8 @@ versions "SDL_3_4_0"         // this is the highest version in bindbc-sdl docume
 versions "SDL_Image_3_2"     // highest version
 versions "SDL_Mixer_3_2"   // highest version
 versions "SDL_TTF_3_2"     // highest version
+versions "SDL_Net_3_2"     // highest version
 
-// 3.2.0	SDL_Mixer_3_2
-// 3.2.2	SDL_Mixer_3_2_2
-
-//versions "SDL_Net_3_2"     // highest version (not ready for prime time)
 
 // libs "SDL3"               // these entries caused link errors since these are for static libraries
 // libs "SDL3_mixer"         // which embeds its code directly into a program during compilation
