@@ -21,11 +21,51 @@ import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) be
                                                   // (3) sourcePaths "libraries" in dub.sdl solved the problem
 import core.stdc.stdlib : exit;
 
+
+import std.typecons : BitFlags;
+
+
+// satellite libraries of SDL3 core
+// The auxillary libraries will only work if SDL3 core is loaded. So this is not optional
+
+enum Flags 
+{
+    SDL3_Core  = 1 << 0,  // 00000001 (1)
+    SDL3_Image = 1 << 1,  // 00000010 (2)
+    SDL3_Mixer = 1 << 2,  // 00000100 (4)
+    SDL3_ttf =   1 << 3,  // 00001000 (8)
+    SDL3_Net =   1 << 4,  // 00010000 (16)
+    UNUSED_A =   1 << 5,  // 00100000
+    UNUSED_B =   1 << 6,  // 01000000
+    UNUSED_C =   1 << 7,  // 10000000
+}
+
+alias SDL3_CORE  = Flags.SDL3_Core;
+alias SDL3_IMAGE = Flags.SDL3_Image;
+alias SDL3_MIXER = Flags.SDL3_Mixer;
+alias SDL3_TTF   = Flags.SDL3_ttf;
+alias SDL3_NET   = Flags.SDL3_Net;
+
+Flags SDL3_ALL = (SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_TTF | SDL3_NET);
+
+
 int main()
-{   
+{  
+    Flags chosen = cast(Flags) 0; // nothing chosen
+    
+    chosen = SDL3_ALL;
+    
+    chosen = (SDL3_CORE | SDL3_NET | SDL3_MIXER);
+    
+    if (!(chosen & SDL3_CORE))
+    {
+        writeln("SDL3_CORE library is required for any of the auxillary libraries (Image, Miser, TTF, Net) to work");
+        exit(-1);
+    }
+
     // If you are using a modern version of BindBC, you should use LoadMsg from the loader
     // library instead of SDLSupport. The load functions now returns a LoadMsg enum value of 
-	// success, noLibrary, or badLibrary
+    // success, noLibrary, or badLibrary
 
     import std.process;
 
@@ -66,7 +106,7 @@ int main()
 
     LoadMsg sdlStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
 
-    //==================================== SDL 3 ===============================================
+    //==================================== SDL3 Core ===============================================
 
     version (linux)
     {
@@ -113,12 +153,12 @@ int main()
         exit(-1);
     } 
 
-
-
     //================================= SDL3 Image ===========================================
 
     LoadMsg imgStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives 
-  
+
+if (chosen & SDL3_IMAGE)
+{
     version (Windows)
     {
         imgStatus = loadSDLImage("SDL3_image.dll");
@@ -151,12 +191,14 @@ int main()
         writeln("The SDL3 Image shared library could not be found or wrong version");
         exit(-1);
     } 
-
+}
 
     //================================= SDL Mixer =====================================
 
     LoadMsg mixStatus = LoadMsg.noLibrary;
-
+    
+if (chosen & SDL3_MIXER)
+{
     version (linux)
     {
         pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
@@ -189,17 +231,18 @@ int main()
         writeln("The SDL3 Mixer shared library could not be found or wrong version");
         exit(-1);
     } 
-
+}
 
 
     //=================================== SDL TTF ================================================
 
     LoadMsg ttfStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
-
+if (chosen & SDL3_TTF)
+{
     version (linux)
     {
-	    pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
-		
+        pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
+
         ttfStatus = loadSDLTTF(pathAndFileName.toStringz);
     }
 
@@ -231,7 +274,7 @@ int main()
         writeln("The SDL3 TTF shared library could not be found or wrong version");
         exit(-1);
     } 
-
+}
 
     //================================== SDL Net =================================================
 	
@@ -257,24 +300,25 @@ both the ../sdl_ttf.d: and /sdl_mixer.d have this import:
 
 import sdl.properties: SDL_PropertiesID;
 +/
-	
-	
-	/+ In order to get SDL Net to be loaded successfully, add the following line (after the line:  static if(sdlNetVersion):
-        import sdl.properties: SDL_PropertiesID;  // ADDED MYSELF
-        in file:
-		\home\<user>\.dub\packages\bindbc-sdl\2.4.2\bindbc-sdl\source\sdl_net.d
-    +/
+
+
+/+ In order to get SDL Net to be loaded successfully, add the following line (after the line:  static if(sdlNetVersion):
+   import sdl.properties: SDL_PropertiesID;  // ADDED MYSELF
+   in file:
+   \home\<user>\.dub\packages\bindbc-sdl\2.4.2\bindbc-sdl\source\sdl_net.d
++/
 
     LoadMsg netStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
- 
+    
+if (chosen & SDL3_NET)
+{
     version (linux)
     {
         pathAndFileName = "./libraries/" ~ "libSDL3_net.so.0.2.0"; 
 
         netStatus = loadSDLNet(pathAndFileName.toStringz);
     }
-
-
+    
     version (Windows)
     {
         netStatus = loadSDLNet("SDL3_net.dll");
@@ -303,41 +347,7 @@ import sdl.properties: SDL_PropertiesID;
         writeln("The SDL3 NET shared library could not be found or wrong version");
         exit(-1);
     } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 
     // Now you can safely call SDL3 functions
