@@ -2,11 +2,11 @@
 
 module app;
 
-import std.stdio : writeln;
+import std.stdio : writeln,  write;
 import bindbc.sdl : loadSDL, loadSDLImage, loadSDLMixer, loadSDLTTF, loadSDLNet,
-                             SDL_GetVersion, IMG_Version, MIX_Version, TTF_Version, NET_Version,
-                             SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
-                             SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
+                    SDL_GetVersion, IMG_Version, MIX_Version, TTF_Version, NET_Version,
+                    SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
+                    SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
                     
 import bindbc.loader;
 import loader = bindbc.loader.sharedlib;  // from Mike Shah working repo
@@ -17,8 +17,8 @@ import std.string: toStringz, fromStringz;
 import std.file: exists;
 
 import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) below. However, created 
-                                                  // lld-link: error: undefined symbol: _D9libraries18load_sdl_librariesQuFZv 
-                                                  // (3) sourcePaths "libraries" in dub.sdl solved the problem
+                                     // lld-link: error: undefined symbol: _D9libraries18load_sdl_librariesQuFZv 
+                                     // (3) sourcePaths "libraries" in dub.sdl solved the problem
 import core.stdc.stdlib : exit;
 
 
@@ -50,7 +50,35 @@ Flags SDL3_ALL = (SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_TTF | SDL3_NET);
 
 
 int main()
-{  
+{
+import std.traits : EnumMembers;
+
+enum Indices : size_t 
+{
+    SDL3_CORE = 0,
+    SDL3_IMAGE,
+    SDL3_MIXER,
+    SDL3_TTF,
+    SDL3_NET
+}
+
+struct LIBS
+{
+    string file;
+    LoadMsg status;  // status of loading the specified library
+}
+
+LIBS[EnumMembers!Indices.length] libs = [["SDL3.dll", LoadMsg.noLibrary]];
+
+
+foreach(i; EnumMembers!Indices)
+{
+    write("i = ", i);
+    writeln(" value = ", cast(size_t) i);
+}
+
+
+
     Flags chosen = cast(Flags) 0; // nothing chosen
     
     chosen = SDL3_ALL;
