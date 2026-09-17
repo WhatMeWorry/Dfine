@@ -55,7 +55,7 @@ int main()
     
     chosen = SDL3_ALL;
     
-    chosen = (SDL3_CORE | SDL3_NET | SDL3_MIXER);
+    //chosen = (SDL3_CORE | SDL3_NET | SDL3_MIXER);
     
     if (!(chosen & SDL3_CORE))
     {
@@ -143,9 +143,9 @@ int main()
         const int linkedVersion = SDL_GetVersion();    // reported by linked SDL library
 
         writeln("SDL3 version: ", SDL_VERSIONNUM_MAJOR(linkedVersion), ".", 
-                                            SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
-                                            SDL_VERSIONNUM_MICRO(linkedVersion),
-                                            " shared library successfully loaded");
+                                  SDL_VERSIONNUM_MINOR(linkedVersion), ".", 
+                                  SDL_VERSIONNUM_MICRO(linkedVersion),
+                                  " shared library successfully loaded");
     }
     else
     {
@@ -182,9 +182,9 @@ if (chosen & SDL3_IMAGE)
         int imageVersion = IMG_Version();  // reported by linked SDL Image Library
 
         writeln("SDL3_Image version ", SDL_VERSIONNUM_MAJOR(imageVersion), ".", 
-                                                      SDL_VERSIONNUM_MINOR(imageVersion), ".", 
-                                                      SDL_VERSIONNUM_MICRO(imageVersion),
-                                                      " shared library successfully loaded");
+                                       SDL_VERSIONNUM_MINOR(imageVersion), ".", 
+                                       SDL_VERSIONNUM_MICRO(imageVersion),
+                                       " shared library successfully loaded");
     }
     else
     {
@@ -222,9 +222,9 @@ if (chosen & SDL3_MIXER)
         int mixVersion = MIX_Version();  // this gets the version loaded at runtime
 
         writeln("SDL3_Mixer version ", SDL_VERSIONNUM_MAJOR(mixVersion), ".", 
-                                                     SDL_VERSIONNUM_MINOR(mixVersion), ".", 
-                                                     SDL_VERSIONNUM_MICRO(mixVersion),
-                                                     " shared library successfully loaded");
+                                       SDL_VERSIONNUM_MINOR(mixVersion), ".", 
+                                       SDL_VERSIONNUM_MICRO(mixVersion),
+                                       " shared library successfully loaded");
     }
     else
     {
@@ -265,9 +265,9 @@ if (chosen & SDL3_TTF)
         int ttfVersion = TTF_Version();  // this gets the version loaded and running at runtime
 
         writeln("SDL3_TTF version ", SDL_VERSIONNUM_MAJOR(ttfVersion), ".", 
-                                                   SDL_VERSIONNUM_MINOR(ttfVersion), ".", 
-                                                   SDL_VERSIONNUM_MICRO(ttfVersion),
-                                                   " shared library successfully loaded"); 
+                                     SDL_VERSIONNUM_MINOR(ttfVersion), ".", 
+                                     SDL_VERSIONNUM_MICRO(ttfVersion),
+                                     " shared library successfully loaded"); 
     }
     else
     {
@@ -338,9 +338,9 @@ if (chosen & SDL3_NET)
         int netVersion = NET_Version();  // this gets the version loaded and running at runtime
 
         writeln("SDL3_NET version ", SDL_VERSIONNUM_MAJOR(netVersion), ".", 
-                                                   SDL_VERSIONNUM_MINOR(netVersion), ".", 
-                                                   SDL_VERSIONNUM_MICRO(netVersion),
-                                                   " shared library successfully loaded"); 
+                                     SDL_VERSIONNUM_MINOR(netVersion), ".", 
+                                     SDL_VERSIONNUM_MICRO(netVersion),
+                                     " shared library successfully loaded"); 
     }
      else
     {
