@@ -62,19 +62,30 @@ enum Indices : size_t
     SDL3_NET
 }
 
-struct LIBS
+struct Lib
 {
     string file;
     LoadMsg status;  // status of loading the specified library
 }
 
-LIBS[EnumMembers!Indices.length] libs = [["SDL3.dll", LoadMsg.noLibrary]];
+writeln("EnumMembers!Indices.length = ", EnumMembers!Indices.length);
 
+Lib[EnumMembers!Indices.length] libs = [ Lib("SDL3.dll",       LoadMsg.noLibrary),
+                                         Lib("SDL3_image.dll", LoadMsg.noLibrary),
+                                         Lib("SDL3_mixer.dll", LoadMsg.noLibrary),
+                                         Lib("SDL3_ttf.dll",   LoadMsg.noLibrary),
+                                         Lib("SDL3_net.dll",   LoadMsg.noLibrary)
+                                       ];
 
 foreach(i; EnumMembers!Indices)
 {
     write("i = ", i);
     writeln(" value = ", cast(size_t) i);
+}
+
+foreach(i; 0..(libs.length))
+{
+    writeln(libs[i]);
 }
 
 
@@ -99,32 +110,37 @@ foreach(i; EnumMembers!Indices)
 
     version (Windows)
     {
-        string pathToLibs;
+        string pathToLibraries;
         string pathAndFileName;
-        string parentDirOfThisPath;
+        string parentDirectoryOfExe;
+        string exeNameAndFullPath;
         
         import std.file: exists, thisExePath, isFile;
-        string fullPathOfExe = thisExePath();  // this executable is by default the same as its package name 
-                                               // or else specified by the targetName attribute in dub.sdl 
-    
-        writeln("Function: ", __FUNCTION__);
-        writeln("in module ", __MODULE__);
-        writeln("at location ", fullPathOfExe);
+                                               
+        exeNameAndFullPath = thisExePath(); // return the full path of the current executable
+                                              // this executable is (by default) the same as its package name 
+                                              // or else specified by the targetName attribute in dub.sdl 
 
+        writeln("exeNameAndFullPath = ", exeNameAndFullPath);
+        
         import std.path: dirName;
-        parentDirOfThisPath = dirName(fullPathOfExe);
+        
+        parentDirectoryOfExe = dirName(exeNameAndFullPath);  // returns the parent directory of path 
+        
+        writeln("parentDirectoryOfExe = ", parentDirectoryOfExe);
 
-        pathToLibs = parentDirOfThisPath ~ `\` ~ "libraries";
+        pathToLibraries = parentDirectoryOfExe ~ `\libraries`;
+        
+        writeln("pathToLibraries = ", pathToLibraries);
         
         import std.process;
-        // 1. Specify the temporary folder you want to add
-        string temporaryPath = pathToLibs;
 
-        // 2. Fetch the existing PATH variable
+        // Fetch the existing PATH variable
         string currentPath = environment.get("PATH");
 
-        // 3. Append the new directory, ensuring the Windows semicolon delimiter is used
-        environment["PATH"] = currentPath ~ temporaryPath;
+        // append the new directory, ensuring the Windows semicolon delimiter is used
+
+        environment["PATH"] = currentPath ~ pathToLibraries;
 
         // --- Verification & Usage ---
         writeln("Updated temporary PATH for this process:");
@@ -154,12 +170,12 @@ foreach(i; EnumMembers!Indices)
     
     version (Windows)
     {
-        import std.file: exists, thisExePath, isFile;
-        fullPathOfExe = thisExePath();  // this executable is by default the same as its package name 
+        //import std.file: exists, thisExePath, isFile;
+        //fullPathOfExe = thisExePath();  // this executable is by default the same as its package name 
                                                        // or else specified by the targetName attribute in dub.sdl 
 
-        import std.path: dirName;
-        parentDirOfThisPath = dirName(fullPathOfExe);
+        //import std.path: dirName;
+        //parentDirOfThisPath = dirName(fullPathOfExe);
     
         sdlStatus = loadSDL("SDL3.dll");
     }
