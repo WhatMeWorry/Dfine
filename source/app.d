@@ -66,6 +66,7 @@ struct Lib
 {
     string file;
     LoadMsg status;  // status of loading the specified library
+    bool selected;
 }
 
 writeln("EnumMembers!Indices.length = ", EnumMembers!Indices.length);
@@ -95,6 +96,13 @@ foreach(i; 0..(libs.length))
     chosen = SDL3_ALL;
     
     //chosen = (SDL3_CORE | SDL3_NET | SDL3_MIXER);
+
+    if ((chosen & SDL3_CORE)| (chosen & SDL3_ALL))
+        
+
+
+
+
     
     if (!(chosen & SDL3_CORE))
     {
