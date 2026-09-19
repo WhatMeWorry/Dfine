@@ -14,6 +14,8 @@ import loader = bindbc.loader.sharedlib;  // from Mike Shah working repo
 import std.file: exists, thisExePath, isFile;
 import std.path: dirName;
 
+import std.process;
+
 import std.string: toStringz, fromStringz;
 import std.file: exists;
 
@@ -93,7 +95,7 @@ int main()
         
         writeln("pathToLibraries = ", pathToLibraries);
         
-        import std.process;
+        
 
         // Fetch the existing PATH variable
         string currentPath = environment.get("PATH");
@@ -107,6 +109,29 @@ int main()
         writeln(environment.get("PATH"));
         writeln();
     }
+	
+	version (linux)
+	{
+        string pathToLibraries;
+        string pathAndFileName;
+        string parentDirectoryOfExe;
+        string exeNameAndFullPath;
+		string lib;
+	
+                                               
+        exeNameAndFullPath = thisExePath(); // return the full path of the current executable
+                                            // this executable is (by default) the same as its package name 
+                                            // or else specified by the targetName attribute in dub.sdl 
+
+        writeln("exeNameAndFullPath = ", exeNameAndFullPath);
+
+        parentDirectoryOfExe = dirName(exeNameAndFullPath);  // returns the parent directory of path 
+        
+        writeln("parentDirectoryOfExe = ", parentDirectoryOfExe);
+
+        pathToLibraries = parentDirectoryOfExe ~ `/libraries/`;	    
+	
+	}
     
     //==============================================================================================
     //==================================== SDL3 Core ===============================================
@@ -121,14 +146,9 @@ int main()
 
     version (linux)
     {
-        // Pass the explicit filename of your shared library
-        //string libPath = "/usr/lib/libSDL3.so.0.4.14";  // this works! by getting where the linux package mgr installed it
-        //string libPath = "/usr/lib/libSDL3.so";   // this also works 
-        // string libPath = "/usr/lib/libSDL3.so.0";   // this works too
-
-        string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. 
-                                                           // It's relative to the root of the project. hence the dot.
-        sdlStatus = loadSDL(libPath.ptr);
+        lib = pathToLibraries ~ "libSDL3.so.0.4.14";
+                                                                
+        sdlStatus = loadSDL(lib.toStringz);
     }
    
 
@@ -168,8 +188,14 @@ if (chosen & SDL3_IMAGE)
  
     version (linux)
     {
-        string pathAndFileName = "./libraries/" ~ "libSDL3_image.so.0.4.4"; 
-        imgStatus = loadSDLImage(pathAndFileName.toStringz);
+        //string pathAndFileName = "./libraries/" ~ "libSDL3_image.so.0.4.4"; 
+		//string libPath = "pathToLibraries" ~ "libSDL3.so.0.4.14";
+        //imgStatus = loadSDLImage(pathAndFileName.toStringz);
+		
+		lib = pathToLibraries ~ "libSDL3_image.so.0.4.4";
+         writeln("lib = ", lib);                                                       
+        imgStatus = loadSDLImage(lib.toStringz);
+		
     }
  
     if (imgStatus == LoadMsg.success) 
@@ -207,8 +233,13 @@ if (chosen & SDL3_MIXER)
     
     version (linux)
     {
-        pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
-        mixStatus = loadSDLMixer(pathAndFileName.toStringz);
+      //  pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
+      //  mixStatus = loadSDLMixer(pathAndFileName.toStringz);
+		
+		lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";
+                                                     
+        imgStatus = loadSDLImage(lib.toStringz);
+		
     }
 
     if (mixStatus == LoadMsg.success) 
