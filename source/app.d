@@ -11,7 +11,8 @@ import bindbc.sdl : loadSDL, loadSDLImage, loadSDLMixer, loadSDLTTF, loadSDLNet,
 import bindbc.loader;
 import loader = bindbc.loader.sharedlib;  // from Mike Shah working repo
 
-
+import std.file: exists, thisExePath, isFile;
+import std.path: dirName;
 
 import std.string: toStringz, fromStringz;
 import std.file: exists;
@@ -51,46 +52,6 @@ Flags SDL3_ALL = (SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_TTF | SDL3_NET);
 
 int main()
 {
-import std.traits : EnumMembers;
-
-enum Indices : size_t 
-{
-    SDL3_CORE = 0,
-    SDL3_IMAGE,
-    SDL3_MIXER,
-    SDL3_TTF,
-    SDL3_NET
-}
-
-struct Lib
-{
-    string file;
-    LoadMsg status;  // status of loading the specified library
-    bool selected;
-}
-
-writeln("EnumMembers!Indices.length = ", EnumMembers!Indices.length);
-
-Lib[EnumMembers!Indices.length] libs = [ Lib("SDL3.dll",       LoadMsg.noLibrary),
-                                         Lib("SDL3_image.dll", LoadMsg.noLibrary),
-                                         Lib("SDL3_mixer.dll", LoadMsg.noLibrary),
-                                         Lib("SDL3_ttf.dll",   LoadMsg.noLibrary),
-                                         Lib("SDL3_net.dll",   LoadMsg.noLibrary)
-                                       ];
-
-foreach(i; EnumMembers!Indices)
-{
-    write("i = ", i);
-    writeln(" value = ", cast(size_t) i);
-}
-
-foreach(i; 0..(libs.length))
-{
-    writeln(libs[i]);
-}
-
-
-
     Flags chosen = cast(Flags) 0; // nothing chosen
     
     chosen = SDL3_ALL;
@@ -98,12 +59,7 @@ foreach(i; 0..(libs.length))
     //chosen = (SDL3_CORE | SDL3_NET | SDL3_MIXER);
 
     if ((chosen & SDL3_CORE)| (chosen & SDL3_ALL))
-        
 
-
-
-
-    
     if (!(chosen & SDL3_CORE))
     {
         writeln("SDL3_CORE library is required for any of the auxillary libraries (Image, Miser, TTF, Net) to work");
@@ -122,17 +78,13 @@ foreach(i; 0..(libs.length))
         string pathAndFileName;
         string parentDirectoryOfExe;
         string exeNameAndFullPath;
-        
-        import std.file: exists, thisExePath, isFile;
                                                
         exeNameAndFullPath = thisExePath(); // return the full path of the current executable
-                                              // this executable is (by default) the same as its package name 
-                                              // or else specified by the targetName attribute in dub.sdl 
+                                            // this executable is (by default) the same as its package name 
+                                            // or else specified by the targetName attribute in dub.sdl 
 
         writeln("exeNameAndFullPath = ", exeNameAndFullPath);
-        
-        import std.path: dirName;
-        
+
         parentDirectoryOfExe = dirName(exeNameAndFullPath);  // returns the parent directory of path 
         
         writeln("parentDirectoryOfExe = ", parentDirectoryOfExe);
@@ -150,42 +102,33 @@ foreach(i; 0..(libs.length))
 
         environment["PATH"] = currentPath ~ pathToLibraries;
 
-        // --- Verification & Usage ---
-        writeln("Updated temporary PATH for this process:");
+        writeln("PATH env variable");
+        writeln();
         writeln(environment.get("PATH"));
+        writeln();
     }
     
-
+    //==============================================================================================
+    //==================================== SDL3 Core ===============================================
+    //==============================================================================================
+    
     LoadMsg sdlStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
 
-    //==================================== SDL3 Core ===============================================
+    version (Windows)
+    {
+        sdlStatus = loadSDL("SDL3.dll");
+    }
 
     version (linux)
     {
         // Pass the explicit filename of your shared library
-
         //string libPath = "/usr/lib/libSDL3.so.0.4.14";  // this works! by getting where the linux package mgr installed it
-
         //string libPath = "/usr/lib/libSDL3.so";   // this also works 
-
         // string libPath = "/usr/lib/libSDL3.so.0";   // this works too
 
         string libPath = "./libraries/libSDL3.so.0.4.14";  // this gets the shared library stored within the project itself. 
-                                                                            // It's relative to the root of the project. hence the dot.
-
+                                                           // It's relative to the root of the project. hence the dot.
         sdlStatus = loadSDL(libPath.ptr);
-    }
-    
-    version (Windows)
-    {
-        //import std.file: exists, thisExePath, isFile;
-        //fullPathOfExe = thisExePath();  // this executable is by default the same as its package name 
-                                                       // or else specified by the targetName attribute in dub.sdl 
-
-        //import std.path: dirName;
-        //parentDirOfThisPath = dirName(fullPathOfExe);
-    
-        sdlStatus = loadSDL("SDL3.dll");
     }
    
 
@@ -202,11 +145,18 @@ foreach(i; 0..(libs.length))
     else
     {
         writeln("The SDL3 shared library could not be found or wrong version");
+        foreach(info; loader.errors)
+        {
+            writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
+        }
         exit(-1);
-    } 
-
-    //================================= SDL3 Image ===========================================
-
+    }
+    
+    
+    //=============================================================================================
+    //======================================= SDL3 Image ==========================================
+    //=============================================================================================
+   
     LoadMsg imgStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives 
 
 if (chosen & SDL3_IMAGE)
@@ -214,20 +164,13 @@ if (chosen & SDL3_IMAGE)
     version (Windows)
     {
         imgStatus = loadSDLImage("SDL3_image.dll");
-
-        foreach(info; loader.errors)
-        {
-            writeln("info.error = ", fromStringz(info.error), " info.message = ", fromStringz(info.message));
-        }
-    }     
+    }
  
     version (linux)
     {
         string pathAndFileName = "./libraries/" ~ "libSDL3_image.so.0.4.4"; 
-
         imgStatus = loadSDLImage(pathAndFileName.toStringz);
     }
- 
  
     if (imgStatus == LoadMsg.success) 
     {
@@ -241,34 +184,33 @@ if (chosen & SDL3_IMAGE)
     else
     {
         writeln("The SDL3 Image shared library could not be found or wrong version");
+        foreach(info; loader.errors)
+        {
+            writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
+        }
         exit(-1);
     } 
 }
 
-    //================================= SDL Mixer =====================================
+    //==============================================================================================
+    //====================================== SDL Mixer =============================================
+    //==============================================================================================
 
     LoadMsg mixStatus = LoadMsg.noLibrary;
     
 if (chosen & SDL3_MIXER)
 {
-    version (linux)
-    {
-        pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
-
-        mixStatus = loadSDLMixer(pathAndFileName.toStringz);
-    }
- 
     version (Windows)
     {
         mixStatus = loadSDLMixer("SDL3_mixer.dll");
-
-        foreach(info; loader.errors)
-        {
-            // Note info.error and info.message are null-terminated const(char)*, not string
-            writeln("info.error = ", fromStringz(info.error), " info.message = ", fromStringz(info.message));
-        }
     }
- 
+    
+    version (linux)
+    {
+        pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
+        mixStatus = loadSDLMixer(pathAndFileName.toStringz);
+    }
+
     if (mixStatus == LoadMsg.success) 
     {
         int mixVersion = MIX_Version();  // this gets the version loaded at runtime
@@ -281,24 +223,22 @@ if (chosen & SDL3_MIXER)
     else
     {
         writeln("The SDL3 Mixer shared library could not be found or wrong version");
+        foreach(info; loader.errors)
+        {
+            writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
+        }
         exit(-1);
     } 
 }
 
-
-    //=================================== SDL TTF ================================================
-
+    //==============================================================================================
+    //===================================== SDL TTF ================================================
+    //==============================================================================================
+    
     LoadMsg ttfStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
+    
 if (chosen & SDL3_TTF)
 {
-    version (linux)
-    {
-        pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
-
-        ttfStatus = loadSDLTTF(pathAndFileName.toStringz);
-    }
-
-
     version (Windows)
     {
         ttfStatus = loadSDLTTF("SDL3_ttf.dll");
@@ -308,6 +248,13 @@ if (chosen & SDL3_TTF)
             // Note info.error and info.message are null-terminated const(char)*, not string
             writeln("info.error = ", fromStringz(info.error), " info.message = ", fromStringz(info.message));
         }
+    }
+    
+    version (linux)
+    {
+        pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
+
+        ttfStatus = loadSDLTTF(pathAndFileName.toStringz);
     }
 
     ttfStatus = LoadMsg.success;
@@ -324,12 +271,15 @@ if (chosen & SDL3_TTF)
     else
     {
         writeln("The SDL3 TTF shared library could not be found or wrong version");
+        foreach(info; loader.errors)
+        {
+            writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
+        }
         exit(-1);
     } 
 }
 
-    //================================== SDL Net =================================================
-	
+
 	/+
 	> dub build
     Starting Performing "debug" build using /usr/bin/dmd for x86_64.
@@ -360,17 +310,14 @@ import sdl.properties: SDL_PropertiesID;
    \home\<user>\.dub\packages\bindbc-sdl\2.4.2\bindbc-sdl\source\sdl_net.d
 +/
 
+    //==============================================================================================
+    //==================================== SDL Net =================================================
+    //==============================================================================================
+
     LoadMsg netStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
     
 if (chosen & SDL3_NET)
 {
-    version (linux)
-    {
-        pathAndFileName = "./libraries/" ~ "libSDL3_net.so.0.2.0"; 
-
-        netStatus = loadSDLNet(pathAndFileName.toStringz);
-    }
-    
     version (Windows)
     {
         netStatus = loadSDLNet("SDL3_net.dll");
@@ -382,8 +329,17 @@ if (chosen & SDL3_NET)
             //exit1);
         }
     }
+    
+    version (linux)
+    {
+        pathAndFileName = "./libraries/" ~ "libSDL3_net.so.0.2.0"; 
 
-    netStatus = LoadMsg.success;
+        netStatus = loadSDLNet(pathAndFileName.toStringz);
+    }
+    
+
+
+    //netStatus = LoadMsg.success;
 
     if (netStatus == LoadMsg.success) 
     {
@@ -397,9 +353,16 @@ if (chosen & SDL3_NET)
      else
     {
         writeln("The SDL3 NET shared library could not be found or wrong version");
+        foreach(info; loader.errors)
+        {
+            writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
+        }
         exit(-1);
     } 
 }
+
+
+
 
 
     // Now you can safely call SDL3 functions
