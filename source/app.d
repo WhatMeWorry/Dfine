@@ -146,7 +146,7 @@ int main()
 
     version (linux)
     {
-        lib = pathToLibraries ~ "libSDL3.so.0.4.14";
+        lib = pathToLibraries ~ "libSDL3.so.0.4.16";
                                                                 
         sdlStatus = loadSDL(lib.toStringz);
     }
@@ -187,13 +187,9 @@ if (chosen & SDL3_IMAGE)
     }
  
     version (linux)
-    {
-        //string pathAndFileName = "./libraries/" ~ "libSDL3_image.so.0.4.4"; 
-		//string libPath = "pathToLibraries" ~ "libSDL3.so.0.4.14";
-        //imgStatus = loadSDLImage(pathAndFileName.toStringz);
-		
+    {	
 		lib = pathToLibraries ~ "libSDL3_image.so.0.4.4";
-         writeln("lib = ", lib);                                                       
+                                                      
         imgStatus = loadSDLImage(lib.toStringz);
 		
     }
@@ -238,7 +234,7 @@ if (chosen & SDL3_MIXER)
 		
 		lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";
                                                      
-        imgStatus = loadSDLImage(lib.toStringz);
+        imgStatus = loadSDLMixer(lib.toStringz);
 		
     }
 
@@ -259,7 +255,8 @@ if (chosen & SDL3_MIXER)
             writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
         }
         exit(-1);
-    } 
+    }
+
 }
 
     //==============================================================================================
