@@ -237,7 +237,7 @@ if (chosen & SDL3_MIXER)
         imgStatus = loadSDLMixer(lib.toStringz);
 		
     }
-
+/+
     if (mixStatus == LoadMsg.success) 
     {
         int mixVersion = MIX_Version();  // this gets the version loaded at runtime
@@ -256,7 +256,7 @@ if (chosen & SDL3_MIXER)
         }
         exit(-1);
     }
-
++/
 }
 
     //==============================================================================================
@@ -270,12 +270,7 @@ if (chosen & SDL3_TTF)
     version (Windows)
     {
         ttfStatus = loadSDLTTF("SDL3_ttf.dll");
-        
-        foreach(info; loader.errors)
-        {
-            // Note info.error and info.message are null-terminated const(char)*, not string
-            writeln("info.error = ", fromStringz(info.error), " info.message = ", fromStringz(info.message));
-        }
+
     }
     
     version (linux)
@@ -349,13 +344,6 @@ if (chosen & SDL3_NET)
     version (Windows)
     {
         netStatus = loadSDLNet("SDL3_net.dll");
-        
-        foreach(info; loader.errors)
-        {
-            // Note info.error and info.message are null-terminated const(char)*, not string
-            writeln("info.error = ", fromStringz(info.error), " info.message = ", fromStringz(info.message));
-            //exit1);
-        }
     }
     
     version (linux)
@@ -364,10 +352,7 @@ if (chosen & SDL3_NET)
 
         netStatus = loadSDLNet(pathAndFileName.toStringz);
     }
-    
 
-
-    //netStatus = LoadMsg.success;
 
     if (netStatus == LoadMsg.success) 
     {
