@@ -228,16 +228,11 @@ if (chosen & SDL3_MIXER)
     }
     
     version (linux)
-    {
-      //  pathAndFileName = "./libraries/" ~ "libSDL3_mixer.so.0.2.4"; 
-      //  mixStatus = loadSDLMixer(pathAndFileName.toStringz);
-		
-		lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";
-                                                     
-        imgStatus = loadSDLMixer(lib.toStringz);
-		
+    {	
+		lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";    
+        mixStatus = loadSDLMixer(lib.toStringz);		
     }
-/+
+
     if (mixStatus == LoadMsg.success) 
     {
         int mixVersion = MIX_Version();  // this gets the version loaded at runtime
@@ -254,9 +249,8 @@ if (chosen & SDL3_MIXER)
         {
             writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
         }
-        exit(-1);
+        //exit(-1);
     }
-+/
 }
 
     //==============================================================================================
