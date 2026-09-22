@@ -80,6 +80,7 @@ int main()
         string pathAndFileName;
         string parentDirectoryOfExe;
         string exeNameAndFullPath;
+        string lib;
                                                
         exeNameAndFullPath = thisExePath(); // return the full path of the current executable
                                             // this executable is (by default) the same as its package name 
@@ -91,7 +92,7 @@ int main()
         
         writeln("parentDirectoryOfExe = ", parentDirectoryOfExe);
 
-        pathToLibraries = parentDirectoryOfExe ~ `\libraries`;
+        pathToLibraries = parentDirectoryOfExe ~ `\libraries\`;
         
         writeln("pathToLibraries = ", pathToLibraries);
         
@@ -103,21 +104,22 @@ int main()
         // append the new directory, ensuring the Windows semicolon delimiter is used
 
         environment["PATH"] = currentPath ~ pathToLibraries;
+        
+        setCustomLoaderSearchPath("libraries");
 
         writeln("PATH env variable");
         writeln();
         writeln(environment.get("PATH"));
         writeln();
     }
-	
-	version (linux)
-	{
+
+    version (linux)
+    {
         string pathToLibraries;
         string pathAndFileName;
         string parentDirectoryOfExe;
         string exeNameAndFullPath;
-		string lib;
-	
+        string lib;
                                                
         exeNameAndFullPath = thisExePath(); // return the full path of the current executable
                                             // this executable is (by default) the same as its package name 
@@ -130,8 +132,7 @@ int main()
         writeln("parentDirectoryOfExe = ", parentDirectoryOfExe);
 
         pathToLibraries = parentDirectoryOfExe ~ `/libraries/`;	    
-	
-	}
+    }
     
     //==============================================================================================
     //==================================== SDL3 Core ===============================================
@@ -141,16 +142,19 @@ int main()
 
     version (Windows)
     {
-        sdlStatus = loadSDL("SDL3.dll");
+        //sdlStatus = loadSDL("SDL3.dll");
+        lib = pathToLibraries ~ "SDL3_3_4_16.dll";
+        writeln("absolute path = ", lib);
+        sdlStatus = loadSDL(lib.toStringz);
     }
 
     version (linux)
     {
         lib = pathToLibraries ~ "libSDL3.so.0.4.16";
-                                                                
+
         sdlStatus = loadSDL(lib.toStringz);
     }
-   
+
 
     if (sdlStatus == LoadMsg.success) 
     {
@@ -183,15 +187,18 @@ if (chosen & SDL3_IMAGE)
 {
     version (Windows)
     {
-        imgStatus = loadSDLImage("SDL3_image.dll");
+        imgStatus = loadSDLImage("SDL3_image_3_4_4.dll");  // This works
+
+        //lib = pathToLibraries ~ "SDL3_image_3_4_4.dll";   // This get tons of missing symbols
+        //writeln("absolute path = ", lib);
+        //imgStatus = loadSDL(lib.toStringz);
     }
  
     version (linux)
-    {	
-		lib = pathToLibraries ~ "libSDL3_image.so.0.4.4";
+    {
+        lib = pathToLibraries ~ "libSDL3_image.so.0.4.4";
                                                       
         imgStatus = loadSDLImage(lib.toStringz);
-		
     }
  
     if (imgStatus == LoadMsg.success) 
@@ -224,13 +231,17 @@ if (chosen & SDL3_MIXER)
 {
     version (Windows)
     {
-        mixStatus = loadSDLMixer("SDL3_mixer.dll");
+        mixStatus = loadSDLMixer("SDL3_mixer_3_2_4.dll");   // This WORKS!
+        
+        //lib = pathToLibraries ~ "SDL3_mixer_3_2_4.dll";    // This get ton of missing symbols 
+        //writeln("absolute mix path = ", lib);
+        //mixStatus = loadSDL(lib.toStringz);
     }
     
     version (linux)
-    {	
-		lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";    
-        mixStatus = loadSDLMixer(lib.toStringz);		
+    {
+        lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";    
+        mixStatus = loadSDLMixer(lib.toStringz);
     }
 
     if (mixStatus == LoadMsg.success) 
