@@ -67,87 +67,52 @@ int main()
     // library instead of SDLSupport. The load functions now returns a LoadMsg enum value of 
     // success, noLibrary, or badLibrary
 
+    string exeNameAndFullPath;
+    string pathToLibraries;
+    string parentDirectoryOfExe;
+    
+    exeNameAndFullPath = thisExePath(); // return the full path of the current executable
+                                        // this executable is (by default) the same as its package name 
+                                        // or else specified by the targetName attribute in dub.sdl 
+
+    parentDirectoryOfExe = dirName(exeNameAndFullPath);  // returns the parent directory of path 
 
 
     version (Windows)
     {
-        string pathToLibraries;
-        string pathAndFileName;
-        string parentDirectoryOfExe;
-        string exeNameAndFullPath;
-        string lib;
-                                               
-        exeNameAndFullPath = thisExePath(); // return the full path of the current executable
-                                            // this executable is (by default) the same as its package name 
-                                            // or else specified by the targetName attribute in dub.sdl 
-
-        writeln("exeNameAndFullPath = ", exeNameAndFullPath);
-
-        parentDirectoryOfExe = dirName(exeNameAndFullPath);  // returns the parent directory of path 
-        
-        writeln("parentDirectoryOfExe = ", parentDirectoryOfExe);
-
-        pathToLibraries = parentDirectoryOfExe ~ `\libraries\`;
-        
-        writeln("pathToLibraries = ", pathToLibraries);
-        
-        
-
-        // Fetch the existing PATH variable
-        string currentPath = environment.get("PATH");
-
-        // append the new directory, ensuring the Windows semicolon delimiter is used
-
-        environment["PATH"] = currentPath ~ pathToLibraries;  // THIS WORKS! Breaks when commented out
-        
-        setCustomLoaderSearchPath("libraries");  // THIS WORKS! Breaks when commented out
-
-        writeln("PATH env variable");
-        writeln();
-        writeln(environment.get("PATH"));
-        writeln();
+        // pathToLibraries = parentDirectoryOfExe ~ `\libraries\`;  // This works.
+        // string currentEnvPATH = environment.get("PATH");         // get the existing PATH variable and
+        // environment["PATH"] = currentEnvPATH ~ pathToLibraries;  // append to PATH environment variable
+        setCustomLoaderSearchPath(null);
+        setCustomLoaderSearchPath("libraries");  // This works and is more elegant than altering PATH
     }
 
     version (linux)
     {
-        string pathToLibraries;
-        string pathAndFileName;
-        string parentDirectoryOfExe;
-        string exeNameAndFullPath;
-        string lib;
-                                               
-        exeNameAndFullPath = thisExePath(); // return the full path of the current executable
+        //exeNameAndFullPath = thisExePath(); // return the full path of the current executable
                                             // this executable is (by default) the same as its package name 
                                             // or else specified by the targetName attribute in dub.sdl 
 
-        writeln("exeNameAndFullPath = ", exeNameAndFullPath);
-
-        parentDirectoryOfExe = dirName(exeNameAndFullPath);  // returns the parent directory of path 
-        
-        writeln("parentDirectoryOfExe = ", parentDirectoryOfExe);
+        //parentDirectoryOfExe = dirName(exeNameAndFullPath);  // returns the parent directory of path 
 
         pathToLibraries = parentDirectoryOfExe ~ `/libraries/`;	    
     }
-    
+
+
     //==============================================================================================
     //==================================== SDL3 Core ===============================================
     //==============================================================================================
-    
+
     LoadMsg sdlStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
 
     version (Windows)
     {
         sdlStatus = loadSDL("SDL3_3_4_16.dll");
-        
-        //lib = pathToLibraries ~ "SDL3_3_4_16.dll";
-        //writeln("absolute path = ", lib);
-        //sdlStatus = loadSDL(lib.toStringz);
     }
 
     version (linux)
     {
-        lib = pathToLibraries ~ "libSDL3.so.0.4.16";
-
+        string lib = pathToLibraries ~ "libSDL3.so.0.4.16";
         sdlStatus = loadSDL(lib.toStringz);
     }
 
@@ -171,12 +136,12 @@ int main()
         }
         exit(-1);
     }
-    
-    
+
+
     //=============================================================================================
     //======================================= SDL3 Image ==========================================
     //=============================================================================================
-   
+
     LoadMsg imgStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives 
 
 if (chosen & SDL3_IMAGE)
@@ -184,16 +149,11 @@ if (chosen & SDL3_IMAGE)
     version (Windows)
     {
         imgStatus = loadSDLImage("SDL3_image_3_4_4.dll");  // This works
-
-        //lib = pathToLibraries ~ "SDL3_image_3_4_4.dll";   // This get tons of missing symbols
-        //writeln("absolute path = ", lib);
-        //imgStatus = loadSDL(lib.toStringz);
     }
  
     version (linux)
     {
-        lib = pathToLibraries ~ "libSDL3_image.so.0.4.4";
-                                                      
+        string lib = pathToLibraries ~ "libSDL3_image.so.0.4.4";
         imgStatus = loadSDLImage(lib.toStringz);
     }
  
@@ -227,16 +187,12 @@ if (chosen & SDL3_MIXER)
 {
     version (Windows)
     {
-        mixStatus = loadSDLMixer("SDL3_mixer_3_2_4.dll");   // This WORKS!
-        
-        //lib = pathToLibraries ~ "SDL3_mixer_3_2_4.dll";    // This get ton of missing symbols 
-        //writeln("absolute mix path = ", lib);
-        //mixStatus = loadSDL(lib.toStringz);
+        mixStatus = loadSDLMixer("SDL3_mixer_3_2_4.dll");
     }
     
     version (linux)
     {
-        lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";    
+        string lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";    
         mixStatus = loadSDLMixer(lib.toStringz);
     }
 
@@ -263,25 +219,21 @@ if (chosen & SDL3_MIXER)
     //==============================================================================================
     //===================================== SDL TTF ================================================
     //==============================================================================================
-    
+
     LoadMsg ttfStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
     
 if (chosen & SDL3_TTF)
 {
     version (Windows)
     {
-        ttfStatus = loadSDLTTF("SDL3_ttf.dll");
-
+        ttfStatus = loadSDLTTF("SDL3_ttf_3_2_2.dll");
     }
     
     version (linux)
     {
-        pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
-
+        string pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
         ttfStatus = loadSDLTTF(pathAndFileName.toStringz);
     }
-
-    ttfStatus = LoadMsg.success;
 
     if (ttfStatus == LoadMsg.success) 
     {
@@ -344,7 +296,7 @@ if (chosen & SDL3_NET)
 {
     version (Windows)
     {
-        netStatus = loadSDLNet("SDL3_net.dll");
+        netStatus = loadSDLNet("SDL3_net_3_2_0.dll");
     }
     
     version (linux)
