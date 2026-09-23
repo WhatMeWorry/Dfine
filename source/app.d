@@ -23,6 +23,8 @@ import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) be
 import core.stdc.stdlib : exit;
 import std.typecons : BitFlags;
 
+import std.algorithm.iteration : splitter;
+
 // satellite libraries of SDL3 core
 // The auxillary libraries will only work if SDL3 core is loaded. So this is not optional
 
@@ -79,12 +81,20 @@ int main()
 
 
     version (Windows)
-    {
-        // pathToLibraries = parentDirectoryOfExe ~ `\libraries\`;  // This works.
-        // string currentEnvPATH = environment.get("PATH");         // get the existing PATH variable and
-        // environment["PATH"] = currentEnvPATH ~ pathToLibraries;  // append to PATH environment variable
-        setCustomLoaderSearchPath(null);
+    {   /+
+        pathToLibraries = parentDirectoryOfExe ~ `\libraries\`;  // This works.
+        string currentEnvPATH = environment.get("PATH");         // get the existing PATH variable and
+        environment["PATH"] = currentEnvPATH ~ pathToLibraries;  // append to PATH environment variable
+    
+        string newEnvPATH = environment.get("PATH");
+        foreach (path; newEnvPATH.splitter(';'))
+        {
+            writeln(path);
+        }
+        +/
+        //setCustomLoaderSearchPath(null);
         setCustomLoaderSearchPath("libraries");  // This works and is more elegant than altering PATH
+
     }
 
     version (linux)
@@ -107,7 +117,7 @@ int main()
 
     version (Windows)
     {
-        sdlStatus = loadSDL("SDL3_3_4_16.dll");
+        sdlStatus = loadSDL("SDL3.dll");
     }
 
     version (linux)
@@ -129,12 +139,10 @@ int main()
     }
     else
     {
-        writeln("The SDL3 shared library could not be found or wrong version");
         foreach(info; loader.errors)
         {
             writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
         }
-        exit(-1);
     }
 
 
@@ -148,7 +156,7 @@ if (chosen & SDL3_IMAGE)
 {
     version (Windows)
     {
-        imgStatus = loadSDLImage("SDL3_image_3_4_4.dll");  // This works
+        imgStatus = loadSDLImage("SDL3_image.dll");  // This works
     }
  
     version (linux)
@@ -168,12 +176,10 @@ if (chosen & SDL3_IMAGE)
     }
     else
     {
-        writeln("The SDL3 Image shared library could not be found or wrong version");
         foreach(info; loader.errors)
         {
             writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
         }
-        exit(-1);
     } 
 }
 
@@ -187,7 +193,7 @@ if (chosen & SDL3_MIXER)
 {
     version (Windows)
     {
-        mixStatus = loadSDLMixer("SDL3_mixer_3_2_4.dll");
+        mixStatus = loadSDLMixer("SDL3_mixer.dll");
     }
     
     version (linux)
@@ -226,7 +232,7 @@ if (chosen & SDL3_TTF)
 {
     version (Windows)
     {
-        ttfStatus = loadSDLTTF("SDL3_ttf_3_2_2.dll");
+        ttfStatus = loadSDLTTF("SDL3_ttf.dll");
     }
     
     version (linux)
@@ -296,7 +302,7 @@ if (chosen & SDL3_NET)
 {
     version (Windows)
     {
-        netStatus = loadSDLNet("SDL3_net_3_2_0.dll");
+        netStatus = loadSDLNet("SDL3_net.dll");
     }
     
     version (linux)
