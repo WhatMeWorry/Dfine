@@ -103,9 +103,9 @@ int main()
 
         // append the new directory, ensuring the Windows semicolon delimiter is used
 
-        environment["PATH"] = currentPath ~ pathToLibraries;
+        environment["PATH"] = currentPath ~ pathToLibraries;  // THIS WORKS! Breaks when commented out
         
-        setCustomLoaderSearchPath("libraries");
+        setCustomLoaderSearchPath("libraries");  // THIS WORKS! Breaks when commented out
 
         writeln("PATH env variable");
         writeln();
@@ -142,10 +142,11 @@ int main()
 
     version (Windows)
     {
-        //sdlStatus = loadSDL("SDL3.dll");
-        lib = pathToLibraries ~ "SDL3_3_4_16.dll";
-        writeln("absolute path = ", lib);
-        sdlStatus = loadSDL(lib.toStringz);
+        sdlStatus = loadSDL("SDL3_3_4_16.dll");
+        
+        //lib = pathToLibraries ~ "SDL3_3_4_16.dll";
+        //writeln("absolute path = ", lib);
+        //sdlStatus = loadSDL(lib.toStringz);
     }
 
     version (linux)
