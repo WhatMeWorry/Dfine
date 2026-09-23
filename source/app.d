@@ -2,31 +2,26 @@
 
 module app;
 
-import std.stdio : writeln,  write;
-import bindbc.sdl : loadSDL, loadSDLImage, loadSDLMixer, loadSDLTTF, loadSDLNet,
+import std.stdio: writeln,  write;
+import bindbc.sdl: loadSDL, loadSDLImage, loadSDLMixer, loadSDLTTF, loadSDLNet,
                     SDL_GetVersion, IMG_Version, MIX_Version, TTF_Version, NET_Version,
                     SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
                     SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
                     
-import bindbc.loader;
+import bindbc.loader: LoadMsg, setCustomLoaderSearchPath;
+
 import loader = bindbc.loader.sharedlib;  // from Mike Shah working repo
 
-import std.file: exists, thisExePath, isFile;
+import std.file: thisExePath;
 import std.path: dirName;
-
-import std.process;
-
-import std.string: toStringz, fromStringz;
-import std.file: exists;
+import std.process: environment;
+import std.string: fromStringz;
 
 import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) below. However, created 
                                      // lld-link: error: undefined symbol: _D9libraries18load_sdl_librariesQuFZv 
                                      // (3) sourcePaths "libraries" in dub.sdl solved the problem
 import core.stdc.stdlib : exit;
-
-
 import std.typecons : BitFlags;
-
 
 // satellite libraries of SDL3 core
 // The auxillary libraries will only work if SDL3 core is loaded. So this is not optional
@@ -72,7 +67,7 @@ int main()
     // library instead of SDLSupport. The load functions now returns a LoadMsg enum value of 
     // success, noLibrary, or badLibrary
 
-    import std.process;
+
 
     version (Windows)
     {
