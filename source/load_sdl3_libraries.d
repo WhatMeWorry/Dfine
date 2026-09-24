@@ -53,7 +53,7 @@ alias SDL3_NET   = SDL3Flags.SDL3_Net;
 SDL3Flags SDL3_ALL = (SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_TTF | SDL3_NET);
 
 
-void load_sdl3_libraries(SDL3Flags chosen)
+void load_sdl3_libs(SDL3Flags chosen)
 {
     auto SDL3_Core_selected = (chosen & SDL3_CORE);
     auto SDL3_Image_selected = (chosen & SDL3_IMAGE);    

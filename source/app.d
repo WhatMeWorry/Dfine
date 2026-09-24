@@ -2,28 +2,28 @@
 
 module app;
 
-import libraries.load_sdl3_libraries;
+import libraries.load_sdl3_libraries: load_sdl3_libs, SDL3_ALL, SDL3_CORE, SDL3_IMAGE, SDL3_MIXER, SDL3_NET, SDL3_TTF;
 // (2) took care of undefined symbol (1) below. However, created 
                                      // lld-link: error: undefined symbol: _D9libraries18load_sdl_librariesQuFZv 
                                      // (3) sourcePaths "libraries" in dub.sdl solved the problem
 import std.stdio: writeln;
 
-import bindbc.sdl: SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
+import bindbc.sdl: SDL_Init, SDL_Quit,
+                   SDL_INIT_AUDIO, SDL_INIT_VIDEO, SDL_INIT_JOYSTICK, SDL_INIT_HAPTIC,
+                   SDL_INIT_GAMEPAD, SDL_INIT_EVENTS, SDL_INIT_SENSOR, SDL_INIT_CAMERA;
 
 
 int main()
 {
-    // SDL3Flags chosen = SDL3_ALL;
+    load_sdl3_libs(SDL3_ALL | SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_NET | SDL3_TTF);
 
-    // SDL3Flags chosen = SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_NET | SDL3_TTF;
-    
-    SDL3Flags chosen = SDL3_CORE | SDL3_IMAGE | SDL3_TTF;
+    uint SDL3_ALL_SUBSYSTEMS = SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC |
+                               SDL_INIT_GAMEPAD | SDL_INIT_EVENTS | SDL_INIT_SENSOR | SDL_INIT_SENSOR;
 
-    load_sdl3_libraries(chosen);
-
-    // Now you can safely call SDL3 functions
-    if (SDL_Init(SDL_INIT_VIDEO)) 
+    if (SDL_Init(SDL3_ALL_SUBSYSTEMS)) 
     {
+        writeln("SDL_Init all subsystems");
+
         writeln("Quitting program");
         
         // Your SDL3 code here...
