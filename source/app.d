@@ -7,15 +7,21 @@ import bindbc.sdl: loadSDL, loadSDLImage, loadSDLMixer, loadSDLTTF, loadSDLNet,
                     SDL_GetVersion, IMG_Version, MIX_Version, TTF_Version, NET_Version,
                     SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
                     SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
-                    
-import bindbc.loader: LoadMsg, setCustomLoaderSearchPath;
+					
+
+import bindbc.loader: LoadMsg;
+					
+version (Windows)
+{                    
+    import bindbc.loader: setCustomLoaderSearchPath;  // function only implemented for Windows
+}
 
 import loader = bindbc.loader.sharedlib;
 
 import std.file: thisExePath;
 import std.path: dirName;
 import std.process: environment;
-import std.string: fromStringz;
+import std.string: toStringz, fromStringz;
 
 import libraries.load_sdl_libraries; // (2) took care of undefined symbol (1) below. However, created 
                                      // lld-link: error: undefined symbol: _D9libraries18load_sdl_librariesQuFZv 
@@ -50,14 +56,12 @@ int main()
 {
     Flags chosen;  // nothing choosen initially  
 
- 
    
     // chosen = SDL3_ALL;
     
     chosen = SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_NET | SDL3_TTF;    
     
-    //if ((chosen & SDL3_CORE) | (chosen & SDL3_ALL))
-    
+ 
     auto SDL3_Core_selected = (chosen & SDL3_CORE);
     auto SDL3_Image_selected = (chosen & SDL3_IMAGE);    
     auto SDL3_Mixer_selected = (chosen & SDL3_MIXER); 
@@ -78,6 +82,7 @@ int main()
     string exeNameAndFullPath;
     string pathToLibraries;
     string parentDirectoryOfExe;
+	string lib;
     
     exeNameAndFullPath = thisExePath(); // return the full path of the current executable
                                         // this executable is (by default) the same as its package name 
@@ -104,11 +109,6 @@ int main()
 
     version (linux)
     {
-        //exeNameAndFullPath = thisExePath(); // return the full path of the current executable
-                                            // this executable is (by default) the same as its package name 
-                                            // or else specified by the targetName attribute in dub.sdl 
-
-        //parentDirectoryOfExe = dirName(exeNameAndFullPath);  // returns the parent directory of path 
 
         pathToLibraries = parentDirectoryOfExe ~ `/libraries/`;	    
     }
@@ -125,7 +125,7 @@ int main()
 
     version (linux)
     {
-        string lib = pathToLibraries ~ "libSDL3.so.0.4.16";
+        lib = pathToLibraries ~ "libSDL3.so.0.4.16";
         LoadMsg sdlStatus = loadSDL(lib.toStringz);
     }
 
@@ -161,7 +161,7 @@ int main()
  
         version (linux)
         {
-            string lib = pathToLibraries ~ "libSDL3_image.so.0.4.4";
+            lib = pathToLibraries ~ "libSDL3_image.so.0.4.4";
             LoadMsg imgStatus = loadSDLImage(lib.toStringz);
         }
  
@@ -196,7 +196,7 @@ int main()
     
         version (linux)
         {
-            string lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";    
+            lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";    
             LoadMsg mixStatus = loadSDLMixer(lib.toStringz);
         }
 
@@ -231,8 +231,8 @@ int main()
     
         version (linux)
         {
-            string pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
-            LoadMsg ttfStatus = loadSDLTTF(pathAndFileName.toStringz);
+            lib = pathToLibraries ~ "libSDL3_ttf.so.0.2.2";			
+            LoadMsg ttfStatus = loadSDLTTF(lib.toStringz);
         }
 
         if (ttfStatus == LoadMsg.success) 
@@ -242,7 +242,7 @@ int main()
             writeln("SDL3_TTF version ", SDL_VERSIONNUM_MAJOR(ttfVersion), ".", 
                                          SDL_VERSIONNUM_MINOR(ttfVersion), ".", 
                                          SDL_VERSIONNUM_MICRO(ttfVersion),
-                                     " shared library successfully loaded"); 
+                                         " shared library successfully loaded"); 
         }
         else
         {
@@ -297,8 +297,8 @@ import sdl.properties: SDL_PropertiesID;
     
         version (linux)
         {
-            pathAndFileName = "./libraries/" ~ "libSDL3_net.so.0.2.0"; 
-            LoadMsg netStatus = loadSDLNet(pathAndFileName.toStringz);
+			lib = pathToLibraries ~ "libSDL3_net.so.0.2.0";	
+            LoadMsg netStatus = loadSDLNet(lib.toStringz);
         }
 
         if (netStatus == LoadMsg.success) 
