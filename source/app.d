@@ -129,7 +129,6 @@ int main()
         LoadMsg sdlStatus = loadSDL(lib.toStringz);
     }
 
-
     if (sdlStatus == LoadMsg.success) 
     {
         // const int compiled = SDL_VERSION;            // hardcoded number from SDL headers
@@ -301,7 +300,6 @@ import sdl.properties: SDL_PropertiesID;
             pathAndFileName = "./libraries/" ~ "libSDL3_net.so.0.2.0"; 
             LoadMsg netStatus = loadSDLNet(pathAndFileName.toStringz);
         }
-
 
         if (netStatus == LoadMsg.success) 
         {
