@@ -7,12 +7,11 @@ import bindbc.sdl: loadSDL, loadSDLImage, loadSDLMixer, loadSDLTTF, loadSDLNet,
                     SDL_GetVersion, IMG_Version, MIX_Version, TTF_Version, NET_Version,
                     SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
                     SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
-					
 
 import bindbc.loader: LoadMsg;
-					
+
 version (Windows)
-{                    
+{
     import bindbc.loader: setCustomLoaderSearchPath;  // function only implemented for Windows
 }
 
@@ -56,18 +55,15 @@ int main()
 {
     Flags chosen;  // nothing choosen initially  
 
-   
     // chosen = SDL3_ALL;
-    
+
     chosen = SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_NET | SDL3_TTF;    
-    
- 
+
     auto SDL3_Core_selected = (chosen & SDL3_CORE);
     auto SDL3_Image_selected = (chosen & SDL3_IMAGE);    
     auto SDL3_Mixer_selected = (chosen & SDL3_MIXER); 
     auto SDL3_Net_selected = (chosen & SDL3_NET); 
     auto SDL3_Ttf_selected = (chosen & SDL3_TTF);        
-
 
     if (!SDL3_Core_selected)
     {
@@ -219,6 +215,41 @@ int main()
     }
 
     //==============================================================================================
+    //==================================== SDL Net =================================================
+    //==============================================================================================
+
+    if (SDL3_Net_selected)
+    {
+        version (Windows)
+        {
+            LoadMsg netStatus = loadSDLNet("SDL3_net.dll");
+        }
+    
+        version (linux)
+        {
+            lib = pathToLibraries ~ "libSDL3_net.so.0.2.0";	
+            LoadMsg netStatus = loadSDLNet(lib.toStringz);
+        }
+
+        if (netStatus == LoadMsg.success) 
+        {
+            int netVersion = NET_Version();  // this gets the version loaded and running at runtime
+
+            writeln("SDL3_NET version ", SDL_VERSIONNUM_MAJOR(netVersion), ".", 
+                                         SDL_VERSIONNUM_MINOR(netVersion), ".", 
+                                         SDL_VERSIONNUM_MICRO(netVersion),
+                                         " shared library successfully loaded"); 
+        }
+        else
+        {
+            foreach(info; loader.errors)
+            {
+                writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
+            }
+        } 
+    }
+
+    //==============================================================================================
     //===================================== SDL TTF ================================================
     //==============================================================================================
     
@@ -284,40 +315,6 @@ import sdl.properties: SDL_PropertiesID;
    \home\<user>\.dub\packages\bindbc-sdl\2.4.2\bindbc-sdl\source\sdl_net.d
 +/
 
-    //==============================================================================================
-    //==================================== SDL Net =================================================
-    //==============================================================================================
-
-    if (SDL3_Net_selected)
-    {
-        version (Windows)
-        {
-            LoadMsg netStatus = loadSDLNet("SDL3_net.dll");
-        }
-    
-        version (linux)
-        {
-			lib = pathToLibraries ~ "libSDL3_net.so.0.2.0";	
-            LoadMsg netStatus = loadSDLNet(lib.toStringz);
-        }
-
-        if (netStatus == LoadMsg.success) 
-        {
-            int netVersion = NET_Version();  // this gets the version loaded and running at runtime
-
-            writeln("SDL3_NET version ", SDL_VERSIONNUM_MAJOR(netVersion), ".", 
-                                         SDL_VERSIONNUM_MINOR(netVersion), ".", 
-                                         SDL_VERSIONNUM_MICRO(netVersion),
-                                         " shared library successfully loaded"); 
-        }
-        else
-        {
-            foreach(info; loader.errors)
-            {
-                writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
-            }
-        } 
-    }
 
 
 
