@@ -113,17 +113,15 @@ int main()
     //==================================== SDL3 Core ===============================================
     //==============================================================================================
 
-    LoadMsg sdlStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
-
     version (Windows)
     {
-        sdlStatus = loadSDL("SDL3.dll");
+        LoadMsg sdlStatus = loadSDL("SDL3.dll");
     }
 
     version (linux)
     {
         string lib = pathToLibraries ~ "libSDL3.so.0.4.16";
-        sdlStatus = loadSDL(lib.toStringz);
+        LoadMsg sdlStatus = loadSDL(lib.toStringz);
     }
 
 
@@ -150,19 +148,17 @@ int main()
     //======================================= SDL3 Image ==========================================
     //=============================================================================================
 
-    LoadMsg imgStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives 
-
 if (chosen & SDL3_IMAGE)
 {
     version (Windows)
     {
-        imgStatus = loadSDLImage("SDL3_image.dll");  // This works
+        LoadMsg imgStatus = loadSDLImage("SDL3_image.dll");  // This works
     }
  
     version (linux)
     {
         string lib = pathToLibraries ~ "libSDL3_image.so.0.4.4";
-        imgStatus = loadSDLImage(lib.toStringz);
+        LoadMsg imgStatus = loadSDLImage(lib.toStringz);
     }
  
     if (imgStatus == LoadMsg.success) 
@@ -186,20 +182,18 @@ if (chosen & SDL3_IMAGE)
     //==============================================================================================
     //====================================== SDL Mixer =============================================
     //==============================================================================================
-
-    LoadMsg mixStatus = LoadMsg.noLibrary;
     
 if (chosen & SDL3_MIXER)
 {
     version (Windows)
     {
-        mixStatus = loadSDLMixer("SDL3_mixer.dll");
+        LoadMsg mixStatus = loadSDLMixer("SDL3_mixer.dll");
     }
     
     version (linux)
     {
         string lib = pathToLibraries ~ "libSDL3_mixer.so.0.2.4";    
-        mixStatus = loadSDLMixer(lib.toStringz);
+        LoadMsg mixStatus = loadSDLMixer(lib.toStringz);
     }
 
     if (mixStatus == LoadMsg.success) 
@@ -213,32 +207,28 @@ if (chosen & SDL3_MIXER)
     }
     else
     {
-        writeln("The SDL3 Mixer shared library could not be found or wrong version");
         foreach(info; loader.errors)
         {
             writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
         }
-        //exit(-1);
     }
 }
 
     //==============================================================================================
     //===================================== SDL TTF ================================================
     //==============================================================================================
-
-    LoadMsg ttfStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
     
 if (chosen & SDL3_TTF)
 {
     version (Windows)
     {
-        ttfStatus = loadSDLTTF("SDL3_ttf.dll");
+        LoadMsg ttfStatus = loadSDLTTF("SDL3_ttf.dll");
     }
     
     version (linux)
     {
         string pathAndFileName = "./libraries/" ~ "libSDL3_ttf.so.0.2.2"; 
-        ttfStatus = loadSDLTTF(pathAndFileName.toStringz);
+        LoadMsg ttfStatus = loadSDLTTF(pathAndFileName.toStringz);
     }
 
     if (ttfStatus == LoadMsg.success) 
@@ -252,12 +242,10 @@ if (chosen & SDL3_TTF)
     }
     else
     {
-        writeln("The SDL3 TTF shared library could not be found or wrong version");
         foreach(info; loader.errors)
         {
             writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
         }
-        exit(-1);
     } 
 }
 
@@ -296,20 +284,18 @@ import sdl.properties: SDL_PropertiesID;
     //==================================== SDL Net =================================================
     //==============================================================================================
 
-    LoadMsg netStatus = LoadMsg.noLibrary;  // LoadMsg default initializes to success which give false positives
-    
 if (chosen & SDL3_NET)
 {
     version (Windows)
     {
-        netStatus = loadSDLNet("SDL3_net.dll");
+        LoadMsg netStatus = loadSDLNet("SDL3_net.dll");
     }
     
     version (linux)
     {
         pathAndFileName = "./libraries/" ~ "libSDL3_net.so.0.2.0"; 
 
-        netStatus = loadSDLNet(pathAndFileName.toStringz);
+        LoadMsg netStatus = loadSDLNet(pathAndFileName.toStringz);
     }
 
 
@@ -324,12 +310,10 @@ if (chosen & SDL3_NET)
     }
      else
     {
-        writeln("The SDL3 NET shared library could not be found or wrong version");
         foreach(info; loader.errors)
         {
             writeln("Error:", fromStringz(info.error), " - ", fromStringz(info.message));
         }
-        exit(-1);
     } 
 }
 
