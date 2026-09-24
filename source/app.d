@@ -4,9 +4,9 @@ module app;
 
 import std.stdio: writeln,  write;
 import bindbc.sdl: loadSDL, loadSDLImage, loadSDLMixer, loadSDLTTF, loadSDLNet,
-                    SDL_GetVersion, IMG_Version, MIX_Version, TTF_Version, NET_Version,
-                    SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
-                    SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
+                   SDL_GetVersion, IMG_Version, MIX_Version, TTF_Version, NET_Version,
+                   SDL_VERSIONNUM_MAJOR, SDL_VERSIONNUM_MINOR, SDL_VERSIONNUM_MICRO,
+                   SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
 
 import bindbc.loader: LoadMsg;
 
@@ -78,14 +78,13 @@ int main()
     string exeNameAndFullPath;
     string pathToLibraries;
     string parentDirectoryOfExe;
-	string lib;
+    string lib;
     
     exeNameAndFullPath = thisExePath(); // return the full path of the current executable
                                         // this executable is (by default) the same as its package name 
                                         // or else specified by the targetName attribute in dub.sdl 
 
     parentDirectoryOfExe = dirName(exeNameAndFullPath);  // returns the parent directory of path 
-
 
     version (Windows)
     {   /+
@@ -105,7 +104,6 @@ int main()
 
     version (linux)
     {
-
         pathToLibraries = parentDirectoryOfExe ~ `/libraries/`;	    
     }
 
@@ -329,31 +327,6 @@ import sdl.properties: SDL_PropertiesID;
 
         SDL_Quit();
     }
-
-
-	/+
-Once installed, the shared object files are placed in your system's standard library directory. 
-You can find the exact path to libSDL3.so by running:bash
-find /usr/lib/ -name "libSDL3.so*"	
-	
-find /usr/lib/ -name "libSDL3.so*"
-
-/usr/lib/libSDL3.so.0.4.14
-/usr/lib/libSDL3.so
-/usr/lib/libSDL3.so.0
-	
-    libSDL3.so.0.4.14   is the Real Name (the actual binary file containing the compiled code and data). The numbers 0.4.14 represent 
-                                 the major, minor, and patch release versions of the library.
-
-    libSDL3.so.0   is the SONAME (Shared Object Name). It is typically a symbolic link pointing to the real file 
-	                      (libSDL3.so.0.4.14), used by the system at runtime to guarantee binary interface (ABI) compatibility
-	
-	libSDL3.so  is the Linker Name (or development name). It is a symbolic link without version numbers, used by compilers and linkers 
-	                  (gcc, ld) when you compile a new program.
-	
-	+/
-	
-
 
     return 0;
 }
