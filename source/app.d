@@ -2,6 +2,40 @@
 
 module app;
 
+import libraries.load_sdl3_libraries;
+// (2) took care of undefined symbol (1) below. However, created 
+                                     // lld-link: error: undefined symbol: _D9libraries18load_sdl_librariesQuFZv 
+                                     // (3) sourcePaths "libraries" in dub.sdl solved the problem
+import std.stdio: writeln;
+
+import bindbc.sdl: SDL_INIT_VIDEO, SDL_Init, SDL_Quit;
+
+
+int main()
+{
+    // SDL3Flags chosen = SDL3_ALL;
+
+    // SDL3Flags chosen = SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_NET | SDL3_TTF;
+    
+    SDL3Flags chosen = SDL3_CORE | SDL3_IMAGE | SDL3_TTF;
+
+    load_sdl3_libraries(chosen);
+
+    // Now you can safely call SDL3 functions
+    if (SDL_Init(SDL_INIT_VIDEO)) 
+    {
+        writeln("Quitting program");
+        
+        // Your SDL3 code here...
+
+        SDL_Quit();
+    }
+
+    return 0;
+}
+
+
+/+
 import std.stdio: writeln,  write;
 import bindbc.sdl: loadSDL, loadSDLImage, loadSDLMixer, loadSDLTTF, loadSDLNet,
                    SDL_GetVersion, IMG_Version, MIX_Version, TTF_Version, NET_Version,
@@ -312,24 +346,11 @@ import sdl.properties: SDL_PropertiesID;
    in file:
    \home\<user>\.dub\packages\bindbc-sdl\2.4.2\bindbc-sdl\source\sdl_net.d
 +/
++/
 
 
 
 
-
-
-    // Now you can safely call SDL3 functions
-    if (SDL_Init(SDL_INIT_VIDEO)) 
-    {
-        writeln("Quitting program");
-        
-        // Your SDL3 code here...
-
-        SDL_Quit();
-    }
-
-    return 0;
-}
 
 
 
