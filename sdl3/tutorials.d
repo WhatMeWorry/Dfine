@@ -1,5 +1,5 @@
 
-/+
+
 
 // void copying_textures_to_surface()
 // void copying_surface_to_surface()
@@ -20,7 +20,9 @@ import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
 import datatypes;
-import a_star.spot : writeAndPause;
+//import a_star.spot : writeAndPause;
+import useful_functions : writeAndPause;
+import breakup: keepRectWithinBiggerRectArrowMovement;
 import core.stdc.stdio : printf;
 import hexmath : isOdd, isEven;
 import breakup;
@@ -623,10 +625,14 @@ void smallest_sdl_texture_program()
                                                          // 256  256  window is same size than texture
     createWindowAndRenderer("mallest_sdl_texture_program", 512, 512, cast(SDL_WindowFlags) 0, &window, &renderer);
 
-    //texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
+    texture = loadImageToTextureWithAccess(renderer, "./images/globe256x256.png", SDL_TEXTUREACCESS_STREAMING);
 
-    SDL_Surface *surface = assembleTCFNA();
+    // SDL_Surface *surface = assembleTCFNA(); // huge surface, but texture is only limited to 46kx46k
+
+    SDL_Surface *surface = loadImageToSurfaceViaSDL3("./images/globe256x256.png");
     
+    // 
+
     texture = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, surface.w, surface.h);
     
     copySurfaceToTexture(surface, null, texture, null);
@@ -1303,4 +1309,3 @@ void mini_and_main_maps()
 +/
 
 
-+/

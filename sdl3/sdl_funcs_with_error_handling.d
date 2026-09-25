@@ -212,6 +212,17 @@ void getTextureSize(SDL_Texture *texture, int *w, int *h)
 }
 
 
+SDL_Surface* loadImageToSurfaceViaSDL3(string file)
+{
+    SDL_Surface *surface = SDL_LoadSurface(toStringz(file));  // Load a BMP, PNG or JPEG image from a file.
+    if (surface == null)
+    {
+        throw new Exception("SDL_LoadSurface failed: " ~ to!string(SDL_GetError()));
+    }
+    return surface;
+}
+
+
 SDL_Surface* loadImageToSurface(string file)
 {
     SDL_Surface *surface = IMG_Load(toStringz(file));  // IMG_Load function supports a wide range of image formats,
@@ -279,6 +290,7 @@ SDL_Texture* loadImageToTexture(SDL_Renderer *renderer, string file)
 SDL_Texture* loadImageToTextureWithAccess(SDL_Renderer *renderer, string file, SDL_TextureAccess textureAccess)
 {
     SDL_Surface *surface = IMG_Load(toStringz(file));
+
     if (surface == null)                                                // BMP, GIF, JPG, PNG, TGA, ICO, and CUR
     {
         throw new Exception("IMG_Load failed: " ~ to!string(SDL_GetError()));

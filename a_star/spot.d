@@ -1,5 +1,5 @@
 
-/+
+
 
 module a_star.spot;
  
@@ -607,4 +607,3 @@ void findShortestPath(HB)(ref HB h, Globals g, Location begin, Location end)
 +/
 
 
-+/

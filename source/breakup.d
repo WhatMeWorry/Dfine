@@ -1,5 +1,5 @@
 
-/+
+
 
 module breakup;
 
@@ -8,7 +8,7 @@ import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
 import datatypes;
-import a_star.spot : writeAndPause;
+import useful_functions : writeAndPause;
 import core.stdc.stdio : printf;
 import hexmath : isOdd, isEven;
 import sdl_funcs_with_error_handling;
@@ -1972,6 +1972,4 @@ SDL_Surface* assembleHugeSurface()
 }
 +/
 
-
-+/
 
