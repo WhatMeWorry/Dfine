@@ -39,16 +39,6 @@ struct Globals(I)
 }
 
 
-void SDL_Initialize()
-{
-    //if( SDL_Init( SDL_INIT_EVERYTHING ) < 0 )  // SDL_INIT_VIDEO
-    //{
-    //    writeln( "SDL could not initialize. SDL_Error: %s", SDL_GetError() );
-    //    exit(-1);
-    //}
-}
-
-
 
 SDL_STRUCT!(I) createSDLwindow(I)(string name, I width, I height)
 {
