@@ -10,7 +10,8 @@ import std.stdio: writeln;
 import std.string: fromStringz;
 import tutorials: just_a_window, smallest_renderer_01, smallest_texture_01a,
                   smallest_sdl_texture_program, no_renderer_02, smallest_texture_with_rect,
-                  two_windows_and_surfaces, mini_and_main_maps;
+                  two_windows_and_surfaces, mini_and_main_maps, copying_textures_to_surface,
+                  copying_surface_to_surface;
 
 import bindbc.sdl: SDL_Init, SDL_Quit,
                    SDL_INIT_AUDIO, SDL_INIT_VIDEO, SDL_INIT_JOYSTICK, SDL_INIT_HAPTIC,
@@ -46,10 +47,9 @@ int main()
 
     two_windows_and_surfaces();
 
-
     copying_textures_to_surface();
 
-    //copying_surface_to_surface();
+    copying_surface_to_surface();
 
     mini_and_main_maps();
 
