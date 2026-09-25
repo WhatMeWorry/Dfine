@@ -7,10 +7,12 @@ import libraries.load_sdl3_libraries: load_sdl3_libs, SDL3_ALL, SDL3_CORE, SDL3_
                                      // lld-link: error: undefined symbol: _D9libraries18load_sdl_librariesQuFZv 
                                      // (3) sourcePaths "libraries" in dub.sdl solved the problem
 import std.stdio: writeln;
+import std.string: fromStringz;
 
 import bindbc.sdl: SDL_Init, SDL_Quit,
                    SDL_INIT_AUDIO, SDL_INIT_VIDEO, SDL_INIT_JOYSTICK, SDL_INIT_HAPTIC,
-                   SDL_INIT_GAMEPAD, SDL_INIT_EVENTS, SDL_INIT_SENSOR, SDL_INIT_CAMERA;
+                   SDL_INIT_GAMEPAD, SDL_INIT_EVENTS, SDL_INIT_SENSOR, SDL_INIT_CAMERA,
+                   SDL_GetError;
 
 
 int main()
@@ -20,16 +22,14 @@ int main()
     uint SDL3_ALL_SUBSYSTEMS = SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC |
                                SDL_INIT_GAMEPAD | SDL_INIT_EVENTS | SDL_INIT_SENSOR | SDL_INIT_SENSOR;
 
-    if (SDL_Init(SDL3_ALL_SUBSYSTEMS)) 
+    if (!SDL_Init(SDL3_ALL_SUBSYSTEMS)) 
     {
-        writeln("SDL_Init all subsystems");
-
+        writeln("SDL_Init error: ", fromStringz(SDL_GetError()));
         writeln("Quitting program");
-        
-        // Your SDL3 code here...
-
-        SDL_Quit();
     }
+
+    writeln("SDL_Init success");
+
 
     return 0;
 }
