@@ -1,5 +1,5 @@
 
-/+
+
 
 module help_window;
 
@@ -8,7 +8,7 @@ import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
 import datatypes;
-import a_star.spot : writeAndPause;
+import useful_functions : writeAndPause;
 import core.stdc.stdio : printf;
 import hexmath : isOdd, isEven;
 import breakup;
@@ -72,19 +72,19 @@ struct HelpWindow
 
         SDL_RenderDebugText(ren, 5.0f, 150.0f, "tab = advance to next swatch");
         SDL_RenderDebugText(ren, 5.0f, 160.0f, "F9 = toggle border of current swatch");
-		
+
         SDL_RenderDebugText(ren, 5.0f, 170.0f, "F10 = all swatches are locked (Move together)");
         SDL_RenderDebugText(ren, 5.0f, 180.0f, "F11 = move all swatches relative to upper left corner");	
         SDL_RenderDebugText(ren, 5.0f, 190.0f, "F12 = save all swatches on and off screen to PNG file");
-		
+
         SDL_RenderDebugText(ren, 5.0f, 200.0f, "------------------------------------");
         SDL_RenderDebugText(ren, 5.0f, 210.0f, "Keypad 4 = trim left side one pixel");		
         SDL_RenderDebugText(ren, 5.0f, 220.0f, "Keypad 6 = trim right side one pixel");		
         SDL_RenderDebugText(ren, 5.0f, 230.0f, "Keypad 8 = trim top by one pixel");
         SDL_RenderDebugText(ren, 5.0f, 240.0f, "Keypad 2 = trim bottom by one pixel");
-		
+
         SDL_RenderDebugText(ren, 5.0f, 250.0f, "------------------------------------");
-	   
+
         SDL_RenderDebugText(ren, 5.0f, 260.0f, "F1 = increase delta scale");
         SDL_RenderDebugText(ren, 5.0f, 270.0f, "F2 = decrease delta scale");
         SDL_RenderDebugText(ren, 5.0f, 280.0f, "F3 = increase delta translate");
@@ -98,4 +98,3 @@ struct HelpWindow
     }
 }
 
-+/

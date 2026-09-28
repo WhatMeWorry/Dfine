@@ -1,5 +1,5 @@
 
-/+
+
 
 module debug_window;
 
@@ -8,7 +8,7 @@ import std.stdio : writeln, write, writefln;
 import std.range : empty;  // for aa 
 import core.stdc.stdlib : exit;
 import datatypes;
-import a_star.spot : writeAndPause;
+import useful_functions : writeAndPause;
 import core.stdc.stdio : printf;
 import hexmath : isOdd, isEven;
 import breakup;
@@ -16,9 +16,9 @@ import magnify;
 import sdl_funcs_with_error_handling;
 import helper_funcs;
 import std.string : toStringz, fromStringz;  // converts D string to C string
-import std.conv : to;           // to!string(c_string)  converts C string to D string 
+import std.conv : to, roundTo;           // to!string(c_string)  converts C string to D string 
 import bindbc.sdl;  // SDL_* all remaining declarations
-import std.conv : roundTo;
+
 
 
 struct DebugWindow
@@ -58,7 +58,7 @@ struct DebugWindow
         SDL_SetRenderDrawColor(ren, 0, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_SetRenderScale(ren, 3, 3);  // where scale_x and scale_y are values greater than 1.
         SDL_RenderDebugText(ren, x, y, str.toStringz);
-		
+
         SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
         SDL_RenderPresent(ren); // Present the rendered content
     }
@@ -95,7 +95,7 @@ struct DebugWindow
 
     void displayAllSwatches(CorkBoard b)
     {
-	    string str;
+        string str;
         // Set the background clear color to yellow
         SDL_SetRenderDrawColor(ren, 255, 255, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(ren); // Clear the renderer
@@ -106,35 +106,34 @@ struct DebugWindow
 
         size_t v = 0;
         foreach (size_t i, s; b.swatches)
-		{
-		    v = i * 50;
-			
+        {
+            v = i * 50;
+            
             SDL_RenderDebugText(ren, 5, v+5, toStringz("Swatch: " ~ to!string(i)));
-			
-			if (b.active == i)
-			{
-			    SDL_RenderDebugText(ren, 85, v+5, toStringz("**"));   
-			}
+
+            if (b.active == i)
+            {
+                SDL_RenderDebugText(ren, 85, v+5, toStringz("**"));   
+            }
 
             str = "position (x,y): (" ~ to!string(s.rect.x) ~ "," ~ to!string(s.rect.y) ~ ")";
             SDL_RenderDebugText(ren, 5, v+15, str.toStringz());
         
             int roundW = roundTo!int(s.rect.w);	
             int roundH = roundTo!int(s.rect.h);				
-		    str = "width x Height: w x h: " ~ to!string(roundW) ~ "x" ~ to!string(roundH) ~ ")";
+            str = "width x Height: w x h: " ~ to!string(roundW) ~ "x" ~ to!string(roundH) ~ ")";
             SDL_RenderDebugText(ren, 5, v+25, str.toStringz);
-			
-		    //str = "opacity (0-255): " ~ to!string(s.opacity);
-		    SDL_RenderDebugText(ren, 5, v+35, toStringz("opacity (0-255): " ~ to!string(s.opacity)));
-			
-			//str = "angle (degrees): " ~ to!string(s.angle);
-			SDL_RenderDebugText(ren, 5, v+45, toStringz("angle (degrees): " ~ to!string(s.angle)));
+
+            //str = "opacity (0-255): " ~ to!string(s.opacity);
+            SDL_RenderDebugText(ren, 5, v+35, toStringz("opacity (0-255): " ~ to!string(s.opacity)));
+
+            //str = "angle (degrees): " ~ to!string(s.angle);
+            SDL_RenderDebugText(ren, 5, v+45, toStringz("angle (degrees): " ~ to!string(s.angle)));
         }
       
         SDL_SetRenderScale(ren, 1.0, 1.0);  // where scale_x and scale_y are = 1.0
         SDL_RenderPresent(ren); // Present the rendered content
-    }	
+    }
 }
 
 
-+/

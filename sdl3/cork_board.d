@@ -1,5 +1,5 @@
 
-/+
+
 
 module cork_board;
 
@@ -9,7 +9,7 @@ import std.datetime.systime : Clock, SysTime;
 import std.string : replace;
 import core.stdc.stdlib : exit;
 import datatypes;
-import a_star.spot : writeAndPause;
+import useful_functions : writeAndPause;
 import core.stdc.stdio : printf;
 import hexmath : isOdd, isEven;
 import breakup;
@@ -79,7 +79,7 @@ struct CorkBoard
     this(SDL_Renderer *renderer, float x, float y)
     {
         this.swatches ~= Swatch(renderer, 10, 10, "./images/WachA.png");
-        //this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
+        this.swatches ~= Swatch(renderer, 20, 20, "./images/WachB.png");
         //this.swatches ~= Swatch(renderer, 30, 30, "./images/WachC.png");
         //this.swatches ~= Swatch(renderer, 40, 40, "./images/WachD.png");
         //this.active = 0;
@@ -187,10 +187,8 @@ struct CorkBoard
             s.opacity--;
         }
     }
-    void increaseOrderOfMagnitude(ref double value)
-    {
-        value *= 10.0;
-    }
+    void increaseOrderOfMagnitude(ref double value) { value *= 10.0;}
+    
     void decreaseOrderOfMagnitude(ref double value)
     {
         value /= 10.0;
@@ -231,7 +229,7 @@ struct CorkBoard
         float min_y = swatches[0].rect.y;  // position of swatch 
         float max_w = swatches[0].rect.x + swatches[0].rect.w;
         float max_h = swatches[0].rect.y + swatches[0].rect.h;
-		
+
         foreach (s; swatches)
         {
             if (s.rect.x < min_x)
@@ -283,14 +281,14 @@ struct CorkBoard
 
 
 
-void corkboard()
+void corkBoard()
 {
     SDL_Window   *window;
     SDL_Renderer *renderer;
 
     // Home Samsung desktop 3840 x 2160
-	// Work Lenovo desktop 2560 x 1600
-	
+    // Work Lenovo desktop 2560 x 1600
+
     createWindowAndRenderer("Corkboard", 2000, 1500, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     CorkBoard board = CorkBoard(renderer,  10, 10);
@@ -353,7 +351,7 @@ void corkboard()
                     case SDLK_DOWN:
                         if (board.locked)
                             board.moveAllSwatchesDown(board.swatches);
-                        else										
+                        else
                             board.moveDown(board.swatches[board.active]);
                     break;
 
@@ -430,7 +428,6 @@ void corkboard()
                         board.moveAllSwatchesRelativeToUpperLeftCorner(offset);
                     break;
 
-
                     case SDLK_F12:
 
                         SDL_FPoint offset = board.calculateOffsetVector();
@@ -463,23 +460,27 @@ void corkboard()
     
                         // Convert to a simple, human-readable string (e.g., "YYYY-Mon-DD HH:MM:SS.FFFFFFFTZ")
                         string simpleString = now.toSimpleString();
-						
-						string noColons = simpleString.replace(":", "-");
-						string noPeriods = noColons.replace(".", "_");
-						string noSpaces = noPeriods.replace(" ", "_");
-												
-                        saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noSpaces ~ ".png");
+                        
+                        string noColons = simpleString.replace(":", "-");
+                        string noPeriods = noColons.replace(".", "_");
+                        string noSpaces = noPeriods.replace(" ", "_");
 
+                        saveSurfaceToPNGfile(bigSurface, "./images/TEST_" ~ noSpaces ~ ".png");
                     break;
-					
+                    
+                    case SDLK_F:
+                        raiseWindow(helpWin.win);
+                    break;
+                    
+                    
                     case SDLK_KP_4:
                         writeln("Key Pad 4 pressed trim left");
                     break;
-					
+
                     case SDLK_KP_6:
                         writeln("Key Pad 6 pressed trim right");
                     break;
-				
+
 /+
 struct Swatch
 {
@@ -500,6 +501,7 @@ struct Swatch
         }
     }
 +/
+
 /+
 2. Creating a New, Smaller Texture
 If you genuinely need a new texture with smaller dimensions, you must:
@@ -510,32 +512,32 @@ Upload the modified pixel data to the new texture using functions like SDL_Updat
 Destroy the old texture using SDL_DestroyTexture when it is no longer needed. 
 +/
 
-				
+
                     case SDLK_KP_8:
                         writeln("Key Pad 8 pressed trim top");
 
-                        ref Swatch cS = board.swatches[board.active];  // current swatch
-						
-						writeln("swatch cS = ", cS);
-						//writeln("Full Size cS.texture = ", cS.texture);
-						//displayTextureProperties(cS.texture); 
-						
+                        Swatch cS = board.swatches[board.active];  // current swatch
+
+                        writeln("swatch cS = ", cS);
+                        //writeln("Full Size cS.texture = ", cS.texture);
+                        //displayTextureProperties(cS.texture); 
+ 
                         SDL_Texture *smallerTex = createTexture(renderer, SDL_PIXELFORMAT_RGBA8888, 
                                        SDL_TEXTUREACCESS_STREAMING, cast(int) cS.rect.w, cast(int) (cS.rect.h - 5.0f));
-						
-                        //writeln("smallerTex = ", smallerTex);						
-			            //displayTextureProperties(smallerTex);
-						
-									   
+
+                        //writeln("smallerTex = ", smallerTex);
+                        //displayTextureProperties(smallerTex);
+
+
                         // Note: Neither Texture nor Swatch have a x and y component. Only w and h. 
-		
+
                         SDL_FRect src = { 0.0f, 
                                           5.0f,                // Start 1 pixel down from the top
                                           cS.rect.w,
                                           cS.rect.h - 5.0f };  // Height reduced by 1 pixel
-										  
+
                         writeln("src = ", src);
-										  
+
                         SDL_FRect dst = { 0.0f, 
                                           0.0f,
                                           cS.rect.w,
@@ -543,24 +545,22 @@ Destroy the old texture using SDL_DestroyTexture when it is no longer needed.
                         writeln("dst = ", dst);
 
                         copyTextureToTextureF(cS.texture, &src, smallerTex, &dst);
-						
-						//writeln("after copyTexToTex");
-						
-						//writeln("smaller size cS = ", smallerTex);
+
+                        //writeln("after copyTexToTex");
+
+                        //writeln("smaller size cS = ", smallerTex);
 
                         copyTextureToTextureF(smallerTex, &dst, cS.texture, &dst);
-						
+
                         cS.rect.h -= 5;	  // update the height property to reflect the top trim
-						
+
                         cS.aspectRatio = dst.w / dst.h;		
 
                         //writeln("cS.aspectRatio =", cS.aspectRatio);	
 
                         writeln("updated swatch cS = ", cS);
 
-
-						
-/+						
+/+
     {
         this.rect.x = x;
         this.rect.y = y;
@@ -579,20 +579,14 @@ Destroy the old texture using SDL_DestroyTexture when it is no longer needed.
 
         copySurfaceToTexture(surface, null, this.texture, null);
         SDL_DestroySurface(surface);
-    }						
-+/						
-						
-						
-						
-						
+    }
++/
+
                     break;
-					
+
                     case SDLK_KP_2:
                         writeln("Key Pad 2 pressed trim bottom");
-                    break;					
-					
-					
-					
+                    break;
 
                     default: // lots of keys are not mapped so not a problem
                 }
@@ -615,6 +609,6 @@ Destroy the old texture using SDL_DestroyTexture when it is no longer needed.
 }
 
 
-+/
+
 
 

@@ -1213,10 +1213,13 @@ void createWindowAndRenderer(string title, int width, int height, SDL_WindowFlag
     }
 }
 
-
-
-
-
+void raiseWindow(SDL_Window *window)
+{
+    if (SDL_RaiseWindow(window) == false)
+    {
+        throw new Exception("SDL_RaiseWindow failed: " ~ to!string(SDL_GetError()));
+    }
+}
 
 
 

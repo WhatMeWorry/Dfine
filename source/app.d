@@ -20,6 +20,8 @@ import bindbc.sdl: SDL_Init, SDL_Quit,
 
 import std.conv: to;
 
+import cork_board : corkBoard;
+
 int main()
 {
     load_sdl3_libs(SDL3_CORE | SDL3_IMAGE | SDL3_MIXER | SDL3_NET | SDL3_TTF);  // or just load_sdl3_libs(SDL3_ALL)  
@@ -33,6 +35,8 @@ int main()
         writeln("Quitting program");
     }
 
+    corkBoard();
+/+
     just_a_window();
     
     no_renderer_02();
@@ -52,7 +56,7 @@ int main()
     copying_surface_to_surface();
 
     mini_and_main_maps();
-
++/
     return 0;
 }
 

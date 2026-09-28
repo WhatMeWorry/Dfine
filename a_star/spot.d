@@ -10,6 +10,7 @@ import std.math : ceil, floor;
 import std.string;
 import core.stdc.stdlib;  // for exit()
 import bag;
+
 import datatypes;
 
 import hexboard;

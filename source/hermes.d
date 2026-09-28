@@ -1,5 +1,5 @@
 
-/+
+
 
 module hermes;
 
@@ -70,7 +70,7 @@ if (plastic.isIn(b1))  // method inside class
     writeln("item, ", b1, " is in the ", plastic.name, " Bag");
 writeln();
 
-if (b1.isIn(plastic))  // nethod outside of class
+if (b1.isIn(plastic))  // method outside of class
     writeln("item, ", b1, " is in the ", plastic.name, " Bag");
 writeln();
 
@@ -84,5 +84,5 @@ if (isIn(b1, plastic)) //
 }
 
 
-+/
+
 
