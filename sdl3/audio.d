@@ -1,8 +1,10 @@
 
 module audio;
 
-import bindbc.sdl: SDL_Window, SDL_Renderer, SDL_AudioStream;
-import bindbc.sdl: MIX_Mixer, MIX_Audio, MIX_LoadAudio, MIX_CreateMixerDevice, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, SDL_GetError;
+import bindbc.sdl: SDL_Delay, SDL_Window, SDL_Renderer, SDL_AudioStream;
+import bindbc.sdl: MIX_PlayAudio, MIX_Mixer, MIX_Audio, MIX_LoadAudio, MIX_CreateMixerDevice, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, SDL_GetError;
+
+import sdl_mixer_funcs_with_error_handling;
 
 import std.string: toStringz;
 import core.stdc.stdio: printf;
@@ -18,35 +20,28 @@ SDL_AudioStream *stream = null;
 
 void audioForay()
 {
-   string pathToExec = getFullPathToExecuableFile();
+    string pathToExec = getFullPathToExecuableFile();
 
-   string pathToAudioFiles = pathToExec ~ `\sounds`;
-
+    string pathToAudioFiles = pathToExec ~ `\sounds`;
 
     MIX_Mixer *mixer = null;
 
-    
-    mixer = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, null);
+    mixer = createMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK);
     
     string pathToAudioFile = pathToAudioFiles ~ `\can_pop.wav`;
     
     writeln("pathToAudioFile = ", pathToAudioFile);
     
-    MIX_Audio *wavAudio = MIX_LoadAudio(mixer, toStringz(pathToAudioFile), false);
-
-    if (!wavAudio) 
-    {
-        //writeln("Failed to load WAV", SDL_GetError());
-        printf("SDL Error: %s\n", SDL_GetError()); 
-    }
-    writeln("WavAudio was successfully loaded");
+    
+    MIX_Audio *audio = loadAudio(mixer, pathToAudioFile);
     
 
 
+    bool ret = playAudio(mixer, audio);
+    writeln("ret = ", ret);
 
 
-
-
+     SDL_Delay(2000);
 
 
 
