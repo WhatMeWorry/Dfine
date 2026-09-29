@@ -5,6 +5,8 @@ module useful_functions;
 
 import std.stdio: writeln;
 import std.process: executeShell;
+import std.file: thisExePath, getcwd;
+import std.path: dirName;
 
 //void writeAndPause(string s = "")
 void writeAndPause(string s)
@@ -35,4 +37,31 @@ void writeAndPause(string s)
         executeShell(`read -n1 -r`);    // -p option did not work
     }
     writeln();
+}
+
+
+
+/+ Note: even when I stated the executable away for its home, only the cwd reflected this. 
+fullPathWithExecName =      C:\Users\Administrator\Documents\GitHub\Dfine\dfine.exe
+fullPathWithoutExecName =   C:\Users\Administrator\Documents\GitHub\Dfine
+current working directory = C:\Users\Administrator\Documents\GitHub\Dfine\notes
++/
+
+
+string getFullPathToExecuableFile()
+{
+    string fullPathWithExecName;     // absolute path name to executive file with file name appended at end
+    string fullPathWithoutExecName;  // absolute path to the executable file (without the file name)
+
+    
+    fullPathWithExecName = thisExePath(); // return the full path to the currently running executable
+
+    writeln("fullPathWithExecName = ", fullPathWithExecName);
+    
+    fullPathWithoutExecName = dirName(fullPathWithExecName);  // returns the parent directory of executive
+    
+    writeln("fullPathWithoutExecName = ", fullPathWithoutExecName);
+    writeln("current working directory = ", getcwd());
+    
+    return fullPathWithoutExecName;
 }
