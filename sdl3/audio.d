@@ -2,7 +2,9 @@
 module audio;
 
 import bindbc.sdl: SDL_Delay, SDL_Window, SDL_Renderer, SDL_AudioStream;
-import bindbc.sdl: MIX_PlayAudio, MIX_Mixer, MIX_Audio, MIX_LoadAudio, MIX_CreateMixerDevice, SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, SDL_GetError;
+import bindbc.sdl: MIX_PlayAudio, MIX_Mixer, MIX_Audio, MIX_LoadAudio, MIX_CreateMixerDevice, 
+                   MIX_Track, SDL_PropertiesID,
+                   SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, MIX_PROP_PLAY_LOOPS_NUMBER, SDL_GetError;
 
 import sdl_mixer_funcs_with_error_handling;
 
@@ -35,14 +37,35 @@ void audioForay()
     
     MIX_Audio *audio = loadAudio(mixer, pathToAudioFile);
     
+    playAudio(mixer, audio);
+    
+    writeln("HELLO");
+    SDL_Delay(2000);
+    
 
+    MIX_Track *mixTrack = createTrack(mixer);
 
-    bool ret = playAudio(mixer, audio);
-    writeln("ret = ", ret);
+    setTrackAudio(mixTrack, audio);
 
+    // Ensure the track isn't already active or paused
+    
+    if (!trackPlaying(mixTrack) && !trackPaused(mixTrack))
+    {
+        // Create an SDL properties group to hold the configuration
+        SDL_PropertiesID props = createProperties();
 
-     SDL_Delay(2000);
+        // Set the loop property (-1 for infinite loops)
+        setNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
+            
+        // Start playback with the configured options group
+        playTrack(mixTrack, props);
+        
+        SDL_Delay(10000);
+        
+        // Clean up the properties group container (SDL clones the internal data)
+        //SDL_DestroyProperties(props);
 
+    }
 
 
 
