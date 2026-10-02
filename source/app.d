@@ -16,13 +16,14 @@ import tutorials: just_a_window, smallest_renderer_01, smallest_texture_01a,
 import bindbc.sdl: SDL_Init, SDL_Quit,
                    SDL_INIT_AUDIO, SDL_INIT_VIDEO, SDL_INIT_JOYSTICK, SDL_INIT_HAPTIC,
                    SDL_INIT_GAMEPAD, SDL_INIT_EVENTS, SDL_INIT_SENSOR, SDL_INIT_CAMERA,
-                   SDL_Quit, SDL_GetError, MIX_Init;
+                   SDL_Quit, SDL_GetError, MIX_Init, TTF_Init;
 
 import std.conv: to;
 
 import cork_board : corkBoard;
 
 import audio;
+import true_type_font;
 
 int main()
 {
@@ -39,14 +40,25 @@ int main()
     
     if (SDL3_MIXER) 
     { 
-        if (!MIX_Init()) 
+        if (MIX_Init() == false) 
         {
-            writeln("MIX_Init error: ", to!string(SDL_GetError()));
+            writeln("MIX_Init failed: ", to!string(SDL_GetError()));
             SDL_Quit();
         }
     }
 
-    audioForay();
+    //audioForay();
+    
+    if (SDL3_TTF) 
+    { 
+        if (TTF_Init() == false) 
+        {
+            writeln("TTF_Init failed: ", to!string(SDL_GetError()));
+            SDL_Quit();
+        }
+    }
+    
+    ttfForay();
 
     //corkBoard();
 /+
