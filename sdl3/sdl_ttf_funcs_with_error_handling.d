@@ -26,7 +26,7 @@ import bindbc.sdl;  // SDL_* all remaining declarations
 import helper_funcs : displayRect;
 
 
-TTF_Font* ttfOpenFont(string file, float fontSize)
+TTF_Font* openFont(string file, float fontSize)
 {
     TTF_Font* font = TTF_OpenFont(file.toStringz, fontSize);
     writeln("font = ", font);
@@ -39,6 +39,12 @@ TTF_Font* ttfOpenFont(string file, float fontSize)
 
 
 
-
-
-
+SDL_Surface* renderText_Blended(TTF_Font *font, string text, size_t length, SDL_Color color)
+{
+    SDL_Surface* surface = TTF_RenderText_Blended(font, toStringz(text), length, color);
+    if (surface == null)
+    {
+        throw new Exception("TTF_OpenFont failed: " ~ to!string(SDL_GetError()));
+    }
+    return surface;
+}
