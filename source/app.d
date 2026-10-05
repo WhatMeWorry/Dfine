@@ -47,7 +47,7 @@ int main()
         }
     }
 
-    //audioForay();
+    audioForay();
     
     if (SDL3_TTF) 
     { 
@@ -60,7 +60,7 @@ int main()
     
     ttfForay();
 
-    //corkBoard();
+    corkBoard();
 /+
     just_a_window();
     

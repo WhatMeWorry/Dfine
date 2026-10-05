@@ -40,7 +40,7 @@ void audioForay()
     playAudio(mixer, audio);
     
     writeln("HELLO");
-    SDL_Delay(2000);
+
     
 
     MIX_Track *mixTrack = createTrack(mixer);
@@ -55,12 +55,13 @@ void audioForay()
         SDL_PropertiesID props = createProperties();
 
         // Set the loop property (-1 for infinite loops)
-        setNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
+        enum INFINITE_LOOP = -1;
+        //setNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, INFINITE_LOOP);
+        setNumberProperty(props, MIX_PROP_PLAY_LOOPS_NUMBER, 7);
             
         // Start playback with the configured options group
         playTrack(mixTrack, props);
-        
-        SDL_Delay(10000);
+
         
         // Clean up the properties group container (SDL clones the internal data)
         //SDL_DestroyProperties(props);
