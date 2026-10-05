@@ -33,10 +33,22 @@ void ttfForay()
     createWindowAndRenderer("Dlang SDL3 TTF Demo", 800, 600, cast(SDL_WindowFlags) 0, &window, &renderer);
 
     string pathToExec = getFullPathToExecuableFile();
+	
+	string pathSeparator;
+	import std.system: OS, os; // Required for runtime checks
+    // Runtime check (Evaluated when the program runs)
+    if (os == OS.win64) 
+	{
+        pathSeparator  = `\`;
+    } else if (os == OS.linux)
+	{
+	    pathSeparator = `/`;
+    }
+	
 
-    string pathToTrueTypeFontFiles = pathToExec ~ `\fonts`;
+    string pathToTrueTypeFontFiles = pathToExec ~ pathSeparator ~ `fonts`;
     
-    string ttfFileName = pathToTrueTypeFontFiles ~ `\Courier_Prime\CourierPrime-Regular.ttf`;
+    string ttfFileName = pathToTrueTypeFontFiles ~ pathSeparator ~ `Courier_Prime` ~ pathSeparator ~ `CourierPrime-Regular.ttf`;
     
     float fontSize = 32;
     
