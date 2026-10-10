@@ -44,14 +44,14 @@ void moveTexturesWithMouse()
 
     // Item 1: Red Rectangle
     SDL_Surface* surf1 = createSurface(120, 120, SDL_PIXELFORMAT_RGBA8888);
-    SDL_FillSurfaceRect(surf1, null, mapRGBA(SDL_GetPixelFormatDetails(SDL_PIXELFORMAT_RGBA8888), null, 230, 50, 50, 255));
+    fillSurfaceRect(surf1, null, mapRGBA(getPixelFormatDetails(SDL_PIXELFORMAT_RGBA8888), null, 230, 50, 50, 255));
     items[0].texture = createTextureFromSurface(renderer, surf1);
     items[0].rect = SDL_FRect(150, 200, 120, 120);
     SDL_DestroySurface(surf1);
 
     // Item 2: Blue Rectangle
     SDL_Surface* surf2 = createSurface(150, 100, SDL_PIXELFORMAT_RGBA8888);
-    SDL_FillSurfaceRect(surf2, null, mapRGBA(SDL_GetPixelFormatDetails(SDL_PIXELFORMAT_RGBA8888), null, 50, 120, 230, 255));
+    fillSurfaceRect(surf2, null, mapRGBA(getPixelFormatDetails(SDL_PIXELFORMAT_RGBA8888), null, 50, 120, 230, 255));
     items[1].texture = createTextureFromSurface(renderer, surf2);
     items[1].rect = SDL_FRect(450, 220, 150, 100);
     SDL_DestroySurface(surf2);
@@ -124,6 +124,14 @@ void moveTexturesWithMouse()
                     else
                         writeln("Down");
                     writeln("scaleFactor = ", scaleFactor);
+                    if (selectedIndex >= 0)
+                    {
+                        writeln("item ", selectedIndex, " is selected");
+                    }
+                    else
+                    {
+                        writeln("No texture is selected");
+                    }
 
                     break;
 
