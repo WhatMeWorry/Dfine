@@ -12,11 +12,15 @@ import tutorials: just_a_window, smallest_renderer_01, smallest_texture_01a,
                   smallest_sdl_texture_program, no_renderer_02, smallest_texture_with_rect,
                   two_windows_and_surfaces, mini_and_main_maps, copying_textures_to_surface,
                   copying_surface_to_surface;
+                  
+import move_textures_with_mouse; //  moveTexturesWithMouse;  
 
 import bindbc.sdl: SDL_Init, SDL_Quit,
                    SDL_INIT_AUDIO, SDL_INIT_VIDEO, SDL_INIT_JOYSTICK, SDL_INIT_HAPTIC,
                    SDL_INIT_GAMEPAD, SDL_INIT_EVENTS, SDL_INIT_SENSOR, SDL_INIT_CAMERA,
                    SDL_Quit, SDL_GetError, MIX_Init, TTF_Init;
+
+import move_textures_with_mouse: moveTexturesWithMouse;
 
 import std.conv: to;
 
@@ -47,7 +51,7 @@ int main()
         }
     }
 
-    audioForay();
+    //audioForay();
     
     if (SDL3_TTF) 
     { 
@@ -58,9 +62,11 @@ int main()
         }
     }
     
-    ttfForay();
+    //ttfForay();
+    
+    moveTexturesWithMouse();
 
-    corkBoard();
+    //corkBoard();
 /+
     just_a_window();
     

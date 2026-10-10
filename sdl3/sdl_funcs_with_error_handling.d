@@ -1312,3 +1312,21 @@ int getMaxTextureSizeForRenderer(SDL_Renderer *renderer)
 }
 
 
+void setRenderDrawColor(SDL_Renderer *renderer, ubyte red, ubyte green, ubyte blue, ubyte alpha)
+{
+    if (SDL_SetRenderDrawColor(renderer, red, green, blue, alpha) == false)
+    {
+        throw new Exception("SDL_SetRenderDrawColor failed: " ~ to!string(SDL_GetError()));
+    }
+}
+
+
+void renderClear(SDL_Renderer *renderer)
+{
+    if (SDL_RenderClear(renderer) == false)
+    {
+        throw new Exception("SDL_RenderClear failed: " ~ to!string(SDL_GetError()));
+    }
+}
+
+
