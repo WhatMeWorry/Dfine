@@ -65,7 +65,7 @@ void moveTexturesWithMouse()
     bool running = true;
     int selectedIndex = -1; // -1 means no texture is currently being dragged
 
-    float scaleFactor = 1.0f;
+    float scale = 1.0f;
     float scaleSpeed = 0.1f;
 
     // Main Loop
@@ -110,20 +110,23 @@ void moveTexturesWithMouse()
                     }
                     break;
 
-                case SDL_EVENT_MOUSE_WHEEL:
-                    // event.wheel.y contains vertical scroll movement (> 0 up, < 0 down)
+                case SDL_EVENT_MOUSE_WHEEL:  // mouse scrolling
+                    // event.wheel.y contains scroll movement (> 0 up, < 0 down)
                     float wheelDirection = event.wheel.y;
-                    scaleFactor += wheelDirection * scaleSpeed;
-
-                    // Keep scale within reasonable bounds
-                    if (scaleFactor < 0.1f) scaleFactor = 0.1f;
-                    if (scaleFactor > 10.0f) scaleFactor = 10.0f;
+                    
                     write("wheelDirection = ");
                     if (wheelDirection > 0)
                         writeln("Up");
                     else
                         writeln("Down");
-                    writeln("scaleFactor = ", scaleFactor);
+                    
+                    scale += wheelDirection * scaleSpeed;
+
+                    // Keep scale within reasonable bounds
+                    if (scale < 0.1f) scale = 0.1f;
+                    if (scale > 10.0f) scale = 10.0f;
+                    
+                    writeln("scale = ", scale);
                     if (selectedIndex >= 0)
                     {
                         writeln("item ", selectedIndex, " is selected");
@@ -132,6 +135,16 @@ void moveTexturesWithMouse()
                     {
                         writeln("No texture is selected");
                     }
+                    // scale > 1.0 means to grow in size
+                    // scale < 1.0 means to shrink in size
+                    
+                    if (selectedIndex == -1)
+                    {
+                        continue;
+                    }
+
+                    items[selectedIndex].rect.w = items[selectedIndex].rect.w * scale;
+                    items[selectedIndex].rect.h = items[selectedIndex].rect.h * scale;
 
                     break;
 
