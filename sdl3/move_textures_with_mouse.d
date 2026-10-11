@@ -66,7 +66,7 @@ void moveTexturesWithMouse()
     int selectedIndex = -1; // -1 means no texture is currently being dragged
 
     float scale = 1.0f;
-    float scaleSpeed = 0.1f;
+    float scaleSpeed = 0.01f;
 
     // Main Loop
     while (running) 
@@ -106,7 +106,7 @@ void moveTexturesWithMouse()
                 case SDL_EVENT_MOUSE_BUTTON_UP:
                     if (event.button.button == SDL_BUTTON_LEFT) 
                     {
-                        selectedIndex = -1; // Release selection
+                        //selectedIndex = -1; // Release selection
                     }
                     break;
 
@@ -143,9 +143,10 @@ void moveTexturesWithMouse()
                         continue;
                     }
 
-                    items[selectedIndex].rect.w = items[selectedIndex].rect.w * scale;
-                    items[selectedIndex].rect.h = items[selectedIndex].rect.h * scale;
-
+                    //items[selectedIndex].rect.w = items[selectedIndex].rect.w * scale;
+                    //items[selectedIndex].rect.h = items[selectedIndex].rect.h * scale;
+                    items[selectedIndex].rect.w = items[selectedIndex].rect.w + scale;
+                    items[selectedIndex].rect.h = items[selectedIndex].rect.h + scale;
                     break;
 
                 case SDL_EVENT_MOUSE_MOTION:
