@@ -80,33 +80,59 @@ void moveTexturesWithMouse()
                     running = false;
                     break;
 
+                case SDL_EVENT_MOUSE_MOTION:
+                    {
+                    // event.motion gives you the SDL_MouseMotionEvent struct
+                    SDL_MouseMotionEvent mouseMove = event.motion;
+
+                    //writefln("Mouse Moved -> Absolute X: %s, Y: %s | Relative dX: %s, dY: %s",
+                    //         mouseMove.x,  mouseMove.y, mouseMove.xrel, mouseMove.yrel);
+                    break;
+                    
+                    
+                    }
+
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) 
                     {
+                    
+                    
+                    /+
                         // Check targets from front-to-back (reverse loop) so topmost items get selected first
-                        for (int i = cast(int)items.length - 1; i >= 0; i--) 
+                        //for (int i = cast(int)items.length - 1; i >= 0; i--) 
+                        foreach_reverse(int i, item; items)
                         {
                             float mx = event.button.x;
                             float my = event.button.y;
                             
                             // Check if the click is inside the texture's bounding box
-                            if (mx >= items[i].rect.x && mx <= items[i].rect.x + items[i].rect.w &&
-                                my >= items[i].rect.y && my <= items[i].rect.y + items[i].rect.h) 
+                            if (mx >= item.rect.x && mx <= item.rect.x + item.rect.w &&
+                                my >= item.rect.y && my <= item.rect.y + item.rect.h) 
                             {
                                 selectedIndex = i;
                                 // Store the offset relative to the texture's origin to avoid "snapping"
-                                items[i].offsetX = mx - items[i].rect.x;
-                                items[i].offsetY = my - items[i].rect.y;
+                                item.offsetX = mx - item.rect.x;
+                                item.offsetY = my - item.rect.y;
                                 break;
                             }
-                        }
+                        } +/
+                     
+                        if (event.button.clicks == 1)          // Uint8 clickCount = event.button.clicks;
+                            writeln("single click");
+                        else if (event.button.clicks == 2)      //   Not used
+                                                                //   Uint8 buttonIndex = event.button.button;
+                                                                //   if (buttonIndex == SDL_BUTTON_LEFT) ...
+                            writeln("double click");
+                        else
+                            writeln("don't know what click just happeded");
+                        
                     }
                     break;
 
                 case SDL_EVENT_MOUSE_BUTTON_UP:
                     if (event.button.button == SDL_BUTTON_LEFT) 
                     {
-                        //selectedIndex = -1; // Release selection
+                        selectedIndex = -1; // Release selection
                     }
                     break;
 
@@ -149,14 +175,14 @@ void moveTexturesWithMouse()
                     items[selectedIndex].rect.h = items[selectedIndex].rect.h + scale;
                     break;
 
-                case SDL_EVENT_MOUSE_MOTION:
+/+                case SDL_EVENT_MOUSE_MOTION:
                     if (selectedIndex != -1) 
                     {
                         // Update coordinate positions fluidly matching mouse coordinates
                         items[selectedIndex].rect.x = event.motion.x - items[selectedIndex].offsetX;
                         items[selectedIndex].rect.y = event.motion.y - items[selectedIndex].offsetY;
                     }
-                    break;
+                    break; +/
 
                 default:
                     break;
@@ -180,6 +206,86 @@ void moveTexturesWithMouse()
         SDL_RenderPresent(renderer);
     }
 }
+
+
+/+
+
+what is the most elegant method for allowing SDL3 to differentiate between a single mouse click and a double mouse click
+
+
+#include <SDL3/SDL.h>
+
+// Variables to track pending single clicks
+SDL_bool pending_single_click = SDL_FALSE;
+Uint64 single_click_timestamp = 0;
+const Uint64 DOUBLE_CLICK_DELAY_MS = 250; // Match or slightly exceed OS threshold if needed
+
+void HandleEvents() {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+            if (event.button.button == SDL_BUTTON_LEFT) {
+                
+                if (event.button.clicks == 1) {
+                    // Flag that a single click might be happening, but wait to see if a second arrives
+                    pending_single_click = SDL_TRUE;
+                    single_click_timestamp = SDL_GetTicks();
+                } 
+                else if (event.button.clicks == 2) {
+                    // A double click was detected by SDL3! Cancel the single click.
+                    pending_single_click = SDL_FALSE;
+                    ExecuteDoubleClickAction();
+                }
+            }
+        }
+    }
+
+    // Outside the event loop (in your main update loop), check if the single click timed out
+    if (pending_single_click && (SDL_GetTicks() - single_click_timestamp > DOUBLE_CLICK_DELAY_MS)) {
+        pending_single_click = SDL_FALSE;
+        ExecuteSingleClickAction();
+    }
+}
++/
+
+/+
+
+Why This Method Is Elegant
+
+• OS-Level Consistency: SDL3 hooks into the native windowing system's click-counter logic. It 
+respects the user's system settings for what constitutes a "double click" speed and spatial tolerance.
+• No Manual Math: You do not need to record coordinates and compare x/y deltas yourself to ensure 
+the mouse didn't move too far between clicks.
+• Solves the Overlap Problem: If your single-click and double-click actions don't conflict (e.g., 
+single-click selects an item, double-click opens it), you can completely omit the timer logic and just execute event.button.clicks == 1 instantly.
+
+When to Bypass the Timer
+
+If your application behaves like a standard desktop OS where a double click inherently includes a single click 
+(e.g., clicking a file selects it, and double-clicking opens it), you can eliminate the timer entirely and make your code even simpler:
+
+
+if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT) {
+    if (event.button.clicks == 1) {
+        SelectTarget(); // Happens instantly
+    } else if (event.button.clicks == 2) {
+        OpenTarget();   // Happens right after the second click
+    }
+}
+
++/
+
+
+
+
+
+
+
+
+
+
+
+
 
 /+
 
