@@ -70,7 +70,8 @@ void moveTexturesWithMouse()
 
     bool pending_single_click = false;
     ulong single_click_timestamp = 0;
-    const ulong DOUBLE_CLICK_DELAY_MS = 250; // Match or slightly exceed OS threshold if needed
+    
+    const ulong DOUBLE_CLICK_DELAY_MS = 300; // Match or slightly exceed OS threshold if needed
 
 
 
@@ -80,6 +81,7 @@ void moveTexturesWithMouse()
         SDL_Event event;
         while (SDL_PollEvent(&event)) 
         {
+            //writeln("Event just triggered. This can be bursty");
             switch (event.type) 
             {
                 case SDL_EVENT_QUIT:
@@ -87,21 +89,16 @@ void moveTexturesWithMouse()
                     break;
 
                 case SDL_EVENT_MOUSE_MOTION:
-                    {
                     // event.motion gives you the SDL_MouseMotionEvent struct
                     SDL_MouseMotionEvent mouseMove = event.motion;
 
                     //writefln("Mouse Moved -> Absolute X: %s, Y: %s | Relative dX: %s, dY: %s",
                     //         mouseMove.x,  mouseMove.y, mouseMove.xrel, mouseMove.yrel);
                     break;
-                    
-                    
-                    }
 
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) 
                     {
-                    /+
                         // Check targets from front-to-back (reverse loop) so topmost items get selected first
                         //for (int i = cast(int)items.length - 1; i >= 0; i--) 
                         foreach_reverse(int i, item; items)
@@ -119,7 +116,8 @@ void moveTexturesWithMouse()
                                 item.offsetY = my - item.rect.y;
                                 break;
                             }
-                        } +/
+                        }
+
                         if (event.button.clicks == 1)
                         {
                             // Flag that a single click might be happening, but wait to see if a second arrives
@@ -134,18 +132,6 @@ void moveTexturesWithMouse()
                             writeln("Double Click Detected");
                         }
 
-                     
-                     
-                        /+
-                        if (event.button.clicks == 1)          // Uint8 clickCount = event.button.clicks;
-                            writeln("single click");
-                        else if (event.button.clicks == 2)      //   Not used
-                                                                //   Uint8 buttonIndex = event.button.button;
-                                                                //   if (buttonIndex == SDL_BUTTON_LEFT) ...
-                            writeln("double click");
-                        else
-                            writeln("don't know what click just happeded");
-                        +/
                     }
                     break;
 
@@ -208,8 +194,13 @@ void moveTexturesWithMouse()
                     break;
             }
         }
-        
-        // Outside the event loop (in your main update loop), check if the single click timed out
+        //writeln("SDL_GetTicks() - single_click_timestamp = ", SDL_GetTicks() - single_click_timestamp);
+    
+        // The following block must be outside the event loop (in your main update loop), check if the single click timed out
+        // because the event loop "while (SDL_PollEvent(&event))" can be quite bursty. So there can be long periods
+        // of time where the if (pending_single_click &&... would not be executed. So single click detection
+        // would be at the mercy of other events occurring
+
         if (pending_single_click && (SDL_GetTicks() - single_click_timestamp > DOUBLE_CLICK_DELAY_MS)) 
         {
             pending_single_click = false;
@@ -224,7 +215,7 @@ void moveTexturesWithMouse()
         renderClear(renderer);
 
         // Draw textures
-        foreach (/+ref+/ item; items) 
+        foreach(item; items) 
         {
             // SDL3 uses SDL_RenderTexture with subpixel precision floating pointers (SDL_FRect)
             renderTexture(renderer, item.texture, null, &item.rect);
