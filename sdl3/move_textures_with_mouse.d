@@ -68,6 +68,12 @@ void moveTexturesWithMouse()
     float scale = 1.0f;
     float scaleSpeed = 0.01f;
 
+    bool pending_single_click = false;
+    ulong single_click_timestamp = 0;
+    const ulong DOUBLE_CLICK_DELAY_MS = 250; // Match or slightly exceed OS threshold if needed
+
+
+
     // Main Loop
     while (running) 
     {
@@ -95,8 +101,6 @@ void moveTexturesWithMouse()
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) 
                     {
-                    
-                    
                     /+
                         // Check targets from front-to-back (reverse loop) so topmost items get selected first
                         //for (int i = cast(int)items.length - 1; i >= 0; i--) 
@@ -116,7 +120,23 @@ void moveTexturesWithMouse()
                                 break;
                             }
                         } +/
+                        if (event.button.clicks == 1)
+                        {
+                            // Flag that a single click might be happening, but wait to see if a second arrives
+                            pending_single_click = true;
+                            single_click_timestamp = SDL_GetTicks();
+                        }
+                        else if (event.button.clicks == 2) 
+                        {
+                            // A double click was detected by SDL3! Cancel the single click.
+                            pending_single_click = false;
+                            //ExecuteDoubleClickAction();
+                            writeln("Double Click Detected");
+                        }
+
                      
+                     
+                        /+
                         if (event.button.clicks == 1)          // Uint8 clickCount = event.button.clicks;
                             writeln("single click");
                         else if (event.button.clicks == 2)      //   Not used
@@ -125,7 +145,7 @@ void moveTexturesWithMouse()
                             writeln("double click");
                         else
                             writeln("don't know what click just happeded");
-                        
+                        +/
                     }
                     break;
 
@@ -188,6 +208,14 @@ void moveTexturesWithMouse()
                     break;
             }
         }
+        
+        // Outside the event loop (in your main update loop), check if the single click timed out
+        if (pending_single_click && (SDL_GetTicks() - single_click_timestamp > DOUBLE_CLICK_DELAY_MS)) 
+        {
+            pending_single_click = false;
+            //ExecuteSingleClickAction();
+            writeln("Single Click Detected");
+        }
 
         // --- Render Target Rendering Pipeline ---
         // Clear background with soft gray color
@@ -207,6 +235,22 @@ void moveTexturesWithMouse()
     }
 }
 
+/+
+Does Windows have a time frame for when two mouse clicks are considered double-clicks
+
+Yes, Windows uses a default time frame of 500 milliseconds (half a second) between two clicks to register them as a double-click
+User Adjustable: You can customize the double-click speed in Windows through the Mouse Properties settings in the Control Panel.
+API Limits: Programmatically via Microsoft Learn, the system double-click time can generally be adjusted or queried using functions 
+like SetDoubleClickTime and GetDoubleClickTime, with a hard cap up to 5,000 milliseconds
+
+Do Apple Macs use a time frame to register two clicks as a double-click, and you can adjust this speed in your system settings
+
+Default Timing: macOS sets the default double-click speed to approximately 500 milliseconds (half a second)
+Adjusting the Speed: You can change how fast or slow two clicks need to be to register as a double-click
+
+Linux systems have a default double-click time frame of 400 milliseconds on major desktop environments like GNOME and KDE
++/
+
 
 /+
 
@@ -220,18 +264,23 @@ SDL_bool pending_single_click = SDL_FALSE;
 Uint64 single_click_timestamp = 0;
 const Uint64 DOUBLE_CLICK_DELAY_MS = 250; // Match or slightly exceed OS threshold if needed
 
-void HandleEvents() {
+void HandleEvents() 
+{
     SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-            if (event.button.button == SDL_BUTTON_LEFT) {
-                
-                if (event.button.clicks == 1) {
+    while (SDL_PollEvent(&event)) 
+    {
+        if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) 
+        {
+            if (event.button.button == SDL_BUTTON_LEFT) 
+            {
+                if (event.button.clicks == 1)
+                {
                     // Flag that a single click might be happening, but wait to see if a second arrives
                     pending_single_click = SDL_TRUE;
                     single_click_timestamp = SDL_GetTicks();
                 } 
-                else if (event.button.clicks == 2) {
+                else if (event.button.clicks == 2) 
+                {
                     // A double click was detected by SDL3! Cancel the single click.
                     pending_single_click = SDL_FALSE;
                     ExecuteDoubleClickAction();
