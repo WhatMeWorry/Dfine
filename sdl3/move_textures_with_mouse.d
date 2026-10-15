@@ -137,6 +137,7 @@ void moveTexturesWithMouse()
 
     float scale = 1.0f;
     float scaleSpeed = 0.1f;
+    float delta = 0.0;
 
     bool pending_single_click = false;
     ulong single_click_timestamp = 0;
@@ -157,8 +158,17 @@ void moveTexturesWithMouse()
                 case SDL_EVENT_QUIT:
                     running = false;
                     break;
-
-
+                
+                case SDL_EVENT_KEY_DOWN:
+                    if (event.key.key == SDLK_F1)
+                        delta = 0.5;
+                    if (event.key.key == SDLK_F2)
+                        delta = 1.0;
+                    if (event.key.key == SDLK_F3)
+                        delta = 5.0;
+                    if (event.key.key == SDLK_F4)
+                        delta = 10.0;
+                    break;
 
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) 
@@ -215,7 +225,7 @@ void moveTexturesWithMouse()
                     // event.wheel.y contains scroll movement (> 0 up, < 0 down)
                     float wheelDirection = event.wheel.y;
                     
-                    write("wheelDirection = ");
+                    writeln("wheelDirection = ", event.wheel.y);
 
                     scale += wheelDirection * scaleSpeed;
 
@@ -223,7 +233,7 @@ void moveTexturesWithMouse()
                     if (scale < 0.1f) scale = 0.1f;
                     if (scale > 10.0f) scale = 10.0f;
                     
-                    writeln("scale = ", scale);
+                    //writeln("scale = ", scale);
  
                     // scale > 1.0 means to grow in size
                     // scale < 1.0 means to shrink in size
@@ -232,8 +242,10 @@ void moveTexturesWithMouse()
                     {
                         if (item.selected)
                         {
-                             item.rect.w = item.rect.w * scale;
-                             item.rect.h = item.rect.h * scale;
+                             //item.rect.w = item.rect.w * scale;
+                             //item.rect.h = item.rect.h * scale;
+                             item.rect.w = item.rect.w + (delta * -wheelDirection);
+                             item.rect.h = item.rect.h + (delta * -wheelDirection);
                         }
                     }
 
@@ -249,8 +261,8 @@ void moveTexturesWithMouse()
 
                     SDL_MouseMotionEvent mouseMove = event.motion;
 
-                    writefln("Mouse Moved -> Absolute X: %s, Y: %s | Relative dX: %s, dY: %s",
-                             mouseMove.x,  mouseMove.y, mouseMove.xrel, mouseMove.yrel);
+                    //writefln("Mouse Moved -> Absolute X: %s, Y: %s | Relative dX: %s, dY: %s",
+                    //         mouseMove.x,  mouseMove.y, mouseMove.xrel, mouseMove.yrel);
                     break;
 
                 default:
