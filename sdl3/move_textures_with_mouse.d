@@ -28,7 +28,77 @@ struct DraggableTexture
     SDL_FRect rect;
     float offsetX;
     float offsetY;
+    bool selected;
 }
+
+
+void drawThickerBorderAroundRect(SDL_Renderer* renderer, const ref SDL_FRect rect, float thickness = 3.0)
+{
+    // Calculate and draw the 4 border rects (sides) to create the border
+    
+    SDL_SetRenderDrawColor(renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
+
+    // Top border piece
+    SDL_FRect topBorder = SDL_FRect(rect.x - thickness, 
+                                    rect.y - thickness, 
+                                    rect.w + (thickness * 2), 
+                                    thickness);
+                                    
+    SDL_RenderFillRect(renderer, &topBorder);
+
+    // Bottom border piece
+    SDL_FRect botBorder = SDL_FRect(rect.x - thickness, 
+                                    rect.y + rect.h, 
+                                    rect.w + (thickness * 2), 
+                                    thickness);
+                                    
+    SDL_RenderFillRect(renderer, &botBorder);
+    
+    // Left border piece
+    SDL_FRect leftBorder = SDL_FRect(rect.x - thickness, 
+                                     rect.y, 
+                                     thickness, 
+                                     rect.h);
+                                     
+    SDL_RenderFillRect(renderer, &leftBorder);
+
+    // Right border piece
+    SDL_FRect rightBorder = SDL_FRect(rect.x + rect.w, 
+                                      rect.y,
+                                      thickness, 
+                                      rect.h);
+                                      
+    SDL_RenderFillRect(renderer, &rightBorder);
+
+}
+
+
+
+/+
+ Draw a yellow outline frame around an existing target rectangle.
+ 
+ Params:
+    renderer = The active SDL_Renderer context.
+    existingRect = The baseline rectangle to surround.
+    padding = The gap distance between the existing rect and the frame.
++/
+
+void drawBorderAroundRect(SDL_Renderer* renderer, const ref SDL_FRect rect, float padding = 1.0)
+{
+    // Calculate the frame dimensions slightly larger than the existing rect
+    SDL_FRect borderRect;
+    borderRect.x = rect.x - padding;
+    borderRect.y = rect.y - padding;
+    borderRect.w = rect.w + (padding * 2.0);
+    borderRect.h = rect.h + (padding * 2.0);
+
+    // Set the renderer draw color to Yellow (RGBA: 255, 255, 0, 255)
+    SDL_SetRenderDrawColor(renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
+
+    // Draw the unfilled outline frame around the rectangle
+    SDL_RenderRect(renderer, &borderRect);
+}
+
 
 void moveTexturesWithMouse()
 {
@@ -63,10 +133,10 @@ void moveTexturesWithMouse()
     }
 
     bool running = true;
-    int selectedIndex = -1; // -1 means no texture is currently being dragged
+    int currentSelected = -1; // -1 means no texture is currently being dragged
 
     float scale = 1.0f;
-    float scaleSpeed = 0.01f;
+    float scaleSpeed = 0.1f;
 
     bool pending_single_click = false;
     ulong single_click_timestamp = 0;
@@ -88,20 +158,14 @@ void moveTexturesWithMouse()
                     running = false;
                     break;
 
-                case SDL_EVENT_MOUSE_MOTION:
-                    // event.motion gives you the SDL_MouseMotionEvent struct
-                    SDL_MouseMotionEvent mouseMove = event.motion;
 
-                    //writefln("Mouse Moved -> Absolute X: %s, Y: %s | Relative dX: %s, dY: %s",
-                    //         mouseMove.x,  mouseMove.y, mouseMove.xrel, mouseMove.yrel);
-                    break;
 
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) 
                     {
                         // Check targets from front-to-back (reverse loop) so topmost items get selected first
                         //for (int i = cast(int)items.length - 1; i >= 0; i--) 
-                        foreach_reverse(int i, item; items)
+                        foreach_reverse(int i, ref item; items)
                         {
                             float mx = event.button.x;
                             float my = event.button.y;
@@ -110,7 +174,12 @@ void moveTexturesWithMouse()
                             if (mx >= item.rect.x && mx <= item.rect.x + item.rect.w &&
                                 my >= item.rect.y && my <= item.rect.y + item.rect.h) 
                             {
-                                selectedIndex = i;
+                                writeln("i = ", i, " item.selected = ", item.selected);
+                                currentSelected = i;
+                                
+                                //item.selected = true;
+                                item.selected = !item.selected;
+                                
                                 // Store the offset relative to the texture's origin to avoid "snapping"
                                 item.offsetX = mx - item.rect.x;
                                 item.offsetY = my - item.rect.y;
@@ -138,7 +207,7 @@ void moveTexturesWithMouse()
                 case SDL_EVENT_MOUSE_BUTTON_UP:
                     if (event.button.button == SDL_BUTTON_LEFT) 
                     {
-                        selectedIndex = -1; // Release selection
+                        currentSelected = -1; // Release selection
                     }
                     break;
 
@@ -147,11 +216,7 @@ void moveTexturesWithMouse()
                     float wheelDirection = event.wheel.y;
                     
                     write("wheelDirection = ");
-                    if (wheelDirection > 0)
-                        writeln("Up");
-                    else
-                        writeln("Down");
-                    
+
                     scale += wheelDirection * scaleSpeed;
 
                     // Keep scale within reasonable bounds
@@ -159,43 +224,40 @@ void moveTexturesWithMouse()
                     if (scale > 10.0f) scale = 10.0f;
                     
                     writeln("scale = ", scale);
-                    if (selectedIndex >= 0)
-                    {
-                        writeln("item ", selectedIndex, " is selected");
-                    }
-                    else
-                    {
-                        writeln("No texture is selected");
-                    }
+ 
                     // scale > 1.0 means to grow in size
                     // scale < 1.0 means to shrink in size
-                    
-                    if (selectedIndex == -1)
+
+                    foreach(ref item; items) 
                     {
-                        continue;
+                        if (item.selected)
+                        {
+                             item.rect.w = item.rect.w * scale;
+                             item.rect.h = item.rect.h * scale;
+                        }
                     }
 
-                    //items[selectedIndex].rect.w = items[selectedIndex].rect.w * scale;
-                    //items[selectedIndex].rect.h = items[selectedIndex].rect.h * scale;
-                    items[selectedIndex].rect.w = items[selectedIndex].rect.w + scale;
-                    items[selectedIndex].rect.h = items[selectedIndex].rect.h + scale;
                     break;
 
-/+                case SDL_EVENT_MOUSE_MOTION:
-                    if (selectedIndex != -1) 
+                case SDL_EVENT_MOUSE_MOTION:
+                    if (currentSelected != -1) 
                     {
                         // Update coordinate positions fluidly matching mouse coordinates
-                        items[selectedIndex].rect.x = event.motion.x - items[selectedIndex].offsetX;
-                        items[selectedIndex].rect.y = event.motion.y - items[selectedIndex].offsetY;
+                        items[currentSelected].rect.x = event.motion.x - items[currentSelected].offsetX;
+                        items[currentSelected].rect.y = event.motion.y - items[currentSelected].offsetY;
                     }
-                    break; +/
+
+                    SDL_MouseMotionEvent mouseMove = event.motion;
+
+                    writefln("Mouse Moved -> Absolute X: %s, Y: %s | Relative dX: %s, dY: %s",
+                             mouseMove.x,  mouseMove.y, mouseMove.xrel, mouseMove.yrel);
+                    break;
 
                 default:
                     break;
             }
         }
-        //writeln("SDL_GetTicks() - single_click_timestamp = ", SDL_GetTicks() - single_click_timestamp);
-    
+
         // The following block must be outside the event loop (in your main update loop), check if the single click timed out
         // because the event loop "while (SDL_PollEvent(&event))" can be quite bursty. So there can be long periods
         // of time where the if (pending_single_click &&... would not be executed. So single click detection
@@ -219,6 +281,14 @@ void moveTexturesWithMouse()
         {
             // SDL3 uses SDL_RenderTexture with subpixel precision floating pointers (SDL_FRect)
             renderTexture(renderer, item.texture, null, &item.rect);
+
+            if (item.selected)
+            {
+                drawBorderAroundRect(renderer, item.rect, 1.0);
+                
+                //drawThickerBorderAroundRect(renderer, item.rect, 3.0);
+            }
+            
         }
 
         // Swap back buffer to screen output
@@ -227,9 +297,9 @@ void moveTexturesWithMouse()
 }
 
 /+
-Does Windows have a time frame for when two mouse clicks are considered double-clicks
+Windows has a time frame for when two mouse clicks are considered double-clicks
 
-Yes, Windows uses a default time frame of 500 milliseconds (half a second) between two clicks to register them as a double-click
+Windows uses a default time frame of 500 milliseconds (half a second) between two clicks to register them as a double-click
 User Adjustable: You can customize the double-click speed in Windows through the Mouse Properties settings in the Control Panel.
 API Limits: Programmatically via Microsoft Learn, the system double-click time can generally be adjusted or queried using functions 
 like SetDoubleClickTime and GetDoubleClickTime, with a hard cap up to 5,000 milliseconds
@@ -240,196 +310,4 @@ Default Timing: macOS sets the default double-click speed to approximately 500 m
 Adjusting the Speed: You can change how fast or slow two clicks need to be to register as a double-click
 
 Linux systems have a default double-click time frame of 400 milliseconds on major desktop environments like GNOME and KDE
-+/
-
-
-/+
-
-what is the most elegant method for allowing SDL3 to differentiate between a single mouse click and a double mouse click
-
-
-#include <SDL3/SDL.h>
-
-// Variables to track pending single clicks
-SDL_bool pending_single_click = SDL_FALSE;
-Uint64 single_click_timestamp = 0;
-const Uint64 DOUBLE_CLICK_DELAY_MS = 250; // Match or slightly exceed OS threshold if needed
-
-void HandleEvents() 
-{
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) 
-    {
-        if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) 
-        {
-            if (event.button.button == SDL_BUTTON_LEFT) 
-            {
-                if (event.button.clicks == 1)
-                {
-                    // Flag that a single click might be happening, but wait to see if a second arrives
-                    pending_single_click = SDL_TRUE;
-                    single_click_timestamp = SDL_GetTicks();
-                } 
-                else if (event.button.clicks == 2) 
-                {
-                    // A double click was detected by SDL3! Cancel the single click.
-                    pending_single_click = SDL_FALSE;
-                    ExecuteDoubleClickAction();
-                }
-            }
-        }
-    }
-
-    // Outside the event loop (in your main update loop), check if the single click timed out
-    if (pending_single_click && (SDL_GetTicks() - single_click_timestamp > DOUBLE_CLICK_DELAY_MS)) {
-        pending_single_click = SDL_FALSE;
-        ExecuteSingleClickAction();
-    }
-}
-+/
-
-/+
-
-Why This Method Is Elegant
-
-• OS-Level Consistency: SDL3 hooks into the native windowing system's click-counter logic. It 
-respects the user's system settings for what constitutes a "double click" speed and spatial tolerance.
-• No Manual Math: You do not need to record coordinates and compare x/y deltas yourself to ensure 
-the mouse didn't move too far between clicks.
-• Solves the Overlap Problem: If your single-click and double-click actions don't conflict (e.g., 
-single-click selects an item, double-click opens it), you can completely omit the timer logic and just execute event.button.clicks == 1 instantly.
-
-When to Bypass the Timer
-
-If your application behaves like a standard desktop OS where a double click inherently includes a single click 
-(e.g., clicking a file selects it, and double-clicking opens it), you can eliminate the timer entirely and make your code even simpler:
-
-
-if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT) {
-    if (event.button.clicks == 1) {
-        SelectTarget(); // Happens instantly
-    } else if (event.button.clicks == 2) {
-        OpenTarget();   // Happens right after the second click
-    }
-}
-
-+/
-
-
-
-
-
-
-
-
-
-
-
-
-
-/+
-
-import core.thread : Thread;
-import std.stdio;
-import bindbc.sdl; // Assumes bindbc-sdl or similar SDL3 bindings for D
-
-void main()
-{
-    // Initialize SDL video
-    if (!SDL_Init(SDL_INIT_VIDEO))
-    {
-        writeln("SDL_Init Error: ", SDL_GetError());
-        return;
-    }
-    scope(exit) SDL_Quit();
-
-    // Create a window and renderer
-    SDL_Window* window = SDL_CreateWindow("SDL3 D Texture Zoom", 800, 600, SDL_WINDOW_RESIZABLE);
-    if (!window)
-    {
-        writeln("SDL_CreateWindow Error: ", SDL_GetError());
-        return;
-    }
-    scope(exit) SDL_DestroyWindow(window);
-
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, null);
-    if (!renderer)
-    {
-        writeln("SDL_CreateRenderer Error: ", SDL_GetError());
-        return;
-    }
-    scope(exit) SDL_DestroyRenderer(renderer);
-
-    // Create a sample 100x100 RGB/RGBA texture
-    float baseW = 100.0f;
-    float baseH = 100.0f;
-    SDL_Texture* texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_RGBA8888,
-        SDL_TEXTUREACCESS_TARGET,
-        cast(int) baseW,
-        cast(int) baseH
-    );
-    if (!texture)
-    {
-        writeln("SDL_CreateTexture Error: ", SDL_GetError());
-        return;
-    }
-    scope(exit) SDL_DestroyTexture(texture);
-
-    // Draw something onto our texture target so it's visible
-    SDL_SetRenderTarget(renderer, texture);
-    SDL_SetRenderDrawColor(renderer, 50, 150, 255, 255); // Blue color
-    SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);   // Yellow border/shape
-    SDL_FRect innerRect = { 10.0f, 10.0f, 80.0f, 80.0f };
-    SDL_RenderFillRect(renderer, &innerRect);
-    SDL_SetRenderTarget(renderer, null); // Switch back to window default render target
-
-    // Current destination size and position for the texture
-    float scaleFactor = 1.0f;
-    float scaleSpeed = 0.1f;
-
-    bool running = true;
-    SDL_Event event;
-
-    while (running)
-    {
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_EVENT_QUIT)
-            {
-                running = false;
-            }
-            else if (event.type == SDL_EVENT_MOUSE_WHEEL)
-            {
-                // event.wheel.y contains vertical scroll movement (> 0 up, < 0 down)
-                float scrollY = event.wheel.y;
-                scaleFactor += scrollY * scaleSpeed;
-
-                // Keep scale within reasonable bounds
-                if (scaleFactor < 0.1f) scaleFactor = 0.1f;
-                if (scaleFactor > 10.0f) scaleFactor = 10.0f;
-            }
-        }
-
-        // Calculate destination rect centered on screen
-        float destW = baseW * scaleFactor;
-        float destH = baseH * scaleFactor;
-        float destX = (800.0f - destW) / 2.0f;
-        float destY = (600.0f - destH) / 2.0f;
-        SDL_FRect destRect = { destX, destY, destW, destH };
-
-        // Clear screen
-        SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
-        SDL_RenderClear(renderer);
-
-        // Render the scaled texture using SDL3's SDL_RenderTexture
-        SDL_RenderTexture(renderer, texture, null, &destRect);
-
-        // Present frame
-        SDL_RenderPresent(renderer);
-    }
-}
-
 +/
