@@ -28,7 +28,7 @@ struct DraggableTexture
     SDL_FRect rect;
     float offsetX;
     float offsetY;
-    bool selected;
+    bool fixedSelect;
 }
 
 
@@ -133,7 +133,9 @@ void moveTexturesWithMouse()
     }
 
     bool running = true;
-    int currentSelected = -1; // -1 means no texture is currently being dragged
+    
+
+    int movingSelected = -1; // -1 means no texture is currently being dragged
 
     float scale = 1.0f;
     float scaleSpeed = 0.1f;
@@ -184,11 +186,10 @@ void moveTexturesWithMouse()
                             if (mx >= item.rect.x && mx <= item.rect.x + item.rect.w &&
                                 my >= item.rect.y && my <= item.rect.y + item.rect.h) 
                             {
-                                writeln("i = ", i, " item.selected = ", item.selected);
-                                currentSelected = i;
+                                movingSelected = i;
                                 
                                 //item.selected = true;
-                                item.selected = !item.selected;
+                                //item.selected = !item.selected;
                                 
                                 // Store the offset relative to the texture's origin to avoid "snapping"
                                 item.offsetX = mx - item.rect.x;
@@ -196,28 +197,44 @@ void moveTexturesWithMouse()
                                 break;
                             }
                         }
-
-                        if (event.button.clicks == 1)
-                        {
-                            // Flag that a single click might be happening, but wait to see if a second arrives
-                            pending_single_click = true;
-                            single_click_timestamp = SDL_GetTicks();
-                        }
-                        else if (event.button.clicks == 2) 
-                        {
-                            // A double click was detected by SDL3! Cancel the single click.
-                            pending_single_click = false;
-                            //ExecuteDoubleClickAction();
-                            writeln("Double Click Detected");
-                        }
-
                     }
+                    if (event.button.button == SDL_BUTTON_RIGHT)   // 
+                    {
+                        foreach_reverse(int i, ref item; items)
+                        {
+                            float mx = event.button.x;
+                            float my = event.button.y;
+
+                            if (mx >= item.rect.x && mx <= item.rect.x + item.rect.w &&
+                                my >= item.rect.y && my <= item.rect.y + item.rect.h) 
+                            {
+                                item.fixedSelect = !item.fixedSelect;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (event.button.clicks == 1)
+                    {
+                        // Flag that a single click might be happening, but wait to see if a second arrives
+                        pending_single_click = true;
+                        single_click_timestamp = SDL_GetTicks();
+                    }
+                    else if (event.button.clicks == 2) 
+                    {
+                        // A double click was detected by SDL3! Cancel the single click.
+                        pending_single_click = false;
+                        //ExecuteDoubleClickAction();
+                        writeln("Double Click Detected");
+                    }
+
+                    
                     break;
 
                 case SDL_EVENT_MOUSE_BUTTON_UP:
                     if (event.button.button == SDL_BUTTON_LEFT) 
                     {
-                        currentSelected = -1; // Release selection
+                        movingSelected = -1; // Release selection
                     }
                     break;
 
@@ -240,7 +257,7 @@ void moveTexturesWithMouse()
 
                     foreach(ref item; items) 
                     {
-                        if (item.selected)
+                        if (item.fixedSelect)
                         {
                              //item.rect.w = item.rect.w * scale;
                              //item.rect.h = item.rect.h * scale;
@@ -252,11 +269,11 @@ void moveTexturesWithMouse()
                     break;
 
                 case SDL_EVENT_MOUSE_MOTION:
-                    if (currentSelected != -1) 
+                    if (movingSelected != -1) 
                     {
                         // Update coordinate positions fluidly matching mouse coordinates
-                        items[currentSelected].rect.x = event.motion.x - items[currentSelected].offsetX;
-                        items[currentSelected].rect.y = event.motion.y - items[currentSelected].offsetY;
+                        items[movingSelected].rect.x = event.motion.x - items[movingSelected].offsetX;
+                        items[movingSelected].rect.y = event.motion.y - items[movingSelected].offsetY;
                     }
 
                     SDL_MouseMotionEvent mouseMove = event.motion;
@@ -294,7 +311,7 @@ void moveTexturesWithMouse()
             // SDL3 uses SDL_RenderTexture with subpixel precision floating pointers (SDL_FRect)
             renderTexture(renderer, item.texture, null, &item.rect);
 
-            if (item.selected)
+            if (item.fixedSelect)
             {
                 drawBorderAroundRect(renderer, item.rect, 1.0);
                 
